@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { Logo, type LogoVariant } from '../components/Logo.tsx'
 import { Button, type ButtonVariant, type ButtonSize } from '../components/Button.tsx'
+import { Label } from '../components/Label';
 
 interface LogoSample { variant: LogoVariant; label: string; onDark?: boolean }
 interface ColorSample { name: string; hex: string; role: string; dark?: boolean }
@@ -151,6 +152,16 @@ function Index() {
           <Button variant="secondary" fullWidth>Cancel</Button>
         </div>
       </section>
+
+      <section className="flex flex-col gap-3">
+        <h2>Label</h2>
+        <div className="flex flex-col gap-3 p-6 bg-surface border border-border rounded-lg">
+          <Label>Benutzername</Label>
+          <Label required>Titel</Label>
+          <Label required className="text-muted">Muted label</Label>
+        </div>
+      </section>
+
     </div>
   )
 }
