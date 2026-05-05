@@ -1,6 +1,17 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createFileRoute } from '@tanstack/react-router'
+import {
+  ArrowRight,
+  Search,
+  MessageCircle,
+  Calendar,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from 'lucide-react'
 import { Logo, type LogoVariant } from '../components/Logo.tsx'
+import { Button, type ButtonVariant, type ButtonSize } from '../components/Button.tsx'
 
 interface LogoSample { variant: LogoVariant; label: string; onDark?: boolean }
 interface ColorSample { name: string; hex: string; role: string; dark?: boolean }
@@ -27,12 +38,20 @@ const COLOR_SAMPLES: ColorSample[] = [
   { name: 'Cream',      hex: '#F9F5F0', role: 'Page background' },
 ]
 
+const TEXT_VARIANTS: { variant: ButtonVariant; label: string }[] = [
+  { variant: 'primary',   label: 'Primary' },
+  { variant: 'accent',    label: 'Accent' },
+  { variant: 'secondary', label: 'Secondary' },
+  { variant: 'ghost',     label: 'Ghost' },
+]
+
+const SIZES: ButtonSize[] = ['sm', 'md', 'lg']
+
 export const Route = createFileRoute('/')({ component: Index })
 
 function Index() {
   return (
-    <div className="p-6 space-y-8 bg-background min-h-dvh">
-
+    <div className="p-6 space-y-12 bg-background min-h-dvh">
       <section>
         <Logo variant="primary" height={56} title="Mira home" />
       </section>
@@ -73,6 +92,74 @@ function Index() {
           <p className="text-small text-muted">Small — Brussels, Belgium · From €20/hr</p>
         </div>
       </section>
+
+      <section className="flex flex-col gap-6">
+        <h2>Buttons</h2>
+
+        <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-4 items-center p-6 bg-surface border border-border rounded-lg">
+          <div />
+          <div className="flex gap-3 text-label text-muted">
+            <span className="w-20">sm</span>
+            <span className="w-24">md</span>
+            <span className="w-24">lg</span>
+          </div>
+
+          {TEXT_VARIANTS.map(({ variant, label }) => (
+            <ShowcaseRow key={variant} label={label}>
+              {SIZES.map((size) => (
+                <Button key={size} variant={variant} size={size}>{label}</Button>
+              ))}
+            </ShowcaseRow>
+          ))}
+
+          <ShowcaseRow label="Icon">
+            {SIZES.map((size) => (
+              <Button key={size} variant="icon" size={size} aria-label="Previous">
+                <ChevronLeft />
+              </Button>
+            ))}
+          </ShowcaseRow>
+        </div>
+
+        <div className="flex flex-wrap gap-3 items-center p-6 bg-surface border border-border rounded-lg">
+          <Button variant="primary">Default</Button>
+          <Button variant="primary" disabled>Disabled</Button>
+          <Button variant="primary" loading>Saving</Button>
+          <Button variant="accent" disabled>Accent disabled</Button>
+          <Button variant="accent" loading>Accent loading</Button>
+        </div>
+
+        <div className="flex flex-wrap gap-3 items-center p-6 bg-surface border border-border rounded-lg">
+          <Button variant="primary" leadingIcon={<Search />}>Search</Button>
+          <Button variant="primary" trailingIcon={<ArrowRight />}>Log in</Button>
+          <Button variant="accent" trailingIcon={<ArrowRight />} size="lg">Get started</Button>
+          <Button variant="secondary" leadingIcon={<MessageCircle />}>Message</Button>
+          <Button variant="primary" leadingIcon={<Calendar />}>Book a time</Button>
+          <Button variant="accent" leadingIcon={<Plus />}>Add exception</Button>
+          <Button variant="ghost" trailingIcon={<ArrowRight />}>View all helpers</Button>
+        </div>
+
+        <div className="flex flex-wrap gap-3 items-center p-6 bg-surface border border-border rounded-lg">
+          <Button variant="icon" aria-label="Previous"><ChevronLeft /></Button>
+          <Button variant="icon" aria-label="Next"><ChevronRight /></Button>
+          <Button variant="icon" aria-label="Add"><Plus /></Button>
+          <Button variant="icon" aria-label="Close"><X /></Button>
+        </div>
+
+        <div className="flex flex-col gap-3 p-6 bg-surface border border-border rounded-lg max-w-sm">
+          <Button variant="primary" fullWidth trailingIcon={<ArrowRight />} size="lg">Send booking request</Button>
+          <Button variant="secondary" fullWidth>Cancel</Button>
+        </div>
+      </section>
     </div>
+  )
+}
+
+function ShowcaseRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <>
+      <span className="text-small text-muted font-medium">{label}</span>
+      <div className="flex gap-3 items-center flex-wrap">{children}</div>
+    </>
   )
 }
