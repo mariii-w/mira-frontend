@@ -13,6 +13,7 @@ import {
 import { Logo, type LogoVariant } from '../components/Logo.tsx'
 import { Button, type ButtonVariant, type ButtonSize } from '../components/Button.tsx'
 import { Label } from '../components/Label';
+import { Input } from '../components/Input';
 
 interface LogoSample { variant: LogoVariant; label: string; onDark?: boolean }
 interface ColorSample { name: string; hex: string; role: string; dark?: boolean }
@@ -159,6 +160,25 @@ function Index() {
           <Label>Benutzername</Label>
           <Label required>Titel</Label>
           <Label required className="text-muted">Muted label</Label>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2>Input</h2>
+        <div className="flex flex-col gap-4 p-6 bg-surface border border-border rounded-lg max-w-sm">
+          <div className="flex flex-col gap-1.5">
+            <Label>Benutzername</Label>
+            <Input placeholder="Geben Sie Ihren Benutzernamen ein" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label required>Titel</Label>
+            <Input placeholder="z.B. PC Support & Laptop Hilfe" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Passwort</Label>
+            <Input type="password" placeholder="Geben Sie Ihr Passwort ein" />
+          </div>
+          <Input placeholder="Disabled" disabled />
         </div>
       </section>
 
