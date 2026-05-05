@@ -14,6 +14,7 @@ import { Logo, type LogoVariant } from '../components/Logo.tsx'
 import { Button, type ButtonVariant, type ButtonSize } from '../components/Button.tsx'
 import { Label } from '../components/Label';
 import { Input } from '../components/Input';
+import { Textarea } from '../components/Textarea';
 
 interface LogoSample { variant: LogoVariant; label: string; onDark?: boolean }
 interface ColorSample { name: string; hex: string; role: string; dark?: boolean }
@@ -179,6 +180,14 @@ function Index() {
             <Input type="password" placeholder="Geben Sie Ihr Passwort ein" />
           </div>
           <Input placeholder="Disabled" disabled />
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2>Textarea</h2>
+        <div className="flex flex-col gap-1.5 p-6 bg-surface border border-border rounded-lg max-w-sm">
+          <Label required>Beschreibung</Label>
+          <Textarea placeholder="Beschreiben Sie Ihren Service..." />
         </div>
       </section>
 
