@@ -24,9 +24,15 @@ const VARIANT: Record<ButtonVariant, string> = {
 };
 
 const SIZE: Record<ButtonSize, string> = {
-  sm: 'h-9 px-3 text-small gap-1.5 [&_svg]:size-4',
-  md: 'h-11 px-5 text-body gap-2 [&_svg]:size-[18px]',
-  lg: 'h-14 px-8 text-body gap-2.5 [&_svg]:size-5',
+  sm: 'h-9 px-3 text-small [&_svg]:size-4',
+  md: 'h-11 px-5 text-body [&_svg]:size-[18px]',
+  lg: 'h-14 px-8 text-body [&_svg]:size-5',
+};
+
+const GAP: Record<ButtonSize, string> = {
+  sm: 'gap-1.5',
+  md: 'gap-2',
+  lg: 'gap-3',
 };
 
 const ICON_SIZE: Record<ButtonSize, string> = {
@@ -88,7 +94,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
           <span className="sr-only">Loading…</span>
         </>
       )}
-      <span className={cn('inline-flex items-center justify-center', loading && 'invisible')}>
+      <span className={cn('inline-flex items-center justify-center', !isIcon && GAP[size], loading && 'invisible')}>
         {!isIcon && leadingIcon && <span aria-hidden="true" className="inline-flex shrink-0">{leadingIcon}</span>}
         {isIcon ? <span aria-hidden="true" className="inline-flex shrink-0">{children}</span> : children}
         {!isIcon && trailingIcon && <span aria-hidden="true" className="inline-flex shrink-0">{trailingIcon}</span>}
