@@ -15,6 +15,7 @@ import { Button, type ButtonVariant, type ButtonSize } from '../components/Butto
 import { Label } from '../components/Label';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
+import { AccessibilityPanel } from '../components/AccessibilityPanel';
 
 interface LogoSample { variant: LogoVariant; label: string; onDark?: boolean }
 interface ColorSample { name: string; hex: string; role: string; dark?: boolean }
@@ -58,6 +59,10 @@ function Index() {
       <section>
         <Logo variant="primary" height={56} title="Mira home" />
       </section>
+
+        <section className="flex justify-end">
+          <AccessibilityPanel />
+        </section>
 
       <section className="flex flex-col gap-3">
         <h2>Logos</h2>
