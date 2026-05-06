@@ -16,6 +16,8 @@ import { Label } from '../components/Label';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
 import { AccessibilityPanel } from '../components/AccessibilityPanel';
+import { CategoryCard } from '../components/CategoryCard';
+
 
 interface LogoSample { variant: LogoVariant; label: string; onDark?: boolean }
 interface ColorSample { name: string; hex: string; role: string; dark?: boolean }
@@ -193,6 +195,31 @@ function Index() {
         <div className="flex flex-col gap-1.5 p-6 bg-surface border border-border rounded-lg max-w-sm">
           <Label required>Beschreibung</Label>
           <Textarea placeholder="Beschreiben Sie Ihren Service..." />
+        </div>
+      </section>
+
+  
+      <section className="flex flex-col gap-3">
+        <h2>Category cards</h2>
+        <div className="overflow-x-auto -mx-6 px-6">
+          <div className="flex gap-4 w-max pb-2">
+            {[
+              { name: 'Assembly',     seed: 'assembly' },
+              { name: 'PC Support',   seed: 'pc' },
+              { name: 'Art Lessons',  seed: 'art' },
+              { name: 'Music Lessons', seed: 'music' },
+              { name: 'Elder Help',   seed: 'elder' },
+              { name: 'Tutoring',     seed: 'tutor' },
+              { name: 'Cleaning',     seed: 'clean' },
+              { name: 'Gardening',    seed: 'garden' },
+              { name: 'Pet Care',     seed: 'pets' },
+              { name: 'Moving Help',  seed: 'moving' },
+            ].map(({ name, seed }) => (
+              <div key={seed} className="w-48 shrink-0">
+                <CategoryCard name={name} imageSrc={`https://picsum.photos/seed/${seed}/400`} />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
