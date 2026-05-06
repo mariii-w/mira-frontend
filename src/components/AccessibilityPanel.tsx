@@ -20,7 +20,7 @@ export function AccessibilityPanel() {
           variant="secondary"
           leadingIcon={<Accessibility />}
           trailingIcon={<ChevronDown />}
-          className="bg-surface"
+          className="border-cream/30 text-cream hover:bg-cream/10 data-[state=open]:bg-cream/10"
         >
           Accessibility
         </Button>
@@ -68,10 +68,10 @@ function Row({ id, title, description, checked, onCheckedChange }: RowProps) {
         <label htmlFor={id} className="text-body font-bold text-foreground cursor-pointer">
           {title}
         </label>
-        <span className="text-small text-muted">{description}</span>
-      </div>
+        <span id={`${id}-desc`} className="text-small text-muted">{description}</span>      </div>
       <Switch.Root
         id={id}
+        aria-describedby={`${id}-desc`}
         checked={checked}
         onCheckedChange={onCheckedChange}
         className={cn(
