@@ -17,7 +17,10 @@ import { Input } from '../components/Input.tsx';
 import { Textarea } from '../components/Textarea.tsx';
 import { AccessibilityPanel } from '../components/AccessibilityPanel.tsx';
 import { CategoryCard } from '../components/CategoryCard.tsx';
-import { ProviderCard } from '../components/ProviderCard'
+import { ProviderCard } from '../components/ProviderCard';
+import { useState } from 'react';
+import { Pagination } from '../components/Pagination';
+
 
 
 interface LogoSample { variant: LogoVariant; label: string; onDark?: boolean }
@@ -54,9 +57,11 @@ const TEXT_VARIANTS: { variant: ButtonVariant; label: string }[] = [
 
 const SIZES: ButtonSize[] = ['sm', 'md', 'lg']
 
+
 export const Route = createFileRoute('/styleguide')({ component: Styleguide })
 
 function Styleguide() {
+  const [page, setPage] = useState(5);
   return (
     <div className="p-6 space-y-12 bg-background min-h-dvh">
       <section>
@@ -259,6 +264,13 @@ function Styleguide() {
         </div>
       </section>
 
+    <section className="flex flex-col gap-3">
+      <h2>Pagination</h2>
+      <div className="p-6 bg-surface border border-border rounded-lg">
+        <Pagination page={page} totalPages={12} onPageChange={setPage} />
+      </div>
+    </section>
+
     </div>
   )
 }
@@ -271,3 +283,4 @@ function ShowcaseRow({ label, children }: { label: string; children: React.React
     </>
   )
 }
+
