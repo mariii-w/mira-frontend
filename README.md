@@ -1,73 +1,209 @@
-# React + TypeScript + Vite
+# Mira — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Last updated: 2026-05-08
 
-Currently, two official plugins are available:
+React + TypeScript frontend for the Mira platform. Built with Vite, Tailwind CSS v4, and TanStack Router.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Design
 
-## React Compiler
+<!-- Add Figma link here -->
+> Figma: https://www.figma.com/design/DDBQZwK4QjCup1GH4OblFu/Design?node-id=240-1053&t=Mxw89tVCKZcrnzMo-1
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Tool | Version | Purpose |
+|------|---------|---------|
+| [React](https://react.dev) | 19 | UI library |
+| [TypeScript](https://www.typescriptlang.org) | 6 | Type safety |
+| [Vite](https://vite.dev) | 8 | Build tool & dev server |
+| [Tailwind CSS](https://tailwindcss.com) | 4 | Utility-first styling with `@theme` design tokens |
+| [TanStack Router](https://tanstack.com/router) | 1 | File-based type-safe routing |
+| [Lucide React](https://lucide.dev) | latest | Icon library |
+| [clsx](https://github.com/lukeed/clsx) + [tailwind-merge](https://github.com/dcastil/tailwind-merge) | latest | Conditional class merging |
+| [Vitest](https://vitest.dev) | 4 | Unit testing |
+| [Testing Library](https://testing-library.com) | 16 | Component testing utilities |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Getting Started
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Prerequisites
+
+- Node.js 22+
+- npm 10+
+
+### Installation
+
+```bash
+# Clone the repo
+git clone https://gitlab.hof-university.de/eganscha/mudkip-project.git
+cd mudkip-project
+
+# Install dependencies
+npm ci
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+Opens the dev server at `http://localhost:5173` with HMR enabled.
+
+### Build
+
+```bash
+npm run build
+```
+
+Runs TypeScript type-checking (`tsc -b`) followed by the Vite production build. Output goes to `dist/`.
+
+### Preview production build
+
+```bash
+npm run preview
+```
+
+### Lint
+
+```bash
+npm run lint
+```
+
+Runs ESLint across all `.ts` / `.tsx` files.
+
+### Tests
+
+```bash
+# Watch mode (local development)
+npm run test
+
+# Single run with coverage report (used in CI)
+npm run test:ci
+```
+
+Coverage is collected via `@vitest/coverage-v8`.
+
+---
+
+## Project Structure
+
+```
+src/
+├── __tests__/          # Unit tests
+├── assets/
+│   └── logos/          # SVG logo variants (primary, stacked, submark, icon, black, white)
+├── components/         # Shared UI components
+├── lib/
+│   └── cn.ts           # clsx + tailwind-merge helper
+├── routes/             # File-based routes (TanStack Router)
+│   ├── __root.tsx      # Root layout
+│   └── index.tsx       # Design system showcase page
+├── globals.css         # Tailwind @theme design tokens + base styles
+├── main.tsx            # App entry point
+└── router.tsx          # Router setup
+```
+
+---
+
+## Design Tokens
+
+Design tokens are defined in `src/globals.css` using Tailwind CSS v4's `@theme` block and are available as Tailwind utilities throughout the app.
+
+### Colors
+
+| Token | Hex | Role |
+|-------|-----|------|
+| `forest` | `#47745B` | Primary action |
+| `sage` | `#6E9D82` | Secondary green |
+| `mint` | `#EBF4EF` | Soft surface |
+| `plum` | `#7C4E80` | Accent |
+| `lilac` | `#B281B6` | Decorative |
+| `blush` | `#F5EDF6` | Soft surface |
+| `charcoal` | `#2E2E26` | Body text |
+| `grey-olive` | `#96928D` | Borders, muted text |
+| `cream` | `#F9F5F0` | Page background |
+| `linen` | `#F2EBE1` | Alt surface |
+
+Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `border`, `muted`) are also defined.
+
+### Typography
+
+| Token | Size | Font |
+|-------|------|------|
+| `h1` | `2rem` | Atkinson Hyperlegible (700) |
+| `h2` | `1.5rem` | Atkinson Hyperlegible (700) |
+| `body` | `1rem` | Lexend |
+| `small` | `0.875rem` | Lexend |
+| `label` | `0.75rem` | Lexend (500) |
+
+---
+
+## Components
+
+All components are showcased on the design system page (`/`).
+
+| Component | Description |
+|-----------|-------------|
+| `Logo` | Mira logo in six variants: `primary`, `stacked`, `submark`, `icon`, `black`, `white` |
+| `Button` | Accessible button — 5 variants (`primary`, `accent`, `secondary`, `ghost`, `icon`), 3 sizes, loading state, leading/trailing icon support |
+| `Label` | Form label with optional required indicator |
+| `Input` | Text input with label, error, and disabled states |
+| `Textarea` | Multi-line text input with the same state API as Input |
+| `AccessibilityPanel` | Floating panel for toggling accessibility preferences (font size, contrast, motion) |
+| `CategoryCard` | Card displaying a service category with icon and title |
+| `ProviderCard` | Provider listing card in compact and full variants, with avatar and badge support |
+| `Navbar` | Top navigation bar with logo, links, and CTA |
+| `Pagination` | Accessible pagination with ellipsis logic |
+| `Landing page` | Full landing page composed of hero, how-it-works, categories, providers, and footer sections |
+
+---
+
+## CI/CD Pipeline
+
+The project uses **GitLab CI** (`.gitlab-ci.yml`). The pipeline runs on every push and merge request and has two sequential stages.
+
+```
+push / MR
+    │
+    ├── build   →  npm ci && npm run build
+    │
+    └── test    →  npm ci && npm run test:ci
+```
+
+Both jobs run on the `node:22` Docker image.
+
+The `feature/runner-test` branch was used to verify the GitLab Runner was connected and working before wiring up real build and test jobs.
+
+### Pipeline jobs
+
+| Job | Stage | Command | Purpose |
+|-----|-------|---------|---------|
+| `build` | build | `npm ci && npm run build` | TypeScript check + Vite production build |
+| `test` | test | `npm ci && npm run test:ci` | Vitest unit tests with V8 coverage |
+
+---
+
+## Branch Strategy
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Production-ready code |
+| `dev` | Integration branch — all feature branches merge here first |
+| `feat/*` | Individual feature or component work |
+| `feature/runner-test` | One-off branch used to smoke-test the GitLab Runner |
+
+---
+
+## Accessibility
+
+The project follows WCAG 2.1 AA as a baseline:
+
+- Focus-visible styles applied globally via `:focus-visible`
+- `prefers-reduced-motion` media query disables all animations
+- Icon-only buttons require `aria-label` (enforced by a dev-mode warning)
+- Loading state uses `aria-busy` and a visually-hidden "Loading…" text
+- Heading fonts use [Atkinson Hyperlegible](https://brailleinstitute.org/freefont), designed for low-vision readers
