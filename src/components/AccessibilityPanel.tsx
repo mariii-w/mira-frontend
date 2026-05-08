@@ -2,10 +2,13 @@ import * as Popover from './Popover'
 import * as Switch from './Switch'
 import { Accessibility, ChevronDown } from 'lucide-react'
 import { Button } from './Button'
-import { useAccessibility } from '../providers/AccessibilityProvider'
+import { useAccessibilityStore } from '../stores/accessibility'
 
 export function AccessibilityPanel() {
-  const { easyRead, reducedMotion, setEasyRead, setReducedMotion } = useAccessibility()
+  const easyRead = useAccessibilityStore((s) => s.easyRead)
+  const reducedMotion = useAccessibilityStore((s) => s.reducedMotion)
+  const setEasyRead = useAccessibilityStore((s) => s.setEasyRead)
+  const setReducedMotion = useAccessibilityStore((s) => s.setReducedMotion)
 
   return (
     <Popover.Root>
