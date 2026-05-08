@@ -83,28 +83,27 @@
   }
 
   :focus {
-    outline: none;
-  }
-
-  :focus-visible {
     outline: 3px solid var(--color-primary);
     outline-offset: 2px;
     border-radius: 4px;
   }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
+/* OS preference — applies unless the user explicitly disabled the toggle */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  html:not([data-reduced-motion="false"]) *,
+  html:not([data-reduced-motion="false"]) *::before,
+  html:not([data-reduced-motion="false"]) *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
 }
 
-/* Accessibility preferences — reads the data attributes set by AccessibilityProvider. */
-
-/* Reduce motion */
+/* Explicit user override via the in-app toggle */
 html[data-reduced-motion="true"] *,
 html[data-reduced-motion="true"] *::before,
 html[data-reduced-motion="true"] *::after {
