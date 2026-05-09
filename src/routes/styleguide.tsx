@@ -20,6 +20,7 @@ import { CategoryCard } from '../components/CategoryCard.tsx';
 import { ProviderCard } from '../components/ProviderCard';
 import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
+import { AvatarIcon } from '../components/AvatarIcon.tsx';
 
 
 
@@ -269,6 +270,11 @@ function Styleguide() {
       <div className="p-6 bg-surface border border-border rounded-lg">
         <Pagination page={page} totalPages={12} onPageChange={setPage} />
       </div>
+    </section>
+
+    <section className="flex flex-col gap-3">
+      <h2>Account Icon</h2>
+      <AvatarIcon size={50} firstName='Lena' lastName='K'></AvatarIcon>
     </section>
 
     </div>
