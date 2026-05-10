@@ -4,8 +4,8 @@ import { Button } from './Button'
 import { AvatarIcon } from './AvatarIcon'
 
 interface UserBadgeProps{
-    firstName?: string
-    lastName?: string
+    firstName: string
+    lastName: string
     isProvider?: boolean
 
 }
