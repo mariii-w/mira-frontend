@@ -22,3 +22,13 @@ test:
   stage: test
   script:
     - npm run test:ci
+  coverage: '/All files\s+\|\s+(\d+\.?\d*)/'
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml

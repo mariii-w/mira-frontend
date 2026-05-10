@@ -6,8 +6,15 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 export default defineConfig({
   plugins: [tanstackRouter({ target: 'react', autoCodeSplitting: true }), tailwindcss(), react()],
   test: {
-    environment: 'jsdom',
-    setupFiles: ['@testing-library/jest-dom/vitest'],
-    globals: true,
+  environment: 'jsdom',
+  setupFiles: ['@testing-library/jest-dom/vitest'],
+  globals: true,
+  reporters: ['default', 'junit'],
+  outputFile: './junit.xml',
+  coverage: {
+    provider: 'v8',
+    reporter: ['text', 'cobertura', 'html'],
+    reportsDirectory: './coverage',
   },
+},
 })
