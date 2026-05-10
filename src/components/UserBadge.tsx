@@ -63,7 +63,6 @@ export function UserBadge({firstName, lastName, isProvider} : UserBadgeProps){
             variant="userBadge"
             leadingIcon={<AvatarIcon firstName={firstName} lastName={lastName} />}
             trailingIcon={<ChevronDown />}
-            className="border-charcoal/30 text-charcoal hover:bg-charcoal/10 data-[state=open]:bg-charcoal/10"
             >
             {name}
             </Button>
