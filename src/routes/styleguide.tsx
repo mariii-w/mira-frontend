@@ -21,6 +21,7 @@ import { ProviderCard } from '../components/ProviderCard';
 import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
 import { AvatarIcon } from '../components/AvatarIcon.tsx';
+import { UserBadge } from '../components/UserBadge.tsx';
 
 
 
@@ -274,7 +275,12 @@ function Styleguide() {
 
     <section className="flex flex-col gap-3">
       <h2>Account Icon</h2>
-      <AvatarIcon size={50} firstName='Lena' lastName='K'></AvatarIcon>
+      
+      <div className="p-6 bg-surface border border-border rounded-lg">
+        <AvatarIcon size={40} firstName='Lena' lastName='Kross'></AvatarIcon>
+        <UserBadge firstName='Lena' lastName='Kross'/>
+        <UserBadge firstName='Klaus' lastName='Merger' isProvider={true}/>
+      </div>
     </section>
 
     </div>
