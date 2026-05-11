@@ -20,6 +20,8 @@ import { CategoryCard } from '../components/CategoryCard.tsx';
 import { ProviderCard } from '../components/ProviderCard';
 import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
+import { AvatarIcon } from '../components/AvatarIcon.tsx';
+import { UserBadge } from '../components/UserBadge.tsx';
 import { SearchBar } from '../components/SearchBar.tsx';
 
 
@@ -275,10 +277,22 @@ function Styleguide() {
         <Pagination page={page} totalPages={12} onPageChange={setPage} />
       </div>
     </section>
+
+    <section className="flex flex-col gap-3">
+      <h2>Account Icon</h2>
+      
+      <div className="p-6 bg-surface border border-border rounded-lg">
+        <AvatarIcon size={40} firstName='Lena' lastName='Kross'></AvatarIcon>
+        <UserBadge firstName='Lena' lastName='Kross'/>
+        <UserBadge firstName='Klaus' lastName='Merger' isProvider={true}/>
+      </div>
+    </section>
+
       <section className="flex flex-col gap-3">
         <h2>Search Bar</h2>
         <SearchBar placeholder='Suche...' />
       </section>
+
     </div>
   )
 }
