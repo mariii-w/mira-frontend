@@ -2,7 +2,6 @@ import { MapPin, ArrowRight, MessageCircle } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { Button } from './Button'
 import type { ReactNode } from 'react'
-import { AvatarIcon } from './AvatarIcon'
 
 export type ProviderCardVariant = 'compact' | 'full'
 
