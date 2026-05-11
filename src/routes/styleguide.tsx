@@ -177,24 +177,28 @@ function Styleguide() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-3">
-        <h2>Input</h2>
-        <div className="flex flex-col gap-4 p-6 bg-surface border border-border rounded-lg max-w-sm">
-          <div className="flex flex-col gap-1.5">
-            <Label>Benutzername</Label>
-            <Input placeholder="Geben Sie Ihren Benutzernamen ein" />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label required>Titel</Label>
-            <Input placeholder="z.B. PC Support & Laptop Hilfe" />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>Passwort</Label>
-            <Input type="password" placeholder="Geben Sie Ihr Passwort ein" />
-          </div>
-          <Input placeholder="Disabled" disabled />
+    <section className="flex flex-col gap-3">
+      <h2>Input</h2>
+      <div className="flex flex-col gap-4 p-6 bg-surface border border-border rounded-lg max-w-sm">
+        <div className="flex flex-col gap-1.5">
+          <Label>Benutzername</Label>
+          <Input placeholder="Geben Sie Ihren Benutzernamen ein" />
         </div>
-      </section>
+        <div className="flex flex-col gap-1.5">
+          <Label required>Titel</Label>
+          <Input placeholder="z.B. PC Support & Laptop Hilfe" />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label>Passwort</Label>
+          <Input type="password" placeholder="Geben Sie Ihr Passwort ein" />
+        </div>
+        <Input placeholder="Disabled" disabled />
+        <div className="flex flex-col gap-1.5">
+          <Label required>Benutzername (Fehler)</Label>
+          <Input value="Anna!" readOnly error="Nur Kleinbuchstaben, Ziffern und Unterstriche." />
+        </div>
+      </div>
+    </section>
 
       <section className="flex flex-col gap-3">
         <h2>Textarea</h2>
