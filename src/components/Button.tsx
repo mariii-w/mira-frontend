@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '../lib/cn';
 
-export type ButtonVariant = 'primary' | 'accent' | 'secondary' | 'ghost' | 'icon';
+export type ButtonVariant = 'primary' | 'accent' | 'secondary' | 'ghost' | 'icon'| 'userBadge';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -21,6 +21,7 @@ const VARIANT: Record<ButtonVariant, string> = {
   secondary: 'bg-transparent text-foreground border border-charcoal hover:bg-charcoal/5 active:bg-charcoal/10',
   ghost:     'bg-transparent text-foreground hover:bg-foreground/5 active:bg-foreground/10',
   icon:      'bg-transparent text-foreground border border-border hover:bg-foreground/5 active:bg-foreground/10',
+  userBadge: 'bg-cream text-charcoal border-charcoal hover:bg-charcoal/20 active:bg-charcoal/20',
 };
 
 const SIZE: Record<ButtonSize, string> = {
