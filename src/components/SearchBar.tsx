@@ -4,25 +4,30 @@ import { Button } from "./Button";
 import * as Popover from "@radix-ui/react-popover";
 import { Label } from "./Label";
 import { Input } from "./Input";
+import { MapPin } from 'lucide-react'
 
-export type InputProps = InputHTMLAttributes<HTMLInputElement>;
+export interface InputProps extends InputHTMLAttributes<HTMLInputElement>
+{
+  place?: string
+  radius?: number
+}
 
 export const SearchBar = forwardRef<HTMLInputElement, InputProps>(function SearchBar(
-  { className, ...rest },
-  ref,
+  { className,
+    place,
+    radius = 20,
+     ...rest 
+    },
+  ref, 
 ) {
-
-    let place = null
-    let radius = 20
-
-    let placeButtonContent = (!place ? "Ort": place) + " " + radius +"km"
+  let placeButtonContent = (!place ? "Ort": place) + " - " + radius +"km"
   return (
     <div className="relative w-full">
       <input
         ref={ref}
         className={cn(
           'w-full h-15 px-4 text-body text-foreground',
-          'bg-linen border border-border rounded-4xl',
+          'bg-white border border-border rounded-4xl',
           'placeholder:text-muted',
           'transition-colors duration-150',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
@@ -32,11 +37,11 @@ export const SearchBar = forwardRef<HTMLInputElement, InputProps>(function Searc
         {...rest}
       />
       <div className="absolute inset-y-0 right-0 flex items-center gap-2 pr-2">
-        <p className="text-4xl text-border">|</p>
+        <div className="my-1 w-0.5 bg-border/30" />
         <div className="p-2">
             <Popover.Root>
                 <Popover.Trigger asChild>
-                    <Button variant="ghost">{placeButtonContent}</Button>
+                    <Button variant="ghost" leadingIcon={<MapPin/>}>{placeButtonContent}</Button>
                 </Popover.Trigger>
                 <Popover.Portal>                    
                     <Popover.Content

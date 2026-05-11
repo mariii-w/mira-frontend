@@ -271,12 +271,10 @@ function Styleguide() {
         <Pagination page={page} totalPages={12} onPageChange={setPage} />
       </div>
     </section>
-
       <section className="flex flex-col gap-3">
         <h2>Search Bar</h2>
-        <SearchBar placeholder='Suche...'/>
+        <SearchBar placeholder='Suche...' />
       </section>
-    
     </div>
   )
 }
