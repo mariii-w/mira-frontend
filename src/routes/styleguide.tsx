@@ -20,6 +20,8 @@ import { CategoryCard } from '../components/CategoryCard.tsx';
 import { ProviderCard } from '../components/ProviderCard';
 import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
+import { AvatarIcon } from '../components/AvatarIcon.tsx';
+import { UserBadge } from '../components/UserBadge.tsx';
 
 
 
@@ -237,10 +239,12 @@ function Styleguide() {
           <div className="w-64">
             <ProviderCard
               variant="compact"
-              name="Patrick S."
+              firstName="Patrick"
+              lastName='Smith'
               distanceKm={1.2}
               bio="Helps with Windows, printers, Wi-Fi setup and phone issues. Patient and friendly with first-time users and seniors."
               pricePerHour={25}
+              avatar={<AvatarIcon firstName="Patrick" lastName="Smith" picture=''/*picture can be added here*/ />}
             />
           </div>
         </div>
@@ -250,7 +254,8 @@ function Styleguide() {
           <div className="w-96">
             <ProviderCard
               variant="full"
-              name="Lena K."
+              firstName="Lena"
+              lastName='Kross'
               distanceKm={2.1}
               bio="Software engineer by day, helper by evening. I diagnose slow PCs, clean out junk, set up email and cloud backup."
               pricePerHour={18}
@@ -259,6 +264,7 @@ function Styleguide() {
                 { name: 'Email Setup', price: 18 },
                 { name: 'Cloud Backup', price: 28 },
               ]}
+              avatar={<AvatarIcon firstName="Lena" lastName="Kross" picture=''/*picture can be added here*//>}
             />
           </div>
         </div>
@@ -268,6 +274,16 @@ function Styleguide() {
       <h2>Pagination</h2>
       <div className="p-6 bg-surface border border-border rounded-lg">
         <Pagination page={page} totalPages={12} onPageChange={setPage} />
+      </div>
+    </section>
+
+    <section className="flex flex-col gap-3">
+      <h2>Account Icon</h2>
+      
+      <div className="p-6 bg-surface border border-border rounded-lg">
+        <AvatarIcon size={40} firstName='Lena' lastName='Kross'></AvatarIcon>
+        <UserBadge firstName='Lena' lastName='Kross'/>
+        <UserBadge firstName='Klaus' lastName='Merger' isProvider={true}/>
       </div>
     </section>
 

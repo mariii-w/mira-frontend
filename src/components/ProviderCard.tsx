@@ -12,7 +12,8 @@ export interface ProviderService {
 
 export interface ProviderCardProps {
   variant?: ProviderCardVariant
-  name: string
+  firstName: string
+  lastName: string
   avatar?: ReactNode
   distanceKm: number
   bio: string
@@ -26,7 +27,8 @@ export interface ProviderCardProps {
 
 export function ProviderCard({
   variant = 'compact',
-  name,
+  firstName,
+  lastName,
   avatar = null,
   distanceKm,
   bio,
@@ -38,7 +40,7 @@ export function ProviderCard({
   className,
 }: ProviderCardProps) {
   const isFull = variant === 'full'
-
+  const name = firstName  + " " + lastName[0] + "."
   return (
     <article
       className={cn(
