@@ -6,6 +6,7 @@ import { Button } from '../components/Button'
 import { CategoryCard } from '../components/CategoryCard'
 import { ProviderCard } from '../components/ProviderCard'
 import { Logo } from '../components/Logo'
+import { AvatarIcon } from '../components/AvatarIcon'
 
 /* eslint-disable react-refresh/only-export-components */
 export const Route = createFileRoute('/')({ component: Home })
@@ -48,10 +49,10 @@ const CATEGORIES = [
 ]
 
 const PROVIDERS = [
-  { name: 'Patrick S.', distanceKm: 1.2, bio: 'Helps with Windows, printers, Wi-Fi setup and phone issues. Patient and friendly with first-time users and seniors.', pricePerHour: 25 },
-  { name: 'Mira L.',    distanceKm: 3.4, bio: 'Math tutor for high-school and first-year uni students. Exam preparation, homework help, flexible evening slots.', pricePerHour: 20 },
-  { name: 'Thomas R.',  distanceKm: 0.8, bio: 'Fast and reliable furniture assembly, IKEA & other brands. Also mounts TVs, shelves and blinds.', pricePerHour: 28 },
-  { name: 'Anna W.',    distanceKm: 2.2, bio: 'Professional cleaner with 5 years experience. Deep cleans, regular visits, and move-out cleaning available.', pricePerHour: 22 },
+  { firstName: 'Patrick ',lastName:'Smith', distanceKm: 1.2, bio: 'Helps with Windows, printers, Wi-Fi setup and phone issues. Patient and friendly with first-time users and seniors.', pricePerHour: 25 },
+  { firstName: 'Mira L.',lastName:'Long',    distanceKm: 3.4, bio: 'Math tutor for high-school and first-year uni students. Exam preparation, homework help, flexible evening slots.', pricePerHour: 20 },
+  { firstName: 'Thomas R.',lastName:'Richard',  distanceKm: 0.8, bio: 'Fast and reliable furniture assembly, IKEA & other brands. Also mounts TVs, shelves and blinds.', pricePerHour: 28 },
+  { firstName: 'Anna W.',lastName:'Washington',    distanceKm: 2.2, bio: 'Professional cleaner with 5 years experience. Deep cleans, regular visits, and move-out cleaning available.', pricePerHour: 22 },
 ]
 
 const FOOTER_LINKS = ['About', 'Contact Us', 'Accessibility', 'Terms of Use', 'Privacy Policy']
@@ -294,14 +295,16 @@ function Home() {
               aria-label="Helpers near you"
             >
               {PROVIDERS.map((p) => (
-                <li key={p.name} className="snap-start shrink-0 w-64">
+                <li key={p.firstName} className="snap-start shrink-0 w-64">
                   <ProviderCard
                     variant="compact"
-                    name={p.name}
-                    avatar={null}
+                    firstName={p.firstName}
+                    lastName={p.lastName}
+                    avatar={<AvatarIcon firstName={p.firstName} lastName={p.lastName} picture=''/>}
                     distanceKm={p.distanceKm}
                     bio={p.bio}
                     pricePerHour={p.pricePerHour}
+                    
                   />
                 </li>
               ))}

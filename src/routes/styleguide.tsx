@@ -238,10 +238,12 @@ function Styleguide() {
           <div className="w-64">
             <ProviderCard
               variant="compact"
-              name="Patrick S."
+              firstName="Patrick"
+              lastName='Smith'
               distanceKm={1.2}
               bio="Helps with Windows, printers, Wi-Fi setup and phone issues. Patient and friendly with first-time users and seniors."
               pricePerHour={25}
+              avatar={<AvatarIcon firstName="Patrick" lastName="Smith" picture=''/*picture can be added here*/ />}
             />
           </div>
         </div>
@@ -251,7 +253,8 @@ function Styleguide() {
           <div className="w-96">
             <ProviderCard
               variant="full"
-              name="Lena K."
+              firstName="Lena"
+              lastName='Kross'
               distanceKm={2.1}
               bio="Software engineer by day, helper by evening. I diagnose slow PCs, clean out junk, set up email and cloud backup."
               pricePerHour={18}
@@ -260,6 +263,7 @@ function Styleguide() {
                 { name: 'Email Setup', price: 18 },
                 { name: 'Cloud Backup', price: 28 },
               ]}
+              avatar={<AvatarIcon firstName="Lena" lastName="Kross" picture=''/*picture can be added here*//>}
             />
           </div>
         </div>

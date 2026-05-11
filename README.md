@@ -1,6 +1,6 @@
 # Mira — Frontend
 
-> Last updated: 2026-05-08
+> Last updated: 2026-05-10
 
 React + TypeScript frontend for the Mira platform. Built with Vite, Tailwind CSS v4, and TanStack Router.
 
@@ -20,6 +20,7 @@ React + TypeScript frontend for the Mira platform. Built with Vite, Tailwind CSS
 | [Vite](https://vite.dev) | 8 | Build tool & dev server |
 | [Tailwind CSS](https://tailwindcss.com) | 4 | Utility-first styling with `@theme` design tokens |
 | [TanStack Router](https://tanstack.com/router) | 1 | File-based type-safe routing |
+| [Zustand](https://zustand.docs.pmnd.rs) | 5 | Lightweight global state with `persist` middleware for localStorage |
 | [Lucide React](https://lucide.dev) | latest | Icon library |
 | [clsx](https://github.com/lukeed/clsx) + [tailwind-merge](https://github.com/dcastil/tailwind-merge) | latest | Conditional class merging |
 | [Vitest](https://vitest.dev) | 4 | Unit testing |
@@ -93,18 +94,22 @@ Coverage is collected via `@vitest/coverage-v8`.
 
 ```
 src/
-├── __tests__/          # Unit tests
+├── __tests__/           # Unit tests (Vitest + Testing Library)
 ├── assets/
-│   └── logos/          # SVG logo variants (primary, stacked, submark, icon, black, white)
-├── components/         # Shared UI components
+│   └── logos/           # SVG logo variants (primary, stacked, submark, icon, black, white)
+├── components/          # Shared UI components (Button, Pagination, Popover, Switch, …)
 ├── lib/
-│   └── cn.ts           # clsx + tailwind-merge helper
-├── routes/             # File-based routes (TanStack Router)
-│   ├── __root.tsx      # Root layout
-│   └── index.tsx       # Design system showcase page
-├── globals.css         # Tailwind @theme design tokens + base styles
-├── main.tsx            # App entry point
-└── router.tsx          # Router setup
+│   └── cn.ts            # clsx + tailwind-merge helper
+├── routes/              # File-based routes (TanStack Router)
+│   ├── __root.tsx       # Root layout
+│   ├── index.tsx        # Landing page (/)
+│   └── styleguide.tsx   # Design system showcase (/styleguide)
+├── stores/
+│   └── accessibility.ts # Zustand store for accessibility prefs (persisted to localStorage)
+├── globals.css          # Tailwind @theme tokens, base styles, reduced-motion rules
+├── main.tsx             # App entry point
+├── router.tsx           # Router setup
+└── routeTree.gen.ts     # Auto-generated route tree (TanStack Router plugin)
 ```
 
 ---
@@ -142,9 +147,18 @@ Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `b
 
 ---
 
+## Routes
+
+| Path | File | Purpose |
+|------|------|---------|
+| `/` | `routes/index.tsx` | Landing page — hero, how-it-works, popular categories, helpers near you, footer |
+| `/styleguide` | `routes/styleguide.tsx` | Design system showcase — every component with live examples |
+
+---
+
 ## Components
 
-All components are showcased on the design system page (`/`).
+All components are showcased on the styleguide page (`/styleguide`).
 
 | Component | Description |
 |-----------|-------------|
@@ -153,12 +167,13 @@ All components are showcased on the design system page (`/`).
 | `Label` | Form label with optional required indicator |
 | `Input` | Text input with label, error, and disabled states |
 | `Textarea` | Multi-line text input with the same state API as Input |
-| `AccessibilityPanel` | Floating panel for toggling accessibility preferences (font size, contrast, motion) |
-| `CategoryCard` | Card displaying a service category with icon and title |
-| `ProviderCard` | Provider listing card in compact and full variants, with avatar and badge support |
 | `Navbar` | Top navigation bar with logo, links, and CTA |
-| `Pagination` | Accessible pagination with ellipsis logic |
-| `Landing page` | Full landing page composed of hero, how-it-works, categories, providers, and footer sections |
+| `CategoryCard` | Card displaying a service category with image and title |
+| `ProviderCard` | Provider listing card in compact and full variants |
+| `Pagination` | Accessible pagination with ellipsis logic, prev/next, sibling window, `aria-current` |
+| `Popover` | Custom accessible popover primitive — focus trap, Escape, click-outside, `role="dialog"` |
+| `Switch` | Custom accessible on/off toggle — `role="switch"`, `aria-checked`, keyboard support |
+| `AccessibilityPanel` | Header dropdown with toggles for **Leichte Sprache** and **Reduce motion**; preferences are persisted via the Zustand store |
 
 ---
 
@@ -202,8 +217,12 @@ The `feature/runner-test` branch was used to verify the GitLab Runner was connec
 
 The project follows WCAG 2.1 AA as a baseline:
 
-- Focus-visible styles applied globally via `:focus-visible`
-- `prefers-reduced-motion` media query disables all animations
+- Focus-visible styles applied globally via `:focus-visible`, with a fallback for older browsers
+- `prefers-reduced-motion` media query disables all animations, with an in-app override toggle
+- User-facing accessibility toggles — **Leichte Sprache** (easy-read German) and **Reduce motion** — accessible from the header `AccessibilityPanel`
+- Preferences are persisted via the Zustand store (`stores/accessibility.ts`) and mirrored onto `<html data-easy-read>` / `<html data-reduced-motion>` so CSS reacts
+- Custom `Popover` and `Switch` primitives include full keyboard navigation (Tab, Shift+Tab, Escape) and ARIA wiring
 - Icon-only buttons require `aria-label` (enforced by a dev-mode warning)
 - Loading state uses `aria-busy` and a visually-hidden "Loading…" text
+- Semantic HTML throughout: `<nav>`, `<main>`, `<section>`, `<article>`, `<ul>`/`<li>` lists with `aria-labelledby` on every section
 - Heading fonts use [Atkinson Hyperlegible](https://brailleinstitute.org/freefont), designed for low-vision readers
