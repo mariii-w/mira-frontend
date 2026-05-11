@@ -2,6 +2,7 @@ import { MapPin, ArrowRight, MessageCircle } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { Button } from './Button'
 import type { ReactNode } from 'react'
+import { AvatarIcon } from './AvatarIcon'
 
 export type ProviderCardVariant = 'compact' | 'full'
 
@@ -12,7 +13,8 @@ export interface ProviderService {
 
 export interface ProviderCardProps {
   variant?: ProviderCardVariant
-  name: string
+  firstName: string
+  lastName: string
   avatar?: ReactNode
   distanceKm: number
   bio: string
@@ -26,7 +28,8 @@ export interface ProviderCardProps {
 
 export function ProviderCard({
   variant = 'compact',
-  name,
+  firstName,
+  lastName,
   avatar = null,
   distanceKm,
   bio,
@@ -38,7 +41,7 @@ export function ProviderCard({
   className,
 }: ProviderCardProps) {
   const isFull = variant === 'full'
-
+  const name = firstName  + " " + lastName[0] + "."
   return (
     <article
       className={cn(
