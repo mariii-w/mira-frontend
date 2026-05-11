@@ -20,6 +20,7 @@ import { CategoryCard } from '../components/CategoryCard.tsx';
 import { ProviderCard } from '../components/ProviderCard';
 import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
+import { SearchBar } from '../components/SearchBar.tsx';
 
 
 
@@ -271,6 +272,11 @@ function Styleguide() {
       </div>
     </section>
 
+      <section className="flex flex-col gap-3">
+        <h2>Search Bar</h2>
+        <SearchBar placeholder='Suche...'/>
+      </section>
+    
     </div>
   )
 }
