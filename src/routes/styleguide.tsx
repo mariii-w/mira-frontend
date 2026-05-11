@@ -177,28 +177,39 @@ function Styleguide() {
         </div>
       </section>
 
-    <section className="flex flex-col gap-3">
-      <h2>Input</h2>
-      <div className="flex flex-col gap-4 p-6 bg-surface border border-border rounded-lg max-w-sm">
-        <div className="flex flex-col gap-1.5">
-          <Label>Benutzername</Label>
-          <Input placeholder="Geben Sie Ihren Benutzernamen ein" />
+      <section className="flex flex-col gap-3">
+        <h2>Input</h2>
+        <div className="flex flex-col gap-4 p-6 bg-surface border border-border rounded-lg max-w-sm">
+
+          <div className="flex flex-col gap-1.5">
+            <Label>Benutzername</Label>
+            <ValidatedInput
+              placeholder="Geben Sie Ihren Benutzernamen ein"
+              validate={(v) => !v ? 'Erforderlich.' : v.length < 3 ? 'Min. 3 Zeichen.' : !/^[a-z0-9_]+$/.test(v) ? 'Nur a–z, 0–9, _.' : null}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label required>Titel</Label>
+            <ValidatedInput
+              placeholder="z.B. PC Support & Laptop Hilfe"
+              validate={(v) => !v ? 'Erforderlich.' : v.length < 3 ? 'Min. 3 Zeichen.' : v.length > 120 ? 'Max. 120 Zeichen.' : null}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label>Passwort</Label>
+            <Input type="password" placeholder="Geben Sie Ihr Passwort ein" />
+          </div>
+
+          <Input placeholder="Disabled" disabled />
+
+          <div className="flex flex-col gap-1.5">
+            <Label required>Benutzername (Fehler)</Label>
+            <Input value="Anna!" readOnly error="Nur Kleinbuchstaben, Ziffern und Unterstriche." />
+          </div>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label required>Titel</Label>
-          <Input placeholder="z.B. PC Support & Laptop Hilfe" />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label>Passwort</Label>
-          <Input type="password" placeholder="Geben Sie Ihr Passwort ein" />
-        </div>
-        <Input placeholder="Disabled" disabled />
-        <div className="flex flex-col gap-1.5">
-          <Label required>Benutzername (Fehler)</Label>
-          <Input value="Anna!" readOnly error="Nur Kleinbuchstaben, Ziffern und Unterstriche." />
-        </div>
-      </div>
-    </section>
+      </section>
 
       <section className="flex flex-col gap-3">
         <h2>Textarea</h2>
@@ -285,6 +296,26 @@ function ShowcaseRow({ label, children }: { label: string; children: React.React
       <span className="text-small text-muted font-medium">{label}</span>
       <div className="flex gap-3 items-center flex-wrap">{children}</div>
     </>
+  )
+}
+
+function ValidatedInput({
+  validate,
+  placeholder,
+}: {
+  validate: (v: string) => string | null
+  placeholder: string
+}) {
+  const [v, setV] = useState('')
+  const [touched, setTouched] = useState(false)
+  return (
+    <Input
+      value={v}
+      onChange={(e) => setV(e.target.value)}
+      onBlur={() => setTouched(true)}
+      error={touched ? validate(v) : null}
+      placeholder={placeholder}
+    />
   )
 }
 
