@@ -22,6 +22,7 @@ import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
 import { AvatarIcon } from '../components/AvatarIcon.tsx';
 import { UserBadge } from '../components/UserBadge.tsx';
+import { FilterBar } from '../components/FilterBar.tsx';
 
 
 
@@ -285,6 +286,22 @@ function Styleguide() {
         <UserBadge firstName='Lena' lastName='Kross'/>
         <UserBadge firstName='Klaus' lastName='Merger' isProvider={true}/>
       </div>
+    </section>
+
+    <section className="flex flex-col gap-3">
+      <h2>Filter Leiste</h2>
+      <div className='w-96'>
+        <FilterBar tagList={[
+          {name:"PC & Laptop", checked: false},
+          {name:"Phone & Tablet", checked: false},
+          {name:"Smart Home", checked: false},
+          {name:"Printers", checked: false},
+          {name:"Software Help", checked: false},
+          {name:"Email & Web", checked: false},
+          {name:"Linux", checked: false},
+        ]}/>
+      </div>
+     
     </section>
 
     </div>
