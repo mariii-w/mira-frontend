@@ -61,7 +61,6 @@ const SIZES: ButtonSize[] = ['sm', 'md', 'lg']
 export const Route = createFileRoute('/styleguide')({ component: Styleguide })
 
 function Styleguide() {
-  const [page, setPage] = useState(5);
   return (
     <div className="p-6 space-y-12 bg-background min-h-dvh">
       <section>
@@ -279,12 +278,14 @@ function Styleguide() {
         </div>
       </section>
 
-    <section className="flex flex-col gap-3">
-      <h2>Pagination</h2>
-      <div className="p-6 bg-surface border border-border rounded-lg">
-        <Pagination page={page} totalPages={12} onPageChange={setPage} />
-      </div>
-    </section>
+      <section className="flex flex-col gap-3">
+        <h2>Pagination</h2>
+        <div className="flex flex-col gap-4 p-6 bg-surface border border-border rounded-lg">
+          <Pagination onPrevious={() => {}} onNext={() => {}} />
+          <Pagination onPrevious={() => {}} onNext={() => {}} disablePrevious />
+          <Pagination onPrevious={() => {}} onNext={() => {}} disableNext />
+        </div>
+      </section>
 
     </div>
   )
