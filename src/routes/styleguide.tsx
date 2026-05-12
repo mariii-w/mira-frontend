@@ -22,6 +22,8 @@ import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
 import { AvatarIcon } from '../components/AvatarIcon.tsx';
 import { UserBadge } from '../components/UserBadge.tsx';
+import { Badge } from '../components/Badge.tsx';
+import { Breadcrumb } from '../components/BreadCrumb.tsx';
 
 
 
@@ -58,6 +60,7 @@ const TEXT_VARIANTS: { variant: ButtonVariant; label: string }[] = [
 ]
 
 const SIZES: ButtonSize[] = ['sm', 'md', 'lg']
+
 
 
 export const Route = createFileRoute('/styleguide')({ component: Styleguide })
@@ -284,6 +287,27 @@ function Styleguide() {
         <AvatarIcon size={40} firstName='Lena' lastName='Kross'></AvatarIcon>
         <UserBadge firstName='Lena' lastName='Kross'/>
         <UserBadge firstName='Klaus' lastName='Merger' isProvider={true}/>
+      </div>
+    </section>
+
+    <section className="flex flex-col gap-3">
+      <h2>Badge</h2>
+      
+      <div className="p-6 bg-surface border border-border rounded-lg">
+        <Badge text={'WI-FI'}/>
+        <Badge variant='accent' text ={'Barrierefrei'}/>
+      </div>
+    </section>
+
+    <section className="flex flex-col gap-3">
+      <h2>Breadcrumb</h2>
+      
+      <div className="p-6 bg-surface border border-border rounded-lg">
+        <Breadcrumb links={[
+          { name: 'Home',     href: '/'              },
+          { name: 'Styleguide', href: '/styleguide'      },
+          ]}
+        />
       </div>
     </section>
 
