@@ -79,7 +79,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       data-variant={variant}
       data-size={size}
       className={cn(
-        'relative inline-flex items-center justify-center font-medium rounded-full transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed',
+        'relative inline-flex items-center justify-center font-medium rounded-full cursor-pointer transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed',
         isIcon ? ICON_SIZE[size] : SIZE[size],
         VARIANT[variant],
         fullWidth && !isIcon && 'w-full',
