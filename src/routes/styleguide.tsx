@@ -22,6 +22,7 @@ import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
 import { AvatarIcon } from '../components/AvatarIcon.tsx';
 import { UserBadge } from '../components/UserBadge.tsx';
+import { SearchBar } from '../components/SearchBar.tsx';
 import { Badge } from '../components/Badge.tsx';
 import { Breadcrumb } from '../components/BreadCrumb.tsx';
 
@@ -290,9 +291,14 @@ function Styleguide() {
       </div>
     </section>
 
+      <section className="flex flex-col gap-3">
+        <h2>Search Bar</h2>
+        <SearchBar placeholder='Suche...' />
+      </section>
+
     <section className="flex flex-col gap-3">
       <h2>Badge</h2>
-      
+
       <div className="p-6 bg-surface border border-border rounded-lg">
         <Badge text={'WI-FI'}/>
         <Badge variant='accent' text ={'Barrierefrei'}/>
@@ -301,7 +307,7 @@ function Styleguide() {
 
     <section className="flex flex-col gap-3">
       <h2>Breadcrumb</h2>
-      
+
       <div className="p-6 bg-surface border border-border rounded-lg">
         <Breadcrumb links={[
           { name: 'Home',     href: '/'              },
