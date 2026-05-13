@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react';
 import { cn } from '../lib/cn';
 
 export interface BreadcrumbLink {
@@ -47,9 +48,7 @@ export function Breadcrumb({
               )}
 
               {!isLast && (
-                <span className="text-muted-foreground select-none" aria-hidden="true">
-                  /
-                </span>
+                <ChevronRight className="text-muted-foreground" size={16} aria-hidden="true" />
               )}
             </li>
           );
