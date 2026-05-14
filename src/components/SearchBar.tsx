@@ -5,6 +5,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { Label } from "./Label";
 import { Input } from "./Input";
 import { MapPin } from 'lucide-react'
+import { Slider } from "./Slider";
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement>
 {
@@ -47,17 +48,21 @@ export const SearchBar = forwardRef<HTMLInputElement, InputProps>(function Searc
                     <Popover.Content
                     align="end"
                     sideOffset={8}
-                    className="z-50 w-80 rounded-xl border border-border bg-surface p-2 shadow-lg"
+                    className="z-50 w-70 rounded-xl border border-border bg-surface p-2 shadow-lg"
                     >
+                      <div className="mx-5">
+
+                      
                         <div className="flex flex-col gap-1.5">
                             <Label>Ort</Label>
                             <Input placeholder="Ortssuche" />
                         </div>
-                        <div className="my-1 h-px bg-border/30" />
+                        <div className="my-2 h-px bg-border/30" />
                         <div className="flex flex-col gap-1.5">
                             <Label>Radius</Label>
-                            {/* Insert Slider Component */}
+                            <Slider label={""} min={10} max={50}/>
                         </div>
+                      </div>
                     </Popover.Content>
                 </Popover.Portal>
             </Popover.Root>
