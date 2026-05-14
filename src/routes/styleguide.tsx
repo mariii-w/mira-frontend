@@ -26,6 +26,7 @@ import { SearchBar } from '../components/SearchBar.tsx';
 import { Badge } from '../components/Badge.tsx';
 import { Breadcrumb } from '../components/BreadCrumb.tsx';
 import { FilterBar } from '../components/FilterBar.tsx';
+import { ServiceCard } from '../components/ServiceCard.tsx';
 
 
 
@@ -346,7 +347,25 @@ function Styleguide() {
           {name:"Linux", checked: false},
         ]}/>
       </div>
-     
+    </section>
+
+    <section className="flex flex-col gap-3">
+      <h2>Service Card</h2>
+      <div className='w-3xl'>
+        <ServiceCard
+            link='#'
+            pictureLink='' 
+            location={'München'} 
+            providerFirstName={'Patrick'} 
+            providerLastName={'Stock'} 
+            varified={true} 
+            label={'Laptop & Wi-Fi setup'} 
+            description={'I help with Windows, macOS, printers, Wi-Fi, smart TVs and phone-to-laptop setups. Friendly with first-time users and seniors.'} 
+            badges={[{text: 'Wi-Fi'}, {text: 'Windows'}, {text: 'Printers'}, {text: 'Barrierefrei', variant: 'accent'}]} 
+            hourRate={20} 
+            distance={10}
+            />
+      </div>
     </section>
 
     </div>
