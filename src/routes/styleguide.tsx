@@ -25,6 +25,7 @@ import { UserBadge } from '../components/UserBadge.tsx';
 import { SearchBar } from '../components/SearchBar.tsx';
 import { Badge } from '../components/Badge.tsx';
 import { Breadcrumb } from '../components/BreadCrumb.tsx';
+import { FilterBar } from '../components/FilterBar.tsx';
 
 
 
@@ -330,6 +331,22 @@ function Styleguide() {
           ]}
         />
       </div>
+    </section>
+
+    <section className="flex flex-col gap-3">
+      <h2>Filter Leiste</h2>
+      <div className='w-96'>
+        <FilterBar tagList={[
+          {name:"PC & Laptop", checked: false},
+          {name:"Phone & Tablet", checked: false},
+          {name:"Smart Home", checked: false},
+          {name:"Printers", checked: false},
+          {name:"Software Help", checked: false},
+          {name:"Email & Web", checked: false},
+          {name:"Linux", checked: false},
+        ]}/>
+      </div>
+     
     </section>
 
     </div>
