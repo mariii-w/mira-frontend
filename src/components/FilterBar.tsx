@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { Input } from './Input'
 import { Button } from './Button'
+import { Slider } from './Slider'
 
 export interface tagList {
   name: string
@@ -84,19 +85,17 @@ export function FilterBar({ tagList = [] }: FilterBarProps) {
           </div>
         </FilterSection>
 
-        <FilterSection title="Entfernung" defaultOpen={false}>
-          <Input placeholder="Max. km" />
+        <FilterSection title="Entfernung">
+          <Slider label={''} min={10} max={50} unit='km'/>
         </FilterSection>
 
-        <FilterSection title="Preis" defaultOpen={false}>
-          <div className="flex gap-2">
-            <Input placeholder="Max €" />
-          </div>
+        <FilterSection title="Preis">
+          <Slider label={''} min={5} max={100} unit='€'/>
         </FilterSection>
       </div>
 
       <div className="w-full h-px bg-border" />
-      <div>
+      <div className='mx-auto'>
         <Button className="">Zeige Ergebnisse</Button>
       </div>
     </article>
