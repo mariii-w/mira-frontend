@@ -351,10 +351,10 @@ function Styleguide() {
 
     <section className="flex flex-col gap-3">
       <h2>Service Card</h2>
-      <div className='w-3xl'>
+      <div className='w-5xl'>
         <ServiceCard
             link='#'
-            pictureLink='' 
+            pictureLink='./pic/ServiceExample1.png' 
             location={'München'} 
             providerFirstName={'Patrick'} 
             providerLastName={'Stock'} 
