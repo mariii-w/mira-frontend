@@ -15,7 +15,7 @@ export interface BadgeProps {
 export function Badge({ variant = 'primary', text }: BadgeProps) {
   return (
     <div className={cn(
-      'inline-flex items-center h-11 rounded-full px-3 py-0.5 font-medium text-xl',
+      'inline-flex items-center h-9 rounded-full px-4 py-0.5 font-medium text-h3',
       VARIANT[variant]
     )}>
       <p>{text}</p>
