@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 export type UserType = 'CUSTOMER' | 'PROVIDER'
-export type AccessibilityPreference = 'EASY_LANGUAGE' | 'READING_MODE' | 'REDUCED_MOTION'
+export type AccessibilityPreference = 'EASY_LANGUAGE' | 'REDUCED_MOTION'
 
 export interface PrivateAddress {
   street: string
@@ -79,23 +79,51 @@ interface AccountResponse {
 }
 
 export async function exchangeRefreshForAccess(): Promise<boolean> {
-  const res = await fetch('http://127.0.0.1:8080/v1/auth/refresh', {
+  // 1. Exchange refresh cookie for access token
+  const refreshRes = await fetch(`${API_BASE}/v1/auth/refresh`, {
     method: 'POST',
     credentials: 'include',
   })
-  if (!res.ok) {
-    useAuthStore.getState().setAuth(null, null)
+  if (!refreshRes.ok) {
+    useAuthStore.getState().clear()
     return false
   }
-  const { accessToken, user } = await res.json()
-  useAuthStore.getState().setAuth(accessToken, user)
+  const { accessToken } = await refreshRes.json()
+
+  // 2. Decode JWT to get accountId + permissions
+  const claims = decodeJwtPayload<JwtClaims>(accessToken)
+  if (!claims?.sub) {
+    useAuthStore.getState().clear()
+    return false
+  }
+  useAuthStore.getState().setToken({
+    accessToken,
+    accountId: claims.sub,
+    permissions: claims.permissions ?? [],
+  })
+
+  // 3. Get userId from accountId
+  const accountRes = await fetch(`${API_BASE}/v1/accounts/${claims.sub}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!accountRes.ok) return false
+  const { userId } = (await accountRes.json()) as AccountResponse
+
+  // 4. Fetch full user profile
+  const userRes = await fetch(`${API_BASE}/v1/users/${userId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!userRes.ok) return false
+  const user = (await userRes.json()) as User
+  useAuthStore.getState().setUser(user)
+
   return true
 }
 
 export async function logout(): Promise<void> {
-  await fetch('http://127.0.0.1:8080/v1/auth/logout', {
+  await fetch(`${API_BASE}/v1/auth/logout`, {
     method: 'POST',
     credentials: 'include',
   })
-  useAuthStore.getState().setAuth(null, null)
+  useAuthStore.getState().clear()
 }
