@@ -1,20 +1,29 @@
 // src/components/Navbar.tsx
 //
-// Logged-out navbar
-// Logged-in variant to be added once components are done
+// Logged-out navbar variant
+// Logged-in variant 
 
 import { Link } from '@tanstack/react-router'
 import { Logo } from './Logo'
 import { Button } from './Button'
 import { AccessibilityPanel } from './AccessibilityPanel'
+import { UserMenu } from './UserMenu'
+import { useAuthStore } from '../stores/auth'
 
-//Actual route names will be added later
 const NAV_LINKS = [
   { label: 'Browse Services', to: '/' },
   { label: 'Find providers',  to: '/' },
 ] as const
 
 export function Navbar() {
+  const user = useAuthStore((s) => s.user)
+  const [firstName = '', lastName = ''] = (user?.name ?? '').split(' ')
+  const isProvider = user?.userType === 'PROVIDER'
+
+  function handleGoogleLogin() {
+    window.location.href = 'http://127.0.0.1:8080/oauth2/authorization/google'
+  }
+
   return (
     <header className="sticky top-0 z-40 w-full bg-charcoal">
       <nav
@@ -56,12 +65,27 @@ export function Navbar() {
           {/* Divider */}
           <div className="h-6 w-px bg-cream/20" aria-hidden="true" />
 
-          <Button variant="secondary" size="md" className="border-cream/30 text-cream hover:bg-cream/10">
-            Login
-          </Button>
-          <Button variant="primary" size="md">
-            Register
-          </Button>
+          {user ? (
+            <UserMenu
+              firstName={firstName}
+              lastName={lastName}
+              isProvider={isProvider}
+            />
+          ) : (
+            <>
+              <Button
+                variant="secondary"
+                size="md"
+                className="border-cream/30 text-cream hover:bg-cream/10"
+                onClick={handleGoogleLogin}
+              >
+                Login
+              </Button>
+              <Button variant="primary" size="md" onClick={handleGoogleLogin}>
+                Register
+                </Button>
+            </>
+          )}
         </div>
       </nav>
     </header>

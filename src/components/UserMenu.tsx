@@ -1,18 +1,24 @@
 import * as Popover from './Popover'
 import { ChevronDown, LogOut, CalendarCheck, LayoutList, UserRound } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from './Button'
 import { AvatarIcon } from './AvatarIcon'
+import { logout } from '../stores/auth'
 
 interface UserMenuProps {
   firstName: string
   lastName: string
   isProvider?: boolean
-  onLogout?: () => void
 }
 
-export function UserMenu({ firstName, lastName, isProvider, onLogout }: UserMenuProps) {
+export function UserMenu({ firstName, lastName, isProvider }: UserMenuProps) {
+  const navigate = useNavigate()
   const displayName = `${firstName} ${lastName[0]}.`
+
+  async function handleLogout() {
+    await logout()
+    navigate({ to: '/' })
+  }
 
   return (
     <Popover.Root>
@@ -40,7 +46,7 @@ export function UserMenu({ firstName, lastName, isProvider, onLogout }: UserMenu
           <div className="my-1 h-px bg-border/30" />
           <button
             type="button"
-            onClick={onLogout}
+            onClick={handleLogout}
             className="w-full flex items-center gap-3 p-3 rounded-lg text-small font-semibold text-foreground hover:bg-linen transition-colors"
           >
             <LogOut size={15} className="text-muted shrink-0" />
