@@ -21,7 +21,7 @@ import { ProviderCard } from '../components/ProviderCard';
 import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
 import { AvatarIcon } from '../components/AvatarIcon.tsx';
-import { UserBadge } from '../components/UserBadge.tsx';
+import { UserMenu } from '../components/UserMenu.tsx';
 import { SearchBar } from '../components/SearchBar.tsx';
 import { Badge } from '../components/Badge.tsx';
 import { Breadcrumb } from '../components/BreadCrumb.tsx';
@@ -304,8 +304,8 @@ function Styleguide() {
       
       <div className="p-6 bg-surface border border-border rounded-lg">
         <AvatarIcon size={40} firstName='Lena' lastName='Kross'></AvatarIcon>
-        <UserBadge firstName='Lena' lastName='Kross'/>
-        <UserBadge firstName='Klaus' lastName='Merger' isProvider={true}/>
+        <UserMenu firstName='Lena' lastName='Kross'/>
+        <UserMenu firstName='Klaus' lastName='Merger' isProvider={true}/>
       </div>
     </section>
 
