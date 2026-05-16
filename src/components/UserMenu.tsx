@@ -13,7 +13,7 @@ interface UserMenuProps {
 
 export function UserMenu({ firstName, lastName, isProvider }: UserMenuProps) {
   const navigate = useNavigate()
-  const displayName = `${firstName} ${lastName[0]}.`
+  const displayName = lastName ? `${firstName} ${lastName[0]}.` : firstName
 
   async function handleLogout() {
     await logout()

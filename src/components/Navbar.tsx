@@ -17,7 +17,8 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const user = useAuthStore((s) => s.user)
-  const [firstName = '', lastName = ''] = (user?.name ?? '').split(' ')
+  const firstName = user?.firstName ?? ''
+  const lastName = user?.lastName ?? ''
   const isProvider = user?.userType === 'PROVIDER'
 
   function handleGoogleLogin() {
