@@ -1,8 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, type ReactNode } from 'react'
 import { Search, Heart } from 'lucide-react'
 import { useAuthStore } from '../../stores/auth'
-import type { UserType } from '../../lib/patchUser'
+import { patchUser, type UserType, type RegisterPatchError } from '../../lib/patchUser'
 
 export const Route = createFileRoute('/register/role')({
   component: RegisterRole,
@@ -10,8 +10,23 @@ export const Route = createFileRoute('/register/role')({
 
 // eslint-disable-next-line react-refresh/only-export-components
 function RegisterRole() {
+  const navigate = useNavigate()
   const currentUserType = useAuthStore((s) => s.user?.userType ?? null)
-  const [selected, setSelected] = useState<UserType | null>(currentUserType)
+  const [submitting, setSubmitting] = useState<UserType | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  async function pick(userType: UserType) {
+    if (submitting) return
+    setSubmitting(userType)
+    setError(null)
+    try {
+      await patchUser({ userType })
+      navigate({ to: '/register/name' })
+    } catch (e) {
+      setError((e as RegisterPatchError).message)
+      setSubmitting(null)
+    }
+  }
 
   return (
     <section className="flex flex-col gap-6" aria-labelledby="register-step-heading">
@@ -24,20 +39,22 @@ function RegisterRole() {
           icon={<Search aria-hidden="true" />}
           title="I need help"
           description="Find people to help with computers, phones, chores, tutoring and other."
-          selected={selected === 'CUSTOMER'}
-          onClick={() => setSelected('CUSTOMER')}
+          selected={currentUserType === 'CUSTOMER'}
+          loading={submitting === 'CUSTOMER'}
+          onClick={() => pick('CUSTOMER')}
         />
         <RoleCard
           icon={<Heart aria-hidden="true" />}
           title="I can help"
           description="Offer services, set your own hours, and get paid for helping others."
-          selected={selected === 'PROVIDER'}
-          onClick={() => setSelected('PROVIDER')}
+          selected={currentUserType === 'PROVIDER'}
+          loading={submitting === 'PROVIDER'}
+          onClick={() => pick('PROVIDER')}
         />
       </div>
 
-      <p className="text-small text-muted text-center">
-        Click an option to continue →
+      <p className="text-small text-muted text-center" aria-live="polite">
+        {error ?? 'Click an option to continue →'}
       </p>
     </section>
   )
@@ -48,20 +65,23 @@ interface RoleCardProps {
   title: string
   description: string
   selected: boolean
+  loading: boolean
   onClick: () => void
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-function RoleCard({ icon, title, description, selected, onClick }: RoleCardProps) {
+function RoleCard({ icon, title, description, selected, loading, onClick }: RoleCardProps) {
   return (
     <button
       type="button"
       role="radio"
       aria-checked={selected}
       onClick={onClick}
+      disabled={loading}
       className={
         'flex flex-col items-start gap-3 rounded-2xl border-2 p-6 text-left transition-colors duration-150 cursor-pointer ' +
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ' +
+        'disabled:opacity-50 disabled:cursor-wait ' +
         (selected
           ? 'border-primary bg-mint'
           : 'border-border bg-surface hover:border-primary/40 hover:bg-mint/30')
