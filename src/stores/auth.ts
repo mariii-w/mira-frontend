@@ -63,7 +63,7 @@ export function decodeJwtPayload<T = unknown>(token: string): T | null {
   }
 }
 
-const API_BASE = 'http://127.0.0.1:8080'
+const API_BASE = ''
 
 interface JwtClaims {
   sub: string
