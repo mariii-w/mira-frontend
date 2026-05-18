@@ -73,20 +73,10 @@ export function Navbar() {
               isProvider={isProvider}
             />
           ) : (
-            <>
-              <Button
-                variant="secondary"
-                size="md"
-                className="border-cream/30 text-cream hover:bg-cream/10"
-                onClick={handleGoogleLogin}
-              >
-                Login
-              </Button>
-              <Button variant="primary" size="md" onClick={handleGoogleLogin}>
-                Register
-                </Button>
-            </>
-          )}
+          <Button variant="primary" size="md" onClick={handleGoogleLogin}>
+            Login
+          </Button>
+        )}
         </div>
       </nav>
     </header>
