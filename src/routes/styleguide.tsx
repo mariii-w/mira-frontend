@@ -71,7 +71,7 @@ function Styleguide() {
   const [checked, setChecked] = useState(false);
   
   return (
-    <div className="p-6 space-y-12 bg-charcoal min-h-dvh">
+    <div className="p-6 space-y-12 bg-white min-h-dvh">
       <section>
         <Logo variant="primary" height={56} title="Mira home" />
       </section>
@@ -370,9 +370,9 @@ function Styleguide() {
       </div>
     </section>
 
-    <section>
       <h2>Service Provider Toggle</h2>
-      <div className='w-96'>
+    <section>
+      <div className='w-96 bg-charcoal p-6 rounded-lg'>
         <ServiceProviderToggle
             id="service-toggle"
             labelLeft="Service"
