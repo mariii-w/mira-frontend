@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router'
 import { Navbar } from '../../components/Navbar'
+import { Logo } from '../../components/Logo'
 import { useAuthStore, type User } from '../../stores/auth'
 
 export const Route = createFileRoute('/register')({
@@ -10,7 +11,7 @@ const STEPS = [
   { path: '/register/role',    label: 'Choose role',    optional: false },
   { path: '/register/name',    label: 'Your name',      optional: false },
   { path: '/register/address', label: 'Your address',   optional: false },
-  { path: '/register/about',   label: 'About you',      optional: true },
+  { path: '/register/about',   label: 'About you',      optional: true  },
   { path: '/register/photo',   label: 'Profile photo',  optional: true  },
 ] as const
 
@@ -39,10 +40,14 @@ function RegisterLayout() {
     <>
       <Navbar />
       <div className="min-h-[calc(100vh-4rem)] bg-background px-6 py-8">
-        <div className="mx-auto max-w-4xl rounded-2xl overflow-hidden shadow-sm grid grid-cols-1 md:grid-cols-[260px_1fr] bg-surface">
-          <aside aria-label="Registration progress" className="bg-accent text-cream p-8 flex flex-col gap-8">
-            <div>
-              <h1 className="font-heading text-3xl font-bold mb-2">Welcome to Mira</h1>
+        <div className="mx-auto max-w-4xl rounded-2xl overflow-hidden shadow-sm grid grid-cols-1 md:grid-cols-[280px_1fr] bg-surface">
+          <aside
+            aria-label="Registration progress"
+            className="bg-gradient-to-b from-primary to-accent p-8 flex flex-col gap-8 min-h-[560px]"
+          >
+            <div className="flex flex-col gap-3">
+              <Logo variant="white" height={48} title="Mira" />
+              <h1 className="font-heading text-3xl font-bold text-cream mt-2">Welcome to Mira</h1>
               <p className="text-small text-cream/80">A few quick steps to set up your account.</p>
             </div>
 
@@ -56,10 +61,10 @@ function RegisterLayout() {
                       className={
                         'inline-flex h-6 w-6 items-center justify-center rounded-full text-label font-bold shrink-0 ' +
                         (status === 'done'
-                          ? 'bg-cream text-accent'
+                          ? 'bg-cream text-primary'
                           : status === 'current'
-                            ? 'bg-cream text-accent ring-2 ring-cream'
-                            : 'bg-cream/20 text-cream/60')
+                            ? 'bg-cream text-accent ring-2 ring-cream/60'
+                            : 'bg-cream/25 text-cream')
                       }
                     >
                       {status === 'done' ? '✓' : idx + 1}
@@ -70,12 +75,12 @@ function RegisterLayout() {
                         (status === 'current'
                           ? 'font-bold text-cream'
                           : status === 'done'
-                            ? 'text-cream/80'
-                            : 'text-cream/60')
+                            ? 'text-cream/90'
+                            : 'text-cream/70')
                       }
                     >
                       {step.label}
-                      {step.optional && <span className="ml-1 text-cream/50">(optional)</span>}
+                      {step.optional && <span className="ml-1 text-cream/60">(optional)</span>}
                     </span>
                     <span className="sr-only">
                       {status === 'done' && 'Completed.'}
@@ -87,7 +92,7 @@ function RegisterLayout() {
               })}
             </ol>
 
-            <p className="text-label text-cream/60 mt-auto" aria-live="polite">
+            <p className="text-label text-cream/70 mt-auto" aria-live="polite">
               Step {stepNumber} of {STEPS.length}
             </p>
           </aside>
