@@ -1,20 +1,102 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router'
 import { Navbar } from '../../components/Navbar'
+import { useAuthStore, type User } from '../../stores/auth'
 
 export const Route = createFileRoute('/register')({
   component: RegisterLayout,
 })
 
+const STEPS = [
+  { path: '/register/role',    label: 'Choose role',    optional: false },
+  { path: '/register/name',    label: 'Your name',      optional: false },
+  { path: '/register/address', label: 'Your address',   optional: false },
+  { path: '/register/about',   label: 'About you',      optional: true },
+  { path: '/register/photo',   label: 'Profile photo',  optional: true  },
+] as const
+
+type StepStatus = 'done' | 'current' | 'upcoming'
+
+function getStepStatus(idx: number, user: User | null, pathname: string): StepStatus {
+  if (STEPS[idx].path === pathname) return 'current'
+  if (!user) return 'upcoming'
+  const completed =
+    (idx === 0 && !!user.userType) ||
+    (idx === 1 && !!user.firstName && !!user.lastName && !!user.username) ||
+    (idx === 2 && !!user.privateAddress) ||
+    (idx === 3 && !!user.bio) ||
+    (idx === 4 && !!user.profileMedia)
+  return completed ? 'done' : 'upcoming'
+}
+
 // eslint-disable-next-line react-refresh/only-export-components
 function RegisterLayout() {
+  const user = useAuthStore((s) => s.user)
+  const location = useLocation()
+  const currentStepIdx = STEPS.findIndex((s) => s.path === location.pathname)
+  const stepNumber = currentStepIdx >= 0 ? currentStepIdx + 1 : 1
+
   return (
     <>
       <Navbar />
-      <main id="main-content" className="min-h-[calc(100vh-4rem)] bg-background px-6 py-8">
-        <div className="mx-auto max-w-4xl rounded-2xl overflow-hidden shadow-sm bg-surface p-8">
-          <Outlet />
+      <div className="min-h-[calc(100vh-4rem)] bg-background px-6 py-8">
+        <div className="mx-auto max-w-4xl rounded-2xl overflow-hidden shadow-sm grid grid-cols-1 md:grid-cols-[260px_1fr] bg-surface">
+          <aside aria-label="Registration progress" className="bg-accent text-cream p-8 flex flex-col gap-8">
+            <div>
+              <h1 className="font-heading text-3xl font-bold mb-2">Welcome to Mira</h1>
+              <p className="text-small text-cream/80">A few quick steps to set up your account.</p>
+            </div>
+
+            <ol className="flex flex-col gap-4 list-none m-0 p-0">
+              {STEPS.map((step, idx) => {
+                const status = getStepStatus(idx, user, location.pathname)
+                return (
+                  <li key={step.path} className="flex items-center gap-3">
+                    <span
+                      aria-hidden="true"
+                      className={
+                        'inline-flex h-6 w-6 items-center justify-center rounded-full text-label font-bold shrink-0 ' +
+                        (status === 'done'
+                          ? 'bg-cream text-accent'
+                          : status === 'current'
+                            ? 'bg-cream text-accent ring-2 ring-cream'
+                            : 'bg-cream/20 text-cream/60')
+                      }
+                    >
+                      {status === 'done' ? '✓' : idx + 1}
+                    </span>
+                    <span
+                      className={
+                        'text-small ' +
+                        (status === 'current'
+                          ? 'font-bold text-cream'
+                          : status === 'done'
+                            ? 'text-cream/80'
+                            : 'text-cream/60')
+                      }
+                    >
+                      {step.label}
+                      {step.optional && <span className="ml-1 text-cream/50">(optional)</span>}
+                    </span>
+                    <span className="sr-only">
+                      {status === 'done' && 'Completed.'}
+                      {status === 'current' && 'Current step.'}
+                      {status === 'upcoming' && 'Not yet completed.'}
+                    </span>
+                  </li>
+                )
+              })}
+            </ol>
+
+            <p className="text-label text-cream/60 mt-auto" aria-live="polite">
+              Step {stepNumber} of {STEPS.length}
+            </p>
+          </aside>
+
+          <main id="main-content" className="p-8 bg-surface" aria-labelledby="register-step-heading">
+            <Outlet />
+          </main>
         </div>
-      </main>
+      </div>
     </>
   )
 }
