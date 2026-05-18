@@ -67,19 +67,15 @@ const API_BASE = 'http://127.0.0.1:8080'
 
 interface JwtClaims {
   sub: string
-  permissions?: string[]
+  user_id: string
+  scp?: string[]
+  type?: string
   exp?: number
   iat?: number
 }
 
-interface AccountResponse {
-  accountId: string
-  userId: string
-  authProviders: string[]
-}
 
 export async function exchangeRefreshForAccess(): Promise<boolean> {
-  // 1. Exchange refresh cookie for access token
   const refreshRes = await fetch(`${API_BASE}/v1/auth/refresh`, {
     method: 'POST',
     credentials: 'include',
@@ -90,30 +86,24 @@ export async function exchangeRefreshForAccess(): Promise<boolean> {
   }
   const { accessToken } = await refreshRes.json()
 
-  // 2. Decode JWT to get accountId + permissions
   const claims = decodeJwtPayload<JwtClaims>(accessToken)
-  if (!claims?.sub) {
+  if (!claims?.sub || !claims.user_id) {
     useAuthStore.getState().clear()
     return false
   }
   useAuthStore.getState().setToken({
     accessToken,
     accountId: claims.sub,
-    permissions: claims.permissions ?? [],
+    permissions: claims.scp ?? [],
   })
 
-  // 3. Get userId from accountId
-  const accountRes = await fetch(`${API_BASE}/v1/accounts/${claims.sub}`, {
+  const userRes = await fetch(`${API_BASE}/v1/users/${claims.user_id}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   })
-  if (!accountRes.ok) return false
-  const { userId } = (await accountRes.json()) as AccountResponse
-
-  // 4. Fetch full user profile
-  const userRes = await fetch(`${API_BASE}/v1/users/${userId}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  })
-  if (!userRes.ok) return false
+  if (!userRes.ok) {
+    useAuthStore.getState().clear()
+    return false
+  }
   const user = (await userRes.json()) as User
   useAuthStore.getState().setUser(user)
 
@@ -121,9 +111,14 @@ export async function exchangeRefreshForAccess(): Promise<boolean> {
 }
 
 export async function logout(): Promise<void> {
-  await fetch(`${API_BASE}/v1/auth/logout`, {
-    method: 'POST',
-    credentials: 'include',
-  })
-  useAuthStore.getState().clear()
+  const token = useAuthStore.getState().accessToken
+  try {
+    await fetch(`${API_BASE}/v1/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
+  } finally {
+    useAuthStore.getState().clear()
+  }
 }
