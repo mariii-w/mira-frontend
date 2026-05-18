@@ -2,7 +2,20 @@ import { createRootRoute, Outlet, useLocation, useNavigate } from '@tanstack/rea
 import { useEffect } from 'react'
 import { exchangeRefreshForAccess, useAuthStore } from '../stores/auth'
 
-function shouldSkipRegistrationGuard(pathname: string): boolean {
+const REGISTRATION_STEP_PATHS = [
+  '/register',
+  '/register/role',
+  '/register/name',
+  '/register/address',
+  '/register/about',
+  '/register/photo',
+] as const
+
+function isRegistrationStep(pathname: string): boolean {
+  return (REGISTRATION_STEP_PATHS as readonly string[]).includes(pathname)
+}
+
+function shouldSkipUnregisteredGuard(pathname: string): boolean {
   return pathname === '/login' || pathname === '/register' || pathname.startsWith('/register/')
 }
 
@@ -18,8 +31,15 @@ function RootComponent() {
 
   useEffect(() => {
     if (!user) return
-    if (user.registrationComplete) return
-    if (shouldSkipRegistrationGuard(location.pathname)) return
+
+    if (user.registrationComplete) {
+      if (isRegistrationStep(location.pathname)) {
+        navigate({ to: '/' })
+      }
+      return
+    }
+
+    if (shouldSkipUnregisteredGuard(location.pathname)) return
     navigate({ to: '/register' })
   }, [user, location.pathname, navigate])
 
