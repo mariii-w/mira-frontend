@@ -2,12 +2,21 @@ import { forwardRef, useId } from 'react'
 import type { InputHTMLAttributes } from 'react'
 import { cn } from '../lib/cn'
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+export type InputSize = 'sm' | 'md' | 'lg'
+
+export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   error?: string | null
+  size?: InputSize
+}
+
+const SIZE: Record<InputSize, string> = {
+  sm: 'h-9 px-3 text-small',
+  md: 'h-11 px-4 text-body',
+  lg: 'h-12 px-5 text-body',
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, error, id, ...rest },
+  { className, error, id, size = 'md', ...rest },
   ref,
 ) {
   const generatedId = useId()
@@ -23,7 +32,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         aria-invalid={hasError || undefined}
         aria-describedby={hasError ? errorId : undefined}
         className={cn(
-          'w-full h-11 px-4 text-body text-foreground',
+          'w-full text-foreground',
+          SIZE[size],
           'bg-linen border rounded-lg',
           'placeholder:text-muted',
           'transition-colors duration-150',
