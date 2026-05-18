@@ -8,6 +8,8 @@ export const Route = createFileRoute('/register/role')({
   component: RegisterRole,
 })
 
+type CardVariant = 'primary' | 'accent'
+
 // eslint-disable-next-line react-refresh/only-export-components
 function RegisterRole() {
   const navigate = useNavigate()
@@ -36,6 +38,7 @@ function RegisterRole() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" role="radiogroup" aria-labelledby="register-step-heading">
         <RoleCard
+          variant="accent"
           icon={<Search aria-hidden="true" />}
           title="I need help"
           description="Find people to help with computers, phones, chores, tutoring and other."
@@ -44,6 +47,7 @@ function RegisterRole() {
           onClick={() => pick('CUSTOMER')}
         />
         <RoleCard
+          variant="primary"
           icon={<Heart aria-hidden="true" />}
           title="I can help"
           description="Offer services, set your own hours, and get paid for helping others."
@@ -61,6 +65,7 @@ function RegisterRole() {
 }
 
 interface RoleCardProps {
+  variant: CardVariant
   icon: ReactNode
   title: string
   description: string
@@ -69,8 +74,29 @@ interface RoleCardProps {
   onClick: () => void
 }
 
+const VARIANT_STYLES: Record<CardVariant, {
+  selected: string
+  unselected: string
+  ring: string
+  iconBg: string
+}> = {
+  primary: {
+    selected: 'border-primary bg-mint',
+    unselected: 'border-border bg-surface hover:border-primary/40 hover:bg-mint/30',
+    ring: 'focus-visible:ring-primary',
+    iconBg: 'bg-primary/10 text-primary',
+  },
+  accent: {
+    selected: 'border-accent bg-blush',
+    unselected: 'border-border bg-surface hover:border-accent/40 hover:bg-blush/30',
+    ring: 'focus-visible:ring-accent',
+    iconBg: 'bg-accent/10 text-accent',
+  },
+}
+
 // eslint-disable-next-line react-refresh/only-export-components
-function RoleCard({ icon, title, description, selected, loading, onClick }: RoleCardProps) {
+function RoleCard({ variant, icon, title, description, selected, loading, onClick }: RoleCardProps) {
+  const v = VARIANT_STYLES[variant]
   return (
     <button
       type="button"
@@ -80,14 +106,13 @@ function RoleCard({ icon, title, description, selected, loading, onClick }: Role
       disabled={loading}
       className={
         'flex flex-col items-start gap-3 rounded-2xl border-2 p-6 text-left transition-colors duration-150 cursor-pointer ' +
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ' +
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ' +
+        v.ring + ' ' +
         'disabled:opacity-50 disabled:cursor-wait ' +
-        (selected
-          ? 'border-primary bg-mint'
-          : 'border-border bg-surface hover:border-primary/40 hover:bg-mint/30')
+        (selected ? v.selected : v.unselected)
       }
     >
-      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary [&_svg]:size-5">
+      <span className={'inline-flex h-10 w-10 items-center justify-center rounded-full [&_svg]:size-5 ' + v.iconBg}>
         {icon}
       </span>
       <span className="font-bold text-body text-foreground">{title}</span>
