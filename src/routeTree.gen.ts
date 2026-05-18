@@ -13,6 +13,7 @@ import { Route as StyleguideRouteImport } from './routes/styleguide'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteRouteImport } from './routes/register/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RegisterIndexRouteImport } from './routes/register/index'
 
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
@@ -34,37 +35,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterIndexRoute = RegisterIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RegisterRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/register': typeof RegisterRouteRoute
+  '/register': typeof RegisterRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/styleguide': typeof StyleguideRoute
+  '/register/': typeof RegisterIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/register': typeof RegisterRouteRoute
   '/login': typeof LoginRoute
   '/styleguide': typeof StyleguideRoute
+  '/register': typeof RegisterIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/register': typeof RegisterRouteRoute
+  '/register': typeof RegisterRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/styleguide': typeof StyleguideRoute
+  '/register/': typeof RegisterIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/register' | '/login' | '/styleguide'
+  fullPaths: '/' | '/register' | '/login' | '/styleguide' | '/register/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/register' | '/login' | '/styleguide'
-  id: '__root__' | '/' | '/register' | '/login' | '/styleguide'
+  to: '/' | '/login' | '/styleguide' | '/register'
+  id: '__root__' | '/' | '/register' | '/login' | '/styleguide' | '/register/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  RegisterRouteRoute: typeof RegisterRouteRoute
+  RegisterRouteRoute: typeof RegisterRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   StyleguideRoute: typeof StyleguideRoute
 }
@@ -99,12 +107,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register/': {
+      id: '/register/'
+      path: '/'
+      fullPath: '/register/'
+      preLoaderRoute: typeof RegisterIndexRouteImport
+      parentRoute: typeof RegisterRouteRoute
+    }
   }
 }
 
+interface RegisterRouteRouteChildren {
+  RegisterIndexRoute: typeof RegisterIndexRoute
+}
+
+const RegisterRouteRouteChildren: RegisterRouteRouteChildren = {
+  RegisterIndexRoute: RegisterIndexRoute,
+}
+
+const RegisterRouteRouteWithChildren = RegisterRouteRoute._addFileChildren(
+  RegisterRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  RegisterRouteRoute: RegisterRouteRoute,
+  RegisterRouteRoute: RegisterRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   StyleguideRoute: StyleguideRoute,
 }
