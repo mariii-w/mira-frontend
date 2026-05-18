@@ -22,7 +22,7 @@ export function Navbar() {
   const isProvider = user?.userType === 'PROVIDER'
 
   function handleGoogleLogin() {
-    window.location.href = 'http://127.0.0.1:8080/oauth2/authorization/google'
+    window.location.href = 'http://localhost:8080/auth/login/google'
   }
 
   return (
@@ -39,7 +39,7 @@ export function Navbar() {
         {/* Nav links */}
         <ul className="flex items-center gap-6 list-none m-0 p-0">
           {NAV_LINKS.map(({ label, to }) => (
-            <li key={to}>
+            <li key={label}>
               <Link
                 to={to}
                 className="text-cream/80 text-small font-medium no-underline hover:text-cream transition-colors duration-150"

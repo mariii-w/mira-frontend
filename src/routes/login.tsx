@@ -1,4 +1,3 @@
-
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { exchangeRefreshForAccess, useAuthStore } from '../stores/auth'
