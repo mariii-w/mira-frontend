@@ -27,6 +27,7 @@ import { Badge } from '../components/Badge.tsx';
 import { Breadcrumb } from '../components/BreadCrumb.tsx';
 import { FilterBar } from '../components/FilterBar.tsx';
 import { ServiceCard } from '../components/ServiceCard.tsx';
+import { ServiceProviderToggle } from '../components/ServiceProviderToggle.tsx';
 
 
 
@@ -64,13 +65,13 @@ const TEXT_VARIANTS: { variant: ButtonVariant; label: string }[] = [
 
 const SIZES: ButtonSize[] = ['sm', 'md', 'lg']
 
-
-
 export const Route = createFileRoute('/styleguide')({ component: Styleguide })
 
 function Styleguide() {
+  const [checked, setChecked] = useState(false);
+  
   return (
-    <div className="p-6 space-y-12 bg-background min-h-dvh">
+    <div className="p-6 space-y-12 bg-white min-h-dvh">
       <section>
         <Logo variant="primary" height={56} title="Mira home" />
       </section>
@@ -366,6 +367,19 @@ function Styleguide() {
             hourRate={20} 
             distance={10}
             />
+      </div>
+    </section>
+
+      <h2>Service Provider Toggle</h2>
+    <section>
+      <div className='w-96 bg-charcoal p-6 rounded-lg'>
+        <ServiceProviderToggle
+            id="service-toggle"
+            labelLeft="Service"
+            labelRight="Provider" 
+            checked={checked} 
+            onCheckedChange={setChecked}
+        />
       </div>
     </section>
 
