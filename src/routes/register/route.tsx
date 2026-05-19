@@ -20,13 +20,25 @@ type StepStatus = 'done' | 'current' | 'upcoming'
 function getStepStatus(idx: number, user: User | null, pathname: string): StepStatus {
   if (STEPS[idx].path === pathname) return 'current'
   if (!user) return 'upcoming'
-  const completed =
+
+  const completedByData =
     (idx === 0 && !!user.userType) ||
     (idx === 1 && !!user.firstName && !!user.lastName && !!user.username) ||
     (idx === 2 && !!user.privateAddress) ||
     (idx === 3 && (!!user.bio || !!user.selfSummary)) ||
     (idx === 4 && !!user.profileMedia)
-  return completed ? 'done' : 'upcoming'
+
+  if (completedByData) return 'done'
+
+  // Optional steps also count as "done" once the user has moved past them.
+  const step = STEPS[idx]
+  if (step.optional) {
+    if (pathname === '/register/done') return 'done'
+    const currentIdx = STEPS.findIndex((s) => s.path === pathname)
+    if (currentIdx > idx) return 'done'
+  }
+
+  return 'upcoming'
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
