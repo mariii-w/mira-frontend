@@ -24,7 +24,7 @@ function getStepStatus(idx: number, user: User | null, pathname: string): StepSt
     (idx === 0 && !!user.userType) ||
     (idx === 1 && !!user.firstName && !!user.lastName && !!user.username) ||
     (idx === 2 && !!user.privateAddress) ||
-    (idx === 3 && !!user.bio) ||
+    (idx === 3 && (!!user.bio || !!user.selfSummary)) ||
     (idx === 4 && !!user.profileMedia)
   return completed ? 'done' : 'upcoming'
 }
