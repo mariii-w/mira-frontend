@@ -17,6 +17,7 @@ import { Route as RegisterIndexRouteImport } from './routes/register/index'
 import { Route as RegisterRoleRouteImport } from './routes/register/role'
 import { Route as RegisterPhotoRouteImport } from './routes/register/photo'
 import { Route as RegisterNameRouteImport } from './routes/register/name'
+import { Route as RegisterDoneRouteImport } from './routes/register/done'
 import { Route as RegisterAddressRouteImport } from './routes/register/address'
 import { Route as RegisterAboutRouteImport } from './routes/register/about'
 
@@ -60,6 +61,11 @@ const RegisterNameRoute = RegisterNameRouteImport.update({
   path: '/name',
   getParentRoute: () => RegisterRouteRoute,
 } as any)
+const RegisterDoneRoute = RegisterDoneRouteImport.update({
+  id: '/done',
+  path: '/done',
+  getParentRoute: () => RegisterRouteRoute,
+} as any)
 const RegisterAddressRoute = RegisterAddressRouteImport.update({
   id: '/address',
   path: '/address',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/styleguide': typeof StyleguideRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
+  '/register/done': typeof RegisterDoneRoute
   '/register/name': typeof RegisterNameRoute
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/styleguide': typeof StyleguideRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
+  '/register/done': typeof RegisterDoneRoute
   '/register/name': typeof RegisterNameRoute
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/styleguide': typeof StyleguideRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
+  '/register/done': typeof RegisterDoneRoute
   '/register/name': typeof RegisterNameRoute
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/styleguide'
     | '/register/about'
     | '/register/address'
+    | '/register/done'
     | '/register/name'
     | '/register/photo'
     | '/register/role'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/styleguide'
     | '/register/about'
     | '/register/address'
+    | '/register/done'
     | '/register/name'
     | '/register/photo'
     | '/register/role'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/styleguide'
     | '/register/about'
     | '/register/address'
+    | '/register/done'
     | '/register/name'
     | '/register/photo'
     | '/register/role'
@@ -210,6 +222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterNameRouteImport
       parentRoute: typeof RegisterRouteRoute
     }
+    '/register/done': {
+      id: '/register/done'
+      path: '/done'
+      fullPath: '/register/done'
+      preLoaderRoute: typeof RegisterDoneRouteImport
+      parentRoute: typeof RegisterRouteRoute
+    }
     '/register/address': {
       id: '/register/address'
       path: '/address'
@@ -230,6 +249,7 @@ declare module '@tanstack/react-router' {
 interface RegisterRouteRouteChildren {
   RegisterAboutRoute: typeof RegisterAboutRoute
   RegisterAddressRoute: typeof RegisterAddressRoute
+  RegisterDoneRoute: typeof RegisterDoneRoute
   RegisterNameRoute: typeof RegisterNameRoute
   RegisterPhotoRoute: typeof RegisterPhotoRoute
   RegisterRoleRoute: typeof RegisterRoleRoute
@@ -239,6 +259,7 @@ interface RegisterRouteRouteChildren {
 const RegisterRouteRouteChildren: RegisterRouteRouteChildren = {
   RegisterAboutRoute: RegisterAboutRoute,
   RegisterAddressRoute: RegisterAddressRoute,
+  RegisterDoneRoute: RegisterDoneRoute,
   RegisterNameRoute: RegisterNameRoute,
   RegisterPhotoRoute: RegisterPhotoRoute,
   RegisterRoleRoute: RegisterRoleRoute,
