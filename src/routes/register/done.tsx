@@ -14,6 +14,9 @@ function RegisterDone() {
   const user = useAuthStore((s) => s.user)
   const firstName = user?.firstName ?? 'there'
 
+    console.log('profileMedia:', user?.profileMedia)
+  console.log('photo url:', user?.profileMedia?.url)
+
   return (
     <section className="flex flex-col items-center justify-center gap-6 py-12 text-center" aria-labelledby="register-step-heading">
       {user?.profileMedia?.url ? (
@@ -23,12 +26,11 @@ function RegisterDone() {
           className="h-[120px] w-[120px] rounded-full object-cover border-2 border-border"
         />
       ) : (
-        <AvatarIcon
-          firstName={user?.firstName ?? ''}
-          lastName={user?.lastName ?? ''}
-          picture=""
-          size={120}
-        />
+      <AvatarIcon
+        firstName={user?.firstName ?? ''}
+        lastName={user?.lastName ?? ''}
+        size={120}
+      />
       )}
 
       <div className="flex flex-col gap-2 max-w-md">

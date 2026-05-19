@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 interface AvatarIconProps {
   firstName?: string
   lastName?: string
@@ -26,12 +28,15 @@ export function AvatarIcon({
   picture,
   size = 40,
 }: AvatarIconProps) {
-  if (picture) {
+  const [imgFailed, setImgFailed] = useState(false)
+
+  if (picture && !imgFailed) {
     return (
       <img
         src={picture}
         style={{ width: size, height: size }}
         className="rounded-full object-cover block shrink-0"
+        onError={() => setImgFailed(true)}
       />
     )
   }
@@ -48,7 +53,7 @@ export function AvatarIcon({
         width: size,
         height: size,
         fontSize: Math.round(size * 0.36),
-        lineHeight: 1,        // fixes vertical centering
+        lineHeight: 1,
       }}
       className={`${bgColor} text-cream rounded-full flex items-center justify-center font-semibold tracking-wide select-none shrink-0`}
     >

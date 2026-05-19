@@ -84,7 +84,6 @@ function RegisterPhoto() {
           <AvatarIcon
             firstName={user?.firstName ?? ''}
             lastName={user?.lastName ?? ''}
-            picture=""
             size={100}
           />
         )}
