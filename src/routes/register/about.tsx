@@ -51,7 +51,11 @@ function RegisterAbout() {
     setServerError(null)
 
     const payload: PatchUserPayload = {}
-    if (bio.trim()) payload.bio = bio.trim()
+    // TEMP: bio sending disabled while LISA is unavailable.
+    // Backend automatically calls LISA to generate a simplifiedBio whenever bio
+    // changes, and throws 503 if LISA is down. Restore the line below once bio simplification is
+    // non-blocking (or LISA token is stable).
+    // if (bio.trim()) payload.bio = bio.trim()
     if (isProvider && tagline.trim()) payload.selfSummary = tagline.trim()
 
     try {
