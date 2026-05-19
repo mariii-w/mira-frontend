@@ -52,16 +52,24 @@ export async function patchUser(payload: PatchUserPayload): Promise<void> {
         message: 'That username is already taken. Try another one.',
       } satisfies RegisterPatchError
     }
+    const body = await res.json().catch(() => null)
     if (res.status === 400) {
-      const body = await res.json().catch(() => null)
       throw {
         field: 'server',
         message: body?.detail ?? 'Some fields are invalid. Please check your input.',
       } satisfies RegisterPatchError
     }
+    if (res.status === 503) {
+      throw {
+        field: 'server',
+        message: body?.detail
+          ? `${body.detail}. Try again in a moment, or clear the bio field and continue.`
+          : 'A backend service is temporarily unavailable. Try again later.',
+      } satisfies RegisterPatchError
+    }
     throw {
       field: 'server',
-      message: `Unexpected error (${res.status}). Please try again.`,
+      message: body?.detail ?? `Unexpected error (${res.status}). Please try again.`,
     } satisfies RegisterPatchError
   }
 
@@ -91,12 +99,15 @@ export async function uploadProfilePhoto(file: File): Promise<void> {
       throw { field: 'file', message: detail ?? 'Image is too large. Max 5 MB.' } satisfies UploadPhotoError
     }
     if (res.status === 415) {
-      throw { field: 'file', message: detail ?? 'Unsupported image format. Use JPEG or PNG.' } satisfies UploadPhotoError
+      throw { field: 'file', message: detail ?? 'Unsupported image format. Use JPG or PNG.' } satisfies UploadPhotoError
     }
     if (res.status === 422) {
       throw { field: 'file', message: detail ?? 'Image dimensions are too small. Min 200×200 pixels.' } satisfies UploadPhotoError
     }
-    throw { field: 'server', message: detail ?? `Upload failed (${res.status}).` } satisfies UploadPhotoError
+    throw {
+      field: 'server',
+      message: detail ?? `Upload failed (${res.status}). Please try again.`,
+    } satisfies UploadPhotoError
   }
 
   const refresh = await authFetch(`/v1/users/${user.userId}`)
