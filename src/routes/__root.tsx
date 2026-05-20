@@ -34,9 +34,9 @@ function RootComponent() {
 
     if (user.registrationComplete) {
       // TEMP (testing): registered users may revisit registration steps.
-      // if (isRegistrationStep(location.pathname)) {
-      //   navigate({ to: '/' })
-      // }
+      if (isRegistrationStep(location.pathname)) {
+      navigate({ to: '/' })
+      }
       return
     }
 
