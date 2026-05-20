@@ -9,9 +9,10 @@ interface UserMenuProps {
   firstName: string
   lastName: string
   isProvider?: boolean
+  pictureUrl?: string
 }
 
-export function UserMenu({ firstName, lastName, isProvider }: UserMenuProps) {
+export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMenuProps) {
   const navigate = useNavigate()
   const displayName = lastName ? `${firstName} ${lastName[0]}.` : firstName
 
@@ -25,7 +26,7 @@ export function UserMenu({ firstName, lastName, isProvider }: UserMenuProps) {
       <Popover.Trigger asChild>
         <Button
           variant="userBadge"
-          leadingIcon={<AvatarIcon firstName={firstName} lastName={lastName} size={32} />}
+          leadingIcon={<AvatarIcon firstName={firstName} lastName={lastName} picture={pictureUrl} size={32} />}
           trailingIcon={<ChevronDown size={16} />}
         >
           {displayName}

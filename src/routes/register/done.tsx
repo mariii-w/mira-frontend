@@ -26,11 +26,12 @@ function RegisterDone() {
           className="h-[120px] w-[120px] rounded-full object-cover border-2 border-border"
         />
       ) : (
-      <AvatarIcon
-        firstName={user?.firstName ?? ''}
-        lastName={user?.lastName ?? ''}
-        size={120}
-      />
+        <AvatarIcon
+          firstName={user?.firstName ?? ''}
+          lastName={user?.lastName ?? ''}
+          picture={user?.profileMedia?.url ?? undefined}
+          size={120}
+        />
       )}
 
       <div className="flex flex-col gap-2 max-w-md">

@@ -20,6 +20,8 @@ export function Navbar() {
   const firstName = user?.firstName ?? ''
   const lastName = user?.lastName ?? ''
   const isProvider = user?.userType === 'PROVIDER'
+  const pictureUrl = user?.profileMedia?.url ?? undefined
+
 
   function handleGoogleLogin() {
     window.location.href = 'http://localhost:8080/auth/login/google'
@@ -71,6 +73,7 @@ export function Navbar() {
               firstName={firstName}
               lastName={lastName}
               isProvider={isProvider}
+              pictureUrl={pictureUrl}
             />
           ) : (
           <Button variant="primary" size="md" onClick={handleGoogleLogin}>
