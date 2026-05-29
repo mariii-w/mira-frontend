@@ -21,10 +21,13 @@ import { ProviderCard } from '../components/ProviderCard';
 import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
 import { AvatarIcon } from '../components/AvatarIcon.tsx';
-import { UserBadge } from '../components/UserBadge.tsx';
+import { UserMenu } from '../components/UserMenu.tsx';
 import { SearchBar } from '../components/SearchBar.tsx';
 import { Badge } from '../components/Badge.tsx';
 import { Breadcrumb } from '../components/BreadCrumb.tsx';
+import { FilterBar } from '../components/FilterBar.tsx';
+import { ServiceCard } from '../components/ServiceCard.tsx';
+import { ServiceProviderToggle } from '../components/ServiceProviderToggle.tsx';
 
 
 
@@ -62,14 +65,13 @@ const TEXT_VARIANTS: { variant: ButtonVariant; label: string }[] = [
 
 const SIZES: ButtonSize[] = ['sm', 'md', 'lg']
 
-
-
 export const Route = createFileRoute('/styleguide')({ component: Styleguide })
 
 function Styleguide() {
-  const [page, setPage] = useState(5);
+  const [checked, setChecked] = useState(false);
+  
   return (
-    <div className="p-6 space-y-12 bg-background min-h-dvh">
+    <div className="p-6 space-y-12 bg-white min-h-dvh">
       <section>
         <Logo variant="primary" height={56} title="Mira home" />
       </section>
@@ -186,19 +188,34 @@ function Styleguide() {
       <section className="flex flex-col gap-3">
         <h2>Input</h2>
         <div className="flex flex-col gap-4 p-6 bg-surface border border-border rounded-lg max-w-sm">
+
           <div className="flex flex-col gap-1.5">
             <Label>Benutzername</Label>
-            <Input placeholder="Geben Sie Ihren Benutzernamen ein" />
+            <ValidatedInput
+              placeholder="Geben Sie Ihren Benutzernamen ein"
+              validate={(v) => !v ? 'Erforderlich.' : v.length < 3 ? 'Min. 3 Zeichen.' : !/^[a-z0-9_]+$/.test(v) ? 'Nur a–z, 0–9, _.' : null}
+            />
           </div>
+
           <div className="flex flex-col gap-1.5">
             <Label required>Titel</Label>
-            <Input placeholder="z.B. PC Support & Laptop Hilfe" />
+            <ValidatedInput
+              placeholder="z.B. PC Support & Laptop Hilfe"
+              validate={(v) => !v ? 'Erforderlich.' : v.length < 3 ? 'Min. 3 Zeichen.' : v.length > 120 ? 'Max. 120 Zeichen.' : null}
+            />
           </div>
+
           <div className="flex flex-col gap-1.5">
             <Label>Passwort</Label>
             <Input type="password" placeholder="Geben Sie Ihr Passwort ein" />
           </div>
+
           <Input placeholder="Disabled" disabled />
+
+          <div className="flex flex-col gap-1.5">
+            <Label required>Benutzername (Fehler)</Label>
+            <Input value="Anna!" readOnly error="Nur Kleinbuchstaben, Ziffern und Unterstriche." />
+          </div>
         </div>
       </section>
 
@@ -274,20 +291,22 @@ function Styleguide() {
         </div>
       </section>
 
-    <section className="flex flex-col gap-3">
-      <h2>Pagination</h2>
-      <div className="p-6 bg-surface border border-border rounded-lg">
-        <Pagination page={page} totalPages={12} onPageChange={setPage} />
-      </div>
-    </section>
+      <section className="flex flex-col gap-3">
+        <h2>Pagination</h2>
+        <div className="flex flex-col gap-4 p-6 bg-surface border border-border rounded-lg">
+          <Pagination onPrevious={() => {}} onNext={() => {}} />
+          <Pagination onPrevious={() => {}} onNext={() => {}} disablePrevious />
+          <Pagination onPrevious={() => {}} onNext={() => {}} disableNext />
+        </div>
+      </section>
 
     <section className="flex flex-col gap-3">
       <h2>Account Icon</h2>
       
       <div className="p-6 bg-surface border border-border rounded-lg">
         <AvatarIcon size={40} firstName='Lena' lastName='Kross'></AvatarIcon>
-        <UserBadge firstName='Lena' lastName='Kross'/>
-        <UserBadge firstName='Klaus' lastName='Merger' isProvider={true}/>
+        <UserMenu firstName='Lena' lastName='Kross'/>
+        <UserMenu firstName='Klaus' lastName='Merger' isProvider={true}/>
       </div>
     </section>
 
@@ -317,6 +336,53 @@ function Styleguide() {
       </div>
     </section>
 
+    <section className="flex flex-col gap-3">
+      <h2>Filter Leiste</h2>
+      <div className='w-96'>
+        <FilterBar tagList={[
+          {name:"PC & Laptop", checked: false},
+          {name:"Phone & Tablet", checked: false},
+          {name:"Smart Home", checked: false},
+          {name:"Printers", checked: false},
+          {name:"Software Help", checked: false},
+          {name:"Email & Web", checked: false},
+          {name:"Linux", checked: false},
+        ]}/>
+      </div>
+    </section>
+
+    <section className="flex flex-col gap-3">
+      <h2>Service Card</h2>
+      <div className='w-5xl'>
+        <ServiceCard
+            link='#'
+            pictureLink='./pic/ServiceExample1.png' 
+            location={'München'} 
+            providerFirstName={'Patrick'} 
+            providerLastName={'Stock'} 
+            varified={true} 
+            label={'Laptop & Wi-Fi setup'} 
+            description={'I help with Windows, macOS, printers, Wi-Fi, smart TVs and phone-to-laptop setups. Friendly with first-time users and seniors.'} 
+            badges={[{text: 'Wi-Fi'}, {text: 'Windows'}, {text: 'Printers'}, {text: 'Barrierefrei', variant: 'accent'}]} 
+            hourRate={20} 
+            distance={10}
+            />
+      </div>
+    </section>
+
+      <h2>Service Provider Toggle</h2>
+    <section>
+      <div className='w-96 bg-charcoal p-6 rounded-lg'>
+        <ServiceProviderToggle
+            id="service-toggle"
+            labelLeft="Service"
+            labelRight="Provider" 
+            checked={checked} 
+            onCheckedChange={setChecked}
+        />
+      </div>
+    </section>
+
     </div>
   )
 }
@@ -327,6 +393,26 @@ function ShowcaseRow({ label, children }: { label: string; children: React.React
       <span className="text-small text-muted font-medium">{label}</span>
       <div className="flex gap-3 items-center flex-wrap">{children}</div>
     </>
+  )
+}
+
+function ValidatedInput({
+  validate,
+  placeholder,
+}: {
+  validate: (v: string) => string | null
+  placeholder: string
+}) {
+  const [v, setV] = useState('')
+  const [touched, setTouched] = useState(false)
+  return (
+    <Input
+      value={v}
+      onChange={(e) => setV(e.target.value)}
+      onBlur={() => setTouched(true)}
+      error={touched ? validate(v) : null}
+      placeholder={placeholder}
+    />
   )
 }
 

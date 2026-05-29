@@ -1,20 +1,32 @@
 // src/components/Navbar.tsx
 //
-// Logged-out navbar
-// Logged-in variant to be added once components are done
+// Logged-out navbar variant
+// Logged-in variant 
 
 import { Link } from '@tanstack/react-router'
 import { Logo } from './Logo'
 import { Button } from './Button'
 import { AccessibilityPanel } from './AccessibilityPanel'
+import { UserMenu } from './UserMenu'
+import { useAuthStore } from '../stores/auth'
 
-//Actual route names will be added later
 const NAV_LINKS = [
   { label: 'Browse Services', to: '/' },
   { label: 'Find providers',  to: '/' },
 ] as const
 
 export function Navbar() {
+  const user = useAuthStore((s) => s.user)
+  const firstName = user?.firstName ?? ''
+  const lastName = user?.lastName ?? ''
+  const isProvider = user?.userType === 'PROVIDER'
+  const pictureUrl = user?.profileMedia?.url ?? undefined
+
+
+  function handleGoogleLogin() {
+    window.location.href = 'http://localhost:8080/auth/login/google'
+  }
+
   return (
     <header className="sticky top-0 z-40 w-full bg-charcoal">
       <nav
@@ -29,7 +41,7 @@ export function Navbar() {
         {/* Nav links */}
         <ul className="flex items-center gap-6 list-none m-0 p-0">
           {NAV_LINKS.map(({ label, to }) => (
-            <li key={to}>
+            <li key={label}>
               <Link
                 to={to}
                 className="text-cream/80 text-small font-medium no-underline hover:text-cream transition-colors duration-150"
@@ -56,12 +68,18 @@ export function Navbar() {
           {/* Divider */}
           <div className="h-6 w-px bg-cream/20" aria-hidden="true" />
 
-          <Button variant="secondary" size="md" className="border-cream/30 text-cream hover:bg-cream/10">
+          {user ? (
+            <UserMenu
+              firstName={firstName}
+              lastName={lastName}
+              isProvider={isProvider}
+              pictureUrl={pictureUrl}
+            />
+          ) : (
+          <Button variant="primary" size="md" onClick={handleGoogleLogin}>
             Login
           </Button>
-          <Button variant="primary" size="md">
-            Register
-          </Button>
+        )}
         </div>
       </nav>
     </header>

@@ -10,11 +10,30 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StyleguideRouteImport } from './routes/styleguide'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RegisterRouteRouteImport } from './routes/register/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RegisterIndexRouteImport } from './routes/register/index'
+import { Route as RegisterRoleRouteImport } from './routes/register/role'
+import { Route as RegisterPhotoRouteImport } from './routes/register/photo'
+import { Route as RegisterNameRouteImport } from './routes/register/name'
+import { Route as RegisterDoneRouteImport } from './routes/register/done'
+import { Route as RegisterAddressRouteImport } from './routes/register/address'
+import { Route as RegisterAboutRouteImport } from './routes/register/about'
 
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
   path: '/styleguide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRouteRoute = RegisterRouteRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,30 +41,126 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterIndexRoute = RegisterIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RegisterRouteRoute,
+} as any)
+const RegisterRoleRoute = RegisterRoleRouteImport.update({
+  id: '/role',
+  path: '/role',
+  getParentRoute: () => RegisterRouteRoute,
+} as any)
+const RegisterPhotoRoute = RegisterPhotoRouteImport.update({
+  id: '/photo',
+  path: '/photo',
+  getParentRoute: () => RegisterRouteRoute,
+} as any)
+const RegisterNameRoute = RegisterNameRouteImport.update({
+  id: '/name',
+  path: '/name',
+  getParentRoute: () => RegisterRouteRoute,
+} as any)
+const RegisterDoneRoute = RegisterDoneRouteImport.update({
+  id: '/done',
+  path: '/done',
+  getParentRoute: () => RegisterRouteRoute,
+} as any)
+const RegisterAddressRoute = RegisterAddressRouteImport.update({
+  id: '/address',
+  path: '/address',
+  getParentRoute: () => RegisterRouteRoute,
+} as any)
+const RegisterAboutRoute = RegisterAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => RegisterRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/register': typeof RegisterRouteRouteWithChildren
+  '/login': typeof LoginRoute
   '/styleguide': typeof StyleguideRoute
+  '/register/about': typeof RegisterAboutRoute
+  '/register/address': typeof RegisterAddressRoute
+  '/register/done': typeof RegisterDoneRoute
+  '/register/name': typeof RegisterNameRoute
+  '/register/photo': typeof RegisterPhotoRoute
+  '/register/role': typeof RegisterRoleRoute
+  '/register/': typeof RegisterIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/styleguide': typeof StyleguideRoute
+  '/register/about': typeof RegisterAboutRoute
+  '/register/address': typeof RegisterAddressRoute
+  '/register/done': typeof RegisterDoneRoute
+  '/register/name': typeof RegisterNameRoute
+  '/register/photo': typeof RegisterPhotoRoute
+  '/register/role': typeof RegisterRoleRoute
+  '/register': typeof RegisterIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/register': typeof RegisterRouteRouteWithChildren
+  '/login': typeof LoginRoute
   '/styleguide': typeof StyleguideRoute
+  '/register/about': typeof RegisterAboutRoute
+  '/register/address': typeof RegisterAddressRoute
+  '/register/done': typeof RegisterDoneRoute
+  '/register/name': typeof RegisterNameRoute
+  '/register/photo': typeof RegisterPhotoRoute
+  '/register/role': typeof RegisterRoleRoute
+  '/register/': typeof RegisterIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/styleguide'
+  fullPaths:
+    | '/'
+    | '/register'
+    | '/login'
+    | '/styleguide'
+    | '/register/about'
+    | '/register/address'
+    | '/register/done'
+    | '/register/name'
+    | '/register/photo'
+    | '/register/role'
+    | '/register/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/styleguide'
-  id: '__root__' | '/' | '/styleguide'
+  to:
+    | '/'
+    | '/login'
+    | '/styleguide'
+    | '/register/about'
+    | '/register/address'
+    | '/register/done'
+    | '/register/name'
+    | '/register/photo'
+    | '/register/role'
+    | '/register'
+  id:
+    | '__root__'
+    | '/'
+    | '/register'
+    | '/login'
+    | '/styleguide'
+    | '/register/about'
+    | '/register/address'
+    | '/register/done'
+    | '/register/name'
+    | '/register/photo'
+    | '/register/role'
+    | '/register/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RegisterRouteRoute: typeof RegisterRouteRouteWithChildren
+  LoginRoute: typeof LoginRoute
   StyleguideRoute: typeof StyleguideRoute
 }
 
@@ -58,6 +173,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StyleguideRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -65,11 +194,86 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register/': {
+      id: '/register/'
+      path: '/'
+      fullPath: '/register/'
+      preLoaderRoute: typeof RegisterIndexRouteImport
+      parentRoute: typeof RegisterRouteRoute
+    }
+    '/register/role': {
+      id: '/register/role'
+      path: '/role'
+      fullPath: '/register/role'
+      preLoaderRoute: typeof RegisterRoleRouteImport
+      parentRoute: typeof RegisterRouteRoute
+    }
+    '/register/photo': {
+      id: '/register/photo'
+      path: '/photo'
+      fullPath: '/register/photo'
+      preLoaderRoute: typeof RegisterPhotoRouteImport
+      parentRoute: typeof RegisterRouteRoute
+    }
+    '/register/name': {
+      id: '/register/name'
+      path: '/name'
+      fullPath: '/register/name'
+      preLoaderRoute: typeof RegisterNameRouteImport
+      parentRoute: typeof RegisterRouteRoute
+    }
+    '/register/done': {
+      id: '/register/done'
+      path: '/done'
+      fullPath: '/register/done'
+      preLoaderRoute: typeof RegisterDoneRouteImport
+      parentRoute: typeof RegisterRouteRoute
+    }
+    '/register/address': {
+      id: '/register/address'
+      path: '/address'
+      fullPath: '/register/address'
+      preLoaderRoute: typeof RegisterAddressRouteImport
+      parentRoute: typeof RegisterRouteRoute
+    }
+    '/register/about': {
+      id: '/register/about'
+      path: '/about'
+      fullPath: '/register/about'
+      preLoaderRoute: typeof RegisterAboutRouteImport
+      parentRoute: typeof RegisterRouteRoute
+    }
   }
 }
 
+interface RegisterRouteRouteChildren {
+  RegisterAboutRoute: typeof RegisterAboutRoute
+  RegisterAddressRoute: typeof RegisterAddressRoute
+  RegisterDoneRoute: typeof RegisterDoneRoute
+  RegisterNameRoute: typeof RegisterNameRoute
+  RegisterPhotoRoute: typeof RegisterPhotoRoute
+  RegisterRoleRoute: typeof RegisterRoleRoute
+  RegisterIndexRoute: typeof RegisterIndexRoute
+}
+
+const RegisterRouteRouteChildren: RegisterRouteRouteChildren = {
+  RegisterAboutRoute: RegisterAboutRoute,
+  RegisterAddressRoute: RegisterAddressRoute,
+  RegisterDoneRoute: RegisterDoneRoute,
+  RegisterNameRoute: RegisterNameRoute,
+  RegisterPhotoRoute: RegisterPhotoRoute,
+  RegisterRoleRoute: RegisterRoleRoute,
+  RegisterIndexRoute: RegisterIndexRoute,
+}
+
+const RegisterRouteRouteWithChildren = RegisterRouteRoute._addFileChildren(
+  RegisterRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RegisterRouteRoute: RegisterRouteRouteWithChildren,
+  LoginRoute: LoginRoute,
   StyleguideRoute: StyleguideRoute,
 }
 export const routeTree = rootRouteImport

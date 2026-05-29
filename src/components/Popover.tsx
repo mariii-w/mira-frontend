@@ -97,8 +97,8 @@ export function Content({
       : align === 'end' ? t.right - c.width
       : t.left + t.width / 2 - c.width / 2
     setPos({
-      top: t.bottom + sideOffset + window.scrollY,
-      left: left + window.scrollX,
+      top: t.bottom + sideOffset,
+      left,
     })
   }, [open, align, sideOffset, triggerRef])
 
@@ -150,7 +150,7 @@ export function Content({
       id={contentId}
       role="dialog"
       data-state="open"
-      style={{ position: 'absolute', top: pos.top, left: pos.left }}
+      style={{ position: 'fixed', top: pos.top, left: pos.left }}
       className={className}
     >
       {children}
