@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { ChevronDown, Check, X } from 'lucide-react'
 
 export interface SelectOption {
@@ -25,18 +25,6 @@ export function MultiSelect({
   loading = false,
   'aria-label': ariaLabel,
 }: MultiSelectProps) {
-  const [open, setOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    function onMouseDown(e: MouseEvent) {
-      if (!containerRef.current?.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', onMouseDown)
-    return () => document.removeEventListener('mousedown', onMouseDown)
-  }, [open])
-
   function toggle(id: string) {
     onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id])
   }
@@ -72,56 +60,48 @@ export function MultiSelect({
         </div>
       )}
 
-      {/* Trigger + dropdown */}
-      <div ref={containerRef} className="relative max-w-xs">
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          aria-haspopup="listbox"
-          className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background text-small text-foreground hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span className="text-muted">{loading ? 'Loading…' : placeholder}</span>
-          <ChevronDown
-            size={16}
-            aria-hidden="true"
-            className={['text-muted shrink-0 transition-transform', open ? 'rotate-180' : ''].join(' ')}
-          />
-        </button>
-
-        {open && (
-          <ul
-            role="listbox"
-            aria-multiselectable="true"
+      {/* Listbox */}
+      <Listbox value={value} onChange={onChange} multiple>
+        <div className="relative max-w-xs">
+          <ListboxButton
+            disabled={loading}
             aria-label={ariaLabel}
-            className="absolute z-10 mt-1 w-full max-h-56 overflow-y-auto rounded-xl border border-border bg-surface shadow-lg py-1"
+            className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background text-small text-foreground hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed data-[open]:border-primary"
           >
-            {options.map((opt) => {
-              const selected = value.includes(opt.id)
-              return (
-                <li
-                  key={opt.id}
-                  role="option"
-                  aria-selected={selected}
-                  onClick={() => toggle(opt.id)}
-                  className="flex items-center justify-between px-4 py-2.5 text-small text-foreground hover:bg-primary/10 cursor-pointer transition-colors"
-                >
-                  {opt.label}
-                  <span className="flex items-center gap-2 shrink-0 ml-2">
-                    {opt.badge && (
-                      <span className="text-[10px] font-medium text-accent bg-blush px-1.5 py-0.5 rounded-full">
-                        {opt.badge}
-                      </span>
-                    )}
-                    {selected && <Check size={14} aria-hidden="true" className="text-primary" />}
-                  </span>
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </div>
+            <span className="text-muted">{loading ? 'Loading…' : placeholder}</span>
+            <ChevronDown
+              size={16}
+              aria-hidden="true"
+              className="text-muted shrink-0 transition-transform ui-open:rotate-180"
+            />
+          </ListboxButton>
+
+          <ListboxOptions
+            anchor="bottom start"
+            className="z-10 w-[var(--button-width)] max-h-56 overflow-y-auto rounded-xl border border-border bg-surface shadow-lg py-1 [--anchor-gap:4px] focus:outline-none"
+          >
+            {options.map((opt) => (
+              <ListboxOption
+                key={opt.id}
+                value={opt.id}
+                className="flex items-center justify-between px-4 py-2.5 text-small text-foreground cursor-pointer transition-colors select-none data-[focus]:bg-primary/10"
+              >
+                {opt.label}
+                <span className="flex items-center gap-2 shrink-0 ml-2">
+                  {opt.badge && (
+                    <span className="text-[10px] font-medium text-accent bg-blush px-1.5 py-0.5 rounded-full">
+                      {opt.badge}
+                    </span>
+                  )}
+                  {value.includes(opt.id) && (
+                    <Check size={14} aria-hidden="true" className="text-primary" />
+                  )}
+                </span>
+              </ListboxOption>
+            ))}
+          </ListboxOptions>
+        </div>
+      </Listbox>
     </div>
   )
 }
