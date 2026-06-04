@@ -53,8 +53,7 @@ export function MyListingsPage() {
   const activeCount = listings.filter((l) => l.publicationStatus === 'ACTIVE').length
 
   function handleCreate() {
-    // TODO: navigate to create listing page once route exists
-    navigate({ to: '/' })
+    navigate({ to: '/create-listing' })
   }
 
   function handleEdit(_listingId: string) {
