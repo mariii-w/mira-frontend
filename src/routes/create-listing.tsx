@@ -402,6 +402,8 @@ export function CreateListingPage() {
             )}
           </div>
 
+          <div className="pb-8" />
+
         </form>
       </main>
     </>
