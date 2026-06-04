@@ -42,7 +42,7 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
           <Row icon={<UserRound size={15} />} title="View Profile" to="/" />
           <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/" />
           {isProvider && (
-            <Row icon={<LayoutList size={15} />} title="Meine Anzeigen" to="/" />
+            <Row icon={<LayoutList size={15} />} title="My Services" to="/my-listings" />
           )}
           <div className="my-1 h-px bg-border/30" />
           <button
