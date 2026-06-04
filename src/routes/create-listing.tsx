@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef, type FormEvent, type ChangeEvent } from 'react'
-import { Plus, X, ChevronDown, Check } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { Label } from '../components/Label'
 import { Textarea } from '../components/Textarea'
 import { Slider } from '../components/Slider'
+import { MultiSelect } from '../components/MultiSelect'
 import { useAuthStore } from '../stores/auth'
 import { authFetch } from '../lib/queryClient'
 
@@ -88,8 +89,6 @@ export function CreateListingPage() {
 
   const [availableTags, setAvailableTags] = useState<ServiceTag[]>([])
   const [tagsLoading, setTagsLoading] = useState(true)
-  const [tagsOpen, setTagsOpen] = useState(false)
-  const tagsDropdownRef = useRef<HTMLDivElement>(null)
   const [submitting, setSubmitting] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
 
@@ -102,15 +101,6 @@ export function CreateListingPage() {
       .catch((err) => console.error('Failed to load tags:', err))
       .finally(() => setTagsLoading(false))
   }, [])
-
-  useEffect(() => {
-    if (!tagsOpen) return
-    function onMouseDown(e: MouseEvent) {
-      if (!tagsDropdownRef.current?.contains(e.target as Node)) setTagsOpen(false)
-    }
-    document.addEventListener('mousedown', onMouseDown)
-    return () => document.removeEventListener('mousedown', onMouseDown)
-  }, [tagsOpen])
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const picked = Array.from(e.target.files ?? []).slice(0, 10 - imageFiles.length)
@@ -125,12 +115,6 @@ export function CreateListingPage() {
     setImagePreviews((prev) => prev.filter((_, i) => i !== idx))
   }
 
-  function toggleTag(tagId: string) {
-    setSelectedTagIds((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
-    )
-    setTagError(null)
-  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -398,89 +382,21 @@ export function CreateListingPage() {
           {/* Tags */}
           <div className="flex flex-col gap-2">
             <Label required>Tags</Label>
-
-            {/* Selected tag chips */}
-            {selectedTagIds.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {selectedTagIds.map((id) => {
-                  const tag = availableTags.find((t) => t.tagId === id)
-                  if (!tag) return null
-                  return (
-                    <span
-                      key={id}
-                      className={[
-                        'inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-small font-medium',
-                        tag.isBarrierefrei
-                          ? 'bg-blush text-accent'
-                          : 'bg-mint text-primary',
-                      ].join(' ')}
-                    >
-                      {tag.name}
-                      <button
-                        type="button"
-                        onClick={() => toggleTag(id)}
-                        aria-label={`Remove tag ${tag.name}`}
-                        className="opacity-60 hover:opacity-100 transition-opacity"
-                      >
-                        <X size={12} aria-hidden="true" />
-                      </button>
-                    </span>
-                  )
-                })}
-              </div>
-            )}
-
-            {/* Dropdown */}
-            <div ref={tagsDropdownRef} className="relative max-w-xs">
-              <button
-                type="button"
-                disabled={tagsLoading}
-                onClick={() => setTagsOpen((o) => !o)}
-                aria-expanded={tagsOpen}
-                aria-haspopup="listbox"
-                className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background text-small text-foreground hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="text-muted">
-                  {tagsLoading ? 'Loading tags…' : 'Select tags…'}
-                </span>
-                <ChevronDown
-                  size={16}
-                  aria-hidden="true"
-                  className={['text-muted shrink-0 transition-transform', tagsOpen ? 'rotate-180' : ''].join(' ')}
-                />
-              </button>
-
-              {tagsOpen && (
-                <ul
-                  role="listbox"
-                  aria-multiselectable="true"
-                  aria-label="Service tags"
-                  className="absolute z-10 mt-1 w-full max-h-56 overflow-y-auto rounded-xl border border-border bg-surface shadow-lg py-1"
-                >
-                  {availableTags.filter((t) => t.isActive).map((tag) => {
-                    const selected = selectedTagIds.includes(tag.tagId)
-                    return (
-                      <li
-                        key={tag.tagId}
-                        role="option"
-                        aria-selected={selected}
-                        onClick={() => toggleTag(tag.tagId)}
-                        className="flex items-center justify-between px-4 py-2.5 text-small text-foreground hover:bg-primary/10 cursor-pointer transition-colors"
-                      >
-                        {tag.name}
-                        {tag.isBarrierefrei && (
-                          <span className="text-[10px] font-medium text-accent bg-blush px-1.5 py-0.5 rounded-full">
-                            barrierefrei
-                          </span>
-                        )}
-                        {selected && <Check size={14} aria-hidden="true" className="text-primary shrink-0 ml-2" />}
-                      </li>
-                    )
-                  })}
-                </ul>
-              )}
-            </div>
-
+            <MultiSelect
+              options={availableTags
+                .filter((t) => t.isActive)
+                .map((t) => ({
+                  id: t.tagId,
+                  label: t.name,
+                  badge: t.isBarrierefrei ? 'barrierefrei' : undefined,
+                  variant: t.isBarrierefrei ? 'accent' : 'default',
+                }))}
+              value={selectedTagIds}
+              onChange={(ids) => { setSelectedTagIds(ids); setTagError(null) }}
+              placeholder="Select tags…"
+              loading={tagsLoading}
+              aria-label="Service tags"
+            />
             {tagError && (
               <p role="alert" className="text-small text-red-600">{tagError}</p>
             )}
