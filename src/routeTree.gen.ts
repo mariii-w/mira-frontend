@@ -10,8 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StyleguideRouteImport } from './routes/styleguide'
-import { Route as MyListingsRouteImport } from './routes/my-listings'
-import { Route as MyBookingsRouteImport } from './routes/my-bookings'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -37,14 +36,9 @@ const StyleguideRoute = StyleguideRouteImport.update({
   path: '/styleguide',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MyListingsRoute = MyListingsRouteImport.update({
-  id: '/my-listings',
-  path: '/my-listings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MyBookingsRoute = MyBookingsRouteImport.update({
-  id: '/my-bookings',
-  path: '/my-bookings',
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -149,8 +143,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/my-bookings': typeof MyBookingsRoute
-  '/my-listings': typeof MyListingsRoute
+  '/profile': typeof ProfileRoute
   '/styleguide': typeof StyleguideRoute
   '/browse-services': typeof SearchBrowseServicesRoute
   '/browse-users': typeof SearchBrowseUsersRoute
@@ -172,8 +165,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/my-bookings': typeof MyBookingsRoute
-  '/my-listings': typeof MyListingsRoute
+  '/profile': typeof ProfileRoute
   '/styleguide': typeof StyleguideRoute
   '/browse-services': typeof SearchBrowseServicesRoute
   '/browse-users': typeof SearchBrowseUsersRoute
@@ -197,8 +189,7 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/my-bookings': typeof MyBookingsRoute
-  '/my-listings': typeof MyListingsRoute
+  '/profile': typeof ProfileRoute
   '/styleguide': typeof StyleguideRoute
   '/_search/browse-services': typeof SearchBrowseServicesRoute
   '/_search/browse-users': typeof SearchBrowseUsersRoute
@@ -223,8 +214,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/create-listing'
     | '/login'
-    | '/my-bookings'
-    | '/my-listings'
+    | '/profile'
     | '/styleguide'
     | '/browse-services'
     | '/browse-users'
@@ -246,8 +236,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/create-listing'
     | '/login'
-    | '/my-bookings'
-    | '/my-listings'
+    | '/profile'
     | '/styleguide'
     | '/browse-services'
     | '/browse-users'
@@ -270,8 +259,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/create-listing'
     | '/login'
-    | '/my-bookings'
-    | '/my-listings'
+    | '/profile'
     | '/styleguide'
     | '/_search/browse-services'
     | '/_search/browse-users'
@@ -295,8 +283,7 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   CreateListingRoute: typeof CreateListingRoute
   LoginRoute: typeof LoginRoute
-  MyBookingsRoute: typeof MyBookingsRoute
-  MyListingsRoute: typeof MyListingsRoute
+  ProfileRoute: typeof ProfileRoute
   StyleguideRoute: typeof StyleguideRoute
   SearchBrowseServicesRoute: typeof SearchBrowseServicesRoute
   SearchBrowseUsersRoute: typeof SearchBrowseUsersRoute
@@ -315,18 +302,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StyleguideRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/my-listings': {
-      id: '/my-listings'
-      path: '/my-listings'
-      fullPath: '/my-listings'
-      preLoaderRoute: typeof MyListingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/my-bookings': {
-      id: '/my-bookings'
-      path: '/my-bookings'
-      fullPath: '/my-bookings'
-      preLoaderRoute: typeof MyBookingsRouteImport
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -507,8 +487,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   CreateListingRoute: CreateListingRoute,
   LoginRoute: LoginRoute,
-  MyBookingsRoute: MyBookingsRoute,
-  MyListingsRoute: MyListingsRoute,
+  ProfileRoute: ProfileRoute,
   StyleguideRoute: StyleguideRoute,
   SearchBrowseServicesRoute: SearchBrowseServicesRoute,
   SearchBrowseUsersRoute: SearchBrowseUsersRoute,
