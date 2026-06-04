@@ -61,8 +61,7 @@ function validateCity(v: string) {
   return null
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-export function CreateListingPage() {
+function CreateListingPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
 
@@ -201,6 +200,7 @@ export function CreateListingPage() {
                   Service is being saved…
                 </span>
               )}
+              {/* TODO: implement listing preview */}
               <Button type="button" variant="ghost" size="md">
                 Preview
               </Button>
