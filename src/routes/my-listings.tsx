@@ -29,7 +29,8 @@ function CreateServiceButton({ onClick }: { onClick: () => void }) {
   )
 }
 
-function MyListingsPage() {
+// eslint-disable-next-line react-refresh/only-export-components
+export function MyListingsPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
 
