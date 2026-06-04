@@ -144,38 +144,36 @@ export function CreateListingPage() {
     setServerError(null)
 
     try {
+      const formData = new FormData()
+      formData.append(
+        'listing',
+        new Blob(
+          [JSON.stringify({
+            title: title.trim(),
+            description: description.trim(),
+            price: Number(price),
+            tagIds: selectedTagIds,
+            location: {
+              street: street.trim(),
+              houseNumber: houseNumber.trim(),
+              postalCode,
+              city: city.trim(),
+              serviceRadiusKm: radiusKm,
+            },
+          })],
+          { type: 'application/json' },
+        ),
+      )
+      imageFiles.forEach((f) => formData.append('files', f))
+
       const res = await authFetch('/v1/listings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: title.trim(),
-          description: description.trim(),
-          price: Number(price),
-          tagIds: selectedTagIds,
-          location: {
-            street: street.trim(),
-            houseNumber: houseNumber.trim(),
-            postalCode,
-            city: city.trim(),
-            serviceRadiusKm: radiusKm,
-          },
-        }),
+        body: formData,
       })
 
       if (!res.ok) {
         const body = await res.json().catch(() => null)
         throw new Error(body?.detail ?? `Failed to create listing (${res.status}).`)
-      }
-
-      const listing = await res.json()
-
-      if (imageFiles.length > 0) {
-        const formData = new FormData()
-        imageFiles.forEach((f) => formData.append('files', f))
-        await authFetch(`/v1/listings/${listing.listingId}/media`, {
-          method: 'POST',
-          body: formData,
-        })
       }
 
       navigate({ to: '/my-listings' })
