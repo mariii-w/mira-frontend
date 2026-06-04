@@ -381,8 +381,9 @@ export function CreateListingPage() {
 
           {/* Tags */}
           <div className="flex flex-col gap-2">
-            <Label required>Tags</Label>
+            <Label htmlFor="listing-tags" required>Tags</Label>
             <MultiSelect
+              id="listing-tags"
               options={availableTags
                 .filter((t) => t.isActive)
                 .map((t) => ({
@@ -396,9 +397,11 @@ export function CreateListingPage() {
               placeholder="Select tags…"
               loading={tagsLoading}
               aria-label="Service tags"
+              aria-describedby={tagError ? 'listing-tags-error' : undefined}
+              aria-required
             />
             {tagError && (
-              <p role="alert" className="text-small text-red-600">{tagError}</p>
+              <p id="listing-tags-error" role="alert" className="text-small text-red-600">{tagError}</p>
             )}
           </div>
 

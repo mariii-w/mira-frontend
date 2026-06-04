@@ -14,7 +14,10 @@ interface MultiSelectProps {
   onChange: (ids: string[]) => void
   placeholder?: string
   loading?: boolean
+  id?: string
   'aria-label'?: string
+  'aria-describedby'?: string
+  'aria-required'?: boolean
 }
 
 export function MultiSelect({
@@ -23,23 +26,33 @@ export function MultiSelect({
   onChange,
   placeholder = 'Select…',
   loading = false,
+  id,
   'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedby,
+  'aria-required': ariaRequired,
 }: MultiSelectProps) {
-  function toggle(id: string) {
-    onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id])
+  function toggle(optId: string) {
+    onChange(value.includes(optId) ? value.filter((v) => v !== optId) : [...value, optId])
   }
+
+  const buttonAriaLabel = ariaLabel
+    ? value.length > 0
+      ? `${ariaLabel}, ${value.length} selected`
+      : ariaLabel
+    : undefined
 
   return (
     <div className="flex flex-col gap-2">
       {/* Selected chips */}
       {value.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {value.map((id) => {
-            const opt = options.find((o) => o.id === id)
+        <div role="list" aria-label="Selected tags" className="flex flex-wrap gap-2">
+          {value.map((optId) => {
+            const opt = options.find((o) => o.id === optId)
             if (!opt) return null
             return (
               <span
-                key={id}
+                key={optId}
+                role="listitem"
                 className={[
                   'inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-small font-medium',
                   opt.variant === 'accent' ? 'bg-blush text-accent' : 'bg-mint text-primary',
@@ -48,7 +61,7 @@ export function MultiSelect({
                 {opt.label}
                 <button
                   type="button"
-                  onClick={() => toggle(id)}
+                  onClick={() => toggle(optId)}
                   aria-label={`Remove ${opt.label}`}
                   className="opacity-60 hover:opacity-100 transition-opacity"
                 >
@@ -64,8 +77,11 @@ export function MultiSelect({
       <Listbox value={value} onChange={onChange} multiple>
         <div className="relative max-w-xs">
           <ListboxButton
+            id={id}
             disabled={loading}
-            aria-label={ariaLabel}
+            aria-label={buttonAriaLabel}
+            aria-describedby={ariaDescribedby}
+            aria-required={ariaRequired}
             className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background text-small text-foreground hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed data-[open]:border-primary"
           >
             <span className="text-muted">{loading ? 'Loading…' : placeholder}</span>
@@ -78,6 +94,7 @@ export function MultiSelect({
 
           <ListboxOptions
             anchor="bottom start"
+            aria-label={ariaLabel}
             className="z-10 w-[var(--button-width)] max-h-56 overflow-y-auto rounded-xl border border-border bg-surface shadow-lg py-1 [--anchor-gap:4px] focus:outline-none"
           >
             {options.map((opt) => (
