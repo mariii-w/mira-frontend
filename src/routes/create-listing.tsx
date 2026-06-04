@@ -196,6 +196,11 @@ export function CreateListingPage() {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <h1 className="font-heading text-h1 font-bold text-foreground">New Listing</h1>
             <div className="flex items-center gap-3">
+              {submitting && (
+                <span aria-live="polite" className="text-small text-muted">
+                  Service is being saved…
+                </span>
+              )}
               <Button type="button" variant="ghost" size="md">
                 Preview
               </Button>
