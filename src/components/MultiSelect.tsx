@@ -1,5 +1,6 @@
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { ChevronDown, Check, X } from 'lucide-react'
+import { useRef, useEffect } from 'react'
 
 export interface SelectOption {
   id: string
@@ -41,6 +42,18 @@ export function MultiSelect({
       : ariaLabel
     : undefined
 
+  // Headless UI overrides aria-describedby via its internal description context,
+  // so we set it imperatively to ensure the user-provided value is preserved.
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (!buttonRef.current) return
+    if (ariaDescribedby) {
+      buttonRef.current.setAttribute('aria-describedby', ariaDescribedby)
+    } else {
+      buttonRef.current.removeAttribute('aria-describedby')
+    }
+  }, [ariaDescribedby])
+
   return (
     <div className="flex flex-col gap-2">
       {/* Selected chips */}
@@ -77,10 +90,10 @@ export function MultiSelect({
       <Listbox value={value} onChange={onChange} multiple>
         <div className="relative max-w-xs">
           <ListboxButton
+            ref={buttonRef}
             id={id}
             disabled={loading}
             aria-label={buttonAriaLabel}
-            aria-describedby={ariaDescribedby}
             aria-required={ariaRequired}
             className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background text-small text-foreground hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed data-[open]:border-primary"
           >

@@ -61,7 +61,8 @@ function validateCity(v: string) {
   return null
 }
 
-function CreateListingPage() {
+// eslint-disable-next-line react-refresh/only-export-components
+export function CreateListingPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
 
