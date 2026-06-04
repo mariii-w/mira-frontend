@@ -70,19 +70,18 @@ function MyListingsPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
             <div className="flex flex-col gap-1">
               <h1 className="font-heading text-h1 font-bold text-foreground">My Services</h1>
-              {!loading && (
-                <p className="text-small text-muted">
-                  {activeCount} active
+              <p aria-live="polite" className="text-small text-muted">
+                {!loading && <>{activeCount} active
                   {/* TODO: append "· {totalBookings} bookings total" once bookings API is wired up
                        Endpoint candidate: GET /v1/bookings with a filter on the provider's userId */}
-                </p>
-              )}
+                </>}
+              </p>
             </div>
             <CreateServiceButton onClick={handleCreate} />
           </div>
 
           {loading && (
-            <div className="flex justify-center py-16">
+            <div role="status" aria-live="polite" className="flex justify-center py-16">
               <p className="text-small text-muted">Loading…</p>
             </div>
           )}
@@ -99,7 +98,7 @@ function MyListingsPage() {
           )}
 
           {!loading && !error && listings.length > 0 && (
-            <ul className="flex flex-col gap-4 list-none m-0 p-0">
+            <ul role="list" aria-label="Your services" className="flex flex-col gap-4 list-none m-0 p-0">
               {listings.map((listing) => (
                 <li key={listing.listingId}>
                   <MyListingCard listing={listing} onEdit={handleEdit} />
