@@ -3,7 +3,7 @@ import { Badge, type BadgeProps } from "./Badge"
 import { Button } from "./Button"
 import { MapPin, Dot, ArrowRight } from 'lucide-react'
 
-interface ServiceCardProps{
+export interface ServiceCardProps{
     link: string
     pictureLink: string
     location: string
