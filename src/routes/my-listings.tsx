@@ -56,9 +56,8 @@ export function MyListingsPage() {
     navigate({ to: '/create-listing' })
   }
 
-  function handleEdit(_listingId: string) {
-    // TODO: navigate to edit listing page once route exists
-    navigate({ to: '/' })
+  function handleEdit(id: string) {
+    navigate({ to: '/edit-listing/$listingId', params: { listingId: id } })
   }
 
   return (
