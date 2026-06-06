@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
+import { Pagination } from '../components/Pagination'
 import { MyListingCard, type MyListingSummary } from '../components/MyListingCard'
 import { useAuthStore } from '../stores/auth'
 import { authFetch } from '../lib/queryClient'
@@ -35,20 +36,45 @@ export function MyListingsPage() {
   const user = useAuthStore((s) => s.user)
 
   const [listings, setListings] = useState<MyListingSummary[]>([])
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
+  const [prevCursors, setPrevCursors] = useState<(string | null)[]>([])
+  const [currentFrom, setCurrentFrom] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
-    authFetch(`/v1/users/${user.userId}/listings`)
+    setLoading(true)
+    setError(null)
+    const url = currentFrom
+      ? `/v1/users/${user.userId}/listings?limit=20&from=${encodeURIComponent(currentFrom)}`
+      : `/v1/users/${user.userId}/listings?limit=20`
+    authFetch(url)
       .then(async (res) => {
         if (!res.ok) throw new Error('Failed to load listings.')
         const data = await res.json()
         setListings(data.items)
+        setNextCursor(data.cursor?.next ?? null)
       })
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [user])
+  }, [user, currentFrom])
+
+  const hasPrev = prevCursors.length > 0
+
+  function handleNext() {
+    if (!nextCursor) return
+    setPrevCursors((prev) => [...prev, currentFrom])
+    setCurrentFrom(nextCursor)
+  }
+
+  function handlePrev() {
+    if (!hasPrev) return
+    const stack = prevCursors.slice()
+    const from = stack.pop() ?? null
+    setPrevCursors(stack)
+    setCurrentFrom(from)
+  }
 
   const activeCount = listings.filter((l) => l.publicationStatus === 'ACTIVE').length
 
@@ -97,13 +123,24 @@ export function MyListingsPage() {
           )}
 
           {!loading && !error && listings.length > 0 && (
-            <ul role="list" aria-label="Your services" className="flex flex-col gap-4 list-none m-0 p-0">
-              {listings.map((listing) => (
-                <li key={listing.listingId}>
-                  <MyListingCard listing={listing} onEdit={handleEdit} />
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul role="list" aria-label="Your services" className="flex flex-col gap-4 list-none m-0 p-0">
+                {listings.map((listing) => (
+                  <li key={listing.listingId}>
+                    <MyListingCard listing={listing} onEdit={handleEdit} />
+                  </li>
+                ))}
+              </ul>
+              {(hasPrev || nextCursor) && (
+                <Pagination
+                  onPrevious={handlePrev}
+                  onNext={handleNext}
+                  disablePrevious={!hasPrev}
+                  disableNext={!nextCursor}
+                  className="mt-6 flex justify-center"
+                />
+              )}
+            </>
           )}
 
         </div>

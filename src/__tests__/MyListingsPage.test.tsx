@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { authFetch } from '../lib/queryClient'
 
 const mockNavigate = vi.fn()
@@ -109,11 +109,77 @@ describe('<MyListingsPage />', () => {
     )
   })
 
-  it('fetches listings for the authenticated user', async () => {
+  it('fetches listings for the authenticated user with limit', async () => {
     mockSuccess([])
     render(<MyListingsPage />)
     await waitFor(() => expect(mockFetch).toHaveBeenCalledOnce())
-    expect(mockFetch).toHaveBeenCalledWith('/v1/users/user-1/listings')
+    expect(mockFetch).toHaveBeenCalledWith('/v1/users/user-1/listings?limit=20')
+  })
+
+  it('does not show pagination controls when there is only one page', async () => {
+    mockSuccess(makeListings([{}]))
+    render(<MyListingsPage />)
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /previous/i })).not.toBeInTheDocument()
+  })
+
+  it('shows Next button when there is a next cursor', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ items: makeListings([{}]), cursor: { limit: 20, next: 'cursor-abc' } }),
+    } as Response)
+    render(<MyListingsPage />)
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /next/i })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled()
+  })
+
+  it('fetches next page and enables Previous when Next is clicked', async () => {
+    mockFetch.mockImplementation(async (url: string) => {
+      const page = String(url).includes('from=') ? 2 : 1
+      return {
+        ok: true,
+        json: async () => ({
+          items: makeListings([{ title: `Page ${page}` }]),
+          cursor: { limit: 20, next: page === 1 ? 'cursor-p2' : null },
+        }),
+      } as Response
+    })
+
+    render(<MyListingsPage />)
+    await waitFor(() => expect(screen.getByRole('heading', { name: /Page 1/ })).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: /next/i }))
+    await waitFor(() => expect(screen.getByRole('heading', { name: /Page 2/ })).toBeInTheDocument())
+
+    expect(mockFetch).toHaveBeenLastCalledWith('/v1/users/user-1/listings?limit=20&from=cursor-p2')
+    expect(screen.getByRole('button', { name: /previous/i })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /next/i })).toBeDisabled()
+  })
+
+  it('returns to first page when Previous is clicked', async () => {
+    mockFetch.mockImplementation(async (url: string) => {
+      const page = String(url).includes('from=') ? 2 : 1
+      return {
+        ok: true,
+        json: async () => ({
+          items: makeListings([{ title: `Page ${page}` }]),
+          cursor: { limit: 20, next: page === 1 ? 'cursor-p2' : null },
+        }),
+      } as Response
+    })
+
+    render(<MyListingsPage />)
+    await waitFor(() => expect(screen.getByRole('heading', { name: /Page 1/ })).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: /next/i }))
+    await waitFor(() => expect(screen.getByRole('heading', { name: /Page 2/ })).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: /previous/i }))
+    await waitFor(() => expect(screen.getByRole('heading', { name: /Page 1/ })).toBeInTheDocument())
+
+    expect(mockFetch).toHaveBeenLastCalledWith('/v1/users/user-1/listings?limit=20')
   })
 
   it('Create service button is always visible', async () => {
