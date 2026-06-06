@@ -5,6 +5,7 @@ interface AvatarIconProps {
   lastName?: string
   picture?: string
   size?: number
+  style?: string
 }
 
 const BG_COLORS = [
@@ -27,6 +28,7 @@ export function AvatarIcon({
   lastName,
   picture,
   size = 40,
+  style = '',
 }: AvatarIconProps) {
   const [imgFailed, setImgFailed] = useState(false)
 
@@ -55,7 +57,7 @@ export function AvatarIcon({
         fontSize: Math.round(size * 0.36),
         lineHeight: 1,
       }}
-      className={`${bgColor} text-cream rounded-full flex items-center justify-center font-semibold tracking-wide select-none shrink-0`}
+      className={`${bgColor} text-cream rounded-full flex items-center justify-center font-semibold tracking-wide select-none shrink-0 ${style}`}
     >
       {initials}
     </div>
