@@ -29,8 +29,16 @@ const STATUS_OVERLAY: Partial<Record<PublicationStatus, { label: string; bg: str
   DELETED: { label: 'DELETED', bg: 'bg-charcoal/75' },
 }
 
+const STATUS_BADGE: Record<PublicationStatus, { label: string; className: string }> = {
+  ACTIVE:  { label: 'Active',  className: 'bg-green-100 text-green-800' },
+  DRAFT:   { label: 'Draft',   className: 'bg-gray-100 text-gray-500' },
+  PAUSED:  { label: 'Paused',  className: 'bg-amber-100 text-amber-700' },
+  DELETED: { label: 'Deleted', className: 'bg-red-100 text-red-700' },
+}
+
 export function MyListingCard({ listing, onEdit }: MyListingCardProps) {
   const overlay = STATUS_OVERLAY[listing.publicationStatus]
+  const badge = STATUS_BADGE[listing.publicationStatus]
   const headingId = `listing-title-${listing.listingId}`
 
   return (
@@ -61,13 +69,21 @@ export function MyListingCard({ listing, onEdit }: MyListingCardProps) {
 
       <div className="flex flex-col justify-between flex-1 p-5 gap-3 min-h-[140px]">
         <div className="flex flex-col gap-1.5">
-          <h2
-            id={headingId}
-            className="font-heading font-bold text-h2 text-foreground leading-snug"
-          >
-            {listing.title}
-            {overlay && <span className="sr-only"> ({overlay.label})</span>}
-          </h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2
+              id={headingId}
+              className="font-heading font-bold text-h2 text-foreground leading-snug"
+            >
+              {listing.title}
+              {overlay && <span className="sr-only"> ({overlay.label})</span>}
+            </h2>
+            <span
+              aria-hidden="true"
+              className={`text-label font-semibold px-2 py-0.5 rounded-full shrink-0 ${badge.className}`}
+            >
+              {badge.label}
+            </span>
+          </div>
           <p className="text-small text-muted line-clamp-3">{listing.description}</p>
         </div>
         <div className="flex justify-end">
