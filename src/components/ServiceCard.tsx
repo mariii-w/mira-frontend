@@ -34,12 +34,12 @@ export function ServiceCard(
 )
 {
     return(
-        <div className="bg-linen rounded-2xl flex flex-col p-5 gap-4 border border-border w-full">
+        <div className="bg-cream rounded-2xl flex flex-col p-5 gap-2 border border-border w-full">
             <div className='flex col-2 gap-4'>
                 <div className='m-3'>
-                    <img src={pictureLink} className="w-150 h-auto rounded-xl object-cover" />
+                    <img src={pictureLink} className="w-64 h-48 rounded-xl object-cover" />
                 </div>
-                <div className='grid gap-2 my-3'>
+                <div className='grid gap-2 my-2 flex-1'>
                     <div className="flex gap-8">
                         <label className='text-h2'>{label}</label>
                         
@@ -71,12 +71,9 @@ export function ServiceCard(
                         <div className='ml-auto mt-auto'>
                             <Button variant="primary" trailingIcon={<ArrowRight />} ><Link to={link} className='text-white decoration-0 '>Zum Angebot</Link></Button>
                         </div>
-                    </div>
-                    
+                    </div>  
                 </div>
-
-            </div>
-            
+            </div>   
         </div>
     )
 }
