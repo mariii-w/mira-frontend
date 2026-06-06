@@ -37,7 +37,6 @@ interface ListingDetails {
   publicationStatus: PublicationStatus
   tags: Array<{ tagId: string; name: string; isBarrierefrei: boolean; isActive: boolean }>
   location: { city: string; postalCode: string; serviceRadiusKm: number }
-  media: ExistingImage[]
 }
 
 function validateTitle(v: string) {
@@ -130,10 +129,13 @@ export function EditListingPage() {
 
   useEffect(() => {
     if (!user) return
-    authFetch(`/v1/users/${user.userId}/listings/${listingId}`)
-      .then(async (res) => {
-        if (!res.ok) throw new Error('Failed to load listing.')
-        const data: ListingDetails = await res.json()
+    Promise.all([
+      authFetch(`/v1/users/${user.userId}/listings/${listingId}`),
+      authFetch(`/v1/listings/${listingId}/media`),
+    ])
+      .then(async ([listingRes, mediaRes]) => {
+        if (!listingRes.ok) throw new Error('Failed to load listing.')
+        const data: ListingDetails = await listingRes.json()
         setListing(data)
         setTitle(data.title)
         setDescription(data.description)
@@ -142,7 +144,14 @@ export function EditListingPage() {
         setCity(data.location.city)
         setRadiusKm(data.location.serviceRadiusKm)
         setSelectedTagIds(data.tags.map((t) => t.tagId))
-        setExistingImages(data.media ?? [])
+
+        if (mediaRes.ok) {
+          const mediaData = await mediaRes.json()
+          const items: ExistingImage[] = Array.isArray(mediaData)
+            ? mediaData
+            : (mediaData?.items ?? mediaData?.uploaded ?? [])
+          setExistingImages(items)
+        }
       })
       .catch((e: Error) => setLoadError(e.message))
   }, [user, listingId])
@@ -382,9 +391,9 @@ export function EditListingPage() {
                   variant="secondary"
                   size="md"
                   loading={actionSubmitting}
-                  onClick={() => callStatusAction('publish')}
+                  onClick={() => callStatusAction('resume')}
                 >
-                  Republish
+                  Resume
                 </Button>
               )}
             </div>
@@ -652,9 +661,8 @@ export function EditListingPage() {
               {!deleteConfirming ? (
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="accent"
                   size="md"
-                  className="text-red-600 hover:bg-red-50 active:bg-red-100"
                   onClick={() => setDeleteConfirming(true)}
                 >
                   Delete listing
@@ -667,9 +675,8 @@ export function EditListingPage() {
                   <div className="flex gap-2">
                     <Button
                       type="button"
-                      variant="primary"
+                      variant="accent"
                       size="md"
-                      className="bg-red-600 hover:bg-red-700 border-red-600 active:bg-red-800"
                       loading={actionSubmitting}
                       onClick={handleDelete}
                     >

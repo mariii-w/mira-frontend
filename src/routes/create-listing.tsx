@@ -202,7 +202,7 @@ export function CreateListingPage() {
                 </span>
               )}
               {/* TODO: implement listing preview */}
-              <Button type="button" variant="ghost" size="md">
+              <Button type="button" variant="secondary" size="md">
                 Preview
               </Button>
               <Button type="submit" variant="primary" size="md" loading={submitting}>
