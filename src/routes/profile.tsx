@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Check, ClipboardPen, MapPin, Briefcase, Plus, Calendar, Mail, History, Phone } from 'lucide-react'
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
 import { AvatarIcon } from '../components/AvatarIcon'
@@ -89,7 +89,6 @@ function Profile({ isProvider, isOwner, isVerified = false }: ProfileProps) {
       hourRate: 45,
       distance: 0
     }
-
   ]
 
   return(
@@ -105,12 +104,12 @@ function Profile({ isProvider, isOwner, isVerified = false }: ProfileProps) {
                 <div className="col-span-2">
                     <div className='flex flex-row items-center gap-4'>
                         <div>
-                            <AvatarIcon size={150} />
+                            <AvatarIcon size={200} style='border border-cream border-4' />
                         </div>
                         <div className='pt-15 mt-4 flex flex-col gap-2'>
                             <div className='flex flex-row gap-4 items-center'>
                                 <h1 className="text-3xl font-semibold">John Doe</h1>
-                                {isOwner && isVerified? <p className="text-sm font-bold text-primary flex items-center gap-1"> <Check /> Verifiziert</p> : <p className="text-sm font-bold"></p>}
+                                {isProvider && isVerified? <p className="text-sm font-bold text-primary flex items-center gap-1"> <Check /> Verifiziert</p> : <p className="text-sm font-bold"></p>}
                                 {isOwner && <Button size="md" trailingIcon={<ClipboardPen />}>Bearbeiten</Button>}
                             </div>
                             <div>
@@ -195,21 +194,6 @@ function Profile({ isProvider, isOwner, isVerified = false }: ProfileProps) {
                   </div>
                 )}
 
-            </div>
-            <div className='w-5xl'>
-                <ServiceCard
-                    link='#'
-                    pictureLink='./pic/ServiceExample1.png' 
-                    location={'München'} 
-                    providerFirstName={'Patrick'} 
-                    providerLastName={'Stock'} 
-                    varified={true} 
-                    label={'Laptop & Wi-Fi setup'} 
-                    description={'I help with Windows, macOS, printers, Wi-Fi, smart TVs and phone-to-laptop setups. Friendly with first-time users and seniors.'} 
-                    badges={[{text: 'Wi-Fi'}, {text: 'Windows'}, {text: 'Printers'}, {text: 'Barrierefrei', variant: 'accent'}]} 
-                    hourRate={20} 
-                    distance={10}
-                    />
             </div>
         </section>
      </main>
