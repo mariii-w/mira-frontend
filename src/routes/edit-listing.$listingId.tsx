@@ -12,6 +12,7 @@ import { useAuthStore } from '../stores/auth'
 import { authFetch } from '../lib/queryClient'
 import type { PublicationStatus } from '../components/MyListingCard'
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute('/edit-listing/$listingId')({
   component: EditListingPage,
 })
@@ -85,7 +86,6 @@ const STATUS_LABEL: Record<PublicationStatus, string> = {
   DELETED: 'Deleted',
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function EditListingPage() {
   const { listingId } = Route.useParams()
   const navigate = useNavigate()
@@ -190,7 +190,10 @@ export function EditListingPage() {
       const res = await authFetch(`/v1/listings/${listingId}/media/${mediaId}`, {
         method: 'DELETE',
       })
-      if (!res.ok) throw new Error(`${res.status}`)
+      if (!res.ok) {
+        if (removed) setExistingImages((prev) => [...prev, removed])
+        setServerError('Failed to delete image. Please try again.')
+      }
     } catch {
       if (removed) setExistingImages((prev) => [...prev, removed])
       setServerError('Failed to delete image. Please try again.')
@@ -249,7 +252,9 @@ export function EditListingPage() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => null)
-        throw new Error(err?.detail ?? `Failed to save listing (${res.status}).`)
+        setServerError(err?.detail ?? `Failed to save listing (${res.status}).`)
+        setSubmitting(false)
+        return
       }
 
       if (newImageFiles.length > 0) {
@@ -258,7 +263,7 @@ export function EditListingPage() {
         await authFetch(`/v1/listings/${listingId}/media`, { method: 'POST', body: formData })
       }
 
-      navigate({ to: '/my-listings' })
+      await navigate({ to: '/my-listings' })
     } catch (err) {
       setServerError((err as Error).message)
       setSubmitting(false)
@@ -272,9 +277,11 @@ export function EditListingPage() {
       const res = await authFetch(`/v1/listings/${listingId}/${endpoint}`, { method: 'POST' })
       if (!res.ok) {
         const err = await res.json().catch(() => null)
-        throw new Error(err?.detail ?? `Action failed (${res.status}).`)
+        setServerError(err?.detail ?? `Action failed (${res.status}).`)
+        setActionSubmitting(false)
+        return
       }
-      navigate({ to: '/my-listings' })
+      await navigate({ to: '/my-listings' })
     } catch (err) {
       setServerError((err as Error).message)
       setActionSubmitting(false)
@@ -288,9 +295,12 @@ export function EditListingPage() {
       const res = await authFetch(`/v1/listings/${listingId}`, { method: 'DELETE' })
       if (!res.ok) {
         const err = await res.json().catch(() => null)
-        throw new Error(err?.detail ?? `Failed to delete listing (${res.status}).`)
+        setServerError(err?.detail ?? `Failed to delete listing (${res.status}).`)
+        setActionSubmitting(false)
+        setDeleteConfirming(false)
+        return
       }
-      navigate({ to: '/my-listings' })
+      await navigate({ to: '/my-listings' })
     } catch (err) {
       setServerError((err as Error).message)
       setActionSubmitting(false)

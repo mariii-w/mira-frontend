@@ -67,7 +67,7 @@ function makeListing(overrides: { publicationStatus?: PublicationStatus; tags?: 
 }
 
 function setupMocks(listing = makeListing(), media: unknown[] = [], actionOk = true) {
-  mockFetch.mockImplementation(async (url: string, init?: RequestInit) => {
+  mockFetch.mockImplementation(async (url: RequestInfo, init?: RequestInit) => {
     const method = init?.method?.toUpperCase()
     if (!method || method === 'GET') {
       if (String(url).includes('/media')) {

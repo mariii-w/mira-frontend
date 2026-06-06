@@ -11,6 +11,7 @@ import { MultiSelect } from '../components/MultiSelect'
 import { useAuthStore } from '../stores/auth'
 import { authFetch } from '../lib/queryClient'
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute('/create-listing')({
   component: CreateListingPage,
 })
@@ -61,7 +62,6 @@ function validateCity(v: string) {
   return null
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function CreateListingPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
@@ -173,10 +173,12 @@ export function CreateListingPage() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null)
-        throw new Error(body?.detail ?? `Failed to create listing (${res.status}).`)
+        setServerError(body?.detail ?? `Failed to create listing (${res.status}).`)
+        setSubmitting(false)
+        return
       }
 
-      navigate({ to: '/my-listings' })
+      await navigate({ to: '/my-listings' })
     } catch (err) {
       setServerError((err as Error).message)
       setSubmitting(false)
