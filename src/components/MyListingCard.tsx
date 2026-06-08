@@ -3,18 +3,21 @@ import { Button } from './Button'
 
 export type PublicationStatus = 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'DELETED'
 export type ModerationStatus = 'VISIBLE' | 'BLOCKED'
+export type VlmStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
 
 export interface MyListingSummary {
   listingId: string
   title: string
   description: string
+  easyDescription?: string | null
+  easyDescriptionStatus?: VlmStatus
   price: number
   publicationStatus: PublicationStatus
   moderationStatus: ModerationStatus
   author: { name: string; surname: string }
   publishedAt: string | null
   location: { city: string; postalCode: string; serviceRadiusKm: number }
-  primaryMedia?: { mediaId: string; url: string; altText?: string }
+  primaryMedia?: { mediaId: string; url: string; altText?: string | null; altTextStatus?: VlmStatus }
   tags: Array<{ tagId: string; name: string; isBarrierefrei: boolean; isActive: boolean }>
 }
 
@@ -51,7 +54,7 @@ export function MyListingCard({ listing, onEdit }: MyListingCardProps) {
         {listing.primaryMedia ? (
           <img
             src={listing.primaryMedia.url}
-            alt={listing.primaryMedia.altText ?? listing.title}
+            alt={listing.primaryMedia.altTextStatus === 'COMPLETED' && listing.primaryMedia.altText ? listing.primaryMedia.altText : listing.title}
             className="w-full h-full object-cover"
           />
         ) : null}

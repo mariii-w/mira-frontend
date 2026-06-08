@@ -25,27 +25,37 @@ const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
 function StatusFilterBar({
   value,
   onChange,
+  counts,
 }: {
   value: StatusFilter
   onChange: (value: StatusFilter) => void
+  counts: Partial<Record<StatusFilter, number>>
 }) {
   return (
     <div role="group" aria-label="Filter services by status" className="flex flex-wrap gap-2">
       {STATUS_FILTERS.map((filter) => {
         const selected = filter.value === value
+        const count = counts[filter.value]
         return (
           <button
             key={filter.value}
             type="button"
             aria-pressed={selected}
             onClick={() => onChange(filter.value)}
-            className={`rounded-full px-4 py-1.5 text-small font-semibold transition-colors ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-small font-semibold transition-colors ${
               selected
-                ? 'bg-accent text-cream'
-                : 'bg-linen text-foreground hover:bg-black/5'
+                ? 'bg-foreground text-cream'
+                : 'border border-foreground/25 text-foreground hover:bg-black/5'
             }`}
           >
             {filter.label}
+            {count !== undefined && (
+              <span className={`rounded-full px-1.5 py-0.5 text-xs leading-none ${
+                selected ? 'bg-white/20 text-cream' : 'bg-foreground/10 text-foreground'
+              }`}>
+                {count}
+              </span>
+            )}
           </button>
         )
       })}
@@ -83,6 +93,23 @@ export function MyListingsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [statusCounts, setStatusCounts] = useState<Partial<Record<StatusFilter, number>>>({})
+
+  useEffect(() => {
+    if (!user) return
+    authFetch(`/v1/users/${user.userId}/listings?limit=100`)
+      .then(async (res) => {
+        if (!res.ok) return
+        const data = await res.json()
+        const counts: Partial<Record<StatusFilter, number>> = { ALL: data.items.length }
+        for (const item of data.items as MyListingSummary[]) {
+          const s = item.publicationStatus as StatusFilter
+          counts[s] = (counts[s] ?? 0) + 1
+        }
+        setStatusCounts(counts)
+      })
+      .catch(() => {})
+  }, [user])
 
   useEffect(() => {
     if (!user) return
@@ -125,8 +152,6 @@ export function MyListingsPage() {
     setCurrentFrom(from)
   }
 
-  const activeCount = listings.filter((l) => l.publicationStatus === 'ACTIVE').length
-
   function handleCreate() {
     navigate({ to: '/create-listing' })
   }
@@ -141,21 +166,16 @@ export function MyListingsPage() {
       <main id="main-content" className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8">
         <div className="mx-auto max-w-3xl">
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8 animate-fade-in-up">
             <div className="flex flex-col gap-1">
               <h1 className="font-heading text-h1 font-bold text-foreground">My Services</h1>
-              <p aria-live="polite" className="text-small text-muted">
-                {!loading && <>{activeCount} active
-                  {/* TODO: append "· {totalBookings} bookings total" once bookings API is wired up
-                       Endpoint candidate: GET /v1/bookings with a filter on the provider's userId */}
-                </>}
-              </p>
+              <p className="text-small text-muted">Manage your listed services and track their status.</p>
             </div>
             <CreateServiceButton onClick={handleCreate} />
           </div>
 
-          <div className="mb-8">
-            <StatusFilterBar value={statusFilter} onChange={handleFilterChange} />
+          <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
+            <StatusFilterBar value={statusFilter} onChange={handleFilterChange} counts={statusCounts} />
           </div>
 
           {loading && (
@@ -186,8 +206,12 @@ export function MyListingsPage() {
           {!loading && !error && listings.length > 0 && (
             <>
               <ul role="list" aria-label="Your services" className="flex flex-col gap-4 list-none m-0 p-0">
-                {listings.map((listing) => (
-                  <li key={listing.listingId}>
+                {listings.map((listing, index) => (
+                  <li
+                    key={listing.listingId}
+                    className="animate-fade-in-up"
+                    style={{ animationDelay: `${Math.min(index * 60, 420) + 120}ms` }}
+                  >
                     <MyListingCard listing={listing} onEdit={handleEdit} />
                   </li>
                 ))}

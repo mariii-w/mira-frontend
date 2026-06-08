@@ -192,7 +192,7 @@ export function CreateListingPage() {
         <form
           onSubmit={handleSubmit}
           noValidate
-          className="mx-auto max-w-2xl flex flex-col gap-8"
+          className="mx-auto max-w-2xl flex flex-col gap-8 animate-fade-in-up"
         >
           {/* Header */}
           <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -286,7 +286,7 @@ export function CreateListingPage() {
                 <div
                   key={url}
                   role="listitem"
-                  className="relative w-36 h-36 rounded-xl overflow-hidden border border-border/30 shrink-0"
+                  className="relative w-36 h-36 rounded-xl overflow-hidden border border-border/30 shrink-0 animate-scale-in"
                 >
                   <img src={url} alt={`Uploaded image ${i + 1}`} className="w-full h-full object-cover" />
                   <button

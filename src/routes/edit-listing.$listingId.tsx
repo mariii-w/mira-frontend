@@ -10,7 +10,7 @@ import { Slider } from '../components/Slider'
 import { MultiSelect } from '../components/MultiSelect'
 import { useAuthStore } from '../stores/auth'
 import { authFetch } from '../lib/queryClient'
-import type { PublicationStatus } from '../components/MyListingCard'
+import type { PublicationStatus, VlmStatus } from '../components/MyListingCard'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute('/edit-listing/$listingId')({
@@ -28,16 +28,20 @@ interface ExistingImage {
   mediaId: string
   url: string
   altText?: string | null
+  altTextStatus?: VlmStatus
 }
 
 interface ListingDetails {
   listingId: string
   title: string
   description: string
+  easyDescription?: string | null
+  easyDescriptionStatus?: VlmStatus
   price: number
   publicationStatus: PublicationStatus
   tags: Array<{ tagId: string; name: string; isBarrierefrei: boolean; isActive: boolean }>
   location: { city: string; postalCode: string; serviceRadiusKm: number }
+  media?: ExistingImage[]
 }
 
 function validateTitle(v: string) {
@@ -350,7 +354,7 @@ export function EditListingPage() {
         <form
           onSubmit={handleSubmit}
           noValidate
-          className="mx-auto max-w-2xl flex flex-col gap-8"
+          className="mx-auto max-w-2xl flex flex-col gap-8 animate-fade-in-up"
         >
           {/* Header */}
           <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -515,7 +519,7 @@ export function EditListingPage() {
                   <div
                     key={url}
                     role="listitem"
-                    className="relative w-36 h-36 rounded-xl overflow-hidden border border-border/30 shrink-0"
+                    className="relative w-36 h-36 rounded-xl overflow-hidden border border-border/30 shrink-0 animate-scale-in"
                   >
                     <img src={url} alt={`New image ${i + 1}`} className="w-full h-full object-cover" />
                     <button
@@ -688,7 +692,7 @@ export function EditListingPage() {
                   Delete listing
                 </Button>
               ) : (
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-in">
                   <p role="alert" className="text-small text-foreground">
                     Are you sure? This cannot be undone.
                   </p>
