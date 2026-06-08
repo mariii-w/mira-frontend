@@ -130,7 +130,6 @@ export function EditListingPage() {
   const [deleteConfirming, setDeleteConfirming] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const vlmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const hasVlmPending = existingImages.some(
     (img) => img.altTextStatus === 'PENDING' || img.altTextStatus === 'PROCESSING',
@@ -138,24 +137,31 @@ export function EditListingPage() {
 
   useEffect(() => {
     if (!hasVlmPending) return
+    let cancelled = false
 
-    vlmTimerRef.current = setTimeout(async () => {
-      try {
-        const res = await authFetch(`/v1/listings/${listingId}/media`)
-        if (!res.ok) return
-        const mediaData = await res.json()
-        const items: ExistingImage[] = Array.isArray(mediaData)
-          ? mediaData
-          : (mediaData?.items ?? mediaData?.uploaded ?? [])
-        setExistingImages(items)
-      } catch {
-        // polling is best-effort
+    ;(async () => {
+      while (!cancelled) {
+        await new Promise((r) => setTimeout(r, 4000))
+        if (cancelled) break
+        try {
+          const res = await authFetch(`/v1/listings/${listingId}/media`)
+          if (!res.ok) break
+          const mediaData = await res.json()
+          const items: ExistingImage[] = Array.isArray(mediaData)
+            ? mediaData
+            : (mediaData?.items ?? mediaData?.uploaded ?? [])
+          setExistingImages(items)
+          const stillPending = items.some(
+            (img) => img.altTextStatus === 'PENDING' || img.altTextStatus === 'PROCESSING',
+          )
+          if (!stillPending) break
+        } catch {
+          break
+        }
       }
-    }, 4000)
+    })()
 
-    return () => {
-      if (vlmTimerRef.current) clearTimeout(vlmTimerRef.current)
-    }
+    return () => { cancelled = true }
   }, [hasVlmPending, listingId])
 
   useEffect(() => {
