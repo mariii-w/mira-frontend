@@ -130,6 +130,33 @@ export function EditListingPage() {
   const [deleteConfirming, setDeleteConfirming] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const vlmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const hasVlmPending = existingImages.some(
+    (img) => img.altTextStatus === 'PENDING' || img.altTextStatus === 'PROCESSING',
+  )
+
+  useEffect(() => {
+    if (!hasVlmPending) return
+
+    vlmTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await authFetch(`/v1/listings/${listingId}/media`)
+        if (!res.ok) return
+        const mediaData = await res.json()
+        const items: ExistingImage[] = Array.isArray(mediaData)
+          ? mediaData
+          : (mediaData?.items ?? mediaData?.uploaded ?? [])
+        setExistingImages(items)
+      } catch {
+        // polling is best-effort
+      }
+    }, 4000)
+
+    return () => {
+      if (vlmTimerRef.current) clearTimeout(vlmTimerRef.current)
+    }
+  }, [hasVlmPending, listingId])
 
   useEffect(() => {
     if (!user) return
@@ -502,13 +529,21 @@ export function EditListingPage() {
                   >
                     <img
                       src={img.url}
-                      alt={img.altText ?? ''}
+                      alt={img.altTextStatus === 'COMPLETED' && img.altText ? img.altText : ''}
                       className="w-full h-full object-cover"
                     />
+                    {(img.altTextStatus === 'PENDING' || img.altTextStatus === 'PROCESSING') && (
+                      <span
+                        aria-label="Generating description…"
+                        className="absolute bottom-1.5 left-1.5 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center"
+                      >
+                        <span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      </span>
+                    )}
                     <button
                       type="button"
                       onClick={() => removeExistingImage(img.mediaId)}
-                      aria-label={img.altText ? `Remove image: ${img.altText}` : `Remove image ${i + 1}`}
+                      aria-label={img.altTextStatus === 'COMPLETED' && img.altText ? `Remove image: ${img.altText}` : `Remove image ${i + 1}`}
                       className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-charcoal/70 text-cream flex items-center justify-center hover:bg-charcoal transition-colors"
                     >
                       <X size={12} aria-hidden="true" />
