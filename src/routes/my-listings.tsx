@@ -41,6 +41,7 @@ function StatusFilterBar({
             key={filter.value}
             type="button"
             aria-pressed={selected}
+            aria-label={filter.label}
             onClick={() => onChange(filter.value)}
             className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-small font-semibold transition-colors ${
               selected
@@ -50,7 +51,7 @@ function StatusFilterBar({
           >
             {filter.label}
             {count !== undefined && (
-              <span className={`rounded-full px-1.5 py-0.5 text-xs leading-none ${
+              <span aria-hidden="true" className={`rounded-full px-1.5 py-0.5 text-xs leading-none ${
                 selected ? 'bg-white/20 text-cream' : 'bg-foreground/10 text-foreground'
               }`}>
                 {count}

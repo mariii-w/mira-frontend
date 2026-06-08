@@ -54,7 +54,7 @@ export function MyListingCard({ listing, onEdit }: MyListingCardProps) {
         {listing.primaryMedia ? (
           <img
             src={listing.primaryMedia.url}
-            alt={listing.primaryMedia.altTextStatus === 'COMPLETED' && listing.primaryMedia.altText ? listing.primaryMedia.altText : listing.title}
+            alt={(listing.primaryMedia.altTextStatus == null || listing.primaryMedia.altTextStatus === 'COMPLETED') && listing.primaryMedia.altText ? listing.primaryMedia.altText : listing.title}
             className="w-full h-full object-cover"
           />
         ) : null}

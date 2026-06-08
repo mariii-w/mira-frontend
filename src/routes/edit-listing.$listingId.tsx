@@ -535,7 +535,7 @@ export function EditListingPage() {
                   >
                     <img
                       src={img.url}
-                      alt={img.altTextStatus === 'COMPLETED' && img.altText ? img.altText : ''}
+                      alt={(img.altTextStatus == null || img.altTextStatus === 'COMPLETED') && img.altText ? img.altText : ''}
                       className="w-full h-full object-cover"
                     />
                     {(img.altTextStatus === 'PENDING' || img.altTextStatus === 'PROCESSING') && (
@@ -549,7 +549,7 @@ export function EditListingPage() {
                     <button
                       type="button"
                       onClick={() => removeExistingImage(img.mediaId)}
-                      aria-label={img.altTextStatus === 'COMPLETED' && img.altText ? `Remove image: ${img.altText}` : `Remove image ${i + 1}`}
+                      aria-label={(img.altTextStatus == null || img.altTextStatus === 'COMPLETED') && img.altText ? `Remove image: ${img.altText}` : `Remove image ${i + 1}`}
                       className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-charcoal/70 text-cream flex items-center justify-center hover:bg-charcoal transition-colors"
                     >
                       <X size={12} aria-hidden="true" />

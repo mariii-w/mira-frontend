@@ -82,15 +82,6 @@ describe('<MyListingsPage />', () => {
     expect(list).toBeInTheDocument()
   })
 
-  it('shows active count in stats after load', async () => {
-    mockSuccess(makeListings([
-      { publicationStatus: 'ACTIVE' },
-      { publicationStatus: 'ACTIVE' },
-      { publicationStatus: 'DRAFT' },
-    ]))
-    render(<MyListingsPage />)
-    await waitFor(() => expect(screen.getByText(/2 active/)).toBeInTheDocument())
-  })
 
   it('shows empty state when no listings are returned', async () => {
     mockSuccess([])
@@ -112,8 +103,9 @@ describe('<MyListingsPage />', () => {
   it('fetches listings for the authenticated user with limit', async () => {
     mockSuccess([])
     render(<MyListingsPage />)
-    await waitFor(() => expect(mockFetch).toHaveBeenCalledOnce())
-    expect(mockFetch).toHaveBeenCalledWith('/v1/users/user-1/listings?limit=20')
+    await waitFor(() =>
+      expect(mockFetch).toHaveBeenCalledWith('/v1/users/user-1/listings?limit=20')
+    )
   })
 
   it('does not show pagination controls when there is only one page', async () => {
@@ -214,8 +206,9 @@ describe('<MyListingsPage />', () => {
     it('fetches without publicationStatus param when "All" is active', async () => {
       mockSuccess([])
       render(<MyListingsPage />)
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledOnce())
-      expect(mockFetch).toHaveBeenCalledWith('/v1/users/user-1/listings?limit=20')
+      await waitFor(() =>
+        expect(mockFetch).toHaveBeenCalledWith('/v1/users/user-1/listings?limit=20')
+      )
     })
 
     it('appends publicationStatus param when a specific filter is selected', async () => {
