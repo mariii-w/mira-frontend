@@ -73,7 +73,7 @@ afterEach(() => {
 describe('<CreateListingPage />', () => {
   it('renders all main form sections', () => {
     render(<CreateListingPage />)
-    expect(screen.getByRole('heading', { name: 'New Listing' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'New Service' })).toBeInTheDocument()
     expect(screen.getByLabelText(/title/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/description/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/hourly rate/i)).toBeInTheDocument()

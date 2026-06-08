@@ -114,11 +114,11 @@ describe('<EditListingPage />', () => {
     )
   })
 
-  it('renders the Edit Listing heading after load', async () => {
+  it('renders the Edit Service heading after load', async () => {
     setupMocks()
     render(<EditListingPage />)
     await waitFor(() =>
-      expect(screen.getByRole('heading', { name: 'Edit Listing' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Edit Service' })).toBeInTheDocument()
     )
   })
 
@@ -304,11 +304,11 @@ describe('<EditListingPage />', () => {
     expect(resumeCall![1].method).toBe('POST')
   })
 
-  it('shows delete confirmation dialog when Delete listing is clicked', async () => {
+  it('shows delete confirmation dialog when Delete service is clicked', async () => {
     setupMocks()
     render(<EditListingPage />)
     await waitForLoad()
-    fireEvent.click(screen.getByRole('button', { name: /delete listing/i }))
+    fireEvent.click(screen.getByRole('button', { name: /delete service/i }))
     expect(screen.getByText('Are you sure? This cannot be undone.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /yes, delete/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^cancel$/i })).toBeInTheDocument()
@@ -318,17 +318,17 @@ describe('<EditListingPage />', () => {
     setupMocks()
     render(<EditListingPage />)
     await waitForLoad()
-    fireEvent.click(screen.getByRole('button', { name: /delete listing/i }))
+    fireEvent.click(screen.getByRole('button', { name: /delete service/i }))
     fireEvent.click(screen.getByRole('button', { name: /^cancel$/i }))
     expect(screen.queryByText('Are you sure? This cannot be undone.')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /delete listing/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /delete service/i })).toBeInTheDocument()
   })
 
   it('sends DELETE to /v1/listings/:id and navigates after confirming deletion', async () => {
     setupMocks()
     render(<EditListingPage />)
     await waitForLoad()
-    fireEvent.click(screen.getByRole('button', { name: /delete listing/i }))
+    fireEvent.click(screen.getByRole('button', { name: /delete service/i }))
     fireEvent.click(screen.getByRole('button', { name: /yes, delete/i }))
 
     await waitFor(() =>
@@ -345,7 +345,7 @@ describe('<EditListingPage />', () => {
     setupMocks(makeListing({ publicationStatus: 'DELETED' }))
     render(<EditListingPage />)
     await waitForLoad()
-    expect(screen.queryByRole('button', { name: /delete listing/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /delete service/i })).not.toBeInTheDocument()
   })
 
   describe('validation', () => {
@@ -435,7 +435,7 @@ describe('<EditListingPage />', () => {
       await waitForLoad()
       expect(screen.queryByRole('button', { name: /^save$/i })).not.toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /publish|pause|resume/i })).not.toBeInTheDocument()
-      expect(screen.queryByRole('button', { name: /delete listing/i })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /delete service/i })).not.toBeInTheDocument()
     })
 
     it('hides the images section', async () => {
@@ -489,7 +489,7 @@ describe('<EditListingPage />', () => {
       setupMocks(makeListing(), [], false)
       render(<EditListingPage />)
       await waitForLoad()
-      fireEvent.click(screen.getByRole('button', { name: /delete listing/i }))
+      fireEvent.click(screen.getByRole('button', { name: /delete service/i }))
       fireEvent.click(screen.getByRole('button', { name: /yes, delete/i }))
       await waitFor(() =>
         expect(screen.getByRole('alert')).toHaveTextContent('Action failed.')
