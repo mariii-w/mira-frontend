@@ -136,7 +136,7 @@ describe('<MyListingsPage />', () => {
   })
 
   it('fetches next page and enables Previous when Next is clicked', async () => {
-    mockFetch.mockImplementation(async (url: string) => {
+    mockFetch.mockImplementation(async (url: RequestInfo) => {
       const page = String(url).includes('from=') ? 2 : 1
       return {
         ok: true,
@@ -159,7 +159,7 @@ describe('<MyListingsPage />', () => {
   })
 
   it('returns to first page when Previous is clicked', async () => {
-    mockFetch.mockImplementation(async (url: string) => {
+    mockFetch.mockImplementation(async (url: RequestInfo) => {
       const page = String(url).includes('from=') ? 2 : 1
       return {
         ok: true,
@@ -245,7 +245,7 @@ describe('<MyListingsPage />', () => {
     })
 
     it('resets pagination to page 1 when filter changes', async () => {
-      mockFetch.mockImplementation(async (url: string) => {
+      mockFetch.mockImplementation(async (url: RequestInfo) => {
         const page = String(url).includes('from=') ? 2 : 1
         return {
           ok: true,

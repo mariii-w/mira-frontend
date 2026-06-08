@@ -347,4 +347,154 @@ describe('<EditListingPage />', () => {
     await waitForLoad()
     expect(screen.queryByRole('button', { name: /delete listing/i })).not.toBeInTheDocument()
   })
+
+  describe('validation', () => {
+    it('shows description error when description is too short', async () => {
+      setupMocks()
+      render(<EditListingPage />)
+      await waitForLoad()
+      fireEvent.change(screen.getByLabelText(/description/i), { target: { value: 'short' } })
+      fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+      await waitFor(() =>
+        expect(screen.getByText('At least 10 characters.')).toBeInTheDocument()
+      )
+    })
+
+    it('shows price error when value is negative', async () => {
+      setupMocks()
+      render(<EditListingPage />)
+      await waitForLoad()
+      fireEvent.change(screen.getByLabelText(/hourly rate/i), { target: { value: '-5' } })
+      fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+      await waitFor(() =>
+        expect(screen.getByText('Must be a positive number.')).toBeInTheDocument()
+      )
+    })
+
+    it('shows postal code error when format is invalid and address is started', async () => {
+      setupMocks()
+      render(<EditListingPage />)
+      await waitForLoad()
+      fireEvent.change(screen.getByLabelText(/^street$/i), { target: { value: 'Main St' } })
+      fireEvent.change(screen.getByLabelText(/^no\./i), { target: { value: '1' } })
+      fireEvent.change(screen.getByLabelText(/postal code/i), { target: { value: '1234' } })
+      fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+      await waitFor(() =>
+        expect(screen.getByText('Must be exactly 5 digits.')).toBeInTheDocument()
+      )
+    })
+  })
+
+  describe('location in PATCH body', () => {
+    it('excludes location when street and house number are empty', async () => {
+      setupMocks()
+      render(<EditListingPage />)
+      await waitForLoad()
+      fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith({ to: '/my-listings' }))
+      const patchCall = (mockFetch.mock.calls as [string, RequestInit][]).find(
+        ([, init]) => init?.method === 'PATCH'
+      )!
+      const body = JSON.parse(patchCall[1].body as string)
+      expect(body.location).toBeUndefined()
+    })
+
+    it('includes location when street and house number are filled', async () => {
+      setupMocks()
+      render(<EditListingPage />)
+      await waitForLoad()
+      fireEvent.change(screen.getByLabelText(/^street$/i), { target: { value: 'Main Street' } })
+      fireEvent.change(screen.getByLabelText(/^no\./i), { target: { value: '12a' } })
+      fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith({ to: '/my-listings' }))
+      const patchCall = (mockFetch.mock.calls as [string, RequestInit][]).find(
+        ([, init]) => init?.method === 'PATCH'
+      )!
+      const body = JSON.parse(patchCall[1].body as string)
+      expect(body.location).toBeDefined()
+      expect(body.location.street).toBe('Main Street')
+      expect(body.location.houseNumber).toBe('12a')
+      expect(body.location.city).toBe('Berlin')
+      expect(body.location.postalCode).toBe('10115')
+    })
+  })
+
+  describe('DELETED listing', () => {
+    it('disables all form fields', async () => {
+      setupMocks(makeListing({ publicationStatus: 'DELETED' }))
+      render(<EditListingPage />)
+      await waitForLoad()
+      expect(screen.getByLabelText(/title/i)).toBeDisabled()
+      expect(screen.getByLabelText(/description/i)).toBeDisabled()
+      expect(screen.getByLabelText(/hourly rate/i)).toBeDisabled()
+    })
+
+    it('shows no action or delete buttons', async () => {
+      setupMocks(makeListing({ publicationStatus: 'DELETED' }))
+      render(<EditListingPage />)
+      await waitForLoad()
+      expect(screen.queryByRole('button', { name: /^save$/i })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /publish|pause|resume/i })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /delete listing/i })).not.toBeInTheDocument()
+    })
+
+    it('hides the images section', async () => {
+      setupMocks(makeListing({ publicationStatus: 'DELETED' }))
+      render(<EditListingPage />)
+      await waitForLoad()
+      expect(screen.queryByRole('list', { name: /listing images/i })).not.toBeInTheDocument()
+    })
+  })
+
+  describe('images', () => {
+    it('renders existing images loaded from the media endpoint', async () => {
+      const media = [
+        { mediaId: 'media-1', url: 'https://example.com/img1.jpg', altText: 'Cat photo' },
+        { mediaId: 'media-2', url: 'https://example.com/img2.jpg', altText: null },
+      ]
+      setupMocks(makeListing(), media)
+      render(<EditListingPage />)
+      await waitForLoad()
+      expect(screen.getByRole('img', { name: 'Cat photo' })).toBeInTheDocument()
+      expect(screen.getAllByRole('listitem')).toHaveLength(2)
+    })
+
+    it('calls DELETE on the media endpoint when an existing image is removed', async () => {
+      const media = [{ mediaId: 'media-1', url: 'https://example.com/img1.jpg', altText: 'Cat photo' }]
+      setupMocks(makeListing(), media)
+      render(<EditListingPage />)
+      await waitForLoad()
+      fireEvent.click(screen.getByRole('button', { name: /remove image: cat photo/i }))
+      await waitFor(() => {
+        const deleteCall = (mockFetch.mock.calls as [string, RequestInit][]).find(
+          ([url, init]) => String(url).includes('/media/media-1') && init?.method === 'DELETE'
+        )
+        expect(deleteCall).toBeDefined()
+      })
+    })
+  })
+
+  describe('server errors on status actions', () => {
+    it('shows server error when publish fails', async () => {
+      setupMocks(makeListing({ publicationStatus: 'DRAFT' }), [], false)
+      render(<EditListingPage />)
+      await waitForLoad()
+      fireEvent.click(screen.getByRole('button', { name: /^publish$/i }))
+      await waitFor(() =>
+        expect(screen.getByRole('alert')).toHaveTextContent('Action failed.')
+      )
+    })
+
+    it('shows server error and dismisses confirmation when delete fails', async () => {
+      setupMocks(makeListing(), [], false)
+      render(<EditListingPage />)
+      await waitForLoad()
+      fireEvent.click(screen.getByRole('button', { name: /delete listing/i }))
+      fireEvent.click(screen.getByRole('button', { name: /yes, delete/i }))
+      await waitFor(() =>
+        expect(screen.getByRole('alert')).toHaveTextContent('Action failed.')
+      )
+      expect(screen.queryByText('Are you sure? This cannot be undone.')).not.toBeInTheDocument()
+    })
+  })
 })
