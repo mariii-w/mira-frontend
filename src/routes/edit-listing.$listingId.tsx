@@ -400,7 +400,7 @@ export function EditListingPage() {
               >
                 <ArrowLeft size={20} aria-hidden="true" />
               </button>
-              <h1 className="font-heading text-h1 font-bold text-foreground">Edit Listing</h1>
+              <h1 className="font-heading text-h1 font-bold text-foreground">Edit Service</h1>
               {status && (
                 <span className="text-small font-medium text-muted border border-border/40 rounded-full px-2.5 py-0.5">
                   <span className="sr-only">Status: </span>
@@ -730,7 +730,7 @@ export function EditListingPage() {
                   size="md"
                   onClick={() => setDeleteConfirming(true)}
                 >
-                  Delete listing
+                  Delete service
                 </Button>
               ) : (
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-in">

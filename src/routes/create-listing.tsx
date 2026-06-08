@@ -205,7 +205,7 @@ export function CreateListingPage() {
               >
                 <ArrowLeft size={20} aria-hidden="true" />
               </button>
-              <h1 className="font-heading text-h1 font-bold text-foreground">New Listing</h1>
+              <h1 className="font-heading text-h1 font-bold text-foreground">New Service</h1>
             </div>
             <div className="flex items-center gap-3">
               {submitting && (
