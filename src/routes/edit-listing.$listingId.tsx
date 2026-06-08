@@ -366,16 +366,15 @@ export function EditListingPage() {
               <h1 className="font-heading text-h1 font-bold text-foreground">Edit Listing</h1>
               {status && (
                 <span className="text-small font-medium text-muted border border-border/40 rounded-full px-2.5 py-0.5">
+                  <span className="sr-only">Status: </span>
                   {STATUS_LABEL[status]}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-3">
-              {submitting && (
-                <span aria-live="polite" className="text-small text-muted">
-                  Saving…
-                </span>
-              )}
+              <span aria-live="polite" className="text-small text-muted">
+                {submitting ? 'Saving…' : ''}
+              </span>
               {isEditable && (
                 <Button type="submit" variant="primary" size="md" loading={submitting}>
                   Save
@@ -437,6 +436,7 @@ export function EditListingPage() {
               placeholder="e.g. PC support and laptop help"
               error={titleError}
               disabled={!isEditable}
+              aria-required={isEditable || undefined}
             />
           </div>
 
@@ -455,6 +455,7 @@ export function EditListingPage() {
               placeholder="Describe what you offer, your experience and availability…"
               error={descriptionError}
               disabled={!isEditable}
+              aria-required={isEditable || undefined}
             />
           </div>
 
@@ -475,6 +476,7 @@ export function EditListingPage() {
               error={priceError}
               className="max-w-xs"
               disabled={!isEditable}
+              aria-required={isEditable || undefined}
             />
           </div>
 
@@ -488,7 +490,7 @@ export function EditListingPage() {
                 </span>
               </div>
               <div className="flex flex-wrap gap-3" role="list" aria-label="Listing images">
-                {existingImages.map((img) => (
+                {existingImages.map((img, i) => (
                   <div
                     key={img.mediaId}
                     role="listitem"
@@ -502,7 +504,7 @@ export function EditListingPage() {
                     <button
                       type="button"
                       onClick={() => removeExistingImage(img.mediaId)}
-                      aria-label="Remove image"
+                      aria-label={img.altText ? `Remove image: ${img.altText}` : `Remove image ${i + 1}`}
                       className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-charcoal/70 text-cream flex items-center justify-center hover:bg-charcoal transition-colors"
                     >
                       <X size={12} aria-hidden="true" />
@@ -687,7 +689,7 @@ export function EditListingPage() {
                 </Button>
               ) : (
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <p className="text-small text-foreground">
+                  <p role="alert" className="text-small text-foreground">
                     Are you sure? This cannot be undone.
                   </p>
                   <div className="flex gap-2">

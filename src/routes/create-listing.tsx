@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef, type FormEvent, type ChangeEvent } from 'react'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, ArrowLeft } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
@@ -196,7 +196,17 @@ export function CreateListingPage() {
         >
           {/* Header */}
           <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h1 className="font-heading text-h1 font-bold text-foreground">New Listing</h1>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigate({ to: '/my-listings' })}
+                aria-label="Back to My Services"
+                className="inline-flex items-center justify-center w-9 h-9 rounded-full hover:bg-foreground/5 active:bg-foreground/10 transition-colors text-muted hover:text-foreground shrink-0"
+              >
+                <ArrowLeft size={20} aria-hidden="true" />
+              </button>
+              <h1 className="font-heading text-h1 font-bold text-foreground">New Listing</h1>
+            </div>
             <div className="flex items-center gap-3">
               {submitting && (
                 <span aria-live="polite" className="text-small text-muted">

@@ -4,13 +4,54 @@ import { Plus } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
 import { Pagination } from '../components/Pagination'
-import { MyListingCard, type MyListingSummary } from '../components/MyListingCard'
+import { MyListingCard, type MyListingSummary, type PublicationStatus } from '../components/MyListingCard'
 import { useAuthStore } from '../stores/auth'
 import { authFetch } from '../lib/queryClient'
 
 export const Route = createFileRoute('/my-listings')({
   component: MyListingsPage,
 })
+
+type StatusFilter = 'ALL' | PublicationStatus
+
+const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
+  { value: 'ALL', label: 'All' },
+  { value: 'ACTIVE', label: 'Active' },
+  { value: 'DRAFT', label: 'Draft' },
+  { value: 'PAUSED', label: 'Paused' },
+  { value: 'DELETED', label: 'Deleted' },
+]
+
+function StatusFilterBar({
+  value,
+  onChange,
+}: {
+  value: StatusFilter
+  onChange: (value: StatusFilter) => void
+}) {
+  return (
+    <div role="group" aria-label="Filter services by status" className="flex flex-wrap gap-2">
+      {STATUS_FILTERS.map((filter) => {
+        const selected = filter.value === value
+        return (
+          <button
+            key={filter.value}
+            type="button"
+            aria-pressed={selected}
+            onClick={() => onChange(filter.value)}
+            className={`rounded-full px-4 py-1.5 text-small font-semibold transition-colors ${
+              selected
+                ? 'bg-accent text-cream'
+                : 'bg-linen text-foreground hover:bg-black/5'
+            }`}
+          >
+            {filter.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
 
 function CreateServiceButton({ onClick }: { onClick: () => void }) {
   return (
@@ -39,6 +80,7 @@ export function MyListingsPage() {
   const [nextCursor, setNextCursor] = useState<string | null>(null)
   const [prevCursors, setPrevCursors] = useState<(string | null)[]>([])
   const [currentFrom, setCurrentFrom] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -46,10 +88,10 @@ export function MyListingsPage() {
     if (!user) return
     setLoading(true)
     setError(null)
-    const url = currentFrom
-      ? `/v1/users/${user.userId}/listings?limit=20&from=${encodeURIComponent(currentFrom)}`
-      : `/v1/users/${user.userId}/listings?limit=20`
-    authFetch(url)
+    const params = new URLSearchParams({ limit: '20' })
+    if (currentFrom) params.set('from', currentFrom)
+    if (statusFilter !== 'ALL') params.set('publicationStatus', statusFilter)
+    authFetch(`/v1/users/${user.userId}/listings?${params.toString()}`)
       .then(async (res) => {
         if (!res.ok) throw new Error('Failed to load listings.')
         const data = await res.json()
@@ -58,7 +100,14 @@ export function MyListingsPage() {
       })
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [user, currentFrom])
+  }, [user, currentFrom, statusFilter])
+
+  function handleFilterChange(value: StatusFilter) {
+    if (value === statusFilter) return
+    setPrevCursors([])
+    setCurrentFrom(null)
+    setStatusFilter(value)
+  }
 
   const hasPrev = prevCursors.length > 0
 
@@ -105,6 +154,10 @@ export function MyListingsPage() {
             <CreateServiceButton onClick={handleCreate} />
           </div>
 
+          <div className="mb-8">
+            <StatusFilterBar value={statusFilter} onChange={handleFilterChange} />
+          </div>
+
           {loading && (
             <div role="status" aria-live="polite" className="flex justify-center py-16">
               <p className="text-small text-muted">Loading…</p>
@@ -117,8 +170,16 @@ export function MyListingsPage() {
 
           {!loading && !error && listings.length === 0 && (
             <div className="flex flex-col items-center gap-4 py-16 text-center">
-              <p className="text-body text-muted">You haven't created any services yet.</p>
-              <CreateServiceButton onClick={handleCreate} />
+              {statusFilter === 'ALL' ? (
+                <>
+                  <p className="text-body text-muted">You haven't created any services yet.</p>
+                  <CreateServiceButton onClick={handleCreate} />
+                </>
+              ) : (
+                <p className="text-body text-muted">
+                  No {statusFilter.toLowerCase()} services.
+                </p>
+              )}
             </div>
           )}
 
