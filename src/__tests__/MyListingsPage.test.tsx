@@ -188,4 +188,114 @@ describe('<MyListingsPage />', () => {
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
     expect(screen.getByRole('button', { name: /Create service/ })).toBeInTheDocument()
   })
+
+  describe('status filter', () => {
+    it('renders all five filter buttons', async () => {
+      mockSuccess([])
+      render(<MyListingsPage />)
+      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+      const group = screen.getByRole('group', { name: /filter services by status/i })
+      expect(group).toBeInTheDocument()
+      for (const label of ['All', 'Active', 'Draft', 'Paused', 'Deleted']) {
+        expect(screen.getByRole('button', { name: label })).toBeInTheDocument()
+      }
+    })
+
+    it('"All" is selected by default', async () => {
+      mockSuccess([])
+      render(<MyListingsPage />)
+      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+      expect(screen.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true')
+      for (const label of ['Active', 'Draft', 'Paused', 'Deleted']) {
+        expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'false')
+      }
+    })
+
+    it('fetches without publicationStatus param when "All" is active', async () => {
+      mockSuccess([])
+      render(<MyListingsPage />)
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledOnce())
+      expect(mockFetch).toHaveBeenCalledWith('/v1/users/user-1/listings?limit=20')
+    })
+
+    it('appends publicationStatus param when a specific filter is selected', async () => {
+      mockSuccess([])
+      render(<MyListingsPage />)
+      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+
+      mockSuccess([])
+      fireEvent.click(screen.getByRole('button', { name: 'Draft' }))
+
+      await waitFor(() =>
+        expect(mockFetch).toHaveBeenCalledWith(
+          '/v1/users/user-1/listings?limit=20&publicationStatus=DRAFT'
+        )
+      )
+    })
+
+    it('marks the selected filter as pressed and deselects the previous one', async () => {
+      mockSuccess([])
+      render(<MyListingsPage />)
+      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+
+      fireEvent.click(screen.getByRole('button', { name: 'Active' }))
+
+      expect(screen.getByRole('button', { name: 'Active' })).toHaveAttribute('aria-pressed', 'true')
+      expect(screen.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'false')
+    })
+
+    it('resets pagination to page 1 when filter changes', async () => {
+      mockFetch.mockImplementation(async (url: string) => {
+        const page = String(url).includes('from=') ? 2 : 1
+        return {
+          ok: true,
+          json: async () => ({
+            items: makeListings([{ title: `Page ${page}` }]),
+            cursor: { limit: 20, next: page === 1 ? 'cursor-p2' : null },
+          }),
+        } as Response
+      })
+
+      render(<MyListingsPage />)
+      await waitFor(() => expect(screen.getByRole('heading', { name: /Page 1/ })).toBeInTheDocument())
+
+      fireEvent.click(screen.getByRole('button', { name: /next/i }))
+      await waitFor(() => expect(screen.getByRole('heading', { name: /Page 2/ })).toBeInTheDocument())
+
+      mockSuccess([])
+      fireEvent.click(screen.getByRole('button', { name: 'Draft' }))
+
+      await waitFor(() =>
+        expect(mockFetch).toHaveBeenCalledWith(
+          '/v1/users/user-1/listings?limit=20&publicationStatus=DRAFT'
+        )
+      )
+    })
+
+    it('shows filter-specific empty state when a filter returns no results', async () => {
+      mockSuccess([])
+      render(<MyListingsPage />)
+      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+
+      mockFetch.mockClear()
+      mockSuccess([])
+      fireEvent.click(screen.getByRole('button', { name: 'Paused' }))
+
+      await waitFor(() =>
+        expect(screen.getByText('No paused services.')).toBeInTheDocument()
+      )
+      expect(screen.queryByText("You haven't created any services yet.")).not.toBeInTheDocument()
+    })
+
+    it('shows generic empty state when "All" returns no results', async () => {
+      mockSuccess([])
+      render(<MyListingsPage />)
+      await waitFor(() =>
+        expect(screen.getByText("You haven't created any services yet.")).toBeInTheDocument()
+      )
+      // header + empty-state body both render Create service
+      expect(screen.getAllByRole('button', { name: /Create service/ })).toHaveLength(2)
+      expect(screen.queryByText(/No .* services\./)).not.toBeInTheDocument()
+    })
+  })
 })
