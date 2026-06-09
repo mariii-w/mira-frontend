@@ -216,7 +216,7 @@ export function SearchPage() {
       <main id="main-content" className="min-h-[calc(100vh-4rem)] bg-background">
 
         {/* ── Search bar row ── */}
-        <div className="bg-background border-b border-border px-6 py-3">
+        <div className="bg-background px-6 py-3">
           <div className="mx-auto max-w-6xl flex items-center gap-4">
             <ServiceProviderToggle
               id="search-toggle"
@@ -243,7 +243,7 @@ export function SearchPage() {
         </div>
 
         {/* ── Breadcrumb + active filter chips row ── */}
-        <div className="bg-linen border-b border-border px-6 py-2">
+        <div className="bg-background px-6 py-2">
           <div className="mx-auto max-w-6xl flex items-center justify-between gap-4 flex-wrap">
             <Breadcrumb links={breadcrumbLinks} />
 
