@@ -1,28 +1,35 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Check, ClipboardPen, MapPin, Briefcase, Plus, Calendar, Mail, History, Phone } from 'lucide-react'
+import { Check, ClipboardPen, MapPin, Briefcase, Plus, Calendar, Mail, History, Phone, User } from 'lucide-react'
 import { useState } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
 import { AvatarIcon } from '../components/AvatarIcon'
 import { ServiceCardEdit, type ServiceCardEditProps } from '../components/ServiceCardEdit'
 import { ServiceCard, type ServiceCardProps } from '../components/ServiceCard'
+import { useAuthStore } from '../stores/auth'
+import { fetchUser } from '../lib/fetchUser'
 
 /* eslint-disable react-refresh/only-export-components */
 export const Route = createFileRoute('/profile')({ 
-  component: () => <Profile isOwner={false} isProvider={true} isVerified={true} /> 
+  component: () => <Profile isOwner={false} isProvider={true} isVerified={true} userId={"1b4e7cce-bb07-49b9-a28b-d22136fb905e"} /> 
 })
 
 type ProfileProps = {
   isProvider: boolean
   isOwner: boolean
   isVerified?: boolean
+  userId:  string
 }
 
-function Profile({ isProvider, isOwner, isVerified = false }: ProfileProps) {
+async function Profile({ isProvider, isOwner, isVerified = false, userId }: ProfileProps) {
   const [, setActiveTab] = useState('account')
+  const currentUser = useAuthStore((s) => s.user)
+  
+  const user = fetchUser(userId )
+  isOwner = currentUser?.userId === userId
+    // console.log("Profile page rendered with userId:", currentUser?.userId) // Debug log to check userId
 
-  const adress = "Berlin, Germany"
-
+  const adress = (await user)?.privateAddress ?? "Keine Adresse angegeben"
   const userDescription = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
   const serviceListings: ServiceCardEditProps[] = [
@@ -116,7 +123,7 @@ function Profile({ isProvider, isOwner, isVerified = false }: ProfileProps) {
                                 {isProvider? <p className="text-xl font-bold text-primary">Dienstleiter</p> : <p className="text-xl font-bold text-accent">Kunde</p>}
                             </div>
                             <div>
-                                <p className="flex items-center gap-1 text-sm font-bold text-border"> <MapPin/> {adress}</p>
+                                <p className="flex items-center gap-1 text-sm font-bold text-border"> <MapPin/> </p>
                             </div>
                         </div>
                     </div>
