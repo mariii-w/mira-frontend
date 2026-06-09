@@ -25,7 +25,7 @@ export function Navbar() {
   const pictureUrl = user?.profileMedia ? mediaUrl(user.profileMedia.url) : undefined;
 
   function handleGoogleLogin() {
-    window.location.href = "http://localhost:8081/auth/login/google";
+    window.location.href = 'http://localhost:8081/auth/login/google'
   }
 
   return (

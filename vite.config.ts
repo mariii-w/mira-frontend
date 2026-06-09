@@ -4,11 +4,19 @@ import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
-  plugins: [
-    tanstackRouter({ target: "react", autoCodeSplitting: true }),
-    tailwindcss(),
-    react(),
-  ],
+  plugins: [tanstackRouter({ target: 'react', autoCodeSplitting: true }), tailwindcss(), react()],
+  server: {
+    proxy: {
+      '/v1': {
+        target: 'http://localhost:8081',
+        changeOrigin: false,
+      },
+      '/media': {
+        target: 'http://localhost:8081',
+        changeOrigin: false,
+      },
+    },
+  },
   test: {
     environment: "jsdom",
     setupFiles: ["@testing-library/jest-dom/vitest"],
