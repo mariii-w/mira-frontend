@@ -5,13 +5,22 @@ import { Input } from './Input'
 import { Button } from './Button'
 import { Slider } from './Slider'
 
-export interface tagList {
+export interface ServiceTagOption {
+  tagId: string
   name: string
-  checked: boolean
 }
 
 interface FilterBarProps {
-  tagList: tagList[]
+  tags: ServiceTagOption[]
+  selectedTagIds: string[]
+  onTagToggle: (tagId: string) => void
+  distanceKm: number
+  onDistanceChange: (v: number) => void
+  maxPrice: number
+  onMaxPriceChange: (v: number) => void
+  onApply: () => void
+  resultCount?: number
+  activeCount?: number
 }
 
 interface FilterSectionProps {
@@ -22,7 +31,7 @@ interface FilterSectionProps {
 
 function FilterSection({ title, defaultOpen = true, children }: FilterSectionProps) {
   const [open, setOpen] = useState(defaultOpen)
-  
+
   return (
     <div className="flex flex-col">
       <button
@@ -58,57 +67,109 @@ function FilterSection({ title, defaultOpen = true, children }: FilterSectionPro
   )
 }
 
-export function FilterBar({ tagList = [] }: FilterBarProps) {
-    
+export function FilterBar({
+  tags = [],
+  selectedTagIds,
+  onTagToggle,
+  distanceKm,
+  onDistanceChange,
+  maxPrice,
+  onMaxPriceChange,
+  onApply,
+  resultCount,
+  activeCount = 0,
+}: FilterBarProps) {
   const [search, setSearch] = useState('')
 
-  const filteredTags = tagList?.filter(tag => 
+  const filteredTags = tags.filter(tag =>
     tag.name.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
     <article className="bg-linen rounded-2xl flex flex-col p-5 gap-4 border border-border w-full max-w-xs">
-      <p className="text-h1 font-bold">Filter</p>
+      <div className="flex items-center justify-between">
+        <p className="text-h1 font-bold">Filter</p>
+        {activeCount > 0 && (
+          <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-cream">
+            {activeCount} aktiv
+          </span>
+        )}
+      </div>
       <div className="w-full h-px bg-border" />
-      
+
       <div className="flex flex-col gap-3 divide-y divide-border">
         <FilterSection title="Tags">
-          <Input 
-            placeholder="Tags suchen" 
+          <Input
+            placeholder="Tags suchen"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <div className="mt-2 flex flex-col gap-2 max-h-48 overflow-y-auto">
-            {filteredTags.map((tag, index) => (
-              <TagLine key={`${tag.name}-${index}`} name={tag.name} checked={tag.checked} />
+            {filteredTags.map((tag) => (
+              <TagLine
+                key={tag.tagId}
+                tagId={tag.tagId}
+                name={tag.name}
+                checked={selectedTagIds.includes(tag.tagId)}
+                onToggle={onTagToggle}
+              />
             ))}
           </div>
         </FilterSection>
 
         <FilterSection title="Entfernung">
-          <Slider label={''} min={10} max={50} unit='km'/>
+          <Slider
+            label="Entfernung"
+            min={1}
+            max={50}
+            unit="km"
+            value={distanceKm}
+            onChange={onDistanceChange}
+          />
         </FilterSection>
 
-        <FilterSection title="Preis">
-          <Slider label={''} min={5} max={100} unit='€'/>
+        <FilterSection title="Preis pro Stunde">
+          <Slider
+            label="Maximaler Preis"
+            min={5}
+            max={100}
+            unit="€"
+            value={maxPrice}
+            onChange={onMaxPriceChange}
+          />
         </FilterSection>
       </div>
 
       <div className="w-full h-px bg-border" />
-      <div className='mx-auto'>
-        <Button className="">Zeige Ergebnisse</Button>
+      <div className="mx-auto">
+        <Button onClick={onApply}>
+          {resultCount !== undefined
+            ? `Zeige ${resultCount} Ergebnisse`
+            : 'Zeige Ergebnisse'}
+        </Button>
       </div>
     </article>
   )
 }
 
-export function TagLine({ name, checked }: { name: string; checked: boolean }) {
+export function TagLine({
+  tagId,
+  name,
+  checked,
+  onToggle,
+}: {
+  tagId: string
+  name: string
+  checked: boolean
+  onToggle: (tagId: string) => void
+}) {
   return (
     <label className="flex items-center gap-2 cursor-pointer hover:bg-black/5 p-1 rounded transition-colors">
-      <input 
-        type="checkbox" 
-        defaultChecked={checked}
-        className="w-4 h-4 rounded border-gray-300 accent-primary" 
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={() => onToggle(tagId)}
+        className="w-4 h-4 rounded border-gray-300 accent-primary"
       />
       <span className="text-sm">{name}</span>
     </label>
