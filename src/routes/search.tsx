@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { X } from 'lucide-react'
+import { X, Wrench, Users } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { SearchBar } from '../components/SearchBar'
 import { FilterBar, type ServiceTagOption } from '../components/FilterBar'
@@ -215,13 +215,15 @@ export function SearchPage() {
       <Navbar />
       <main id="main-content" className="min-h-[calc(100vh-4rem)] bg-background">
 
-        {/* ── Search bar area ── */}
-        <div className="border-b border-border bg-surface px-4 py-4">
-          <div className="mx-auto max-w-5xl flex items-center gap-4">
+        {/* ── Search bar row ── */}
+        <div className="bg-background border-b border-border px-6 py-3">
+          <div className="mx-auto max-w-6xl flex items-center gap-4">
             <ServiceProviderToggle
               id="search-toggle"
               labelLeft="Services"
               labelRight="Providers"
+              iconLeft={<Wrench />}
+              iconRight={<Users />}
               checked={false}
               onCheckedChange={() => {}}
             />
@@ -240,36 +242,17 @@ export function SearchPage() {
           </div>
         </div>
 
-        {/* ── Content ── */}
-        <div className="mx-auto max-w-5xl px-4 py-6 flex gap-6 items-start">
-
-          {/* ── Sidebar ── */}
-          <aside className="shrink-0 w-64">
-            <FilterBar
-              tags={allTags}
-              selectedTagIds={pendingTagIds}
-              onTagToggle={handleTagToggle}
-              distanceKm={pendingRadius}
-              onDistanceChange={setPendingRadius}
-              maxPrice={pendingMaxPrice}
-              onMaxPriceChange={setPendingMaxPrice}
-              onApply={commitFilters}
-              resultCount={listingsQuery.isSuccess ? listings.length : undefined}
-              activeCount={activeCount}
-            />
-          </aside>
-
-          {/* ── Results ── */}
-          <div className="flex-1 flex flex-col gap-4 min-w-0">
-
+        {/* ── Breadcrumb + active filter chips row ── */}
+        <div className="bg-linen border-b border-border px-6 py-2">
+          <div className="mx-auto max-w-6xl flex items-center justify-between gap-4 flex-wrap">
             <Breadcrumb links={breadcrumbLinks} />
 
             {/* Active filter chips */}
             {hasActiveFilters && (
-              <div className="flex flex-wrap gap-2 items-center" role="group" aria-label="Active filters">
+              <div className="flex flex-wrap gap-2 items-center" role="group" aria-label="Aktive Filter">
                 {hasPriceFilter && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-border bg-linen px-3 py-1 text-small">
-                    Bis {search.maxPrice}€/h
+                  <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-small">
+                    {search.maxPrice}€/h
                     <button
                       type="button"
                       aria-label="Preisfilter entfernen"
@@ -284,7 +267,7 @@ export function SearchPage() {
                   </span>
                 )}
                 {activeTagChips.map(tag => (
-                  <span key={tag.tagId} className="inline-flex items-center gap-1 rounded-full border border-border bg-linen px-3 py-1 text-small">
+                  <span key={tag.tagId} className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-small">
                     {tag.name}
                     <button
                       type="button"
@@ -309,6 +292,30 @@ export function SearchPage() {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* ── Content ── */}
+        <div className="mx-auto max-w-6xl px-6 py-6 flex gap-6 items-start">
+
+          {/* ── Sidebar ── */}
+          <aside className="shrink-0 w-64">
+            <FilterBar
+              tags={allTags}
+              selectedTagIds={pendingTagIds}
+              onTagToggle={handleTagToggle}
+              distanceKm={pendingRadius}
+              onDistanceChange={setPendingRadius}
+              maxPrice={pendingMaxPrice}
+              onMaxPriceChange={setPendingMaxPrice}
+              onApply={commitFilters}
+              resultCount={listingsQuery.isSuccess ? listings.length : undefined}
+              activeCount={activeCount}
+            />
+          </aside>
+
+          {/* ── Results ── */}
+          <div className="flex-1 flex flex-col gap-4 min-w-0">
 
             {/* Results header */}
             <div>

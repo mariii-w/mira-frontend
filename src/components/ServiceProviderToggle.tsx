@@ -1,10 +1,12 @@
 import * as Switch from "@radix-ui/react-switch";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, type ReactNode } from "react";
 
 interface ServiceProviderToggleProps {
   id: string;
   labelLeft: string;
   labelRight: string;
+  iconLeft?: ReactNode;
+  iconRight?: ReactNode;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
 }
@@ -13,6 +15,8 @@ export function ServiceProviderToggle({
   id,
   labelLeft,
   labelRight,
+  iconLeft,
+  iconRight,
   checked,
   onCheckedChange,
 }: ServiceProviderToggleProps) {
@@ -42,20 +46,22 @@ export function ServiceProviderToggle({
       {/* Left label */}
       <span
         ref={leftRef}
-        className={`relative z-10 px-4 py-1 text-h2 font-medium select-none transition-colors duration-150 whitespace-nowrap ${
+        className={`relative z-10 inline-flex items-center gap-1.5 px-4 py-1 text-h2 font-medium select-none transition-colors duration-150 whitespace-nowrap ${
           !checked ? "text-surface" : "text-charcoal"
         }`}
       >
+        {iconLeft && <span className="shrink-0 [&>svg]:w-4 [&>svg]:h-4">{iconLeft}</span>}
         {labelLeft}
       </span>
 
       {/* Right label */}
       <span
         ref={rightRef}
-        className={`relative z-10 px-4 py-1 text-h2 font-medium select-none transition-colors duration-150 whitespace-nowrap ${
+        className={`relative z-10 inline-flex items-center gap-1.5 px-4 py-1 text-h2 font-medium select-none transition-colors duration-150 whitespace-nowrap ${
           checked ? "text-surface" : "text-charcoal"
         }`}
       >
+        {iconRight && <span className="shrink-0 [&>svg]:w-4 [&>svg]:h-4">{iconRight}</span>}
         {labelRight}
       </span>
     </Switch.Root>
