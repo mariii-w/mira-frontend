@@ -36,6 +36,7 @@ type PublicListingSummary = {
   listingId: string
   tags: ServiceTag[]
   title: string
+  description: string | null
   price: number
   author: { name: string; surname: string }
   publishedAt: string | null
@@ -374,6 +375,7 @@ export function SearchPage() {
                         providerFirstName={listing.author.name}
                         providerLastName={listing.author.surname}
                         label={listing.title}
+                        description={listing.description ?? undefined}
                         badges={listing.tags.map(t => ({
                           text: t.name,
                           variant: t.isBarrierefrei ? 'accent' : 'primary',
