@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StyleguideRouteImport } from './routes/styleguide'
-import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -23,22 +22,11 @@ import { Route as RegisterNameRouteImport } from './routes/register/name'
 import { Route as RegisterDoneRouteImport } from './routes/register/done'
 import { Route as RegisterAddressRouteImport } from './routes/register/address'
 import { Route as RegisterAboutRouteImport } from './routes/register/about'
-import { Route as EditListingListingIdRouteImport } from './routes/edit-listing.$listingId'
-import { Route as SearchBrowseUsersRouteImport } from './routes/_search/browse-users'
-import { Route as SearchBrowseServicesRouteImport } from './routes/_search/browse-services'
-import { Route as ListingsListingIdIndexRouteImport } from './routes/listings/$listingId.index'
-import { Route as ListingsListingIdBookRouteImport } from './routes/listings/$listingId_.book'
 import { Route as ProfileUserIdRouteImport } from './routes/profile.$userId'
-import { Route as ProfileUserIdEditRouteImport } from './routes/profile.$userId.edit'
 
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
   path: '/styleguide',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -101,40 +89,10 @@ const RegisterAboutRoute = RegisterAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => RegisterRouteRoute,
 } as any)
-const EditListingListingIdRoute = EditListingListingIdRouteImport.update({
-  id: '/edit-listing/$listingId',
-  path: '/edit-listing/$listingId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchBrowseUsersRoute = SearchBrowseUsersRouteImport.update({
-  id: '/_search/browse-users',
-  path: '/browse-users',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchBrowseServicesRoute = SearchBrowseServicesRouteImport.update({
-  id: '/_search/browse-services',
-  path: '/browse-services',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ListingsListingIdIndexRoute = ListingsListingIdIndexRouteImport.update({
-  id: '/listings/$listingId/',
-  path: '/listings/$listingId/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ListingsListingIdBookRoute = ListingsListingIdBookRouteImport.update({
-  id: '/listings/$listingId_/book',
-  path: '/listings/$listingId/book',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
   id: '/profile/$userId',
   path: '/profile/$userId',
   getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileUserIdEditRoute = ProfileUserIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => ProfileUserIdRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -143,12 +101,8 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
   '/styleguide': typeof StyleguideRoute
-  '/browse-services': typeof SearchBrowseServicesRoute
-  '/browse-users': typeof SearchBrowseUsersRoute
-  '/edit-listing/$listingId': typeof EditListingListingIdRoute
-  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -165,12 +119,8 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
   '/styleguide': typeof StyleguideRoute
-  '/browse-services': typeof SearchBrowseServicesRoute
-  '/browse-users': typeof SearchBrowseUsersRoute
-  '/edit-listing/$listingId': typeof EditListingListingIdRoute
-  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -189,12 +139,8 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
   '/styleguide': typeof StyleguideRoute
-  '/_search/browse-services': typeof SearchBrowseServicesRoute
-  '/_search/browse-users': typeof SearchBrowseUsersRoute
-  '/edit-listing/$listingId': typeof EditListingListingIdRoute
-  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -214,11 +160,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/create-listing'
     | '/login'
-    | '/profile'
     | '/styleguide'
-    | '/browse-services'
-    | '/browse-users'
-    | '/edit-listing/$listingId'
     | '/profile/$userId'
     | '/register/about'
     | '/register/address'
@@ -236,11 +178,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/create-listing'
     | '/login'
-    | '/profile'
     | '/styleguide'
-    | '/browse-services'
-    | '/browse-users'
-    | '/edit-listing/$listingId'
     | '/profile/$userId'
     | '/register/about'
     | '/register/address'
@@ -259,11 +197,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/create-listing'
     | '/login'
-    | '/profile'
     | '/styleguide'
-    | '/_search/browse-services'
-    | '/_search/browse-users'
-    | '/edit-listing/$listingId'
     | '/profile/$userId'
     | '/register/about'
     | '/register/address'
@@ -283,14 +217,8 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   CreateListingRoute: typeof CreateListingRoute
   LoginRoute: typeof LoginRoute
-  ProfileRoute: typeof ProfileRoute
   StyleguideRoute: typeof StyleguideRoute
-  SearchBrowseServicesRoute: typeof SearchBrowseServicesRoute
-  SearchBrowseUsersRoute: typeof SearchBrowseUsersRoute
-  EditListingListingIdRoute: typeof EditListingListingIdRoute
-  ListingsListingIdBookRoute: typeof ListingsListingIdBookRoute
-  ListingsListingIdIndexRoute: typeof ListingsListingIdIndexRoute
-  ProfileUserIdRoute: typeof ProfileUserIdRouteWithChildren
+  ProfileUserIdRoute: typeof ProfileUserIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -300,13 +228,6 @@ declare module '@tanstack/react-router' {
       path: '/styleguide'
       fullPath: '/styleguide'
       preLoaderRoute: typeof StyleguideRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -393,54 +314,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterAboutRouteImport
       parentRoute: typeof RegisterRouteRoute
     }
-    '/edit-listing/$listingId': {
-      id: '/edit-listing/$listingId'
-      path: '/edit-listing/$listingId'
-      fullPath: '/edit-listing/$listingId'
-      preLoaderRoute: typeof EditListingListingIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_search/browse-users': {
-      id: '/_search/browse-users'
-      path: '/browse-users'
-      fullPath: '/browse-users'
-      preLoaderRoute: typeof SearchBrowseUsersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_search/browse-services': {
-      id: '/_search/browse-services'
-      path: '/browse-services'
-      fullPath: '/browse-services'
-      preLoaderRoute: typeof SearchBrowseServicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/listings/$listingId/': {
-      id: '/listings/$listingId/'
-      path: '/listings/$listingId'
-      fullPath: '/listings/$listingId/'
-      preLoaderRoute: typeof ListingsListingIdIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/listings/$listingId_/book': {
-      id: '/listings/$listingId_/book'
-      path: '/listings/$listingId/book'
-      fullPath: '/listings/$listingId/book'
-      preLoaderRoute: typeof ListingsListingIdBookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/profile/$userId': {
       id: '/profile/$userId'
       path: '/profile/$userId'
       fullPath: '/profile/$userId'
       preLoaderRoute: typeof ProfileUserIdRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/profile/$userId/edit': {
-      id: '/profile/$userId/edit'
-      path: '/edit'
-      fullPath: '/profile/$userId/edit'
-      preLoaderRoute: typeof ProfileUserIdEditRouteImport
-      parentRoute: typeof ProfileUserIdRoute
     }
   }
 }
@@ -487,14 +366,8 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   CreateListingRoute: CreateListingRoute,
   LoginRoute: LoginRoute,
-  ProfileRoute: ProfileRoute,
   StyleguideRoute: StyleguideRoute,
-  SearchBrowseServicesRoute: SearchBrowseServicesRoute,
-  SearchBrowseUsersRoute: SearchBrowseUsersRoute,
-  EditListingListingIdRoute: EditListingListingIdRoute,
-  ListingsListingIdBookRoute: ListingsListingIdBookRoute,
-  ListingsListingIdIndexRoute: ListingsListingIdIndexRoute,
-  ProfileUserIdRoute: ProfileUserIdRouteWithChildren,
+  ProfileUserIdRoute: ProfileUserIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
