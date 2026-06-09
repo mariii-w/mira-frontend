@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StyleguideRouteImport } from './routes/styleguide'
-import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -24,16 +23,10 @@ import { Route as RegisterDoneRouteImport } from './routes/register/done'
 import { Route as RegisterAddressRouteImport } from './routes/register/address'
 import { Route as RegisterAboutRouteImport } from './routes/register/about'
 import { Route as ProfileUserIdRouteImport } from './routes/profile.$userId'
-import { Route as ProfileUserIdEditRouteImport } from './routes/profile.$userId.edit'
 
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
   path: '/styleguide',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -101,11 +94,6 @@ const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
   path: '/profile/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileUserIdEditRoute = ProfileUserIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => ProfileUserIdRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -113,9 +101,8 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
   '/styleguide': typeof StyleguideRoute
-  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -130,9 +117,8 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
   '/styleguide': typeof StyleguideRoute
-  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -149,9 +135,8 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
   '/styleguide': typeof StyleguideRoute
-  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -169,7 +154,6 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/create-listing'
     | '/login'
-    | '/profile'
     | '/styleguide'
     | '/profile/$userId'
     | '/register/about'
@@ -186,7 +170,6 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/create-listing'
     | '/login'
-    | '/profile'
     | '/styleguide'
     | '/profile/$userId'
     | '/register/about'
@@ -204,7 +187,6 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/create-listing'
     | '/login'
-    | '/profile'
     | '/styleguide'
     | '/profile/$userId'
     | '/register/about'
@@ -223,9 +205,8 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   CreateListingRoute: typeof CreateListingRoute
   LoginRoute: typeof LoginRoute
-  ProfileRoute: typeof ProfileRoute
   StyleguideRoute: typeof StyleguideRoute
-  ProfileUserIdRoute: typeof ProfileUserIdRouteWithChildren
+  ProfileUserIdRoute: typeof ProfileUserIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -235,13 +216,6 @@ declare module '@tanstack/react-router' {
       path: '/styleguide'
       fullPath: '/styleguide'
       preLoaderRoute: typeof StyleguideRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -335,13 +309,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profile/$userId/edit': {
-      id: '/profile/$userId/edit'
-      path: '/edit'
-      fullPath: '/profile/$userId/edit'
-      preLoaderRoute: typeof ProfileUserIdEditRouteImport
-      parentRoute: typeof ProfileUserIdRoute
-    }
   }
 }
 
@@ -387,9 +354,8 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   CreateListingRoute: CreateListingRoute,
   LoginRoute: LoginRoute,
-  ProfileRoute: ProfileRoute,
   StyleguideRoute: StyleguideRoute,
-  ProfileUserIdRoute: ProfileUserIdRouteWithChildren,
+  ProfileUserIdRoute: ProfileUserIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
