@@ -29,6 +29,7 @@ import { Route as SearchBrowseUsersRouteImport } from './routes/_search/browse-u
 import { Route as SearchBrowseServicesRouteImport } from './routes/_search/browse-services'
 import { Route as ListingsListingIdIndexRouteImport } from './routes/listings/$listingId.index'
 import { Route as ListingsListingIdBookRouteImport } from './routes/listings/$listingId_.book'
+import { Route as ProfileUserIdRouteImport } from './routes/profile.$userId'
 
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
@@ -130,6 +131,11 @@ const ListingsListingIdBookRoute = ListingsListingIdBookRouteImport.update({
   path: '/listings/$listingId/book',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
+  id: '/profile/$userId',
+  path: '/profile/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/browse-services': typeof SearchBrowseServicesRoute
   '/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/browse-services': typeof SearchBrowseServicesRoute
   '/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/_search/browse-services': typeof SearchBrowseServicesRoute
   '/_search/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/browse-services'
     | '/browse-users'
     | '/edit-listing/$listingId'
+    | '/profile/$userId'
     | '/register/about'
     | '/register/address'
     | '/register/done'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/browse-services'
     | '/browse-users'
     | '/edit-listing/$listingId'
+    | '/profile/$userId'
     | '/register/about'
     | '/register/address'
     | '/register/done'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/_search/browse-services'
     | '/_search/browse-users'
     | '/edit-listing/$listingId'
+    | '/profile/$userId'
     | '/register/about'
     | '/register/address'
     | '/register/done'
@@ -279,6 +291,7 @@ export interface RootRouteChildren {
   EditListingListingIdRoute: typeof EditListingListingIdRoute
   ListingsListingIdBookRoute: typeof ListingsListingIdBookRoute
   ListingsListingIdIndexRoute: typeof ListingsListingIdIndexRoute
+  ProfileUserIdRoute: typeof ProfileUserIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -423,6 +436,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListingsListingIdBookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/$userId': {
+      id: '/profile/$userId'
+      path: '/profile/$userId'
+      fullPath: '/profile/$userId'
+      preLoaderRoute: typeof ProfileUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -464,6 +484,7 @@ const rootRouteChildren: RootRouteChildren = {
   EditListingListingIdRoute: EditListingListingIdRoute,
   ListingsListingIdBookRoute: ListingsListingIdBookRoute,
   ListingsListingIdIndexRoute: ListingsListingIdIndexRoute,
+  ProfileUserIdRoute: ProfileUserIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
