@@ -339,15 +339,25 @@ function Styleguide() {
     <section className="flex flex-col gap-3">
       <h2>Filter Leiste</h2>
       <div className='w-96'>
-        <FilterBar tagList={[
-          {name:"PC & Laptop", checked: false},
-          {name:"Phone & Tablet", checked: false},
-          {name:"Smart Home", checked: false},
-          {name:"Printers", checked: false},
-          {name:"Software Help", checked: false},
-          {name:"Email & Web", checked: false},
-          {name:"Linux", checked: false},
-        ]}/>
+        <FilterBar
+          tags={[
+            { tagId: '1', name: 'PC & Laptop' },
+            { tagId: '2', name: 'Phone & Tablet' },
+            { tagId: '3', name: 'Smart Home' },
+            { tagId: '4', name: 'Printers' },
+            { tagId: '5', name: 'Software Help' },
+            { tagId: '6', name: 'Email & Web' },
+            { tagId: '7', name: 'Linux' },
+          ]}
+          selectedTagIds={['1', '2']}
+          onTagToggle={() => {}}
+          distanceKm={10}
+          onDistanceChange={() => {}}
+          maxPrice={40}
+          onMaxPriceChange={() => {}}
+          onApply={() => {}}
+          activeCount={2}
+        />
       </div>
     </section>
 
