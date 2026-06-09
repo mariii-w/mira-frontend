@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Search, Check, ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react'
 import { useState, useRef } from 'react'
 import { Navbar } from '../components/Navbar'
@@ -59,6 +59,7 @@ const FOOTER_LINKS = ['About', 'Contact Us', 'Accessibility', 'Terms of Use', 'P
 
 function Home() {
   const [query, setQuery] = useState('')
+  const navigate = useNavigate()
   const categoryRef = useRef<HTMLUListElement>(null)
   const providerRef = useRef<HTMLUListElement>(null)
 
@@ -97,7 +98,7 @@ function Home() {
               <p className="text-small text-foreground/70">
                 Search thousands of verified services in your neighbourhood. Book in minutes, pay securely, leave a review.
               </p>
-              <form role="search" className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
+              <form role="search" className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (query.trim()) navigate({ to: '/search', search: { q: query.trim(), city: '', radius: 20, tagIds: [], maxPrice: 100, from: undefined } }) }}>
                 <label htmlFor="hero-search" className="sr-only">Search for a service</label>
                 <input
                   id="hero-search"

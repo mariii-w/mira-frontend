@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StyleguideRouteImport } from './routes/styleguide'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as MyListingsRouteImport } from './routes/my-listings'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
@@ -27,6 +28,11 @@ import { Route as EditListingListingIdRouteImport } from './routes/edit-listing.
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
   path: '/styleguide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MyListingsRoute = MyListingsRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-listings': typeof MyListingsRoute
+  '/search': typeof SearchRoute
   '/styleguide': typeof StyleguideRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
   '/register/about': typeof RegisterAboutRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-listings': typeof MyListingsRoute
+  '/search': typeof SearchRoute
   '/styleguide': typeof StyleguideRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
   '/register/about': typeof RegisterAboutRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-listings': typeof MyListingsRoute
+  '/search': typeof SearchRoute
   '/styleguide': typeof StyleguideRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
   '/register/about': typeof RegisterAboutRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/create-listing'
     | '/login'
     | '/my-listings'
+    | '/search'
     | '/styleguide'
     | '/edit-listing/$listingId'
     | '/register/about'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/create-listing'
     | '/login'
     | '/my-listings'
+    | '/search'
     | '/styleguide'
     | '/edit-listing/$listingId'
     | '/register/about'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/create-listing'
     | '/login'
     | '/my-listings'
+    | '/search'
     | '/styleguide'
     | '/edit-listing/$listingId'
     | '/register/about'
@@ -199,6 +211,7 @@ export interface RootRouteChildren {
   CreateListingRoute: typeof CreateListingRoute
   LoginRoute: typeof LoginRoute
   MyListingsRoute: typeof MyListingsRoute
+  SearchRoute: typeof SearchRoute
   StyleguideRoute: typeof StyleguideRoute
   EditListingListingIdRoute: typeof EditListingListingIdRoute
 }
@@ -210,6 +223,13 @@ declare module '@tanstack/react-router' {
       path: '/styleguide'
       fullPath: '/styleguide'
       preLoaderRoute: typeof StyleguideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/my-listings': {
@@ -336,6 +356,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreateListingRoute: CreateListingRoute,
   LoginRoute: LoginRoute,
   MyListingsRoute: MyListingsRoute,
+  SearchRoute: SearchRoute,
   StyleguideRoute: StyleguideRoute,
   EditListingListingIdRoute: EditListingListingIdRoute,
 }
