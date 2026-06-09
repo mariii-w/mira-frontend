@@ -30,6 +30,7 @@ function fmt(n: number): string {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function Slider({
+  label,
   unit,
   min,
   max,
@@ -127,6 +128,7 @@ export function Slider({
           step={step}
           value={value}
           disabled={disabled}
+          aria-label={label || undefined}
           aria-valuemin={min}
           aria-valuemax={max}
           aria-valuenow={value}
