@@ -1,3 +1,6 @@
+import { ChevronDown, ChevronUp, MapPin } from 'lucide-react'
+import { useState } from 'react'
+
 export type BookingStatus =
   | 'PENDING'
   | 'CONFIRMED'
@@ -75,5 +78,104 @@ export function StatusBadge({ status }: { status: BookingStatus }) {
     >
       {STATUS_LABEL[status]}
     </span>
+  )
+}
+
+function formatDate(iso: string) {
+  const d = new Date(iso)
+  return {
+    month: d.toLocaleString('default', { month: 'short' }).toUpperCase(),
+    day:   String(d.getDate()),
+    time:  d.toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit', hour12: false }),
+  }
+}
+
+function durationHours(start: string, end: string) {
+  return Math.round((new Date(end).getTime() - new Date(start).getTime()) / 3_600_000)
+}
+
+function formatAddress(addr: BookingServiceAddress | null): string | null {
+  if (!addr) return null
+  return `${addr.street} ${addr.houseNumber}, ${addr.city}`
+}
+
+export interface BookingCardProps {
+  booking: BookingSummary
+  renderExpanded?: (bookingId: string) => React.ReactNode
+}
+
+export function BookingCard({ booking, renderExpanded }: BookingCardProps) {
+  const [expanded, setExpanded] = useState(false)
+
+  const { month, day, time } = formatDate(booking.bookedStart)
+  const hours     = durationHours(booking.bookedStart, booking.bookedEnd)
+  const address   = formatAddress(booking.serviceAddress)
+  const headingId = `booking-${booking.bookingId}-title`
+  const detailsId = `booking-${booking.bookingId}-details`
+
+  return (
+    <article
+      aria-labelledby={headingId}
+      className="bg-surface rounded-2xl border border-border/20 shadow-sm overflow-hidden"
+    >
+      <div className="flex items-start gap-4 p-4 sm:p-5">
+        <div
+          aria-label={`${month} ${day} at ${time}`}
+          className="flex flex-col items-center justify-center min-w-[3rem] text-center select-none"
+        >
+          <span aria-hidden="true" className="text-xs font-semibold text-muted uppercase tracking-wide leading-none">
+            {month}
+          </span>
+          <span aria-hidden="true" className="text-h2 font-bold text-foreground leading-tight">
+            {day}
+          </span>
+          <span aria-hidden="true" className="text-xs text-muted leading-none mt-0.5">
+            {time}
+          </span>
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <h3 id={headingId} className="font-heading text-body font-semibold text-foreground truncate">
+            {booking.listing.title}
+          </h3>
+          <p className="text-small text-muted mt-0.5">
+            {booking.counterparty.name} {booking.counterparty.surname}
+          </p>
+          {address && (
+            <p className="flex items-center gap-1 text-small text-muted mt-1">
+              <MapPin aria-hidden="true" size={12} className="shrink-0" />
+              <span className="truncate">{address}</span>
+            </p>
+          )}
+          <p className="text-small text-muted mt-1">
+            {hours}h · {booking.totalPrice}€
+          </p>
+        </div>
+
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <StatusBadge status={booking.status} />
+          {renderExpanded && (
+            <button
+              type="button"
+              aria-expanded={expanded}
+              aria-controls={detailsId}
+              aria-label={expanded ? 'Collapse booking details' : 'Expand booking details'}
+              onClick={() => setExpanded((v) => !v)}
+              className="text-muted hover:text-foreground transition-colors"
+            >
+              {expanded
+                ? <ChevronUp  aria-hidden="true" size={18} />
+                : <ChevronDown aria-hidden="true" size={18} />}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {renderExpanded && expanded && (
+        <div id={detailsId} className="border-t border-border/20 px-4 pb-4 pt-3 sm:px-5">
+          {renderExpanded(booking.bookingId)}
+        </div>
+      )}
+    </article>
   )
 }
