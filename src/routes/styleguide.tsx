@@ -29,6 +29,7 @@ import { FilterBar } from '../components/FilterBar.tsx';
 import { ServiceCard } from '../components/ServiceCard.tsx';
 import { ServiceProviderToggle } from '../components/ServiceProviderToggle.tsx'
 import { BookingCard, type BookingSummary, type BookingDetails } from '../components/BookingCard.tsx';
+import { CalendarGrid } from '../components/CalendarGrid.tsx';
 
 
 
@@ -152,7 +153,10 @@ const BOOKING_SAMPLES: { summary: BookingSummary; detail: BookingDetails }[] = [
 export const Route = createFileRoute('/styleguide')({ component: Styleguide })
 
 function Styleguide() {
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useState(false)
+  const [calYear, setCalYear] = useState(new Date().getFullYear())
+  const [calMonth, setCalMonth] = useState(new Date().getMonth() + 1)
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null)
   
   return (
     <div className="p-6 space-y-12 bg-white min-h-dvh">
@@ -473,6 +477,47 @@ function Styleguide() {
         {BOOKING_SAMPLES.map(({ summary, detail }) => (
           <BookingCard key={summary.bookingId} booking={summary} mockDetail={detail} onActionComplete={() => {}} />
         ))}
+      </div>
+    </section>
+
+    <section className="flex flex-col gap-3">
+      <h2>Calendar Grid</h2>
+      <div className="p-6 bg-surface border border-border rounded-lg max-w-sm">
+        <CalendarGrid
+          year={calYear}
+          month={calMonth}
+          onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m) }}
+          minDate={new Date()}
+          renderDay={(date) => {
+            const today = new Date()
+            const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+            const isSelected = selectedDay?.toDateString() === date.toDateString()
+            const isToday = date.toDateString() === today.toDateString()
+            return (
+              <button
+                type="button"
+                disabled={isPast}
+                onClick={() => setSelectedDay(date)}
+                aria-label={date.toDateString()}
+                aria-pressed={isSelected}
+                className={[
+                  'w-full aspect-square rounded-lg text-small font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+                  isPast     ? 'text-muted/40 cursor-not-allowed' : 'hover:bg-mint',
+                  isSelected ? 'bg-primary text-primary-foreground hover:bg-primary' : '',
+                  isToday && !isSelected ? 'ring-1 ring-primary text-primary' : '',
+                  !isSelected && !isToday && !isPast ? 'text-foreground' : '',
+                ].join(' ')}
+              >
+                {date.getDate()}
+              </button>
+            )
+          }}
+        />
+        {selectedDay && (
+          <p className="mt-3 text-small text-muted text-center">
+            Selected: {selectedDay.toLocaleDateString('default', { weekday: 'short', day: 'numeric', month: 'long' })}
+          </p>
+        )}
       </div>
     </section>
 
