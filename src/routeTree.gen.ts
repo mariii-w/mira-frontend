@@ -24,6 +24,7 @@ import { Route as RegisterDoneRouteImport } from './routes/register/done'
 import { Route as RegisterAddressRouteImport } from './routes/register/address'
 import { Route as RegisterAboutRouteImport } from './routes/register/about'
 import { Route as EditListingListingIdRouteImport } from './routes/edit-listing.$listingId'
+import { Route as ListingsListingIdBookRouteImport } from './routes/listings/$listingId.book'
 
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
@@ -100,6 +101,11 @@ const EditListingListingIdRoute = EditListingListingIdRouteImport.update({
   path: '/edit-listing/$listingId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListingsListingIdBookRoute = ListingsListingIdBookRouteImport.update({
+  id: '/listings/$listingId/book',
+  path: '/listings/$listingId/book',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
   '/register/': typeof RegisterIndexRoute
+  '/listings/$listingId/book': typeof ListingsListingIdBookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
   '/register': typeof RegisterIndexRoute
+  '/listings/$listingId/book': typeof ListingsListingIdBookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
   '/register/': typeof RegisterIndexRoute
+  '/listings/$listingId/book': typeof ListingsListingIdBookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/register/photo'
     | '/register/role'
     | '/register/'
+    | '/listings/$listingId/book'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/register/photo'
     | '/register/role'
     | '/register'
+    | '/listings/$listingId/book'
   id:
     | '__root__'
     | '/'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/register/photo'
     | '/register/role'
     | '/register/'
+    | '/listings/$listingId/book'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -214,6 +226,7 @@ export interface RootRouteChildren {
   MyListingsRoute: typeof MyListingsRoute
   StyleguideRoute: typeof StyleguideRoute
   EditListingListingIdRoute: typeof EditListingListingIdRoute
+  ListingsListingIdBookRoute: typeof ListingsListingIdBookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditListingListingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/listings/$listingId/book': {
+      id: '/listings/$listingId/book'
+      path: '/listings/$listingId/book'
+      fullPath: '/listings/$listingId/book'
+      preLoaderRoute: typeof ListingsListingIdBookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -359,6 +379,7 @@ const rootRouteChildren: RootRouteChildren = {
   MyListingsRoute: MyListingsRoute,
   StyleguideRoute: StyleguideRoute,
   EditListingListingIdRoute: EditListingListingIdRoute,
+  ListingsListingIdBookRoute: ListingsListingIdBookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
