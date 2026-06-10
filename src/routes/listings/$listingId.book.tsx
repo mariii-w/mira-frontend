@@ -1,10 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Minus, Plus, Sunrise, Sun, Home, MapPin } from 'lucide-react'
+import { ArrowLeft, Minus, Plus, Sunrise, Sun, Home, MapPin, MapPinned, ArrowRight } from 'lucide-react'
 import { Navbar } from '../../components/Navbar'
 import { CalendarGrid } from '../../components/CalendarGrid'
-import { Button } from '../../components/Button'
 import { authFetch } from '../../lib/queryClient'
 
 export const Route = createFileRoute('/listings/$listingId/book')({
@@ -41,6 +40,12 @@ function toLocalDatetime(date: Date): string {
 
 function formatTime(isoDatetime: string): string {
   return new Date(isoDatetime).toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatSlotLabel(slot: string): string {
+  const d = new Date(slot)
+  return d.toLocaleDateString('default', { weekday: 'short', day: 'numeric', month: 'short' }) +
+    ' · ' + d.toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit' })
 }
 
 function freeHours(windows: TimeWindow[]): number {
@@ -83,6 +88,10 @@ function StepBadge({ n }: { n: number }) {
       {n}
     </span>
   )
+}
+
+function initials(name: string, surname: string): string {
+  return (name[0] ?? '') + (surname[0] ?? '')
 }
 
 function BookingPage() {
@@ -144,6 +153,8 @@ function BookingPage() {
     description.length >= 10 &&
     description.length <= 2000
 
+  const estimatedTotal = listing ? (listing.price * durationHours).toFixed(2) : null
+
   const locationOptions = [
     {
       value: 'AT_CONSUMER' as LocationType,
@@ -199,7 +210,7 @@ function BookingPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-dvh bg-background pb-28">
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 py-8">
         <button
@@ -209,14 +220,45 @@ function BookingPage() {
           aria-label="Go back"
         >
           <ArrowLeft size={16} aria-hidden="true" />
-          Back
+          Back to Listing
         </button>
 
-        <h1 className="mb-6">Book a service</h1>
+      {listing && (
+        <div
+          className="rounded-2xl px-6 py-5 mb-4"
+          style={{ background: 'linear-gradient(135deg, #47745B 0%, #7C4E80 100%)' }}
+          aria-label="Listing summary"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div
+                className="w-14 h-14 rounded-full ring-2 ring-primary-foreground/40 bg-primary-foreground/20 flex items-center justify-center text-primary-foreground font-bold text-body flex-shrink-0"
+                aria-hidden="true"
+              >
+                {initials(listing.author.name, listing.author.surname)}
+              </div>
+              <div>
+                <p className="text-xs text-primary-foreground/60 uppercase tracking-wide font-semibold mb-1">
+                  You're booking
+                </p>
+                <p className="text-body font-bold text-primary-foreground mb-1">{listing.title}</p>
+                <p className="flex items-center gap-1 text-xs text-primary-foreground/60">
+                  <MapPinned size={11} aria-hidden="true" />
+                  {listing.location.city}
+                </p>
+              </div>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <span className="text-2xl font-bold text-primary-foreground">{listing.price}€</span>
+              <span className="text-xs text-primary-foreground/60"> / hr</span>
+            </div>
+          </div>
+        </div>
+      )}
 
         <section
           aria-labelledby="pick-datetime-heading"
-          className="bg-surface rounded-2xl border border-border p-6 mb-4"
+          className="bg-linen rounded-2xl border border-border p-6 mb-4"
         >
           <div className="flex items-center gap-3 mb-4">
             <StepBadge n={1} />
@@ -341,7 +383,7 @@ function BookingPage() {
 
         <section
           aria-labelledby="details-heading"
-          className="bg-surface rounded-2xl border border-border p-6 mb-4"
+          className="bg-linen rounded-2xl border border-border p-6 mb-4"
         >
           <div className="flex items-center gap-3 mb-6">
             <StepBadge n={2} />
@@ -421,13 +463,50 @@ function BookingPage() {
             </div>
           </div>
         </section>
-
-        <div className="flex justify-end">
-          <Button variant="primary" disabled={!canSubmit}>
-            Continue
-          </Button>
-        </div>
       </main>
+
+      <div className="fixed bottom-0 left-0 right-0 bg-linen border-t border-border z-10">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-6">
+          <div className="flex gap-6 flex-1 min-w-0">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-muted uppercase tracking-wide">Date & time</p>
+              <p className="text-small font-medium text-foreground truncate">
+                {selectedSlot ? formatSlotLabel(selectedSlot) : '—'}
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <p className="text-xs font-semibold text-muted uppercase tracking-wide">Duration</p>
+              <p className="text-small font-medium text-foreground">{durationHours}h</p>
+            </div>
+            <div className="flex-shrink-0">
+              <p className="text-xs font-semibold text-muted uppercase tracking-wide">Location</p>
+              <p className="text-small font-medium text-foreground">
+                {locationType === 'AT_CONSUMER' ? 'At your place' : locationType === 'AT_PROVIDER' ? "At provider's" : '—'}
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <p className="text-xs font-semibold text-muted uppercase tracking-wide">Estimated total</p>
+              <p className="text-small font-semibold text-foreground">
+                {estimatedTotal ? `${estimatedTotal} €` : '—'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            disabled={!canSubmit}
+            className={[
+              'flex items-center gap-2 px-6 py-3 rounded-xl text-small font-semibold transition-colors flex-shrink-0',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+              canSubmit
+                ? 'bg-primary text-primary-foreground hover:bg-primary-hover'
+                : 'bg-muted/20 text-muted cursor-not-allowed',
+            ].join(' ')}
+          >
+            Send booking request
+            <ArrowRight size={16} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
