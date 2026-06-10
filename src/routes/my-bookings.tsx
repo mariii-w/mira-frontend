@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Navbar } from '../components/Navbar'
-import { BookingCard, type BookingSummary, type BookingStatus } from '../components/BookingCard'
+import { BookingCard, type BookingSummary, type BookingStatus, type BookingCollection } from '../components/BookingCard'
 import { useAuthStore } from '../stores/auth'
+import { authFetch } from '../lib/queryClient'
 
 export const Route = createFileRoute('/my-bookings')({
   component: MyBookingsPage,
@@ -83,10 +85,19 @@ function MyBookingsPage() {
   const isProvider = user?.userType === 'PROVIDER'
 
   const [activeFilter, setActiveFilter] = useState<BookingFilter>('ALL')
-  const allItems: BookingSummary[] = []
-  const loading = false
-  const error: string | null = null
-  function refetch() {}
+
+  const { data, isLoading: loading, error: queryError, refetch } = useQuery<BookingCollection>({
+    queryKey: ['bookings', user?.userId],
+    queryFn: async () => {
+      const res = await authFetch(`/v1/users/${user!.userId}/bookings`)
+      if (!res.ok) throw new Error('Failed to load bookings.')
+      return res.json()
+    },
+    enabled: !!user,
+  })
+
+  const allItems = data?.items ?? []
+  const error = queryError ? (queryError as Error).message : null
 
   const filtered = applyFilter(allItems, activeFilter)
 
