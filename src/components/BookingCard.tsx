@@ -1,5 +1,5 @@
-import { ChevronDown, ChevronUp, MapPin } from 'lucide-react'
-import { useState } from 'react'
+import { Check, CheckCheck, ChevronDown, ChevronUp, CreditCard, MapPin, ThumbsUp, X } from 'lucide-react'
+import React, { useState } from 'react'
 import { authFetch } from '../lib/queryClient'
 import { Button } from './Button'
 
@@ -94,14 +94,36 @@ const STATUS_LABEL: Record<BookingStatus, string> = {
 }
 
 const STATUS_CLASS: Record<BookingStatus, string> = {
-  PENDING:               'bg-amber-100 text-amber-800',
-  CONFIRMED:             'bg-violet-100 text-violet-800',
-  PAID:                  'bg-teal-100 text-teal-800',
-  AWAITING_CONFIRMATION: 'bg-teal-100 text-teal-800',
-  COMPLETED:             'bg-green-100 text-green-800',
-  CANCELLED:             'bg-red-100 text-red-700',
-  EXPIRED:               'bg-gray-100 text-gray-500',
-  REFUSED:               'bg-red-100 text-red-700',
+  PENDING:               'bg-accent/15 text-accent',
+  CONFIRMED:             'bg-accent/15 text-accent',
+  PAID:                  'bg-primary/15 text-primary',
+  AWAITING_CONFIRMATION: 'bg-primary/15 text-primary',
+  COMPLETED:             'bg-foreground/10 text-muted',
+  CANCELLED:             'bg-foreground/10 text-muted',
+  EXPIRED:               'bg-foreground/10 text-muted',
+  REFUSED:               'bg-foreground/10 text-muted',
+}
+
+const CARD_BORDER: Record<BookingStatus, string> = {
+  PENDING:               'border-accent',
+  CONFIRMED:             'border-accent',
+  PAID:                  'border-primary',
+  AWAITING_CONFIRMATION: 'border-primary',
+  COMPLETED:             'border-border',
+  CANCELLED:             'border-border',
+  EXPIRED:               'border-border',
+  REFUSED:               'border-border',
+}
+
+const TOGGLE_COLOR: Record<BookingStatus, string> = {
+  PENDING:               'text-accent',
+  CONFIRMED:             'text-accent',
+  PAID:                  'text-primary',
+  AWAITING_CONFIRMATION: 'text-primary',
+  COMPLETED:             'text-foreground',
+  CANCELLED:             'text-foreground',
+  EXPIRED:               'text-foreground',
+  REFUSED:               'text-foreground',
 }
 
 const ACTION_LABEL: Record<string, string> = {
@@ -111,6 +133,15 @@ const ACTION_LABEL: Record<string, string> = {
   'pay':                  'Pay',
   'mark-delivered':       'Mark as done',
   'acknowledge-delivery': 'Confirm service done',
+}
+
+const ACTION_ICON: Record<string, React.ReactNode> = {
+  'cancel':               <X size={13} />,
+  'accept':               <Check size={13} />,
+  'refuse':               <X size={13} />,
+  'pay':                  <CreditCard size={13} />,
+  'mark-delivered':       <CheckCheck size={13} />,
+  'acknowledge-delivery': <ThumbsUp size={13} />,
 }
 
 const ACTION_VARIANT: Record<string, 'primary' | 'secondary'> = {
@@ -203,7 +234,7 @@ export function BookingCard({ booking, onActionComplete, mockDetail }: BookingCa
   return (
     <article
       aria-labelledby={headingId}
-      className="bg-surface rounded-2xl border border-border/20 shadow-sm overflow-hidden"
+      className={`bg-surface rounded-2xl border shadow-sm overflow-hidden ${CARD_BORDER[booking.status]}`}
     >
       <div className="flex items-start gap-4 p-4 sm:p-5">
         <div
@@ -234,7 +265,7 @@ export function BookingCard({ booking, onActionComplete, mockDetail }: BookingCa
               <span className="truncate">{address}</span>
             </p>
           )}
-          <p className="text-small text-muted mt-1">
+          <p className="text-small text-foreground font-semibold mt-1">
             {hours}h · {booking.totalPrice}€
           </p>
         </div>
@@ -247,7 +278,7 @@ export function BookingCard({ booking, onActionComplete, mockDetail }: BookingCa
             aria-controls={detailsId}
             aria-label={expanded ? 'Collapse booking details' : 'Expand booking details'}
             onClick={handleToggle}
-            className="text-muted hover:text-foreground transition-colors"
+            className={`transition-colors ${expanded ? TOGGLE_COLOR[booking.status] : 'text-muted hover:text-foreground'}`}
           >
             {expanded
               ? <ChevronUp  aria-hidden="true" size={18} />
@@ -257,7 +288,7 @@ export function BookingCard({ booking, onActionComplete, mockDetail }: BookingCa
       </div>
 
       {expanded && (
-        <div id={detailsId} className="border-t border-border/20 px-4 pb-4 pt-3 sm:px-5">
+        <div id={detailsId} className="bg-cream border-t border-border/20 px-4 pb-4 pt-3 sm:px-5">
           {loadingDetail && (
             <p role="status" aria-live="polite" className="text-small text-muted">Loading…</p>
           )}
@@ -282,9 +313,11 @@ export function BookingCard({ booking, onActionComplete, mockDetail }: BookingCa
                       key={action.rel}
                       variant={ACTION_VARIANT[action.rel] ?? 'secondary'}
                       size="sm"
+                      leadingIcon={ACTION_ICON[action.rel]}
                       loading={loadingAction === action.rel}
                       disabled={loadingAction !== null}
                       onClick={() => handleAction(action)}
+                      className="text-xs"
                     >
                       {ACTION_LABEL[action.rel] ?? action.rel}
                     </Button>
