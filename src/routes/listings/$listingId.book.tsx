@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Sunrise, Sun } from 'lucide-react'
+import { ArrowLeft, Minus, Plus, Sunrise, Sun, Home, MapPin } from 'lucide-react'
 import { Navbar } from '../../components/Navbar'
 import { CalendarGrid } from '../../components/CalendarGrid'
 import { Button } from '../../components/Button'
@@ -11,20 +11,16 @@ export const Route = createFileRoute('/listings/$listingId/book')({
   component: BookingPage,
 })
 
-interface TimeWindow {
-  start: string
-  end: string
-}
+type LocationType = 'AT_CONSUMER' | 'AT_PROVIDER'
 
-interface DayAvailability {
-  date: string
-  workingHours: TimeWindow[]
-  freeWindows: TimeWindow[]
-}
-
-interface AvailabilityResponse {
-  userId: string
-  days: DayAvailability[]
+interface TimeWindow { start: string; end: string }
+interface DayAvailability { date: string; workingHours: TimeWindow[]; freeWindows: TimeWindow[] }
+interface AvailabilityResponse { userId: string; days: DayAvailability[] }
+interface ListingDetails {
+  title: string
+  price: number
+  author: { name: string; surname: string }
+  location: { city: string; postalCode: string }
 }
 
 function isDayPast(date: Date, today: Date): boolean {
@@ -44,10 +40,7 @@ function toLocalDatetime(date: Date): string {
 }
 
 function formatTime(isoDatetime: string): string {
-  return new Date(isoDatetime).toLocaleTimeString('default', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  return new Date(isoDatetime).toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit' })
 }
 
 function freeHours(windows: TimeWindow[]): number {
@@ -75,6 +68,23 @@ function generateHourSlots(windows: TimeWindow[]): string[] {
   return slots
 }
 
+function maxDurationForSlot(slot: string, windows: TimeWindow[]): number {
+  const slotMs = new Date(slot).getTime()
+  const w = windows.find(
+    (w) => new Date(w.start).getTime() <= slotMs && slotMs < new Date(w.end).getTime()
+  )
+  if (!w) return 1
+  return Math.min(12, Math.floor((new Date(w.end).getTime() - slotMs) / 36e5))
+}
+
+function StepBadge({ n }: { n: number }) {
+  return (
+    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+      {n}
+    </span>
+  )
+}
+
 function BookingPage() {
   const { listingId } = Route.useParams()
   const navigate = useNavigate()
@@ -84,6 +94,9 @@ function BookingPage() {
   const [month, setMonth] = useState(today.getMonth() + 1)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
+  const [durationHours, setDurationHours] = useState(1)
+  const [locationType, setLocationType] = useState<LocationType | null>(null)
+  const [description, setDescription] = useState('')
 
   const from = new Date(year, month - 1, 1)
   const to = new Date(year, month, 0)
@@ -100,13 +113,51 @@ function BookingPage() {
     staleTime: 5 * 60 * 1000,
   })
 
+  const { data: listing } = useQuery<ListingDetails>({
+    queryKey: ['listing', listingId],
+    queryFn: async () => {
+      const res = await authFetch(`/v1/public-listings/${listingId}`)
+      if (!res.ok) throw new Error('Failed to fetch listing')
+      return res.json() as Promise<ListingDetails>
+    },
+    staleTime: 10 * 60 * 1000,
+  })
+
   const dayMap = new Map<string, DayAvailability>(
     availability?.days.map((d) => [d.date, d]) ?? []
   )
 
   const wholeMonthUnavailable =
-    availability !== undefined &&
-    availability.days.every((d) => d.freeWindows.length === 0)
+    availability !== undefined && availability.days.every((d) => d.freeWindows.length === 0)
+
+  const selectedDayData = selectedDate ? dayMap.get(toLocalDate(selectedDate)) : undefined
+  const hourSlots = selectedDayData ? generateHourSlots(selectedDayData.freeWindows) : []
+  const morningSlots = hourSlots.filter((s) => new Date(s).getHours() < 12)
+  const afternoonSlots = hourSlots.filter((s) => new Date(s).getHours() >= 12)
+  const maxDuration = selectedSlot && selectedDayData
+    ? maxDurationForSlot(selectedSlot, selectedDayData.freeWindows)
+    : 12
+
+  const canSubmit =
+    selectedSlot !== null &&
+    locationType !== null &&
+    description.length >= 10 &&
+    description.length <= 2000
+
+  const locationOptions = [
+    {
+      value: 'AT_CONSUMER' as LocationType,
+      label: 'At my place',
+      Icon: Home,
+      detail: 'Your address will be shared with the provider once confirmed.',
+    },
+    {
+      value: 'AT_PROVIDER' as LocationType,
+      label: "At provider's place",
+      Icon: MapPin,
+      detail: listing ? `${listing.location.postalCode} ${listing.location.city}` : '—',
+    },
+  ]
 
   function renderDay(date: Date) {
     const past = isDayPast(date, today)
@@ -121,10 +172,7 @@ function BookingPage() {
       <button
         type="button"
         disabled={past || unavailable}
-        onClick={() => {
-          setSelectedDate(date)
-          setSelectedSlot(null)
-        }}
+        onClick={() => { setSelectedDate(date); setSelectedSlot(null); setDurationHours(1) }}
         aria-label={date.toLocaleDateString('default', { weekday: 'long', day: 'numeric', month: 'long' })}
         aria-pressed={isSelected}
         className={[
@@ -138,9 +186,7 @@ function BookingPage() {
           !isSelected && !isToday && !past && !unavailable ? 'text-foreground' : '',
         ].join(' ')}
       >
-        <span className={unavailable ? 'line-through' : undefined}>
-          {date.getDate()}
-        </span>
+        <span className={unavailable ? 'line-through' : undefined}>{date.getDate()}</span>
         {dots > 0 && (
           <span aria-hidden="true" className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
             {Array.from({ length: dots }).map((_, i) => (
@@ -151,11 +197,6 @@ function BookingPage() {
       </button>
     )
   }
-
-  const selectedDayData = selectedDate ? dayMap.get(toLocalDate(selectedDate)) : undefined
-  const hourSlots = selectedDayData ? generateHourSlots(selectedDayData.freeWindows) : []
-  const morningSlots = hourSlots.filter((s) => new Date(s).getHours() < 12)
-  const afternoonSlots = hourSlots.filter((s) => new Date(s).getHours() >= 12)
 
   return (
     <div className="min-h-dvh bg-background">
@@ -177,9 +218,12 @@ function BookingPage() {
           aria-labelledby="pick-datetime-heading"
           className="bg-surface rounded-2xl border border-border p-6 mb-4"
         >
-          <h2 id="pick-datetime-heading" className="text-body font-semibold text-foreground mb-4">
-            Pick a date and a time
-          </h2>
+          <div className="flex items-center gap-3 mb-4">
+            <StepBadge n={1} />
+            <h2 id="pick-datetime-heading" className="text-body font-semibold text-foreground">
+              Pick a date and a time
+            </h2>
+          </div>
 
           <div className="flex">
             <div className="flex-[3] min-w-0 pr-6">
@@ -187,18 +231,13 @@ function BookingPage() {
                 year={year}
                 month={month}
                 onMonthChange={(y, m) => {
-                  setYear(y)
-                  setMonth(m)
-                  setSelectedDate(null)
-                  setSelectedSlot(null)
+                  setYear(y); setMonth(m); setSelectedDate(null); setSelectedSlot(null); setDurationHours(1)
                 }}
                 minDate={today}
                 renderDay={renderDay}
               />
               {wholeMonthUnavailable && (
-                <p className="mt-4 text-small text-muted text-center">
-                  No availability this month.
-                </p>
+                <p className="mt-4 text-small text-muted text-center">No availability this month.</p>
               )}
             </div>
 
@@ -217,17 +256,14 @@ function BookingPage() {
                   {morningSlots.length > 0 && (
                     <div className="mb-3">
                       <p className="flex items-center gap-1 text-xs font-semibold text-muted uppercase tracking-wide mb-1.5">
-                          <Sunrise size={12} aria-hidden="true" />
-                          Morning
-                        </p>
+                        <Sunrise size={12} aria-hidden="true" /> Morning
+                      </p>
                       <div className="grid grid-cols-2 gap-1" role="listbox" aria-label="Morning slots">
                         {morningSlots.map((slot) => (
                           <button
-                            key={slot}
-                            type="button"
-                            role="option"
+                            key={slot} type="button" role="option"
                             aria-selected={selectedSlot === slot}
-                            onClick={() => setSelectedSlot(slot)}
+                            onClick={() => { setSelectedSlot(slot); setDurationHours(1) }}
                             className={[
                               'rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors',
                               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
@@ -246,17 +282,14 @@ function BookingPage() {
                   {afternoonSlots.length > 0 && (
                     <div>
                       <p className="flex items-center gap-1 text-xs font-semibold text-muted uppercase tracking-wide mb-1.5">
-                          <Sun size={12} aria-hidden="true" />
-                          Afternoon
-                        </p>
+                        <Sun size={12} aria-hidden="true" /> Afternoon
+                      </p>
                       <div className="grid grid-cols-2 gap-1" role="listbox" aria-label="Afternoon slots">
                         {afternoonSlots.map((slot) => (
                           <button
-                            key={slot}
-                            type="button"
-                            role="option"
+                            key={slot} type="button" role="option"
                             aria-selected={selectedSlot === slot}
-                            onClick={() => setSelectedSlot(slot)}
+                            onClick={() => { setSelectedSlot(slot); setDurationHours(1) }}
                             className={[
                               'rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors',
                               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
@@ -271,14 +304,126 @@ function BookingPage() {
                       </div>
                     </div>
                   )}
+
+                  {selectedSlot && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
+                        Estimated duration
+                      </p>
+                      <div className="flex items-center gap-3" role="group" aria-label="Duration">
+                        <button
+                          type="button" aria-label="Decrease duration"
+                          disabled={durationHours <= 1}
+                          onClick={() => setDurationHours((h) => Math.max(1, h - 1))}
+                          className="p-1.5 rounded-lg border border-border text-foreground hover:bg-mint disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                        >
+                          <Minus size={14} aria-hidden="true" />
+                        </button>
+                        <span className="min-w-[4ch] text-center text-small font-semibold text-foreground" aria-live="polite" aria-atomic="true">
+                          {durationHours}h
+                        </span>
+                        <button
+                          type="button" aria-label="Increase duration"
+                          disabled={durationHours >= maxDuration}
+                          onClick={() => setDurationHours((h) => Math.min(maxDuration, h + 1))}
+                          className="p-1.5 rounded-lg border border-border text-foreground hover:bg-mint disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                        >
+                          <Plus size={14} aria-hidden="true" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
           </div>
         </section>
 
+        <section
+          aria-labelledby="details-heading"
+          className="bg-surface rounded-2xl border border-border p-6 mb-4"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <StepBadge n={2} />
+            <h2 id="details-heading" className="text-body font-semibold text-foreground">
+              Where and what
+            </h2>
+          </div>
+
+          <div className="flex gap-8">
+            <div className="flex-1">
+              <p id="location-label" className="text-small font-medium text-foreground mb-3">Location</p>
+              <div className="space-y-2" role="radiogroup" aria-labelledby="location-label">
+                {locationOptions.map(({ value, label, Icon, detail }) => {
+                  const isSelected = locationType === value
+                  return (
+                    <button
+                      key={value} type="button" role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => setLocationType(value)}
+                      className={[
+                        'w-full rounded-xl border p-4 text-left transition-colors',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+                        isSelected
+                          ? 'bg-mint border-primary'
+                          : 'bg-background border-border hover:border-primary/40',
+                      ].join(' ')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={[
+                          'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
+                          isSelected ? 'bg-primary text-primary-foreground' : 'bg-border/20 text-muted',
+                        ].join(' ')}>
+                          <Icon size={16} aria-hidden="true" />
+                        </span>
+                        <div>
+                          <p className={['text-small font-semibold', isSelected ? 'text-primary' : 'text-foreground'].join(' ')}>
+                            {label}
+                          </p>
+                          {isSelected && (
+                            <p className="text-xs text-muted mt-0.5">{detail}</p>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="flex-1">
+              <label htmlFor="description" className="block text-small font-medium text-foreground mb-2">
+                Tell the provider what you need
+              </label>
+              <textarea
+                id="description" rows={7}
+                placeholder="Describe the issue or what you'd like done..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                maxLength={2000}
+                className={[
+                  'w-full rounded-xl border bg-background px-4 py-3 text-small text-foreground',
+                  'placeholder:text-muted resize-none transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+                  description.length > 0 && description.length < 10 ? 'border-destructive' : 'border-border',
+                ].join(' ')}
+                aria-describedby="desc-hint"
+              />
+              <p
+                id="desc-hint"
+                className={['mt-1 text-xs text-right',
+                  description.length > 0 && description.length < 10 ? 'text-destructive' : 'text-muted',
+                ].join(' ')}
+              >
+                {description.length}/2000
+                {description.length > 0 && description.length < 10 ? ' — min 10 characters' : ''}
+              </p>
+            </div>
+          </div>
+        </section>
+
         <div className="flex justify-end">
-          <Button variant="primary" disabled={!selectedDate || !selectedSlot}>
+          <Button variant="primary" disabled={!canSubmit}>
             Continue
           </Button>
         </div>
