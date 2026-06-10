@@ -27,7 +27,8 @@ import { Badge } from '../components/Badge.tsx';
 import { Breadcrumb } from '../components/BreadCrumb.tsx';
 import { FilterBar } from '../components/FilterBar.tsx';
 import { ServiceCard } from '../components/ServiceCard.tsx';
-import { ServiceProviderToggle } from '../components/ServiceProviderToggle.tsx';
+import { ServiceProviderToggle } from '../components/ServiceProviderToggle.tsx'
+import { BookingCard, type BookingSummary, type BookingDetails } from '../components/BookingCard.tsx';
 
 
 
@@ -64,6 +65,89 @@ const TEXT_VARIANTS: { variant: ButtonVariant; label: string }[] = [
 ]
 
 const SIZES: ButtonSize[] = ['sm', 'md', 'lg']
+
+const MOCK_PARTICIPANT = { userId: 'demo', name: 'Demo', surname: 'User' }
+
+function makeMockDetail(
+  bookingId: string,
+  description: string,
+  autoConfirmAt: string | null,
+  allowedActions: BookingDetails['allowedActions'],
+): BookingDetails {
+  return {
+    bookingId,
+    listingId: 'l-demo',
+    listing: { title: '' },
+    consumer: MOCK_PARTICIPANT,
+    provider: MOCK_PARTICIPANT,
+    status: 'PENDING',
+    locationType: 'AT_CONSUMER',
+    serviceAddress: null,
+    description,
+    totalPrice: 0,
+    bookedStart: new Date().toISOString(),
+    bookedEnd:   new Date().toISOString(),
+    createdAt:   new Date().toISOString(),
+    confirmedAt: null, paidAt: null, providerCompletedAt: null,
+    consumerConfirmedAt: null, consumerConfirmationType: null,
+    autoConfirmAt,
+    completedAt: null, cancelledAt: null, expiresAt: null,
+    allowedActions,
+  }
+}
+
+const BOOKING_SAMPLES: { summary: BookingSummary; detail: BookingDetails }[] = [
+  {
+    summary: {
+      bookingId: '1',
+      listingId: 'l1',
+      listing: { title: 'PC Support & Laptop Help' },
+      counterparty: { userId: 'u1', name: 'Klaus', surname: 'Müller' },
+      status: 'PENDING',
+      serviceAddress: { street: 'Hauptstraße', houseNumber: '24', city: 'Berlin', postalCode: '10115' },
+      totalPrice: 22,
+      bookedStart: new Date(Date.now() + 86400000 * 3).toISOString(),
+      bookedEnd:   new Date(Date.now() + 86400000 * 3 + 3600000).toISOString(),
+      createdAt:   new Date().toISOString(),
+    },
+    detail: makeMockDetail('1', 'My Windows laptop is running very slowly and fans are loud. Please scan and clean it up.', null, [
+      { rel: 'accept', href: '#', method: 'POST' },
+      { rel: 'refuse', href: '#', method: 'POST' },
+    ]),
+  },
+  {
+    summary: {
+      bookingId: '2',
+      listingId: 'l2',
+      listing: { title: 'Wi-Fi & Router Setup' },
+      counterparty: { userId: 'u2', name: 'Anna', surname: 'Weiß' },
+      status: 'AWAITING_CONFIRMATION',
+      serviceAddress: { street: 'Torstraße', houseNumber: '12', city: 'Berlin', postalCode: '10119' },
+      totalPrice: 25,
+      bookedStart: new Date(Date.now() - 86400000).toISOString(),
+      bookedEnd:   new Date(Date.now() - 86400000 + 3600000).toISOString(),
+      createdAt:   new Date().toISOString(),
+    },
+    detail: makeMockDetail('2', 'New Fritzbox, please configure.', new Date(Date.now() + 86400000 * 7).toISOString(), [
+      { rel: 'acknowledge-delivery', href: '#', method: 'POST' },
+    ]),
+  },
+  {
+    summary: {
+      bookingId: '3',
+      listingId: 'l3',
+      listing: { title: 'Smart Home Setup' },
+      counterparty: { userId: 'u3', name: 'Lena', surname: 'Kraus' },
+      status: 'COMPLETED',
+      serviceAddress: { street: 'Ludwigstraße', houseNumber: '11', city: 'Berlin', postalCode: '10115' },
+      totalPrice: 50,
+      bookedStart: new Date(Date.now() - 86400000 * 5).toISOString(),
+      bookedEnd:   new Date(Date.now() - 86400000 * 5 + 7200000).toISOString(),
+      createdAt:   new Date().toISOString(),
+    },
+    detail: makeMockDetail('3', 'Set up Philips Hue lights and Google Home in the living room.', null, []),
+  },
+]
 
 export const Route = createFileRoute('/styleguide')({ component: Styleguide })
 
@@ -376,10 +460,19 @@ function Styleguide() {
         <ServiceProviderToggle
             id="service-toggle"
             labelLeft="Service"
-            labelRight="Provider" 
-            checked={checked} 
+            labelRight="Provider"
+            checked={checked}
             onCheckedChange={setChecked}
         />
+      </div>
+    </section>
+
+    <section className="flex flex-col gap-3">
+      <h2>Booking Card</h2>
+      <div className="flex flex-col gap-4 max-w-2xl">
+        {BOOKING_SAMPLES.map(({ summary, detail }) => (
+          <BookingCard key={summary.bookingId} booking={summary} mockDetail={detail} onActionComplete={() => {}} />
+        ))}
       </div>
     </section>
 

@@ -154,11 +154,12 @@ function formatAddress(addr: BookingServiceAddress | null): string | null {
 export interface BookingCardProps {
   booking: BookingSummary
   onActionComplete: () => void
+  mockDetail?: BookingDetails
 }
 
-export function BookingCard({ booking, onActionComplete }: BookingCardProps) {
+export function BookingCard({ booking, onActionComplete, mockDetail }: BookingCardProps) {
   const [expanded, setExpanded] = useState(false)
-  const [detail, setDetail] = useState<BookingDetails | null>(null)
+  const [detail, setDetail] = useState<BookingDetails | null>(mockDetail ?? null)
   const [loadingDetail, setLoadingDetail] = useState(false)
   const [loadingAction, setLoadingAction] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -172,7 +173,7 @@ export function BookingCard({ booking, onActionComplete }: BookingCardProps) {
   async function handleToggle() {
     const next = !expanded
     setExpanded(next)
-    if (next && !detail) {
+    if (next && !detail && !mockDetail) {
       setLoadingDetail(true)
       try {
         const res = await authFetch(`/v1/bookings/${booking.bookingId}`)
@@ -207,7 +208,7 @@ export function BookingCard({ booking, onActionComplete }: BookingCardProps) {
       <div className="flex items-start gap-4 p-4 sm:p-5">
         <div
           aria-label={`${month} ${day} at ${time}`}
-          className="flex flex-col items-center justify-center min-w-[3rem] text-center select-none"
+          className="flex flex-col items-center justify-center min-w-[3rem] text-center select-none self-center"
         >
           <span aria-hidden="true" className="text-xs font-semibold text-muted uppercase tracking-wide leading-none">
             {month}
