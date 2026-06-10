@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, MapPin } from 'lucide-react'
 import { useState } from 'react'
 import { authFetch } from '../lib/queryClient'
+import { Button } from './Button'
 
 export type BookingStatus =
   | 'PENDING'
@@ -103,6 +104,24 @@ const STATUS_CLASS: Record<BookingStatus, string> = {
   REFUSED:               'bg-red-100 text-red-700',
 }
 
+const ACTION_LABEL: Record<string, string> = {
+  'cancel':               'Cancel',
+  'accept':               'Accept Booking',
+  'refuse':               'Refuse',
+  'pay':                  'Pay',
+  'mark-delivered':       'Mark as done',
+  'acknowledge-delivery': 'Confirm service done',
+}
+
+const ACTION_VARIANT: Record<string, 'primary' | 'secondary'> = {
+  'cancel':               'secondary',
+  'refuse':               'secondary',
+  'accept':               'primary',
+  'pay':                  'primary',
+  'mark-delivered':       'primary',
+  'acknowledge-delivery': 'primary',
+}
+
 export function StatusBadge({ status }: { status: BookingStatus }) {
   return (
     <span
@@ -137,10 +156,12 @@ export interface BookingCardProps {
   onActionComplete: () => void
 }
 
-export function BookingCard({ booking, onActionComplete: _onActionComplete }: BookingCardProps) {
+export function BookingCard({ booking, onActionComplete }: BookingCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [detail, setDetail] = useState<BookingDetails | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const [loadingAction, setLoadingAction] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const { month, day, time } = formatDate(booking.bookedStart)
   const hours     = durationHours(booking.bookedStart, booking.bookedEnd)
@@ -159,6 +180,22 @@ export function BookingCard({ booking, onActionComplete: _onActionComplete }: Bo
       } finally {
         setLoadingDetail(false)
       }
+    }
+  }
+
+  async function handleAction(action: AllowedAction) {
+    setLoadingAction(action.rel)
+    setActionError(null)
+    try {
+      const res = await authFetch(action.href, { method: action.method })
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        setActionError(body?.detail ?? 'Something went wrong. Please try again.')
+        return
+      }
+      onActionComplete()
+    } finally {
+      setLoadingAction(null)
     }
   }
 
@@ -233,6 +270,25 @@ export function BookingCard({ booking, onActionComplete: _onActionComplete }: Bo
               )}
               {detail.autoConfirmAt && booking.status === 'AWAITING_CONFIRMATION' && (
                 <p className="text-xs text-amber-700 mb-3">⚠ Auto-confirm if you don't respond</p>
+              )}
+              {actionError && (
+                <p role="alert" className="text-small text-red-600 mb-3">{actionError}</p>
+              )}
+              {detail.allowedActions.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {detail.allowedActions.map((action) => (
+                    <Button
+                      key={action.rel}
+                      variant={ACTION_VARIANT[action.rel] ?? 'secondary'}
+                      size="sm"
+                      loading={loadingAction === action.rel}
+                      disabled={loadingAction !== null}
+                      onClick={() => handleAction(action)}
+                    >
+                      {ACTION_LABEL[action.rel] ?? action.rel}
+                    </Button>
+                  ))}
+                </div>
               )}
             </>
           )}
