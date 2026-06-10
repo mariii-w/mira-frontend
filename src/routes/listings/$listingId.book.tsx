@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { ArrowLeft, Minus, Plus, Sunrise, Sun, Home, MapPin, MapPinned, ArrowRight } from 'lucide-react'
 import { Navbar } from '../../components/Navbar'
 import { CalendarGrid } from '../../components/CalendarGrid'
@@ -154,6 +154,28 @@ function BookingPage() {
     description.length <= 2000
 
   const estimatedTotal = listing ? (listing.price * durationHours).toFixed(2) : null
+
+  const bookingMutation = useMutation({
+    mutationFn: async () => {
+      const res = await authFetch('/v1/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listingId,
+          bookedStart: selectedSlot,
+          durationHours,
+          locationType,
+          description,
+        }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error((err as { detail?: string }).detail ?? 'Booking failed')
+      }
+      return res.json()
+    },
+    onSuccess: () => navigate({ to: '/my-bookings' }),
+  })
 
   const locationOptions = [
     {
@@ -466,6 +488,13 @@ function BookingPage() {
       </main>
 
       <div className="fixed bottom-0 left-0 right-0 bg-linen border-t border-border z-10">
+        {bookingMutation.isError && (
+          <div className="max-w-4xl mx-auto px-4 pt-2">
+            <p className="text-xs text-destructive" role="alert">
+              {(bookingMutation.error as Error).message}
+            </p>
+          </div>
+        )}
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-6">
           <div className="flex gap-6 flex-1 min-w-0">
             <div className="min-w-0">
@@ -493,17 +522,18 @@ function BookingPage() {
           </div>
           <button
             type="button"
-            disabled={!canSubmit}
+            disabled={!canSubmit || bookingMutation.isPending}
+            onClick={() => bookingMutation.mutate()}
             className={[
               'flex items-center gap-2 px-6 py-3 rounded-xl text-small font-semibold transition-colors flex-shrink-0',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-              canSubmit
+              canSubmit && !bookingMutation.isPending
                 ? 'bg-primary text-primary-foreground hover:bg-primary-hover'
                 : 'bg-muted/20 text-muted cursor-not-allowed',
             ].join(' ')}
           >
-            Send booking request
-            <ArrowRight size={16} aria-hidden="true" />
+            {bookingMutation.isPending ? 'Sending…' : 'Send booking request'}
+            {!bookingMutation.isPending && <ArrowRight size={16} aria-hidden="true" />}
           </button>
         </div>
       </div>
