@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp, MapPin } from 'lucide-react'
 import { useState } from 'react'
+import { authFetch } from '../lib/queryClient'
 
 export type BookingStatus =
   | 'PENDING'
@@ -30,6 +31,12 @@ export interface BookingListingPreview {
   title: string
 }
 
+export interface AllowedAction {
+  rel: string
+  href: string
+  method: string
+}
+
 export interface BookingSummary {
   bookingId: string
   listingId: string
@@ -41,6 +48,32 @@ export interface BookingSummary {
   bookedStart: string
   bookedEnd: string
   createdAt: string
+}
+
+export interface BookingDetails {
+  bookingId: string
+  listingId: string
+  listing: BookingListingPreview
+  consumer: BookingParticipant
+  provider: BookingParticipant
+  status: BookingStatus
+  locationType: LocationType
+  serviceAddress: BookingServiceAddress | null
+  description: string
+  totalPrice: number
+  bookedStart: string
+  bookedEnd: string
+  createdAt: string
+  confirmedAt: string | null
+  paidAt: string | null
+  providerCompletedAt: string | null
+  consumerConfirmedAt: string | null
+  consumerConfirmationType: string | null
+  autoConfirmAt: string | null
+  completedAt: string | null
+  cancelledAt: string | null
+  expiresAt: string | null
+  allowedActions: AllowedAction[]
 }
 
 export interface BookingCollection {
@@ -101,17 +134,33 @@ function formatAddress(addr: BookingServiceAddress | null): string | null {
 
 export interface BookingCardProps {
   booking: BookingSummary
-  renderExpanded?: (bookingId: string) => React.ReactNode
+  onActionComplete: () => void
 }
 
-export function BookingCard({ booking, renderExpanded }: BookingCardProps) {
+export function BookingCard({ booking, onActionComplete: _onActionComplete }: BookingCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const [detail, setDetail] = useState<BookingDetails | null>(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
 
   const { month, day, time } = formatDate(booking.bookedStart)
   const hours     = durationHours(booking.bookedStart, booking.bookedEnd)
   const address   = formatAddress(booking.serviceAddress)
   const headingId = `booking-${booking.bookingId}-title`
   const detailsId = `booking-${booking.bookingId}-details`
+
+  async function handleToggle() {
+    const next = !expanded
+    setExpanded(next)
+    if (next && !detail) {
+      setLoadingDetail(true)
+      try {
+        const res = await authFetch(`/v1/bookings/${booking.bookingId}`)
+        if (res.ok) setDetail(await res.json() as BookingDetails)
+      } finally {
+        setLoadingDetail(false)
+      }
+    }
+  }
 
   return (
     <article
@@ -154,26 +203,39 @@ export function BookingCard({ booking, renderExpanded }: BookingCardProps) {
 
         <div className="flex flex-col items-end gap-2 shrink-0">
           <StatusBadge status={booking.status} />
-          {renderExpanded && (
-            <button
-              type="button"
-              aria-expanded={expanded}
-              aria-controls={detailsId}
-              aria-label={expanded ? 'Collapse booking details' : 'Expand booking details'}
-              onClick={() => setExpanded((v) => !v)}
-              className="text-muted hover:text-foreground transition-colors"
-            >
-              {expanded
-                ? <ChevronUp  aria-hidden="true" size={18} />
-                : <ChevronDown aria-hidden="true" size={18} />}
-            </button>
-          )}
+          <button
+            type="button"
+            aria-expanded={expanded}
+            aria-controls={detailsId}
+            aria-label={expanded ? 'Collapse booking details' : 'Expand booking details'}
+            onClick={handleToggle}
+            className="text-muted hover:text-foreground transition-colors"
+          >
+            {expanded
+              ? <ChevronUp  aria-hidden="true" size={18} />
+              : <ChevronDown aria-hidden="true" size={18} />}
+          </button>
         </div>
       </div>
 
-      {renderExpanded && expanded && (
+      {expanded && (
         <div id={detailsId} className="border-t border-border/20 px-4 pb-4 pt-3 sm:px-5">
-          {renderExpanded(booking.bookingId)}
+          {loadingDetail && (
+            <p role="status" aria-live="polite" className="text-small text-muted">Loading…</p>
+          )}
+          {detail && (
+            <>
+              {detail.description && (
+                <div className="mb-3">
+                  <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-1">Description</p>
+                  <p className="text-small text-foreground">{detail.description}</p>
+                </div>
+              )}
+              {detail.autoConfirmAt && booking.status === 'AWAITING_CONFIRMATION' && (
+                <p className="text-xs text-amber-700 mb-3">⚠ Auto-confirm if you don't respond</p>
+              )}
+            </>
+          )}
         </div>
       )}
     </article>
