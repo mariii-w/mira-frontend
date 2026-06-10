@@ -16,7 +16,7 @@ function buildFilters(isProvider: boolean): { value: BookingFilter; label: strin
   return [
     { value: 'ALL',      label: 'All' },
     { value: 'REQUESTS', label: isProvider ? 'Requests' : 'Pending' },
-    { value: 'TO_PAY',   label: 'To pay' },
+    { value: 'TO_PAY',   label: isProvider ? 'Awaiting payment' : 'To pay' },
     { value: 'ACTIVE',   label: 'Active' },
     { value: 'PAST',     label: 'Past' },
   ]

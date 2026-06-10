@@ -40,7 +40,7 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
           className="z-50 w-56 rounded-xl border border-border bg-surface p-2 shadow-lg"
         >
           <Row icon={<UserRound size={15} />} title="View Profile" to="/" />
-          <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/" />
+          <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/my-bookings" />
           {isProvider && (
             <Row icon={<LayoutList size={15} />} title="My Services" to="/my-listings" />
           )}

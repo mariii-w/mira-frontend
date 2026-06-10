@@ -84,8 +84,8 @@ export interface BookingCollection {
 
 const STATUS_LABEL: Record<BookingStatus, string> = {
   PENDING:               'Pending',
-  CONFIRMED:             'To pay',
-  PAID:                  'Upcoming',
+  CONFIRMED:             'Awaiting payment',
+  PAID:                  'Confirm done',
   AWAITING_CONFIRMATION: 'Confirm done',
   COMPLETED:             'Completed',
   CANCELLED:             'Cancelled',
@@ -225,6 +225,8 @@ export function BookingCard({ booking, onActionComplete, mockDetail }: BookingCa
         setActionError(body?.detail ?? 'Something went wrong. Please try again.')
         return
       }
+      const detailRes = await authFetch(`/v1/bookings/${booking.bookingId}`)
+      if (detailRes.ok) setDetail(await detailRes.json() as BookingDetails)
       onActionComplete()
     } finally {
       setLoadingAction(null)
@@ -300,6 +302,11 @@ export function BookingCard({ booking, onActionComplete, mockDetail }: BookingCa
                   <p className="text-small text-foreground">{detail.description}</p>
                 </div>
               )}
+              {booking.status === 'AWAITING_CONFIRMATION' && (
+                detail.allowedActions.some((a) => a.rel === 'acknowledge-delivery')
+                  ? <p className="text-xs text-muted mb-3">Provider has marked this as done.</p>
+                  : <p className="text-xs text-muted mb-3">Waiting for customer to confirm.</p>
+              )}
               {detail.autoConfirmAt && booking.status === 'AWAITING_CONFIRMATION' && (
                 <p className="text-xs text-amber-700 mb-3">⚠ Auto-confirm if you don't respond</p>
               )}
@@ -307,8 +314,8 @@ export function BookingCard({ booking, onActionComplete, mockDetail }: BookingCa
                 <p role="alert" className="text-small text-red-600 mb-3">{actionError}</p>
               )}
               {detail.allowedActions.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {detail.allowedActions.map((action) => (
+                <div className="flex flex-wrap items-center gap-2">
+                  {detail.allowedActions.filter((a) => a.rel !== 'cancel').map((action) => (
                     <Button
                       key={action.rel}
                       variant={ACTION_VARIANT[action.rel] ?? 'secondary'}
@@ -322,6 +329,20 @@ export function BookingCard({ booking, onActionComplete, mockDetail }: BookingCa
                       {ACTION_LABEL[action.rel] ?? action.rel}
                     </Button>
                   ))}
+                  {detail.allowedActions.find((a) => a.rel === 'cancel') && (
+                    <Button
+                      key="cancel"
+                      variant="secondary"
+                      size="sm"
+                      leadingIcon={ACTION_ICON['cancel']}
+                      loading={loadingAction === 'cancel'}
+                      disabled={loadingAction !== null}
+                      onClick={() => handleAction(detail.allowedActions.find((a) => a.rel === 'cancel')!)}
+                      className="text-xs ml-auto"
+                    >
+                      {ACTION_LABEL['cancel']}
+                    </Button>
+                  )}
                 </div>
               )}
             </>
