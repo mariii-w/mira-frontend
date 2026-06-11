@@ -5,26 +5,15 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
 export default defineConfig({
   plugins: [tanstackRouter({ target: 'react', autoCodeSplitting: true }), tailwindcss(), react()],
-  server: {
-    proxy: {
-      '/v1': {
-        target: 'http://localhost:8080',
-        changeOrigin: false,
-      },
-    },
-  },
   test: {
     environment: 'jsdom',
     setupFiles: ['@testing-library/jest-dom/vitest'],
     globals: true,
-    include: ['src/**/*.test.{ts,tsx}'],
-    exclude: ['**/*.a11y.test.{ts,tsx}'],
+    include: ['src/**/*.a11y.test.{ts,tsx}'],
     reporters: ['default', 'junit'],
-    outputFile: './junit.xml',
+    outputFile: './junit-a11y.xml',
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'cobertura', 'html'],
-      reportsDirectory: './coverage',
+      enabled: false,
     },
   },
 })
