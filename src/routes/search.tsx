@@ -383,10 +383,7 @@ export function SearchPage() {
                         providerLastName={listing.author.surname}
                         label={listing.title}
                         description={listing.description ?? undefined}
-                        badges={listing.tags.map(t => ({
-                          text: t.name,
-                          variant: t.isBarrierefrei ? 'accent' : 'primary',
-                        }))}
+                        tags={listing.tags}
                         hourRate={listing.price}
                       />
                     </li>

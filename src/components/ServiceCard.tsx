@@ -1,7 +1,13 @@
 import { Link } from '@tanstack/react-router'
-import { Badge, type BadgeProps } from "./Badge"
+import { Badge } from "./Badge"
 import { Button } from "./Button"
 import { MapPin, Dot, ArrowRight } from 'lucide-react'
+
+export interface ServiceCardTag {
+  tagId: string
+  name: string
+  isBarrierefrei: boolean
+}
 
 interface ServiceCardProps{
     link: string
@@ -12,7 +18,7 @@ interface ServiceCardProps{
     varified?: boolean
     label: string
     description?: string
-    badges: BadgeProps[]
+    tags: ServiceCardTag[]
     hourRate : number
 }
 
@@ -22,7 +28,7 @@ export function ServiceCard(
         location, 
         label, 
         description, 
-        badges, 
+        tags,
         hourRate, 
         providerFirstName,
         providerLastName,
@@ -68,8 +74,8 @@ export function ServiceCard(
                         </div>
                     )}
                     <div className="flex gap-2 flex-wrap items-center">
-                        {badges.map((badge) => (
-                            <Badge key={badge.text} {...badge} />
+                        {tags.map((tag) => (
+                            <Badge key={tag.tagId} text={tag.name} variant={tag.isBarrierefrei ? 'accent' : 'primary'} />
                         ))}
                         <div className='ml-auto shrink-0 flex items-center gap-3'>
                             <Button variant="primary" trailingIcon={<ArrowRight />}><Link to={link} className='text-white decoration-0'>View service</Link></Button>
