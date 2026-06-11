@@ -12,6 +12,7 @@ default:
 stages:
   - build
   - test
+  - lint
 
 build:
   stage: build
@@ -19,7 +20,7 @@ build:
     - npm run build
 
 lint:
-  stage: test
+  stage: lint
   script:
     - npm run lint
 
