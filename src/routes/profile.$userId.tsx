@@ -9,6 +9,7 @@ import { ServiceCard, type ServiceCardProps } from '../components/ServiceCard'
 import { useAuthStore } from '../stores/auth'
 import { fetchUser } from '../lib/fetchUser'
 import {useQuery} from '@tanstack/react-query'
+import { fetchUserListings } from '../lib/fetchListings'
 
 /* eslint-disable react-refresh/only-export-components */
 export const Route = createFileRoute('/profile/$userId')({
@@ -31,11 +32,12 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
     const currentUser = useAuthStore((s) => s.user)
     const isOwner = currentUser?.userId === userId
     
-    console.log(currentUser?.userId)
     const { data: user, isLoading, error } = useQuery({
         queryKey: ['user', userId],
         queryFn: () => fetchUser(userId),
     })
+
+    
 
     if (isLoading) return <p>Loading…</p>
     if (error) return <p>Failed to load profile.</p>
@@ -46,73 +48,34 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
 
     const adress = user?.privateAddress
     const city = adress?.city ?? ''
-   
 
-    const serviceListings: ServiceCardEditProps[] = [
-        {
-        link: '/service/1',
-        pictureLink: './pic/ServiceExample1.png' ,
-        label: 'Web Development',
-        description: 'Professional web development services',
-        status: 'active'
-        },
-        {
-        link: '/service/2',
-        pictureLink: 'https://images.ctfassets.net/5i1m3im8l2b5/5yLgQr5c29UlkwTN7nDyUY/6f5d6a7d6b8e14129d75c72ecb1413a7/What_is_tech_support.jpg?w=1200&h=630&fl=progressive&q=50&fm=jpg',
-        label: 'UI Design',
-        description: 'Modern UI/UX design consultation lorem',
-        status: 'active'
-        },
-        {
-        link: '/service/3',
-        pictureLink: 'https://images.ctfassets.net/5i1m3im8l2b5/5yLgQr5c29UlkwTN7nDyUY/6f5d6a7d6b8e14129d75c72ecb1413a7/What_is_tech_support.jpg?w=1200&h=630&fl=progressive&q=50&fm=jpg',
-        label: 'UI Design',
-        description: 'Modern UI/UX design consultation',
-        status: 'draft'
-        }
-    ]
+    const { data: listingsResponse, isLoading: listingsLoading, error: listingsError } = useQuery({
+        queryKey: ['listings', userId],
+        queryFn: () => fetchUserListings(userId),
+        enabled: isProvider,
+    })
 
-    const publicServiceListings: ServiceCardProps[] = [
-        {
-        link: '/service/1',
-        pictureLink: './pic/ServiceExample1.png',
-        location: 'Berlin, Germany',
-        providerFirstName: 'John',
-        providerLastName: 'Doe',
-        varified: true,
-        label: 'Web Development',
-        description: 'Professional web development services',
-        badges: [{ text: 'React', variant: 'primary' }, { text: 'TypeScript', variant: 'primary' }],
-        hourRate: 50,
-        distance: 0
-        },
-        {
-        link: '/service/2',
-        pictureLink: './pic/ServiceExample1.png',
-        location: 'Berlin, Germany',
-        providerFirstName: 'John',
-        providerLastName: 'Doe',
-        varified: true,
-        label: 'UI Design',
-        description: 'Modern UI/UX design consultation',
-        badges: [{ text: 'Figma', variant: 'primary' }, { text: 'Design', variant: 'primary' }],
-        hourRate: 45,
-        distance: 0
-        },
-        {
-        link: '/service/2',
-        pictureLink: './pic/ServiceExample1.png',
-        location: 'Berlin, Germany',
-        providerFirstName: 'John',
-        providerLastName: 'Doe',
-        varified: true,
-        label: 'UI Design',
-        description: 'Modern UI/UX design consultation',
-        badges: [{ text: 'Figma', variant: 'primary' }, { text: 'Design', variant: 'primary' }],
-        hourRate: 45,
-        distance: 0
-        }
-    ]
+    const serviceListings: ServiceCardEditProps[] = listingsResponse?.items?.map((listing) => ({
+        link: `/service/${listing.listingId}`,
+        pictureLink: listing.primaryMedia?.url || './pic/ServiceExample1.png',
+        label: listing.title,
+        description: listing.description,
+        status: listing.publicationStatus === 'DRAFT' ? 'draft' : 'active'
+    })) ?? []
+
+    const publicServiceListings: ServiceCardProps[] = listingsResponse?.items?.map((listing) => ({
+        link: `/service/${listing.listingId}`,
+        pictureLink: listing.primaryMedia?.url || './pic/ServiceExample1.png',
+        location: `${listing.location.city}${listing.location.postalCode ? ', ' + listing.location.postalCode : ''}`,
+        providerFirstName: listing.author.name,
+        providerLastName: listing.author.surname,
+        varified: false,
+        label: listing.title,
+        description: listing.description,
+        badges: listing.tags.map(tag => ({ text: tag.name, variant: 'primary' as const })),
+        hourRate: listing.price,
+        distance: listing.location.serviceRadiusKm
+    })) ?? []
 
     return(
         <>
