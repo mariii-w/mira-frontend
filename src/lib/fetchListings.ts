@@ -1,4 +1,7 @@
 import { authFetch } from './queryClient'
+import type { User } from '../stores/auth'
+
+// --- Interfaces ---
 
 export interface Tag {
   tagId: string
@@ -56,7 +59,7 @@ export interface FetchUserError {
   message: string
 }
 
-export async function fetchUserPrivateListings(id: string): Promise<ListingsResponse> {
+export async function fetchUserListings(id: string): Promise<ListingsResponse> {
   const res = await authFetch(`/v1/users/${id}/listings`)
 
   if (!res.ok) {
@@ -72,21 +75,3 @@ export async function fetchUserPrivateListings(id: string): Promise<ListingsResp
 
   return res.json() as Promise<ListingsResponse>
 }
-
-export async function fetchUserPublicListings(id: string): Promise<ListingsResponse> {
-  const res = await authFetch(`/v1/public-profiles/${id}/listings`)
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => null)
-    if (res.status === 404) {
-      throw { field: 'server', message: 'User not found.' } satisfies FetchUserError
-    }
-    throw {
-      field: 'server',
-      message: body?.detail ?? `Unexpected error (${res.status}). Please try again.`,
-    } satisfies FetchUserError
-  }
-
-  return res.json() as Promise<ListingsResponse>
-}
-
