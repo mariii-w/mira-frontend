@@ -46,18 +46,18 @@ export function ServiceCard(
 
                         <div className='flex gap-2 ml-auto shrink-0'>
                             <p className='ml-auto text-primary font-bold'>{hourRate}€</p>
-                            <p className='ml-auto'> pro Stunde</p>
+                            <p className='ml-auto'> per hour</p>
                         </div>
                     </div>
                     <div className="flex gap-1 flex-wrap">
                         <div className='flex gap-1'>
-                            <p>von</p>
+                            <p>by</p>
                             <p className='font-bold'>{providerFirstName} {providerLastName}</p>
                         </div>
                         {varified && (
                             <>
                                 <Dot />
-                                <p className="text-primary font-bold">Verifiziert</p>
+                                <p className="text-primary font-bold">Verified</p>
                             </>
                         )}
                         <Dot />
@@ -75,10 +75,10 @@ export function ServiceCard(
                     </div>
                     <div className='flex'>
                         {distance !== undefined && (
-                            <p><MapPin className='inline'/> {distance} km entfernt</p>
+                            <p><MapPin className='inline'/> {distance} km away</p>
                         )}
                         <div className='ml-auto mt-auto'>
-                            <Button variant="primary" trailingIcon={<ArrowRight />} ><Link to={link} className='text-white decoration-0 '>Zum Angebot</Link></Button>
+                            <Button variant="primary" trailingIcon={<ArrowRight />} ><Link to={link} className='text-white decoration-0 '>View service</Link></Button>
                         </div>
                     </div>
 

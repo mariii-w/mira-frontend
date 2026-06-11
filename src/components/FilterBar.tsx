@@ -91,7 +91,7 @@ export function FilterBar({
         <p className="text-h1 font-bold">Filter</p>
         {activeCount > 0 && (
           <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-cream">
-            {activeCount} aktiv
+            {activeCount} active
           </span>
         )}
       </div>
@@ -100,7 +100,7 @@ export function FilterBar({
       <div className="flex flex-col gap-3 divide-y divide-border">
         <FilterSection title="Tags">
           <Input
-            placeholder="Tags suchen"
+            placeholder="Search tags"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -117,9 +117,9 @@ export function FilterBar({
           </div>
         </FilterSection>
 
-        <FilterSection title="Entfernung">
+        <FilterSection title="Distance">
           <Slider
-            label="Entfernung"
+            label="Distance"
             min={1}
             max={50}
             unit="km"
@@ -128,9 +128,9 @@ export function FilterBar({
           />
         </FilterSection>
 
-        <FilterSection title="Preis pro Stunde">
+        <FilterSection title="Price per hour">
           <Slider
-            label="Maximaler Preis"
+            label="Maximum price"
             min={5}
             max={100}
             unit="€"
@@ -144,8 +144,8 @@ export function FilterBar({
       <div className="mx-auto">
         <Button onClick={onApply}>
           {resultCount !== undefined
-            ? `Zeige ${resultCount} Ergebnisse`
-            : 'Zeige Ergebnisse'}
+            ? `Show ${resultCount} results`
+            : 'Show results'}
         </Button>
       </div>
     </article>
