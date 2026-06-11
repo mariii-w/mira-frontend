@@ -297,7 +297,8 @@ export function SearchPage() {
         </div>
 
         {/* ── Content ── */}
-        <div className="mx-auto max-w-6xl px-6 py-6 flex gap-6 items-start">
+        <div className="px-6">
+        <div className="mx-auto max-w-6xl py-6 flex gap-20 items-start">
 
           {/* ── Sidebar ── */}
           <aside className="shrink-0 w-64">
@@ -398,6 +399,7 @@ export function SearchPage() {
               </>
             )}
           </div>
+        </div>
         </div>
       </main>
     </>
