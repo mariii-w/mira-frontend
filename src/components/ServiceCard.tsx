@@ -38,10 +38,10 @@ export function ServiceCard(
 {
     return(
         <div className="bg-linen rounded-2xl flex flex-col p-3 gap-3 border border-border w-full">
-            <div className='flex col-2 gap-3'>
+            <div className='flex flex-col lg:flex-row gap-3'>
                 {pictureLink && (
-                    <div className='shrink-0 self-stretch'>
-                        <img src={pictureLink} className="w-48 h-full rounded-lg object-cover" alt="" />
+                    <div className='shrink-0 lg:self-stretch'>
+                        <img src={pictureLink} className="w-full h-48 lg:w-48 lg:h-full rounded-lg object-cover" alt="" />
                     </div>
                 )}
                 <div className='grid gap-2 flex-1 min-w-0'>
