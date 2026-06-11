@@ -41,19 +41,20 @@ export const SearchBar = forwardRef<HTMLInputElement, InputProps>(
               </Popover.Trigger>
               <Popover.Portal>
                 <Popover.Content
+                  aria-label="Search location filters"
                   align="end"
                   sideOffset={8}
                   className="z-50 w-70 rounded-xl border border-border bg-surface p-2 shadow-lg"
                 >
                   <div className="mx-5">
                     <div className="flex flex-col gap-1.5">
-                      <Label>Ort</Label>
-                      <Input placeholder="Ortssuche" />
+                      <Label htmlFor="search-location">Ort</Label>
+                      <Input id="search-location" placeholder="Ortssuche" />
                     </div>
                     <div className="my-2 h-px bg-border/30" />
                     <div className="flex flex-col gap-1.5">
                       <Label>Radius</Label>
-                      <Slider label={""} min={10} max={50} />
+                      <Slider label="Radius" min={10} max={50} />
                     </div>
                   </div>
                 </Popover.Content>
