@@ -23,7 +23,6 @@ export interface MultiSelectProps {
   id?: string;
   "aria-label"?: string;
   "aria-describedby"?: string;
-  "aria-required"?: boolean;
 }
 
 export function MultiSelect({
@@ -35,7 +34,6 @@ export function MultiSelect({
   id,
   "aria-label": ariaLabel,
   "aria-describedby": ariaDescribedby,
-  "aria-required": ariaRequired,
 }: MultiSelectProps) {
   function toggle(optId: string) {
     onChange(
@@ -109,7 +107,6 @@ export function MultiSelect({
             id={id}
             disabled={loading}
             aria-label={buttonAriaLabel}
-            aria-required={ariaRequired}
             className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background text-small text-foreground hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed data-[open]:border-primary"
           >
             <span className="text-muted">

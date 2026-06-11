@@ -25,6 +25,7 @@ import { Slider } from '../components/Slider'
 import * as Switch from '../components/Switch'
 import { Textarea } from '../components/Textarea'
 import { UserMenu } from '../components/UserMenu'
+import { useAuthStore, type User } from '../stores/auth'
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, className, activeProps, ...props }: {
@@ -43,6 +44,7 @@ vi.mock('@tanstack/react-router', () => ({
 afterEach(() => {
   cleanup()
   document.body.innerHTML = ''
+  useAuthStore.getState().clear()
 })
 
 async function expectNoAxeViolations(container: HTMLElement) {
@@ -238,5 +240,301 @@ describe('component accessibility', () => {
       expect(screen.getByRole('dialog', { name: /search location filters/i })).toBeInTheDocument()
     })
     await expectNoAxeViolations(document.body)
+  })
+
+  it('AvatarIcon fallback states have no automated accessibility violations', async () => {
+    const { container, rerender } = render(<AvatarIcon firstName="Mira" lastName="Muster" />)
+    await expectNoAxeViolations(container)
+
+    rerender(<AvatarIcon picture="/broken-avatar.jpg" />)
+    await act(async () => {
+      fireEvent.error(screen.getByRole('img', { name: /user avatar/i }))
+    })
+
+    expect(screen.getByText('?')).toBeInTheDocument()
+    await expectNoAxeViolations(container)
+  })
+
+  it('Button icon and loading states have no automated accessibility violations', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const warningRender = render(<Button variant="icon">Missing label</Button>)
+    expect(warn).toHaveBeenCalledWith('[Button] icon variant is missing `aria-label`.')
+    warningRender.unmount()
+    warn.mockRestore()
+
+    const { container } = render(
+      <div>
+        <Button variant="icon" size="lg" aria-label="Open filters">
+          F
+        </Button>
+        <Button variant="accent" size="sm" loading fullWidth>
+          Save
+        </Button>
+      </div>,
+    )
+
+    await expectNoAxeViolations(container)
+  })
+
+  it('FilterBar search and collapsed sections have no automated accessibility violations', async () => {
+    const { container } = render(
+      <FilterBar
+        tagList={[
+          { name: 'Errands', checked: true },
+          { name: 'Tutoring', checked: false },
+        ]}
+      />,
+    )
+
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText(/tags suchen/i), { target: { value: 'tut' } })
+      fireEvent.click(screen.getByRole('button', { name: /tags/i }))
+    })
+
+    expect(screen.getByRole('button', { name: /tags/i })).toHaveAttribute('aria-expanded', 'false')
+    await expectNoAxeViolations(container)
+  })
+
+  it('MultiSelect option list states have no automated accessibility violations', async () => {
+    const { container } = render(
+      <MultiSelect
+        id="tag-select"
+        aria-label="Service tags"
+        aria-describedby="tag-help"
+        options={[
+          { id: 'errands', label: 'Errands', badge: 'A11y', variant: 'accent' },
+          { id: 'support', label: 'Support' },
+        ]}
+        value={['errands', 'missing']}
+        onChange={vi.fn()}
+      />,
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /service tags, 2 selected/i }))
+    })
+
+    expect(screen.getByRole('listbox', { name: /service tags/i })).toBeInTheDocument()
+    await expectNoAxeViolations(container)
+  })
+
+  it('MultiSelect chip removal and unlabeled state have no automated accessibility violations', async () => {
+    const onChange = vi.fn()
+    const { container } = render(
+      <MultiSelect
+        options={[{ id: 'support', label: 'Support' }]}
+        value={['support']}
+        onChange={onChange}
+      />,
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /remove support/i }))
+    })
+
+    expect(onChange).toHaveBeenCalledWith([])
+    await expectNoAxeViolations(container)
+  })
+
+  it('MultiSelect loading state has no automated accessibility violations', async () => {
+    const { container } = render(
+      <MultiSelect
+        aria-label="Service tags"
+        loading
+        options={[{ id: 'errands', label: 'Errands' }]}
+        value={[]}
+        onChange={vi.fn()}
+      />,
+    )
+
+    await expectNoAxeViolations(container)
+  })
+
+  it.each(['DRAFT', 'PAUSED', 'DELETED'] as const)(
+    'MyListingCard %s state has no automated accessibility violations',
+    async (publicationStatus) => {
+      const { container } = render(
+        <MyListingCard
+          listing={{
+            ...listing,
+            listingId: `listing-${publicationStatus.toLowerCase()}`,
+            publicationStatus,
+            primaryMedia:
+              publicationStatus === 'DRAFT'
+                ? undefined
+                : { ...listing.primaryMedia!, altText: null, altTextStatus: 'PENDING' },
+          }}
+          onEdit={vi.fn()}
+        />,
+      )
+
+      fireEvent.click(screen.getByRole('button', { name: /edit/i }))
+      await expectNoAxeViolations(container)
+    },
+  )
+
+  it('Navbar login action remains accessible', async () => {
+    const originalLocation = window.location
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { ...originalLocation, href: '' },
+    })
+
+    const { container } = render(<Navbar />)
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /login/i }))
+    })
+
+    expect(window.location.href).toBe('http://localhost:8080/auth/login/google')
+    await expectNoAxeViolations(container)
+
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: originalLocation,
+    })
+  })
+
+  it('Navbar logged-in state has no automated accessibility violations', async () => {
+    useAuthStore.getState().setUser({
+      userId: 'user-1',
+      username: 'mira',
+      firstName: 'Mira',
+      lastName: 'Muster',
+      userType: 'PROVIDER',
+      bio: null,
+      simplifiedBio: null,
+      selfSummary: null,
+      accessibilityPreferences: [],
+      profileMedia: { mediaId: 'avatar-1', url: '/avatar.jpg' },
+      registrationComplete: true,
+      isPublic: true,
+      privateAddress: null,
+    } satisfies User)
+
+    const { container } = render(<Navbar />)
+    await expectNoAxeViolations(container)
+  })
+
+  it('Popover keyboard and outside-click behavior has no automated accessibility violations', async () => {
+    render(
+      <Popover.Root>
+        <Popover.Trigger asChild>
+          <Button>Open actions</Button>
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Content aria-label="Actions" align="start" sideOffset={4}>
+            <Button>First</Button>
+            <Button>Last</Button>
+          </Popover.Content>
+        </Popover.Portal>
+      </Popover.Root>,
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /open actions/i }))
+    })
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: /actions/i })).toBeInTheDocument()
+    })
+
+    await act(async () => {
+      screen.getByRole('button', { name: /last/i }).focus()
+      fireEvent.keyDown(document, { key: 'Tab' })
+      fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
+      fireEvent.keyDown(document, { key: 'Escape' })
+    })
+
+    expect(screen.queryByRole('dialog', { name: /actions/i })).not.toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /open actions/i }))
+    })
+    await act(async () => {
+      fireEvent.mouseDown(document.body)
+    })
+
+    expect(screen.queryByRole('dialog', { name: /actions/i })).not.toBeInTheDocument()
+    await expectNoAxeViolations(document.body)
+  })
+
+  it('ProviderCard full state has no automated accessibility violations', async () => {
+    const { container } = render(
+      <ProviderCard
+        variant="full"
+        firstName="Mira"
+        lastName="Muster"
+        avatar={<AvatarIcon firstName="Mira" lastName="Muster" />}
+        distanceKm={2}
+        bio="Friendly local support."
+        pricePerHour={20}
+        services={[{ name: 'Shopping', price: 20 }]}
+        badges={<Badge text="Verified" />}
+        onMessage={vi.fn()}
+        onViewProfile={vi.fn()}
+      />,
+    )
+
+    await expectNoAxeViolations(container)
+  })
+
+  it('Slider disabled and controlled states have no automated accessibility violations', async () => {
+    const onChange = vi.fn()
+    const onChangeCommitted = vi.fn()
+    const { container } = render(
+      <div>
+        <Slider label="Exact distance" min={10} max={10} disabled />
+        <Slider label="Price" min={0} max={100} value={25} onChange={onChange} onChangeCommitted={onChangeCommitted} />
+      </div>,
+    )
+
+    await act(async () => {
+      const price = screen.getByRole('slider', { name: /price/i })
+      fireEvent.change(price, { target: { value: '50' } })
+      fireEvent.mouseUp(price)
+      fireEvent.keyUp(price, { key: 'Home' })
+      fireEvent.keyUp(price, { key: 'Tab' })
+    })
+
+    expect(onChange).toHaveBeenCalledWith(50)
+    expect(onChangeCommitted).toHaveBeenCalled()
+    await expectNoAxeViolations(container)
+  })
+
+  it('Switch checked state has no automated accessibility violations', async () => {
+    const onCheckedChange = vi.fn()
+    const { container } = render(
+      <Switch.Root aria-label="Easy language" checked onCheckedChange={onCheckedChange}>
+        <Switch.Thumb />
+      </Switch.Root>,
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('switch', { name: /easy language/i }))
+    })
+
+    expect(onCheckedChange).toHaveBeenCalledWith(false)
+    await expectNoAxeViolations(container)
+  })
+
+  it('UserMenu non-provider state has no automated accessibility violations', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }))
+    render(<UserMenu firstName="Mira" lastName="" />)
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /^mira$/i }))
+    })
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: /user menu/i })).toBeInTheDocument()
+    })
+    expect(screen.queryByRole('link', { name: /my services/i })).not.toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /logout/i }))
+    })
+
+    await expectNoAxeViolations(document.body)
+    vi.unstubAllGlobals()
   })
 })
