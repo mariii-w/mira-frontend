@@ -89,13 +89,13 @@ async function fetchPublicListings(params: SearchParams): Promise<PublicListingC
   if (params.from) qs.set('from', params.from)
 
   const res = await fetch(`/v1/public-listings?${qs.toString()}`)
-  if (!res.ok) throw new Error('Listings konnten nicht geladen werden.')
+  if (!res.ok) throw new Error('Listings could not be loaded.')
   return res.json()
 }
 
 async function fetchServiceTags(): Promise<ServiceTag[]> {
   const res = await fetch('/v1/service-tags')
-  if (!res.ok) throw new Error('Tags konnten nicht geladen werden.')
+  if (!res.ok) throw new Error('Tags could not be loaded.')
   return res.json()
 }
 
@@ -208,8 +208,8 @@ export function SearchPage() {
   // Subtitle line
   const subtitleParts: string[] = []
   if (search.city) subtitleParts.push(`In ${search.city}`)
-  if (search.city) subtitleParts.push(`Innerhalb ${search.radius} km`)
-  subtitleParts.push('Sortiert nach Relevanz')
+  if (search.city) subtitleParts.push(`Within ${search.radius} km`)
+  subtitleParts.push('Sorted by relevance')
 
   return (
     <>
@@ -230,7 +230,7 @@ export function SearchPage() {
             />
             <SearchBar
               className="flex-1"
-              placeholder="Was suchst du?"
+              placeholder="What are you looking for?"
               value={pendingQuery}
               onChange={(e) => setPendingQuery(e.target.value)}
               city={pendingCity}
@@ -250,13 +250,13 @@ export function SearchPage() {
 
             {/* Active filter chips */}
             {hasActiveFilters && (
-              <div className="flex flex-wrap gap-2 items-center" role="group" aria-label="Aktive Filter">
+              <div className="flex flex-wrap gap-2 items-center" role="group" aria-label="Active filters">
                 {hasPriceFilter && (
                   <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-small">
                     {search.maxPrice}€/h
                     <button
                       type="button"
-                      aria-label="Preisfilter entfernen"
+                      aria-label="Remove price filter"
                       onClick={() => {
                         setPendingMaxPrice(100)
                         navigate({ search: { ...search, maxPrice: 100, from: undefined } })
@@ -272,7 +272,7 @@ export function SearchPage() {
                     {tag.name}
                     <button
                       type="button"
-                      aria-label={`Filter "${tag.name}" entfernen`}
+                      aria-label={`Remove filter "${tag.name}"`}
                       onClick={() => {
                         const next = search.tagIds.filter(id => id !== tag.tagId)
                         setPendingTagIds(next)
@@ -289,7 +289,7 @@ export function SearchPage() {
                   onClick={clearAllFilters}
                   className="text-small text-primary font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
                 >
-                  Alle löschen
+                  Clear all
                 </button>
               </div>
             )}
@@ -321,7 +321,7 @@ export function SearchPage() {
             {/* Results header */}
             <div>
               <h1 className="font-heading text-h1 font-bold text-foreground">
-                {search.q ? `Services für "${search.q}"` : 'Services'}
+                {search.q ? `Services for "${search.q}"` : 'Services'}
               </h1>
               {subtitleParts.length > 0 && (
                 <p className="text-small text-muted mt-1">{subtitleParts.join(' · ')}</p>
@@ -331,7 +331,7 @@ export function SearchPage() {
             {/* Loading */}
             {listingsQuery.isLoading && (
               <div role="status" aria-live="polite" className="flex justify-center py-16">
-                <p className="text-small text-muted">Laden…</p>
+                <p className="text-small text-muted">Loading…</p>
               </div>
             )}
 
@@ -345,14 +345,14 @@ export function SearchPage() {
             {/* Empty */}
             {listingsQuery.isSuccess && listings.length === 0 && (
               <div className="flex flex-col items-center gap-2 py-16 text-center">
-                <p className="text-body text-muted">Keine Services gefunden.</p>
+                <p className="text-body text-muted">No services found.</p>
                 {hasActiveFilters && (
                   <button
                     type="button"
                     onClick={clearAllFilters}
                     className="text-small text-primary font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
                   >
-                    Filter zurücksetzen
+                    Reset filters
                   </button>
                 )}
               </div>
@@ -361,7 +361,7 @@ export function SearchPage() {
             {/* Results list */}
             {listingsQuery.isSuccess && listings.length > 0 && (
               <>
-                <ul role="list" aria-label="Suchergebnisse" className="flex flex-col gap-4 list-none m-0 p-0">
+                <ul role="list" aria-label="Search results" className="flex flex-col gap-4 list-none m-0 p-0">
                   {listings.map((listing, index) => (
                     <li
                       key={listing.listingId}
