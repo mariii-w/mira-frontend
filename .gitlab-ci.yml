@@ -13,11 +13,18 @@ stages:
   - build
   - test
   - lint
+  - release
 
 build:
   stage: build
   script:
     - npm run build
+    - apk add --no-cache zip
+    - zip -r dist.zip dist/
+  artifacts:
+    paths:
+      - dist.zip
+    expire_in: never
 
 lint:
   stage: lint
@@ -38,3 +45,27 @@ test:
       coverage_report:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
+
+create_release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  before_script: []
+  needs:
+    - job: build
+      artifacts: true
+    - job: test
+  rules:
+    - if: "$CI_COMMIT_TAG"
+  script:
+    - echo "Creating release for $CI_COMMIT_TAG"
+  release:
+    tag_name: "$CI_COMMIT_TAG"
+    name: "Release $CI_COMMIT_TAG"
+    description: |
+      Automated release for $CI_COMMIT_TAG.
+      Commit: $CI_COMMIT_SHA
+      Pipeline: $CI_PIPELINE_URL
+    assets:
+      links:
+        - name: "dist.zip"
+          url: "$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist.zip?job=build"
