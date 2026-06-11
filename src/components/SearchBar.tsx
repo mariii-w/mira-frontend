@@ -4,7 +4,7 @@ import { Button } from "./Button";
 import * as Popover from "@radix-ui/react-popover";
 import { Label } from "./Label";
 import { Input } from "./Input";
-import { MapPin } from 'lucide-react'
+import { MapPin, Search } from 'lucide-react'
 import { Slider } from "./Slider";
 
 export interface SearchBarProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -49,7 +49,9 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
         <div className="p-2">
           <Popover.Root>
             <Popover.Trigger asChild>
-              <Button variant="ghost" leadingIcon={<MapPin />}>{locationLabel}</Button>
+              <Button variant="ghost" leadingIcon={<MapPin />}>
+                <span className="hidden lg:inline">{locationLabel}</span>
+              </Button>
             </Popover.Trigger>
             <Popover.Portal>
               <Popover.Content
@@ -83,7 +85,10 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
             </Popover.Portal>
           </Popover.Root>
         </div>
-        <Button variant="accent" onClick={onSearch}>Search</Button>
+        <Button variant="accent" onClick={onSearch} aria-label="Search">
+          <Search size={18} className="lg:hidden" aria-hidden="true" />
+          <span className="hidden lg:inline">Search</span>
+        </Button>
       </div>
     </div>
   );
