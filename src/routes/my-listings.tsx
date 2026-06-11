@@ -148,6 +148,7 @@ export function MyListingsPage() {
         if (statusFilter !== "ALL") {
           params.set("publicationStatus", statusFilter);
         }
+        if (!user) return;
 
         const res = await authFetch(
           `/v1/users/${user.userId}/listings?${params.toString()}`,
