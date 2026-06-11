@@ -218,16 +218,18 @@ export function SearchPage() {
 
         {/* ── Search bar row ── */}
         <div className="bg-background px-6 py-3">
-          <div className="mx-auto max-w-6xl flex items-center gap-4">
-            <ServiceProviderToggle
-              id="search-toggle"
-              labelLeft="Services"
-              labelRight="Providers"
-              iconLeft={<Wrench />}
-              iconRight={<Users />}
-              checked={false}
-              onCheckedChange={() => {}}
-            />
+          <div className="mx-auto max-w-6xl flex items-center gap-20">
+            <div className="shrink-0 w-64">
+              <ServiceProviderToggle
+                id="search-toggle"
+                labelLeft="Services"
+                labelRight="Providers"
+                iconLeft={<Wrench />}
+                iconRight={<Users />}
+                checked={false}
+                onCheckedChange={() => {}}
+              />
+            </div>
             <SearchBar
               className="flex-1"
               placeholder="What are you looking for?"
@@ -245,10 +247,13 @@ export function SearchPage() {
 
         {/* ── Breadcrumb + active filter chips row ── */}
         <div className="bg-background px-6 py-2">
-          <div className="mx-auto max-w-6xl flex items-center justify-between gap-4 flex-wrap">
-            <Breadcrumb links={breadcrumbLinks} />
+          <div className="mx-auto max-w-6xl flex items-center gap-20">
+            <div className="shrink-0 w-64">
+              <Breadcrumb links={breadcrumbLinks} />
+            </div>
 
             {/* Active filter chips */}
+            <div className="flex-1 min-w-0">
             {hasActiveFilters && (
               <div className="flex flex-wrap gap-2 items-center" role="group" aria-label="Active filters">
                 {hasPriceFilter && (
@@ -293,6 +298,7 @@ export function SearchPage() {
                 </button>
               </div>
             )}
+            </div>
           </div>
         </div>
 
