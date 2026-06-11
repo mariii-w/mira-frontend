@@ -27,7 +27,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
   },
   ref,
 ) {
-  const locationLabel = (city || 'Ort') + ' · ' + radius + 'km'
+  const locationLabel = (city || 'Location') + ' · ' + radius + 'km'
 
   return (
     <div className="relative w-full">
@@ -59,9 +59,9 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
               >
                 <div className="mx-5">
                   <div className="flex flex-col gap-1.5">
-                    <Label>Ort</Label>
+                    <Label>Location</Label>
                     <Input
-                      placeholder="Ortssuche"
+                      placeholder="Search location"
                       value={city}
                       onChange={(e) => onCityChange?.(e.target.value)}
                     />
@@ -83,7 +83,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
             </Popover.Portal>
           </Popover.Root>
         </div>
-        <Button variant="accent" onClick={onSearch}>Suchen</Button>
+        <Button variant="accent" onClick={onSearch}>Search</Button>
       </div>
     </div>
   );
