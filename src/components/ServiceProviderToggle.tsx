@@ -35,18 +35,18 @@ export function ServiceProviderToggle({
       id={id}
       checked={checked}
       onCheckedChange={onCheckedChange}
-      className="relative inline-flex h-15 w-fit items-center rounded-full bg-linen px-1 cursor-pointer"
+      className="relative inline-flex h-10 w-fit items-center rounded-full bg-linen px-1 cursor-pointer"
     >
       {/* Sliding thumb */}
       <Switch.Thumb
         style={thumbStyle}
-        className="absolute top-1.5 h-12 rounded-full bg-primary transition-all duration-150"
+        className="absolute top-1 h-8 rounded-full bg-primary transition-all duration-150"
       />
 
       {/* Left label */}
       <span
         ref={leftRef}
-        className={`relative z-10 inline-flex items-center gap-1.5 px-4 py-1 text-h2 font-medium select-none transition-colors duration-150 whitespace-nowrap ${
+        className={`relative z-10 inline-flex items-center gap-1.5 px-4 py-1 text-small font-medium select-none transition-colors duration-150 whitespace-nowrap ${
           !checked ? "text-surface" : "text-charcoal"
         }`}
       >
@@ -57,7 +57,7 @@ export function ServiceProviderToggle({
       {/* Right label */}
       <span
         ref={rightRef}
-        className={`relative z-10 inline-flex items-center gap-1.5 px-4 py-1 text-h2 font-medium select-none transition-colors duration-150 whitespace-nowrap ${
+        className={`relative z-10 inline-flex items-center gap-1.5 px-4 py-1 text-small font-medium select-none transition-colors duration-150 whitespace-nowrap ${
           checked ? "text-surface" : "text-charcoal"
         }`}
       >
