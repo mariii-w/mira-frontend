@@ -12,6 +12,7 @@ default:
 stages:
   - build
   - test
+  - accessibility
   - lint
   - release
 
@@ -46,6 +47,15 @@ test:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
 
+accessibility:
+  stage: accessibility
+  script:
+    - npm run test:a11y
+  artifacts:
+    when: always
+    reports:
+      junit: junit-a11y.xml
+
 create_release:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
@@ -56,6 +66,7 @@ create_release:
     - job: build
       artifacts: true
     - job: test
+    - job: accessibility
   script:
     - echo "Creating release for $CI_COMMIT_TAG"
   release:
