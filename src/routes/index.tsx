@@ -98,7 +98,7 @@ function Home() {
               <p className="text-small text-foreground/70">
                 Search thousands of verified services in your neighbourhood. Book in minutes, pay securely, leave a review.
               </p>
-              <form role="search" className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (query.trim()) navigate({ to: '/search', search: { q: query.trim(), city: '', radius: 20, tagIds: [], maxPrice: 100, from: undefined } }) }}>
+              <form role="search" className="flex gap-2" onSubmit={(e) => { e.preventDefault(); navigate({ to: '/search', search: { q: query.trim(), city: '', radius: 20, tagIds: [], maxPrice: 100, from: undefined } }) }}>
                 <label htmlFor="hero-search" className="sr-only">Search for a service</label>
                 <input
                   id="hero-search"
