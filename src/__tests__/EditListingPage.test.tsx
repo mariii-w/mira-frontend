@@ -38,14 +38,12 @@ vi.mock("../components/MultiSelect", () => ({
     id,
     "aria-label": ariaLabel,
     "aria-describedby": describedby,
-    "aria-required": required,
   }: MultiSelectProps) => (
     <button
       type="button"
       id={id}
       aria-label={ariaLabel}
       aria-describedby={describedby}
-      aria-required={required}
       data-testid="multiselect"
       onClick={() => onChange([...value, "tag-1"])}
     >
