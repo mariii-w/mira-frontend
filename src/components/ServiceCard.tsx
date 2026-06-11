@@ -33,14 +33,14 @@ export function ServiceCard(
 )
 {
     return(
-        <div className="bg-linen rounded-2xl flex flex-col p-5 gap-4 border border-border w-full">
-            <div className='flex col-2 gap-4'>
+        <div className="bg-linen rounded-2xl flex flex-col p-3 gap-3 border border-border w-full">
+            <div className='flex col-2 gap-3'>
                 {pictureLink && (
-                    <div className='m-3 shrink-0'>
-                        <img src={pictureLink} className="w-48 h-36 rounded-xl object-cover" alt="" />
+                    <div className='shrink-0 self-stretch'>
+                        <img src={pictureLink} className="w-48 h-full rounded-lg object-cover" alt="" />
                     </div>
                 )}
-                <div className='grid gap-2 my-3 flex-1 min-w-0'>
+                <div className='grid gap-2 flex-1 min-w-0'>
                     <div className="flex gap-8">
                         <label className='text-h2'>{label}</label>
 
@@ -68,17 +68,15 @@ export function ServiceCard(
                             <p>{description}</p>
                         </div>
                     )}
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-2 flex-wrap items-center">
                         {badges.map((badge) => (
                             <Badge key={badge.text} {...badge} />
                         ))}
-                    </div>
-                    <div className='flex'>
-                        {distance !== undefined && (
-                            <p><MapPin className='inline'/> {distance} km away</p>
-                        )}
-                        <div className='ml-auto mt-auto'>
-                            <Button variant="primary" trailingIcon={<ArrowRight />} ><Link to={link} className='text-white decoration-0 '>View service</Link></Button>
+                        <div className='ml-auto shrink-0 flex items-center gap-3'>
+                            {distance !== undefined && (
+                                <p className="text-small text-foreground/70"><MapPin size={14} className='inline mr-1'/>{distance} km away</p>
+                            )}
+                            <Button variant="primary" trailingIcon={<ArrowRight />}><Link to={link} className='text-white decoration-0'>View service</Link></Button>
                         </div>
                     </div>
 
