@@ -22,6 +22,7 @@ export function Navbar() {
   const isProvider = user?.userType === 'PROVIDER'
   const pictureUrl = user?.profileMedia?.url ?? undefined
 
+  console.log('User ID:', user?.userId)
 
   function handleGoogleLogin() {
     window.location.href = 'http://localhost:8081/auth/login/google'
