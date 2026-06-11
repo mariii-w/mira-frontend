@@ -29,6 +29,12 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full bg-charcoal">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2 focus:text-foreground focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
       <nav
         className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-6"
         aria-label="Main navigation"
@@ -53,7 +59,7 @@ export function Navbar() {
           ))}
           <li>
             
-              <a href="#how-it-works"
+            <a href="#how-it-works"
               className="text-cream/80 text-small font-medium no-underline hover:text-cream transition-colors duration-150"
             >
               How it works
@@ -76,10 +82,10 @@ export function Navbar() {
               pictureUrl={pictureUrl}
             />
           ) : (
-          <Button variant="primary" size="md" onClick={handleGoogleLogin}>
-            Login
-          </Button>
-        )}
+            <Button variant="primary" size="md" onClick={handleGoogleLogin}>
+              Login
+            </Button>
+          )}
         </div>
       </nav>
     </header>
