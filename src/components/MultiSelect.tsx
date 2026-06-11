@@ -5,7 +5,7 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import { ChevronDown, Check, X } from "lucide-react";
-import { useRef, useEffect } from "react";
+import { useId, useRef, useEffect } from "react";
 
 export interface SelectOption {
   id: string;
@@ -23,6 +23,7 @@ export interface MultiSelectProps {
   id?: string;
   "aria-label"?: string;
   "aria-describedby"?: string;
+  "aria-required"?: boolean;
 }
 
 export function MultiSelect({
@@ -34,7 +35,16 @@ export function MultiSelect({
   id,
   "aria-label": ariaLabel,
   "aria-describedby": ariaDescribedby,
+  "aria-required": ariaRequired,
 }: MultiSelectProps) {
+  const generatedId = useId();
+  const requiredDescriptionId = ariaRequired
+    ? `${id ?? generatedId}-required`
+    : undefined;
+  const buttonDescribedby = [ariaDescribedby, requiredDescriptionId]
+    .filter(Boolean)
+    .join(" ");
+
   function toggle(optId: string) {
     onChange(
       value.includes(optId)
@@ -54,12 +64,12 @@ export function MultiSelect({
   const buttonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!buttonRef.current) return;
-    if (ariaDescribedby) {
-      buttonRef.current.setAttribute("aria-describedby", ariaDescribedby);
+    if (buttonDescribedby) {
+      buttonRef.current.setAttribute("aria-describedby", buttonDescribedby);
     } else {
       buttonRef.current.removeAttribute("aria-describedby");
     }
-  }, [ariaDescribedby]);
+  }, [buttonDescribedby]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -102,6 +112,11 @@ export function MultiSelect({
       {/* Listbox */}
       <Listbox value={value} onChange={onChange} multiple>
         <div className="relative max-w-xs">
+          {requiredDescriptionId && (
+            <span id={requiredDescriptionId} className="sr-only">
+              Required
+            </span>
+          )}
           <ListboxButton
             ref={buttonRef}
             id={id}
@@ -122,6 +137,7 @@ export function MultiSelect({
           <ListboxOptions
             anchor="bottom start"
             aria-label={ariaLabel}
+            aria-required={ariaRequired || undefined}
             className="z-10 w-[var(--button-width)] max-h-56 overflow-y-auto rounded-xl border border-border bg-surface shadow-lg py-1 [--anchor-gap:4px] focus:outline-none"
           >
             {options.map((opt) => (
