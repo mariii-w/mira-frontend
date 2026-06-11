@@ -374,8 +374,7 @@ function Styleguide() {
             label={'Laptop & Wi-Fi setup'} 
             description={'I help with Windows, macOS, printers, Wi-Fi, smart TVs and phone-to-laptop setups. Friendly with first-time users and seniors.'} 
             badges={[{text: 'Wi-Fi'}, {text: 'Windows'}, {text: 'Printers'}, {text: 'Barrierefrei', variant: 'accent'}]} 
-            hourRate={20} 
-            distance={10}
+            hourRate={20}
             />
       </div>
     </section>

@@ -14,7 +14,6 @@ interface ServiceCardProps{
     description?: string
     badges: BadgeProps[]
     hourRate : number
-    distance?: number
 }
 
 export function ServiceCard(
@@ -25,8 +24,7 @@ export function ServiceCard(
         description, 
         badges, 
         hourRate, 
-        distance, 
-        providerFirstName, 
+        providerFirstName,
         providerLastName,
         varified
     }: ServiceCardProps  
@@ -61,6 +59,7 @@ export function ServiceCard(
                             </>
                         )}
                         <Dot />
+                        <MapPin size={14} className='shrink-0 self-center text-foreground/70' />
                         <p className='font-bold'>{location}</p>
                     </div>
                     {description && (
@@ -73,9 +72,6 @@ export function ServiceCard(
                             <Badge key={badge.text} {...badge} />
                         ))}
                         <div className='ml-auto shrink-0 flex items-center gap-3'>
-                            {distance !== undefined && (
-                                <p className="text-small text-foreground/70"><MapPin size={14} className='inline mr-1'/>{distance} km away</p>
-                            )}
                             <Button variant="primary" trailingIcon={<ArrowRight />}><Link to={link} className='text-white decoration-0'>View service</Link></Button>
                         </div>
                     </div>
