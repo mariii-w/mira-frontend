@@ -51,10 +51,16 @@ accessibility:
   stage: accessibility
   script:
     - npm run test:a11y
+  coverage: '/All files\s+\|\s+(\d+\.?\d*)/'
   artifacts:
     when: always
+    paths:
+      - coverage-a11y/
     reports:
       junit: junit-a11y.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage-a11y/cobertura-coverage.xml
 
 create_release:
   stage: release

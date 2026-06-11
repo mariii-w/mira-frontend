@@ -13,7 +13,9 @@ export default defineConfig({
     reporters: ['default', 'junit'],
     outputFile: './junit-a11y.xml',
     coverage: {
-      enabled: false,
+      provider: 'v8',
+      reporter: ['text', 'cobertura', 'html'],
+      reportsDirectory: './coverage-a11y',
     },
   },
 })
