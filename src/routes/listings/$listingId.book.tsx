@@ -234,7 +234,7 @@ function BookingPage() {
   return (
     <div className="min-h-dvh bg-background pb-28">
       <Navbar />
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main id="main-content" className="max-w-4xl mx-auto px-4 py-8">
         <button
           type="button"
           onClick={() => navigate({ to: '/' })}

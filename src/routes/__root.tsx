@@ -1,5 +1,5 @@
 import { createRootRoute, Outlet, useLocation, useNavigate } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { exchangeRefreshForAccess, useAuthStore } from '../stores/auth'
 
 // Steps that should redirect to "/" once registration is complete.
@@ -44,7 +44,14 @@ function RootComponent() {
     navigate({ to: '/register' })
   }, [user, location.pathname, navigate])
 
-  return <Outlet />
+  return (
+    <>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      <Outlet />
+    </>
+  )
 }
 
 export const Route = createRootRoute({
