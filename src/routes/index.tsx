@@ -13,15 +13,15 @@ import { AvatarIcon } from '../components/AvatarIcon'
 export const Route = createFileRoute('/')({ component: Home })
 
 const NEED_HELP_BULLETS = [
-  'Browse by category, price, rating',
+  'Browse by category, location & price',
   'Direct chat with providers',
-  'Secure Stripe Payments',
+  'Secure payments via Stripe',
 ]
 
 const CAN_HELP_BULLETS = [
-  'Free to list, only pay on booking',
+  'Free to list — consumers pay you',
   'Your schedule, your rates',
-  'Build reputation with reviews',
+  'Manage availability with a calendar',
 ]
 
 const NEED_HELP_STEPS = [
@@ -132,7 +132,7 @@ function Home() {
                 Turn your skills into income
               </h2>
               <p className="text-small text-foreground/70">
-                List the services you offer, set your prices and schedule. We handle bookings, payments and reviews — keep your time.
+                List the services you offer, set your prices and availability. We handle bookings and payments — keep your time.
               </p>
               <Button variant="accent" size="lg" trailingIcon={<ArrowRight />} fullWidth>Get started</Button>
               <ul className="flex flex-col gap-1.5 list-none m-0 p-0">
