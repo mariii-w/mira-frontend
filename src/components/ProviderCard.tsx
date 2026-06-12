@@ -124,6 +124,7 @@ export function ProviderCard({
             trailingIcon={<ArrowRight />}
             onClick={onViewProfile}
             className={isFull ? 'flex-1' : 'w-full'}
+            aria-label={`View profile of ${firstName} ${lastName}`}
           >
             View Profile
           </Button>

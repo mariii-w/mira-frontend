@@ -34,7 +34,7 @@ function LoginCallback() {
 
     if (error === 'oauth2_failed') {
     return (
-      <div className="min-h-svh bg-background flex items-center justify-center px-6">
+      <main id="main-content" className="min-h-svh bg-background flex items-center justify-center px-6">
         <div className="bg-surface rounded-2xl shadow-sm border border-border/30 p-10 flex flex-col items-center gap-6 max-w-sm w-full text-center">
           <div className="flex flex-col gap-2">
             <h2 className="font-heading text-h2 text-foreground">Login failed</h2>
@@ -49,7 +49,7 @@ function LoginCallback() {
             Try again with Google
           </a>
         </div>
-      </div>
+      </main>
     )
   }
 

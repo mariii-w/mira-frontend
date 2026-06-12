@@ -16,9 +16,6 @@ function RegisterDone() {
   const user = useAuthStore((s) => s.user)
   const firstName = user?.firstName ?? 'there'
 
-    console.log('profileMedia:', user?.profileMedia)
-  console.log('photo url:', user?.profileMedia?.url)
-
   return (
     <section className="flex flex-col items-center justify-center gap-6 py-12 text-center" aria-labelledby="register-step-heading">
       {user?.profileMedia?.url ? (
