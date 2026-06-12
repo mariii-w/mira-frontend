@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Search, Check, ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react'
 import { useState, useRef } from 'react'
+import { usePageTitle } from '../lib/usePageTitle'
 import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
 import { CategoryCard } from '../components/CategoryCard'
@@ -58,6 +59,7 @@ const PROVIDERS = [
 const FOOTER_LINKS = ['About', 'Contact Us', 'Accessibility', 'Terms of Use', 'Privacy Policy']
 
 function Home() {
+  usePageTitle('')
   const [query, setQuery] = useState('')
   const categoryRef = useRef<HTMLUListElement>(null)
   const providerRef = useRef<HTMLUListElement>(null)

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { usePageTitle } from '../../lib/usePageTitle'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { ArrowLeft, Minus, Plus, Sunrise, Sun, Home, MapPin, MapPinned, ArrowRight } from 'lucide-react'
 import { Navbar } from '../../components/Navbar'
@@ -95,6 +96,7 @@ function initials(name: string, surname: string): string {
 }
 
 function BookingPage() {
+  usePageTitle('Book a service')
   const { listingId } = Route.useParams()
   const navigate = useNavigate()
 

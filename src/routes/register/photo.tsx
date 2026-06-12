@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, type ChangeEvent, type FormEvent } from 'react'
+import { usePageTitle } from '../../lib/usePageTitle'
 import { ArrowLeft, ArrowRight, Upload } from 'lucide-react'
 import { Button } from '../../components/Button'
 import { AvatarIcon } from '../../components/AvatarIcon'
@@ -22,6 +23,7 @@ function validateFile(file: File): string | null {
 
 // eslint-disable-next-line react-refresh/only-export-components
 function RegisterPhoto() {
+  usePageTitle('Profile photo')
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const fileInputRef = useRef<HTMLInputElement>(null)

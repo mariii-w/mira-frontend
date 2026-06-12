@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { usePageTitle } from '../lib/usePageTitle'
 import { Plus } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
@@ -84,6 +85,7 @@ function CreateServiceButton({ onClick }: { onClick: () => void }) {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function MyListingsPage() {
+  usePageTitle('My Services')
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
 

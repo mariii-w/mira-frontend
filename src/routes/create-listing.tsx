@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef, type FormEvent, type ChangeEvent } from 'react'
+import { usePageTitle } from '../lib/usePageTitle'
 import { Plus, X, ArrowLeft } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
@@ -63,6 +64,7 @@ function validateCity(v: string) {
 }
 
 export function CreateListingPage() {
+  usePageTitle('Create a service')
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
 

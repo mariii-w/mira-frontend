@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef, type FormEvent, type ChangeEvent } from 'react'
+import { usePageTitle } from '../lib/usePageTitle'
 import { Plus, X, ArrowLeft } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
@@ -91,6 +92,7 @@ const STATUS_LABEL: Record<PublicationStatus, string> = {
 }
 
 export function EditListingPage() {
+  usePageTitle('Edit service')
   const { listingId } = Route.useParams()
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)

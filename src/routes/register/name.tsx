@@ -6,6 +6,7 @@ import { Input } from '../../components/Input'
 import { Label } from '../../components/Label'
 import { useAuthStore } from '../../stores/auth'
 import { patchUser, type RegisterPatchError } from '../../lib/patchUser'
+import { usePageTitle } from '../../lib/usePageTitle'
 
 export const Route = createFileRoute('/register/name')({
   component: RegisterName,
@@ -33,6 +34,7 @@ function validateUsername(value: string): string | null {
 
 // eslint-disable-next-line react-refresh/only-export-components
 function RegisterName() {
+  usePageTitle('Your name')
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
 

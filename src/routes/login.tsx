@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { usePageTitle } from '../lib/usePageTitle'
 import { exchangeRefreshForAccess, useAuthStore } from '../stores/auth'
 
 export const Route = createFileRoute('/login')({
@@ -10,6 +11,7 @@ export const Route = createFileRoute('/login')({
 })
 // eslint-disable-next-line react-refresh/only-export-components
 function LoginCallback() {
+  usePageTitle('Login')
   const navigate = useNavigate()
   const { error } = Route.useSearch()
 

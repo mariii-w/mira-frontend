@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { usePageTitle } from '../lib/usePageTitle'
 import { useQuery } from '@tanstack/react-query'
 import { Navbar } from '../components/Navbar'
 import { BookingCard, type BookingSummary, type BookingStatus, type BookingCollection } from '../components/BookingCard'
@@ -81,6 +82,7 @@ function FilterBar({
 }
 
 function MyBookingsPage() {
+  usePageTitle('My Bookings')
   const user = useAuthStore((s) => s.user)
   const isProvider = user?.userType === 'PROVIDER'
 

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, type ReactNode } from 'react'
+import { usePageTitle } from '../../lib/usePageTitle'
 import { Search, Heart } from 'lucide-react'
 import { useAuthStore } from '../../stores/auth'
 import { patchUser, type UserType, type RegisterPatchError } from '../../lib/patchUser'
@@ -12,6 +13,7 @@ type CardVariant = 'primary' | 'accent'
 
 // eslint-disable-next-line react-refresh/only-export-components
 function RegisterRole() {
+  usePageTitle('Choose your role')
   const navigate = useNavigate()
   const currentUserType = useAuthStore((s) => s.user?.userType ?? null)
   const [submitting, setSubmitting] = useState<UserType | null>(null)

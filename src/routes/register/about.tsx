@@ -7,6 +7,7 @@ import { Label } from '../../components/Label'
 import { Textarea } from '../../components/Textarea'
 import { useAuthStore } from '../../stores/auth'
 import { patchUser, type PatchUserPayload, type RegisterPatchError } from '../../lib/patchUser'
+import { usePageTitle } from '../../lib/usePageTitle'
 
 export const Route = createFileRoute('/register/about')({
   component: RegisterAbout,
@@ -25,6 +26,7 @@ function validateTagline(value: string, required: boolean): string | null {
 
 // eslint-disable-next-line react-refresh/only-export-components
 function RegisterAbout() {
+  usePageTitle('About you')
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const isProvider = user?.userType === 'PROVIDER'

@@ -6,6 +6,7 @@ import { Input } from '../../components/Input'
 import { Label } from '../../components/Label'
 import { useAuthStore } from '../../stores/auth'
 import { patchUser, type RegisterPatchError } from '../../lib/patchUser'
+import { usePageTitle } from '../../lib/usePageTitle'
 
 export const Route = createFileRoute('/register/address')({
   component: RegisterAddress,
@@ -46,6 +47,7 @@ function validateCity(value: string): string | null {
 
 // eslint-disable-next-line react-refresh/only-export-components
 function RegisterAddress() {
+  usePageTitle('Your address')
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
 

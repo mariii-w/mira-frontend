@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
+import { usePageTitle } from '../../lib/usePageTitle'
 import { Button } from '../../components/Button'
 import { AvatarIcon } from '../../components/AvatarIcon'
 import { useAuthStore } from '../../stores/auth'
@@ -10,6 +11,7 @@ export const Route = createFileRoute('/register/done')({
 
 // eslint-disable-next-line react-refresh/only-export-components
 function RegisterDone() {
+  usePageTitle("You're all set!")
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const firstName = user?.firstName ?? 'there'
