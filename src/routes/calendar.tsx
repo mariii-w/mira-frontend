@@ -11,6 +11,7 @@ import { ExceptionModal } from '../components/ExceptionModal'
 import { useAuthStore } from '../stores/auth'
 import { authFetch } from '../lib/queryClient'
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute('/calendar')({
   component: CalendarPage,
 })

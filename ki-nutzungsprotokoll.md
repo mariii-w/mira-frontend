@@ -83,7 +83,7 @@ Pflegen Sie das Protokoll möglichst zeitnah, damit die Git-Historie die Entwick
 | 2026-06-10 | Frederik Schwarz | Claude | Unterst├╝tzung beim Manage-Tab in `ExceptionModal.tsx`: Ausnahmeliste, inline Zeitbearbeitung (PATCH), L├Âschen mit Best├ñtigungsschritt. | Logik als Referenz genutzt; UX-Ablauf und Tab-Struktur gepr├╝ft und angepasst. |
 | 2026-06-10 | Frederik Schwarz | Claude | Unterst├╝tzung bei der ├£berarbeitung der Kalender-Zell-Badges: Positionierung und Unterscheidung von OFF/BLK/+AVAIL, Begrenzung der Buchungsanzeige. | Visuelles Ergebnis im Browser gepr├╝ft; Badge-Platzierung, Benennung und Gr├Â├ƒe anhand eigener R├╝ckmeldung angepasst. |
 | 2026-06-10 | Frederik Schwarz | Claude | Unterst├╝tzung beim Accessibility-Review ├╝ber `calendar.tsx`, `WeeklyScheduleModal.tsx`, `ExceptionModal.tsx`: aria-live, Tab-Rollen, aria-pressed, erweiterte aria-labels, role alert, aria-hidden auf Trennzeichen. | ARIA-Vorschl├ñge gepr├╝ft; jedes Attribut vor der Einbindung erl├ñutert; Umfang des Reviews durch Nutzerin vorgegeben. |
-
+| 2026-06-10 | Frederik Schwarz | Claude | Unterst├╝tzung beim Schreiben der Unit-Tests f├╝r `CalendarPage`, `WeeklyScheduleModal` und `ExceptionModal` mit Vitest und React Testing Library. | Testf├ñlle eigenst├ñndig ausgew├ñhlt und priorisiert; generierte Tests gepr├╝ft, fehlgeschlagene F├ñlle analysiert und Korrekturen (z.B. fehlender `export` in `CalendarPage`, `QueryClientProvider`-Wrapping) selbst eingebracht. |
 ## Optionale ergänzende Hinweise
 
 Hier können Sie bei Bedarf kurz ergänzen,
