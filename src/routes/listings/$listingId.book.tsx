@@ -83,6 +83,7 @@ function maxDurationForSlot(slot: string, windows: TimeWindow[]): number {
   return Math.min(12, Math.floor((new Date(w.end).getTime() - slotMs) / 36e5))
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function StepBadge({ n }: { n: number }) {
   return (
     <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
@@ -95,6 +96,7 @@ function initials(name: string, surname: string): string {
   return (name[0] ?? '') + (surname[0] ?? '')
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function BookingPage() {
   const { listingId } = Route.useParams()
   const navigate = useNavigate()

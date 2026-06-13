@@ -1,5 +1,5 @@
 import { Clock } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Modal } from './Modal'
 import { Button } from './Button'
@@ -45,7 +45,7 @@ interface Props {
 
 export function WeeklyScheduleModal({ open, onClose, userId }: Props) {
   const queryClient = useQueryClient()
-  const [state, setState] = useState<ScheduleState>(() => buildInitialState([]))
+  const [overrides, setOverrides] = useState<Partial<ScheduleState>>({})
 
   const { data, isLoading } = useQuery({
     queryKey: ['schedule', userId],
@@ -57,9 +57,8 @@ export function WeeklyScheduleModal({ open, onClose, userId }: Props) {
     enabled: open && !!userId,
   })
 
-  useEffect(() => {
-    if (data) setState(buildInitialState(data.entries))
-  }, [data])
+  const baseState = useMemo(() => buildInitialState(data?.entries ?? []), [data])
+  const state = useMemo(() => ({ ...baseState, ...overrides }), [baseState, overrides])
 
   const { mutate: saveSchedule, isPending, error } = useMutation({
     mutationFn: async () => {
@@ -81,16 +80,17 @@ export function WeeklyScheduleModal({ open, onClose, userId }: Props) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedule', userId] })
+      setOverrides({})
       onClose()
     },
   })
 
   function toggle(day: BackendDay) {
-    setState((s) => ({ ...s, [day]: { ...s[day], enabled: !s[day].enabled } }))
+    setOverrides((o) => ({ ...o, [day]: { ...state[day], enabled: !state[day].enabled } }))
   }
 
   function setTime(day: BackendDay, field: 'start' | 'end', value: string) {
-    setState((s) => ({ ...s, [day]: { ...s[day], [field]: value } }))
+    setOverrides((o) => ({ ...o, [day]: { ...state[day], [field]: value } }))
   }
 
   return (

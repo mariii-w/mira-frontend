@@ -11,7 +11,6 @@ import { ExceptionModal } from '../components/ExceptionModal'
 import { useAuthStore } from '../stores/auth'
 import { authFetch } from '../lib/queryClient'
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute('/calendar')({
   component: CalendarPage,
 })
@@ -86,6 +85,7 @@ function fetchCalendar(userId: string, from: string, to: string) {
 }
 
 // --- Sub-components ---
+// eslint-disable-next-line react-refresh/only-export-components
 function BookingDayCard({ booking }: { booking: CalendarBooking }) {
   const duration = durationHours(booking.bookedStart, booking.bookedEnd)
   const address = booking.serviceAddress
@@ -113,6 +113,7 @@ function BookingDayCard({ booking }: { booking: CalendarBooking }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function UpcomingRow({ booking }: { booking: CalendarBooking }) {
   const d = new Date(booking.bookedStart)
   const monthAbbr = d.toLocaleString('en', { month: 'short' }).toUpperCase()
@@ -144,6 +145,7 @@ function UpcomingRow({ booking }: { booking: CalendarBooking }) {
 }
 
 // --- Main page ---
+// eslint-disable-next-line react-refresh/only-export-components
 function CalendarPage() {
   const user = useAuthStore((s) => s.user)
   const userId = user?.userId
