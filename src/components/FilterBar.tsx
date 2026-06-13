@@ -86,11 +86,11 @@ export function FilterBar({ tagList = [] }: FilterBarProps) {
         </FilterSection>
 
         <FilterSection title="Entfernung">
-          <Slider label={''} min={10} max={50} unit='km'/>
+          <Slider label="Entfernung" min={10} max={50} unit='km'/>
         </FilterSection>
 
         <FilterSection title="Preis">
-          <Slider label={''} min={5} max={100} unit='€'/>
+          <Slider label="Preis" min={5} max={100} unit='€'/>
         </FilterSection>
       </div>
 

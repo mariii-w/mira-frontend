@@ -16,13 +16,14 @@ const SIZE: Record<InputSize, string> = {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, error, id, size = 'md', ...rest },
+  { className, error, id, size = 'md', 'aria-describedby': ariaDescribedby, ...rest },
   ref,
 ) {
   const generatedId = useId()
   const inputId = id ?? generatedId
   const hasError = !!error
   const errorId = `${inputId}-error`
+  const describedBy = [ariaDescribedby, hasError ? errorId : undefined].filter(Boolean).join(' ') || undefined
 
   return (
     <div className="flex w-full flex-col gap-1.5">
@@ -30,7 +31,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         ref={ref}
         id={inputId}
         aria-invalid={hasError || undefined}
-        aria-describedby={hasError ? errorId : undefined}
+        aria-describedby={describedBy}
         className={cn(
           'w-full text-foreground',
           SIZE[size],

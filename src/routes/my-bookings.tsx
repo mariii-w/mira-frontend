@@ -34,6 +34,7 @@ function applyFilter(items: BookingSummary[], filter: BookingFilter): BookingSum
   return items
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function FilterBar({
   value,
   onChange,
@@ -80,6 +81,7 @@ function FilterBar({
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function MyBookingsPage() {
   const user = useAuthStore((s) => s.user)
   const isProvider = user?.userType === 'PROVIDER'

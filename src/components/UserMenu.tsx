@@ -35,6 +35,7 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
 
       <Popover.Portal>
         <Popover.Content
+          aria-label="User menu"
           align="end"
           sideOffset={8}
           className="z-50 w-56 rounded-xl border border-border bg-surface p-2 shadow-lg"

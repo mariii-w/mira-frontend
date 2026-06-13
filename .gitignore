@@ -13,8 +13,9 @@ dist-ssr
 *.local
 
 # Test reports
-junit.xml
+junit*.xml
 coverage/
+coverage-a11y/
 
 # Editor directories and files
 .vscode/*

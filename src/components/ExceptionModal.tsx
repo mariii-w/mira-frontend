@@ -121,7 +121,7 @@ function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId
               disabled={removing}
               className="rounded-lg bg-red-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-40 transition-colors"
             >
-              {removing ? 'DeletingÔÇª' : 'Delete'}
+              {removing ? 'Deleting…' : 'Delete'}
             </button>
           </div>
         </div>
@@ -130,7 +130,7 @@ function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId
       {/* Time display or edit */}
       {!editing && ex.startTime && ex.endTime && (
         <p className="text-xs text-muted-foreground">
-          {toInputTime(ex.startTime)} ÔÇô {toInputTime(ex.endTime)}
+          {toInputTime(ex.startTime)} – {toInputTime(ex.endTime)}
         </p>
       )}
       {!editing && !ex.startTime && (
@@ -147,7 +147,7 @@ function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId
               aria-label="Start time"
               className="flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-plum [&::-webkit-calendar-picker-indicator]:hidden"
             />
-            <span className="text-muted-foreground text-sm" aria-hidden="true">ÔÇô</span>
+            <span className="text-muted-foreground text-sm" aria-hidden="true">–</span>
             <input
               type="time"
               value={end}
@@ -358,7 +358,7 @@ export function ExceptionModal({ open, onClose, userId }: Props) {
               onClick={() => mutate()}
               disabled={isPending || !!timeError || !date}
             >
-              {isPending ? 'SavingÔÇª' : type === 'BLOCKED' ? 'Block this time' : 'Add availability'}
+              {isPending ? 'Saving…' : type === 'BLOCKED' ? 'Block this time' : 'Add availability'}
             </Button>
           </div>
         </div>

@@ -25,7 +25,7 @@ interface ScheduleEntry {
   endTime: string
 }
 
-// JS getDay(): 0=Sun,1=Mon,...,6=Sat  ÔåÆ  backend enum
+// JS getDay(): 0=Sun,1=Mon,...,6=Sat  →  backend enum
 const JS_DAY_TO_BACKEND: BackendDayOfWeek[] = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
 interface ScheduleException {
@@ -101,7 +101,7 @@ function BookingDayCard({ booking }: { booking: CalendarBooking }) {
           <p className="text-sm text-foreground mt-0.5">{booking.listing.title}</p>
           <p className="text-xs text-muted-foreground mt-0.5">
             {booking.counterparty.name} {booking.counterparty.surname}
-            {' ┬À '}{duration}h{' ┬À '}Ôé¼{booking.totalPrice}
+            {' · '}{duration}h{' · '}€{booking.totalPrice}
           </p>
         </div>
         <StatusBadge status={booking.status} />
@@ -135,8 +135,8 @@ function UpcomingRow({ booking }: { booking: CalendarBooking }) {
         <p className="text-sm font-semibold text-foreground truncate">{booking.listing.title}</p>
         <p className="text-xs text-muted-foreground mt-0.5">
           {booking.counterparty.name} {booking.counterparty.surname}
-          {' ┬À '}<Clock size={10} className="inline" aria-hidden="true" /> {formatTime(booking.bookedStart)}
-          {' ┬À '}{durationHours(booking.bookedStart, booking.bookedEnd)}h
+          {' · '}<Clock size={10} className="inline" aria-hidden="true" /> {formatTime(booking.bookedStart)}
+          {' · '}{durationHours(booking.bookedStart, booking.bookedEnd)}h
         </p>
         <p className="text-xs text-muted-foreground truncate">{address}</p>
       </div>
@@ -163,7 +163,7 @@ export function CalendarPage() {
   const from = toLocalDate(new Date(year, month - 1, 1))
   const to = toLocalDate(new Date(year, month, 0))
 
-  // Upcoming range: today ÔåÆ today+30
+  // Upcoming range: today → today+30
   const upcomingTo = new Date(today)
   upcomingTo.setDate(upcomingTo.getDate() + 30)
   const upcomingFrom = toLocalDate(today)
@@ -359,7 +359,7 @@ export function CalendarPage() {
                       >
                         {date.getDate()}
                       </span>
-                      {/* Exception / schedule badges ÔÇö provider only */}
+                      {/* Exception / schedule badges — provider only */}
                       {isProvider && (isBlocked || hasExtra || isNonWorking) && (
                         <span className="flex flex-wrap gap-0.5 justify-end">
                           {isNonWorking && !isBlocked && (

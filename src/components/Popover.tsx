@@ -7,6 +7,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type HTMLAttributes,
   type ReactElement,
   type ReactNode,
 } from 'react'
@@ -71,11 +72,10 @@ export function Portal({ children }: { children: ReactNode }) {
   return typeof document === 'undefined' ? null : createPortal(children, document.body)
 }
 
-interface ContentProps {
+interface ContentProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode
   align?: 'start' | 'center' | 'end'
   sideOffset?: number
-  className?: string
 }
 
 export function Content({
@@ -83,6 +83,7 @@ export function Content({
   align = 'center',
   sideOffset = 0,
   className,
+  ...props
 }: ContentProps) {
   const { open, setOpen, triggerRef, contentId } = usePopover()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -146,6 +147,7 @@ export function Content({
 
   return (
     <div
+      {...props}
       ref={contentRef}
       id={contentId}
       role="dialog"
