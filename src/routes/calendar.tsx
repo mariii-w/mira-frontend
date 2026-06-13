@@ -93,7 +93,7 @@ function BookingDayCard({ booking }: { booking: CalendarBooking }) {
     : 'Remote'
 
   return (
-    <div className="rounded-xl border border-border p-4 flex flex-col gap-2">
+    <div role="article" className="rounded-xl border border-border p-4 flex flex-col gap-2">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-base font-semibold text-foreground">{formatTime(booking.bookedStart)}</p>
@@ -122,7 +122,7 @@ function UpcomingRow({ booking }: { booking: CalendarBooking }) {
     : 'Remote'
 
   return (
-    <div className="flex items-start gap-3 py-3 border-t border-border/60 first:border-t-0 first:pt-0">
+    <div role="article" className="flex items-start gap-3 py-3 border-t border-border/60 first:border-t-0 first:pt-0">
       {/* Date badge */}
       <div className="flex flex-col items-center min-w-[36px]">
         <span className="text-xs font-semibold text-muted-foreground">{monthAbbr}</span>
@@ -209,12 +209,7 @@ function CalendarPage() {
     {},
   )
 
-  const TEST_BOOKINGS: CalendarBooking[] = [
-    { bookingId: 'test-1', listingId: 'l1', listing: { title: 'Dog Walking' }, counterparty: { userId: 'u1', name: 'Anna', surname: 'M.' }, status: 'CONFIRMED', serviceAddress: null, totalPrice: 30, bookedStart: `${year}-${String(month).padStart(2,'0')}-11T09:00:00`, bookedEnd: `${year}-${String(month).padStart(2,'0')}-11T10:00:00` },
-    { bookingId: 'test-2', listingId: 'l2', listing: { title: 'IT Support' }, counterparty: { userId: 'u2', name: 'Klaus', surname: 'B.' }, status: 'PAID', serviceAddress: null, totalPrice: 50, bookedStart: `${year}-${String(month).padStart(2,'0')}-11T14:00:00`, bookedEnd: `${year}-${String(month).padStart(2,'0')}-11T15:00:00` },
-    { bookingId: 'test-3', listingId: 'l3', listing: { title: 'Garden Help' }, counterparty: { userId: 'u3', name: 'Lukas', surname: 'W.' }, status: 'AWAITING_CONFIRMATION', serviceAddress: null, totalPrice: 20, bookedStart: `${year}-${String(month).padStart(2,'0')}-11T16:00:00`, bookedEnd: `${year}-${String(month).padStart(2,'0')}-11T17:00:00` },
-  ]
-  const bookingsByDate = groupByDate([...(monthData?.items ?? []), ...TEST_BOOKINGS])
+  const bookingsByDate = groupByDate(monthData?.items ?? [])
   const selectedKey = toLocalDate(selectedDate)
   const selectedBookings = bookingsByDate[selectedKey] ?? []
 
@@ -277,16 +272,16 @@ function CalendarPage() {
           <div className="flex-[3] rounded-2xl border border-border bg-surface p-6">
             <div className="mb-3 flex items-center justify-between">
               {isProvider && (
-                <div className="flex items-center gap-5 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
+                <div role="list" aria-label="Calendar legend" className="flex items-center gap-5 text-xs text-muted-foreground">
+                  <span role="listitem" className="flex items-center gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-forest" aria-hidden="true" />
                     Booking
                   </span>
-                  <span className="flex items-center gap-1.5">
+                  <span role="listitem" className="flex items-center gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-foreground/30" aria-hidden="true" />
                     Off (schedule)
                   </span>
-                  <span className="flex items-center gap-1.5">
+                  <span role="listitem" className="flex items-center gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-plum" aria-hidden="true" />
                     Blocked (exception)
                   </span>
@@ -328,12 +323,17 @@ function CalendarPage() {
                 return (
                   <button
                     onClick={() => setSelectedDate(date)}
-                    aria-label={date.toLocaleDateString('en', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
+                    aria-label={[
+                      date.toLocaleDateString('en', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+                      isNonWorking ? 'Not a working day' : null,
+                      isBlocked && blockedEx?.startTime
+                        ? `Partially blocked from ${blockedEx.startTime.slice(0,5)} to ${blockedEx.endTime?.slice(0,5)}, consumers cannot book during this window`
+                        : isBlocked
+                          ? 'Fully blocked, consumers cannot book this day'
+                          : null,
+                      hasExtra ? 'Extra availability added outside regular hours' : null,
+                      dayBookings.length === 1 ? '1 booking' : dayBookings.length > 1 ? `${dayBookings.length} bookings` : null,
+                    ].filter(Boolean).join('. ')}
                     aria-pressed={isSelected}
                     className={[
                       'w-full min-h-[80px] p-1.5 flex flex-col items-start text-xs transition-colors rounded-lg border',
@@ -388,7 +388,7 @@ function CalendarPage() {
                         </span>
                       ))}
                       {dayBookings.length > 1 && (
-                        <span className="text-muted-foreground leading-tight">
+                        <span aria-hidden="true" className="text-muted-foreground leading-tight">
                           +{dayBookings.length - 1} more
                         </span>
                       )}
@@ -402,7 +402,7 @@ function CalendarPage() {
           {/* Right panel */}
           <div className="flex-[2] flex flex-col gap-4">
             {/* Selected day */}
-            <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="rounded-2xl border border-border bg-surface p-5" aria-live="polite" aria-atomic="true">
               <h2 className="mb-3 text-base font-bold text-foreground">
                 {selectedDate.toLocaleDateString('en', {
                   weekday: 'long',
@@ -422,7 +422,7 @@ function CalendarPage() {
             </div>
 
             {/* Upcoming appointments */}
-            <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="rounded-2xl border border-border bg-surface p-5" aria-label="Upcoming appointments">
               <h2 className="mb-3 text-base font-bold text-foreground">Upcoming appointments</h2>
               {upcomingBookings.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No upcoming appointments.</p>

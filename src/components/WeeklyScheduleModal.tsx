@@ -140,7 +140,7 @@ export function WeeklyScheduleModal({ open, onClose, userId }: Props) {
                         className="rounded-lg border border-border bg-background pl-7 pr-2 py-1.5 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-forest [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-inner-spin-button]:hidden"
                       />
                     </div>
-                    <span className="text-muted-foreground text-base">ÔÇô</span>
+                    <span className="text-muted-foreground text-base" aria-hidden="true">ÔÇô</span>
                     <div className="relative flex items-center">
                       <Clock size={14} className="absolute left-2 text-muted-foreground pointer-events-none" aria-hidden="true" />
                       <input

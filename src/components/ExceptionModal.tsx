@@ -107,7 +107,7 @@ function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId
 
       {/* Delete confirmation */}
       {confirmDelete && (
-        <div className="flex items-center justify-between rounded-lg bg-red-50 px-3 py-2">
+        <div role="alert" className="flex items-center justify-between rounded-lg bg-red-50 px-3 py-2">
           <p className="text-xs font-medium text-red-700">Delete this exception?</p>
           <div className="flex items-center gap-2">
             <button
@@ -144,13 +144,15 @@ function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId
               type="time"
               value={start}
               onChange={(e) => setStart(e.target.value)}
+              aria-label="Start time"
               className="flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-plum [&::-webkit-calendar-picker-indicator]:hidden"
             />
-            <span className="text-muted-foreground text-sm">ÔÇô</span>
+            <span className="text-muted-foreground text-sm" aria-hidden="true">ÔÇô</span>
             <input
               type="time"
               value={end}
               onChange={(e) => setEnd(e.target.value)}
+              aria-label="End time"
               className="flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-plum [&::-webkit-calendar-picker-indicator]:hidden"
             />
             <button
@@ -169,7 +171,7 @@ function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId
               <X size={14} />
             </button>
           </div>
-          {timeError && <p className="text-xs text-red-600">{timeError}</p>}
+          {timeError && <p role="alert" className="text-xs text-red-600">{timeError}</p>}
         </div>
       )}
     </div>
@@ -247,11 +249,13 @@ export function ExceptionModal({ open, onClose, userId }: Props) {
       description="Block time off or add extra availability for specific dates."
     >
       {/* Tabs */}
-      <div className="mt-4 flex border-b border-border">
+      <div role="tablist" aria-label="Exception options" className="mt-4 flex border-b border-border">
         {(['add', 'manage'] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
+            role="tab"
+            aria-selected={tab === t}
             onClick={() => setTab(t)}
             className={[
               'pb-2 px-1 mr-5 text-sm font-medium border-b-2 -mb-px transition-colors',
@@ -266,7 +270,7 @@ export function ExceptionModal({ open, onClose, userId }: Props) {
       </div>
 
       {tab === 'add' ? (
-        <div className="mt-4 flex flex-col gap-4">
+        <div role="tabpanel" className="mt-4 flex flex-col gap-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Exception type
           </p>
@@ -280,6 +284,7 @@ export function ExceptionModal({ open, onClose, userId }: Props) {
                 key={value}
                 type="button"
                 onClick={() => { setType(value); setAllDay(value === 'BLOCKED') }}
+                aria-pressed={type === value}
                 className={[
                   'w-full text-left rounded-xl border px-4 py-3 transition-colors',
                   type === value ? 'border-plum bg-plum/10' : 'border-border bg-background hover:bg-foreground/5',
@@ -358,7 +363,7 @@ export function ExceptionModal({ open, onClose, userId }: Props) {
           </div>
         </div>
       ) : (
-        <div className="mt-4 flex flex-col gap-2">
+        <div role="tabpanel" className="mt-4 flex flex-col gap-2">
           {exceptions.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">No exceptions set yet.</p>
           ) : (
