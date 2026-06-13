@@ -15,6 +15,17 @@ export const Route = createFileRoute('/calendar')({
 })
 
 // --- Types ---
+type BackendDayOfWeek = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN'
+
+interface ScheduleEntry {
+  dayOfWeek: BackendDayOfWeek
+  startTime: string
+  endTime: string
+}
+
+// JS getDay(): 0=Sun,1=Mon,...,6=Sat  ÔåÆ  backend enum
+const JS_DAY_TO_BACKEND: BackendDayOfWeek[] = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+
 interface ScheduleException {
   exceptionId: string
   date: string          // "YYYY-MM-DD"
@@ -173,6 +184,18 @@ function CalendarPage() {
     enabled: !!userId && isProvider,
   })
 
+  const { data: scheduleData } = useQuery({
+    queryKey: ['schedule', userId],
+    queryFn: async () => {
+      const res = await authFetch(`/v1/users/${userId}/schedule`)
+      if (!res.ok) throw new Error('Failed to load schedule')
+      return res.json() as Promise<{ entries: ScheduleEntry[] }>
+    },
+    enabled: !!userId && isProvider,
+  })
+
+  const workingDays = new Set((scheduleData?.entries ?? []).map((e) => e.dayOfWeek))
+
   const exceptionsByDate = (exceptionsData?.items ?? []).reduce<Record<string, ScheduleException[]>>(
     (acc, ex) => {
       if (!acc[ex.date]) acc[ex.date] = []
@@ -274,6 +297,9 @@ function CalendarPage() {
                 const dayExceptions = exceptionsByDate[dayKey] ?? []
                 const isBlocked = dayExceptions.some((e) => e.exceptionType === 'BLOCKED')
                 const hasExtra = dayExceptions.some((e) => e.exceptionType === 'AVAILABLE')
+                const backendDay = JS_DAY_TO_BACKEND[date.getDay()]
+                // Non-working: schedule loaded, day not in working days, no AVAILABLE exception overriding
+                const isNonWorking = isProvider && scheduleData != null && !workingDays.has(backendDay) && !hasExtra
 
                 return (
                   <button
@@ -291,13 +317,15 @@ function CalendarPage() {
                         ? 'border-forest bg-mint'
                         : isBlocked
                           ? 'border-border bg-foreground/10'
-                          : 'border-border hover:bg-linen',
+                          : isNonWorking
+                            ? 'border-border bg-foreground/5'
+                            : 'border-border hover:bg-linen',
                     ].join(' ')}
                   >
                     <span
                       className={[
                         'flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium shrink-0',
-                        isToday ? 'bg-forest text-white' : isPast ? 'text-muted-foreground line-through' : 'text-foreground',
+                        isToday ? 'bg-forest text-white' : (isPast || isNonWorking) ? 'text-muted-foreground line-through' : 'text-foreground',
                       ].join(' ')}
                     >
                       {date.getDate()}
