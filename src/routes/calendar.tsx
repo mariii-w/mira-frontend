@@ -7,6 +7,7 @@ import { CalendarGrid } from '../components/CalendarGrid'
 import { Button } from '../components/Button'
 import { StatusBadge, type BookingStatus } from '../components/BookingCard'
 import { WeeklyScheduleModal } from '../components/WeeklyScheduleModal'
+import { ExceptionModal } from '../components/ExceptionModal'
 import { useAuthStore } from '../stores/auth'
 import { authFetch } from '../lib/queryClient'
 
@@ -153,6 +154,7 @@ function CalendarPage() {
   const [month, setMonth] = useState(today.getMonth() + 1)
   const [selectedDate, setSelectedDate] = useState<Date>(today)
   const [scheduleOpen, setScheduleOpen] = useState(false)
+  const [exceptionOpen, setExceptionOpen] = useState(false)
 
   // Month range for calendar grid
   const from = toLocalDate(new Date(year, month - 1, 1))
@@ -252,7 +254,12 @@ function CalendarPage() {
               >
                 Weekly schedule
               </Button>
-              <Button variant="accent" size="md" leadingIcon={<Plus size={16} />}>
+              <Button
+                variant="accent"
+                size="md"
+                leadingIcon={<Plus size={16} />}
+                onClick={() => setExceptionOpen(true)}
+              >
                 Add exception
               </Button>
             </div>
@@ -423,11 +430,18 @@ function CalendarPage() {
       </main>
 
       {isProvider && userId && (
-        <WeeklyScheduleModal
-          open={scheduleOpen}
-          onClose={() => setScheduleOpen(false)}
-          userId={userId}
-        />
+        <>
+          <WeeklyScheduleModal
+            open={scheduleOpen}
+            onClose={() => setScheduleOpen(false)}
+            userId={userId}
+          />
+          <ExceptionModal
+            open={exceptionOpen}
+            onClose={() => setExceptionOpen(false)}
+            userId={userId}
+          />
+        </>
       )}
     </div>
   )
