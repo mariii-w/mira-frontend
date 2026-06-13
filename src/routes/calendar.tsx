@@ -146,7 +146,7 @@ function UpcomingRow({ booking }: { booking: CalendarBooking }) {
 
 // --- Main page ---
 // eslint-disable-next-line react-refresh/only-export-components
-function CalendarPage() {
+export function CalendarPage() {
   const user = useAuthStore((s) => s.user)
   const userId = user?.userId
   const isProvider = user?.userType === 'PROVIDER'
