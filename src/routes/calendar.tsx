@@ -15,6 +15,14 @@ export const Route = createFileRoute('/calendar')({
 })
 
 // --- Types ---
+interface ScheduleException {
+  exceptionId: string
+  date: string          // "YYYY-MM-DD"
+  exceptionType: 'BLOCKED' | 'AVAILABLE'
+  startTime: string | null
+  endTime: string | null
+}
+
 interface CalendarBooking {
   bookingId: string
   listingId: string
@@ -155,6 +163,25 @@ function CalendarPage() {
     enabled: !!userId,
   })
 
+  const { data: exceptionsData } = useQuery({
+    queryKey: ['exceptions', userId],
+    queryFn: async () => {
+      const res = await authFetch(`/v1/users/${userId}/exceptions`)
+      if (!res.ok) throw new Error('Failed to load exceptions')
+      return res.json() as Promise<{ items: ScheduleException[] }>
+    },
+    enabled: !!userId && isProvider,
+  })
+
+  const exceptionsByDate = (exceptionsData?.items ?? []).reduce<Record<string, ScheduleException[]>>(
+    (acc, ex) => {
+      if (!acc[ex.date]) acc[ex.date] = []
+      acc[ex.date].push(ex)
+      return acc
+    },
+    {},
+  )
+
   const bookingsByDate = groupByDate(monthData?.items ?? [])
   const selectedKey = toLocalDate(selectedDate)
   const selectedBookings = bookingsByDate[selectedKey] ?? []
@@ -242,7 +269,11 @@ function CalendarPage() {
                   date.getFullYear() === selectedDate.getFullYear()
 
                 const dayKey = toLocalDate(date)
+                const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate())
                 const dayBookings = bookingsByDate[dayKey] ?? []
+                const dayExceptions = exceptionsByDate[dayKey] ?? []
+                const isBlocked = dayExceptions.some((e) => e.exceptionType === 'BLOCKED')
+                const hasExtra = dayExceptions.some((e) => e.exceptionType === 'AVAILABLE')
 
                 return (
                   <button
@@ -256,17 +287,37 @@ function CalendarPage() {
                     aria-pressed={isSelected}
                     className={[
                       'w-full min-h-[80px] p-1.5 flex flex-col items-start text-xs transition-colors rounded-lg border',
-                      isSelected ? 'border-forest bg-mint' : 'border-border hover:bg-linen',
+                      isSelected
+                        ? 'border-forest bg-mint'
+                        : isBlocked
+                          ? 'border-border bg-foreground/10'
+                          : 'border-border hover:bg-linen',
                     ].join(' ')}
                   >
                     <span
                       className={[
                         'flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium shrink-0',
-                        isToday ? 'bg-forest text-white' : 'text-foreground',
+                        isToday ? 'bg-forest text-white' : isPast ? 'text-muted-foreground line-through' : 'text-foreground',
                       ].join(' ')}
                     >
                       {date.getDate()}
                     </span>
+                    {/* Exception badges ÔÇö provider only */}
+                    {(isBlocked || hasExtra) && (
+                      <span className="mt-0.5 flex flex-wrap gap-0.5">
+                        {isBlocked && (
+                          <span className="rounded-full bg-plum px-1.5 py-0.5 text-[10px] font-semibold text-white leading-none">
+                            OFF
+                          </span>
+                        )}
+                        {hasExtra && (
+                          <span className="rounded-full bg-forest px-1.5 py-0.5 text-[10px] font-semibold text-white leading-none">
+                            +AVAIL
+                          </span>
+                        )}
+                      </span>
+                    )}
+
                     <span className="mt-1 flex flex-col gap-0.5 w-full overflow-hidden">
                       {dayBookings.slice(0, 2).map((b) => (
                         <span
