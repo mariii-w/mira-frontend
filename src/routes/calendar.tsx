@@ -6,6 +6,7 @@ import { Navbar } from '../components/Navbar'
 import { CalendarGrid } from '../components/CalendarGrid'
 import { Button } from '../components/Button'
 import { StatusBadge, type BookingStatus } from '../components/BookingCard'
+import { WeeklyScheduleModal } from '../components/WeeklyScheduleModal'
 import { useAuthStore } from '../stores/auth'
 import { authFetch } from '../lib/queryClient'
 
@@ -151,6 +152,7 @@ function CalendarPage() {
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth() + 1)
   const [selectedDate, setSelectedDate] = useState<Date>(today)
+  const [scheduleOpen, setScheduleOpen] = useState(false)
 
   // Month range for calendar grid
   const from = toLocalDate(new Date(year, month - 1, 1))
@@ -242,7 +244,12 @@ function CalendarPage() {
 
           {isProvider && (
             <div className="flex items-center gap-3">
-              <Button variant="secondary" size="md" leadingIcon={<CalendarDays size={16} />}>
+              <Button
+                variant="secondary"
+                size="md"
+                leadingIcon={<CalendarDays size={16} />}
+                onClick={() => setScheduleOpen(true)}
+              >
                 Weekly schedule
               </Button>
               <Button variant="accent" size="md" leadingIcon={<Plus size={16} />}>
@@ -405,6 +412,14 @@ function CalendarPage() {
           </div>
         </div>
       </main>
+
+      {isProvider && userId && (
+        <WeeklyScheduleModal
+          open={scheduleOpen}
+          onClose={() => setScheduleOpen(false)}
+          userId={userId}
+        />
+      )}
     </div>
   )
 }
