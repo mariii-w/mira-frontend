@@ -1,75 +1,98 @@
-import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
-import { ChevronDown, Check, X } from 'lucide-react'
-import { useRef, useEffect } from 'react'
+import {
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
+import { ChevronDown, Check, X } from "lucide-react";
+import { useId, useRef, useEffect } from "react";
 
 export interface SelectOption {
-  id: string
-  label: string
-  badge?: string
-  variant?: 'default' | 'accent'
+  id: string;
+  label: string;
+  badge?: string;
+  variant?: "default" | "accent";
 }
 
-interface MultiSelectProps {
-  options: SelectOption[]
-  value: string[]
-  onChange: (ids: string[]) => void
-  placeholder?: string
-  loading?: boolean
-  id?: string
-  'aria-label'?: string
-  'aria-describedby'?: string
-  'aria-required'?: boolean
+export interface MultiSelectProps {
+  options: SelectOption[];
+  value: string[];
+  onChange: (ids: string[]) => void;
+  placeholder?: string;
+  loading?: boolean;
+  id?: string;
+  "aria-label"?: string;
+  "aria-describedby"?: string;
+  "aria-required"?: boolean;
 }
 
 export function MultiSelect({
   options,
   value,
   onChange,
-  placeholder = 'Select…',
+  placeholder = "Select…",
   loading = false,
   id,
-  'aria-label': ariaLabel,
-  'aria-describedby': ariaDescribedby,
-  'aria-required': ariaRequired,
+  "aria-label": ariaLabel,
+  "aria-describedby": ariaDescribedby,
+  "aria-required": ariaRequired,
 }: MultiSelectProps) {
+  const generatedId = useId();
+  const requiredDescriptionId = ariaRequired
+    ? `${id ?? generatedId}-required`
+    : undefined;
+  const buttonDescribedby = [ariaDescribedby, requiredDescriptionId]
+    .filter(Boolean)
+    .join(" ");
+
   function toggle(optId: string) {
-    onChange(value.includes(optId) ? value.filter((v) => v !== optId) : [...value, optId])
+    onChange(
+      value.includes(optId)
+        ? value.filter((v) => v !== optId)
+        : [...value, optId],
+    );
   }
 
   const buttonAriaLabel = ariaLabel
     ? value.length > 0
       ? `${ariaLabel}, ${value.length} selected`
       : ariaLabel
-    : undefined
+    : undefined;
 
   // Headless UI overrides aria-describedby via its internal description context,
   // so we set it imperatively to ensure the user-provided value is preserved.
-  const buttonRef = useRef<HTMLButtonElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    if (!buttonRef.current) return
-    if (ariaDescribedby) {
-      buttonRef.current.setAttribute('aria-describedby', ariaDescribedby)
+    if (!buttonRef.current) return;
+    if (buttonDescribedby) {
+      buttonRef.current.setAttribute("aria-describedby", buttonDescribedby);
     } else {
-      buttonRef.current.removeAttribute('aria-describedby')
+      buttonRef.current.removeAttribute("aria-describedby");
     }
-  }, [ariaDescribedby])
+  }, [buttonDescribedby]);
 
   return (
     <div className="flex flex-col gap-2">
       {/* Selected chips */}
       {value.length > 0 && (
-        <div role="list" aria-label="Selected tags" className="flex flex-wrap gap-2">
+        <div
+          role="list"
+          aria-label="Selected tags"
+          className="flex flex-wrap gap-2"
+        >
           {value.map((optId) => {
-            const opt = options.find((o) => o.id === optId)
-            if (!opt) return null
+            const opt = options.find((o) => o.id === optId);
+            if (!opt) return null;
             return (
               <span
                 key={optId}
                 role="listitem"
                 className={[
-                  'inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-small font-medium',
-                  opt.variant === 'accent' ? 'bg-blush text-accent' : 'bg-mint text-primary',
-                ].join(' ')}
+                  "inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-small font-medium",
+                  opt.variant === "accent"
+                    ? "bg-blush text-accent"
+                    : "bg-mint text-primary",
+                ].join(" ")}
               >
                 {opt.label}
                 <button
@@ -81,7 +104,7 @@ export function MultiSelect({
                   <X size={12} aria-hidden="true" />
                 </button>
               </span>
-            )
+            );
           })}
         </div>
       )}
@@ -89,15 +112,21 @@ export function MultiSelect({
       {/* Listbox */}
       <Listbox value={value} onChange={onChange} multiple>
         <div className="relative max-w-xs">
+          {requiredDescriptionId && (
+            <span id={requiredDescriptionId} className="sr-only">
+              Required
+            </span>
+          )}
           <ListboxButton
             ref={buttonRef}
             id={id}
             disabled={loading}
             aria-label={buttonAriaLabel}
-            aria-required={ariaRequired}
             className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background text-small text-foreground hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed data-[open]:border-primary"
           >
-            <span className="text-muted">{loading ? 'Loading…' : placeholder}</span>
+            <span className="text-muted">
+              {loading ? "Loading…" : placeholder}
+            </span>
             <ChevronDown
               size={16}
               aria-hidden="true"
@@ -108,6 +137,7 @@ export function MultiSelect({
           <ListboxOptions
             anchor="bottom start"
             aria-label={ariaLabel}
+            aria-required={ariaRequired || undefined}
             className="z-10 w-[var(--button-width)] max-h-56 overflow-y-auto rounded-xl border border-border bg-surface shadow-lg py-1 [--anchor-gap:4px] focus:outline-none"
           >
             {options.map((opt) => (
@@ -124,7 +154,11 @@ export function MultiSelect({
                     </span>
                   )}
                   {value.includes(opt.id) && (
-                    <Check size={14} aria-hidden="true" className="text-primary" />
+                    <Check
+                      size={14}
+                      aria-hidden="true"
+                      className="text-primary"
+                    />
                   )}
                 </span>
               </ListboxOption>
@@ -133,5 +167,5 @@ export function MultiSelect({
         </div>
       </Listbox>
     </div>
-  )
+  );
 }

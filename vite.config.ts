@@ -17,6 +17,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['@testing-library/jest-dom/vitest'],
     globals: true,
+    include: ['src/**/*.test.{ts,tsx}'],
+    exclude: ['**/*.a11y.test.{ts,tsx}'],
     reporters: ['default', 'junit'],
     outputFile: './junit.xml',
     coverage: {
