@@ -209,7 +209,12 @@ function CalendarPage() {
     {},
   )
 
-  const bookingsByDate = groupByDate(monthData?.items ?? [])
+  const TEST_BOOKINGS: CalendarBooking[] = [
+    { bookingId: 'test-1', listingId: 'l1', listing: { title: 'Dog Walking' }, counterparty: { userId: 'u1', name: 'Anna', surname: 'M.' }, status: 'CONFIRMED', serviceAddress: null, totalPrice: 30, bookedStart: `${year}-${String(month).padStart(2,'0')}-11T09:00:00`, bookedEnd: `${year}-${String(month).padStart(2,'0')}-11T10:00:00` },
+    { bookingId: 'test-2', listingId: 'l2', listing: { title: 'IT Support' }, counterparty: { userId: 'u2', name: 'Klaus', surname: 'B.' }, status: 'PAID', serviceAddress: null, totalPrice: 50, bookedStart: `${year}-${String(month).padStart(2,'0')}-11T14:00:00`, bookedEnd: `${year}-${String(month).padStart(2,'0')}-11T15:00:00` },
+    { bookingId: 'test-3', listingId: 'l3', listing: { title: 'Garden Help' }, counterparty: { userId: 'u3', name: 'Lukas', surname: 'W.' }, status: 'AWAITING_CONFIRMATION', serviceAddress: null, totalPrice: 20, bookedStart: `${year}-${String(month).padStart(2,'0')}-11T16:00:00`, bookedEnd: `${year}-${String(month).padStart(2,'0')}-11T17:00:00` },
+  ]
+  const bookingsByDate = groupByDate([...(monthData?.items ?? []), ...TEST_BOOKINGS])
   const selectedKey = toLocalDate(selectedDate)
   const selectedBookings = bookingsByDate[selectedKey] ?? []
 
@@ -313,7 +318,8 @@ function CalendarPage() {
                 const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate())
                 const dayBookings = bookingsByDate[dayKey] ?? []
                 const dayExceptions = exceptionsByDate[dayKey] ?? []
-                const isBlocked = dayExceptions.some((e) => e.exceptionType === 'BLOCKED')
+                const blockedEx = dayExceptions.find((e) => e.exceptionType === 'BLOCKED')
+                const isBlocked = !!blockedEx
                 const hasExtra = dayExceptions.some((e) => e.exceptionType === 'AVAILABLE')
                 const backendDay = JS_DAY_TO_BACKEND[date.getDay()]
                 // Non-working: schedule loaded, day not in working days, no AVAILABLE exception overriding
@@ -340,37 +346,40 @@ function CalendarPage() {
                             : 'border-border hover:bg-linen',
                     ].join(' ')}
                   >
-                    <span
-                      className={[
-                        'flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium shrink-0',
-                        isToday ? 'bg-forest text-white' : (isPast || isNonWorking) ? 'text-muted-foreground line-through' : 'text-foreground',
-                      ].join(' ')}
-                    >
-                      {date.getDate()}
-                    </span>
-                    {/* Exception / schedule badges ÔÇö provider only */}
-                    {(isBlocked || hasExtra || isNonWorking) && (
-                      <span className="mt-0.5 flex flex-wrap gap-0.5">
-                        {isNonWorking && !isBlocked && (
-                          <span className="rounded-full bg-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold text-foreground/70 leading-none">
-                            OFF
-                          </span>
-                        )}
-                        {isBlocked && (
-                          <span className="rounded-full bg-plum px-1.5 py-0.5 text-[10px] font-semibold text-white leading-none">
-                            BLOCKED
-                          </span>
-                        )}
-                        {hasExtra && (
-                          <span className="rounded-full bg-forest px-1.5 py-0.5 text-[10px] font-semibold text-white leading-none">
-                            +AVAIL
-                          </span>
-                        )}
+                    {/* Day number row + badges inline */}
+                    <span className="flex items-center justify-between w-full gap-1">
+                      <span
+                        className={[
+                          'flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium shrink-0',
+                          isToday ? 'bg-forest text-white' : (isPast || isNonWorking) ? 'text-muted-foreground line-through' : 'text-foreground',
+                        ].join(' ')}
+                      >
+                        {date.getDate()}
                       </span>
-                    )}
+                      {/* Exception / schedule badges ÔÇö provider only */}
+                      {isProvider && (isBlocked || hasExtra || isNonWorking) && (
+                        <span className="flex flex-wrap gap-0.5 justify-end">
+                          {isNonWorking && !isBlocked && (
+                            <span className="rounded-full bg-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold text-foreground/70 leading-none">
+                              OFF
+                            </span>
+                          )}
+                          {isBlocked && (
+                            <span className="rounded-full bg-plum px-1.5 py-0.5 text-[10px] font-semibold text-white leading-none">
+                              BLK
+                            </span>
+                          )}
+                          {hasExtra && (
+                            <span className="rounded-full bg-forest px-1.5 py-0.5 text-[10px] font-semibold text-white leading-none">
+                              +AVAIL
+                            </span>
+                          )}
+                        </span>
+                      )}
+                    </span>
 
                     <span className="mt-1 flex flex-col gap-0.5 w-full overflow-hidden">
-                      {dayBookings.slice(0, 2).map((b) => (
+                      {dayBookings.slice(0, 1).map((b) => (
                         <span
                           key={b.bookingId}
                           className="truncate text-forest font-medium leading-tight bg-mint rounded px-1"
@@ -378,9 +387,9 @@ function CalendarPage() {
                           {formatTime(b.bookedStart)} {b.counterparty.name}
                         </span>
                       ))}
-                      {dayBookings.length > 2 && (
+                      {dayBookings.length > 1 && (
                         <span className="text-muted-foreground leading-tight">
-                          +{dayBookings.length - 2} more
+                          +{dayBookings.length - 1} more
                         </span>
                       )}
                     </span>
