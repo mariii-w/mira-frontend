@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { CalendarDays, Plus } from 'lucide-react'
+import { CalendarDays, Plus, Clock, MapPin } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { CalendarGrid } from '../components/CalendarGrid'
 import { Button } from '../components/Button'
+import { StatusBadge, type BookingStatus } from '../components/BookingCard'
 import { useAuthStore } from '../stores/auth'
 import { authFetch } from '../lib/queryClient'
 
@@ -19,7 +20,7 @@ interface CalendarBooking {
   listingId: string
   listing: { title: string }
   counterparty: { userId: string; name: string; surname: string }
-  status: string
+  status: BookingStatus
   serviceAddress: { street: string; houseNumber: string; city: string; postalCode: string } | null
   totalPrice: number
   bookedStart: string
@@ -37,9 +38,12 @@ function formatTime(isoDatetime: string): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
+function durationHours(start: string, end: string): number {
+  return Math.round((new Date(end).getTime() - new Date(start).getTime()) / 3600000)
+}
+
 function bookingDateKey(isoDatetime: string): string {
-  const d = new Date(isoDatetime)
-  return toLocalDate(d)
+  return toLocalDate(new Date(isoDatetime))
 }
 
 function groupByDate(bookings: CalendarBooking[]): Record<string, CalendarBooking[]> {
@@ -52,7 +56,73 @@ function groupByDate(bookings: CalendarBooking[]): Record<string, CalendarBookin
   return map
 }
 
-// --- Component ---
+function fetchCalendar(userId: string, from: string, to: string) {
+  return authFetch(`/v1/users/${userId}/calendar?from=${from}&to=${to}`)
+    .then((r) => {
+      if (!r.ok) throw new Error('Failed to load calendar')
+      return r.json() as Promise<{ items: CalendarBooking[] }>
+    })
+}
+
+// --- Sub-components ---
+function BookingDayCard({ booking }: { booking: CalendarBooking }) {
+  const duration = durationHours(booking.bookedStart, booking.bookedEnd)
+  const address = booking.serviceAddress
+    ? `${booking.serviceAddress.street} ${booking.serviceAddress.houseNumber}, ${booking.serviceAddress.city}`
+    : 'Remote'
+
+  return (
+    <div className="rounded-xl border border-border p-4 flex flex-col gap-2">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-base font-semibold text-foreground">{formatTime(booking.bookedStart)}</p>
+          <p className="text-sm text-foreground mt-0.5">{booking.listing.title}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {booking.counterparty.name} {booking.counterparty.surname}
+            {' ┬À '}{duration}h{' ┬À '}Ôé¼{booking.totalPrice}
+          </p>
+        </div>
+        <StatusBadge status={booking.status} />
+      </div>
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <MapPin size={12} aria-hidden="true" className="shrink-0" />
+        <span>{address}</span>
+      </div>
+    </div>
+  )
+}
+
+function UpcomingRow({ booking }: { booking: CalendarBooking }) {
+  const d = new Date(booking.bookedStart)
+  const monthAbbr = d.toLocaleString('en', { month: 'short' }).toUpperCase()
+  const day = d.getDate()
+  const address = booking.serviceAddress
+    ? `${booking.serviceAddress.street} ${booking.serviceAddress.houseNumber}, ${booking.serviceAddress.city}`
+    : 'Remote'
+
+  return (
+    <div className="flex items-start gap-3 py-3 border-t border-border/60 first:border-t-0 first:pt-0">
+      {/* Date badge */}
+      <div className="flex flex-col items-center min-w-[36px]">
+        <span className="text-xs font-semibold text-muted-foreground">{monthAbbr}</span>
+        <span className="text-lg font-bold text-foreground leading-tight">{day}</span>
+      </div>
+      {/* Details */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-foreground truncate">{booking.listing.title}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {booking.counterparty.name} {booking.counterparty.surname}
+          {' ┬À '}<Clock size={10} className="inline" aria-hidden="true" /> {formatTime(booking.bookedStart)}
+          {' ┬À '}{durationHours(booking.bookedStart, booking.bookedEnd)}h
+        </p>
+        <p className="text-xs text-muted-foreground truncate">{address}</p>
+      </div>
+      <StatusBadge status={booking.status} />
+    </div>
+  )
+}
+
+// --- Main page ---
 function CalendarPage() {
   const user = useAuthStore((s) => s.user)
   const userId = user?.userId
@@ -63,23 +133,35 @@ function CalendarPage() {
   const [month, setMonth] = useState(today.getMonth() + 1)
   const [selectedDate, setSelectedDate] = useState<Date>(today)
 
-  // First and last day of visible month
+  // Month range for calendar grid
   const from = toLocalDate(new Date(year, month - 1, 1))
   const to = toLocalDate(new Date(year, month, 0))
 
-  const { data } = useQuery({
+  // Upcoming range: today ÔåÆ today+30
+  const upcomingTo = new Date(today)
+  upcomingTo.setDate(upcomingTo.getDate() + 30)
+  const upcomingFrom = toLocalDate(today)
+  const upcomingToStr = toLocalDate(upcomingTo)
+
+  const { data: monthData } = useQuery({
     queryKey: ['calendar', userId, from, to],
-    queryFn: async () => {
-      const res = await authFetch(
-        `/v1/users/${userId}/calendar?from=${from}&to=${to}`,
-      )
-      if (!res.ok) throw new Error('Failed to load calendar')
-      return res.json() as Promise<{ items: CalendarBooking[] }>
-    },
+    queryFn: () => fetchCalendar(userId!, from, to),
     enabled: !!userId,
   })
 
-  const bookingsByDate = groupByDate(data?.items ?? [])
+  const { data: upcomingData } = useQuery({
+    queryKey: ['calendar-upcoming', userId, upcomingFrom, upcomingToStr],
+    queryFn: () => fetchCalendar(userId!, upcomingFrom, upcomingToStr),
+    enabled: !!userId,
+  })
+
+  const bookingsByDate = groupByDate(monthData?.items ?? [])
+  const selectedKey = toLocalDate(selectedDate)
+  const selectedBookings = bookingsByDate[selectedKey] ?? []
+
+  const upcomingBookings = (upcomingData?.items ?? [])
+    .filter((b) => new Date(b.bookedStart) > today)
+    .sort((a, b) => new Date(a.bookedStart).getTime() - new Date(b.bookedStart).getTime())
 
   function handleMonthChange(y: number, m: number) {
     setYear(y)
@@ -91,15 +173,6 @@ function CalendarPage() {
     setMonth(today.getMonth() + 1)
     setSelectedDate(today)
   }
-
-  const selectedKey = toLocalDate(selectedDate)
-  const selectedBookings = bookingsByDate[selectedKey] ?? []
-
-  // Upcoming: all bookings from today onwards, sorted
-  const upcomingBookings = (data?.items ?? [])
-    .filter((b) => new Date(b.bookedStart) >= today)
-    .sort((a, b) => new Date(a.bookedStart).getTime() - new Date(b.bookedStart).getTime())
-    .slice(0, 10)
 
   return (
     <div className="min-h-screen bg-background">
@@ -183,9 +256,7 @@ function CalendarPage() {
                     aria-pressed={isSelected}
                     className={[
                       'w-full min-h-[80px] p-1.5 flex flex-col items-start text-xs transition-colors rounded-lg border',
-                      isSelected
-                        ? 'border-forest bg-mint'
-                        : 'border-border hover:bg-linen',
+                      isSelected ? 'border-forest bg-mint' : 'border-border hover:bg-linen',
                     ].join(' ')}
                   >
                     <span
@@ -196,8 +267,6 @@ function CalendarPage() {
                     >
                       {date.getDate()}
                     </span>
-
-                    {/* Booking labels */}
                     <span className="mt-1 flex flex-col gap-0.5 w-full overflow-hidden">
                       {dayBookings.slice(0, 2).map((b) => (
                         <span
@@ -223,7 +292,7 @@ function CalendarPage() {
           <div className="flex-[2] flex flex-col gap-4">
             {/* Selected day */}
             <div className="rounded-2xl border border-border bg-surface p-5">
-              <h2 className="mb-3 text-sm font-semibold text-foreground">
+              <h2 className="mb-3 text-base font-bold text-foreground">
                 {selectedDate.toLocaleDateString('en', {
                   weekday: 'long',
                   day: 'numeric',
@@ -233,17 +302,25 @@ function CalendarPage() {
               {selectedBookings.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No bookings on this day.</p>
               ) : (
-                <p className="text-sm text-muted-foreground">{selectedBookings.length} booking(s)</p>
+                <div className="flex flex-col gap-3">
+                  {selectedBookings.map((b) => (
+                    <BookingDayCard key={b.bookingId} booking={b} />
+                  ))}
+                </div>
               )}
             </div>
 
             {/* Upcoming appointments */}
             <div className="rounded-2xl border border-border bg-surface p-5">
-              <h2 className="mb-3 text-sm font-semibold text-foreground">Upcoming appointments</h2>
+              <h2 className="mb-3 text-base font-bold text-foreground">Upcoming appointments</h2>
               {upcomingBookings.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No upcoming appointments.</p>
               ) : (
-                <p className="text-sm text-muted-foreground">{upcomingBookings.length} upcoming</p>
+                <div className="flex flex-col">
+                  {upcomingBookings.map((b) => (
+                    <UpcomingRow key={b.bookingId} booking={b} />
+                  ))}
+                </div>
               )}
             </div>
           </div>
