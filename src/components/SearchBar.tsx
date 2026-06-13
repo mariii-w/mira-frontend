@@ -13,12 +13,14 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const SearchBar = forwardRef<HTMLInputElement, InputProps>(
-  function SearchBar({ className, place, radius = 20, ...rest }, ref) {
+  function SearchBar({ className, place, radius = 20, id, 'aria-label': ariaLabel, ...rest }, ref) {
     const placeButtonContent = (!place ? "Ort" : place) + " - " + radius + "km";
     return (
       <div className="relative w-full">
         <input
           ref={ref}
+          id={id}
+          aria-label={ariaLabel ?? (id ? undefined : 'Search services')}
           className={cn(
             "w-full h-15 px-4 text-body text-foreground",
             "bg-white border border-border rounded-4xl",

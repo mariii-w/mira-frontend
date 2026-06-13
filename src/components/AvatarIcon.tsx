@@ -49,9 +49,12 @@ export function AvatarIcon({
   const last = lastName?.[0]?.toUpperCase() ?? ''
   const initials = first + last || '?'
   const bgColor = nameToBgColor(fullName)
+  const fallbackLabel = alt ?? (fullName ? `${fullName} avatar` : 'User avatar')
 
   return (
     <div
+      role="img"
+      aria-label={fallbackLabel}
       style={{
         width: size,
         height: size,
