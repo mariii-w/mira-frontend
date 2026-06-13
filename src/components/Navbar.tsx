@@ -58,7 +58,6 @@ export function Navbar() {
             </li>
           ))}
           <li>
-            
             <a href="#how-it-works"
               className="text-cream/80 text-small font-medium no-underline hover:text-cream transition-colors duration-150"
             >
