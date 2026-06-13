@@ -6,6 +6,7 @@ import { Navbar } from '../../components/Navbar'
 import { CalendarGrid } from '../../components/CalendarGrid'
 import { authFetch } from '../../lib/queryClient'
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute('/listings/$listingId/book')({
   component: BookingPage,
 })

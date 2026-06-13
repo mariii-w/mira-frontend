@@ -13,6 +13,7 @@ import { useAuthStore } from '../stores/auth'
 const NAV_LINKS = [
   { label: 'Browse Services', to: '/' },
   { label: 'Find providers',  to: '/' },
+  { label: 'Calendar',        to: '/calendar' },
 ] as const
 
 export function Navbar() {

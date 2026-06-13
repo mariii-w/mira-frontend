@@ -73,7 +73,7 @@ export function CalendarGrid({
           <ChevronLeft size={18} aria-hidden="true" />
         </button>
 
-        <p className="font-heading font-semibold text-foreground text-body" aria-live="polite">
+        <p className="font-heading font-semibold text-foreground text-lg" aria-live="polite">
           {label}
         </p>
 
@@ -101,7 +101,7 @@ export function CalendarGrid({
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-y-1" role="grid" aria-label={label}>
+      <div className="grid grid-cols-7 gap-1" role="grid" aria-label={label}>
         {cells.map((date, i) =>
           date ? (
             <div key={i} role="gridcell">
