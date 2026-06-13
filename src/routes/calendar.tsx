@@ -271,8 +271,12 @@ function CalendarPage() {
                     Booking
                   </span>
                   <span className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-foreground/30" aria-hidden="true" />
+                    Off (schedule)
+                  </span>
+                  <span className="flex items-center gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-plum" aria-hidden="true" />
-                    Unavailable (blocked)
+                    Blocked (exception)
                   </span>
                 </div>
               )}
@@ -337,12 +341,17 @@ function CalendarPage() {
                     >
                       {date.getDate()}
                     </span>
-                    {/* Exception badges ÔÇö provider only */}
-                    {(isBlocked || hasExtra) && (
+                    {/* Exception / schedule badges ÔÇö provider only */}
+                    {(isBlocked || hasExtra || isNonWorking) && (
                       <span className="mt-0.5 flex flex-wrap gap-0.5">
+                        {isNonWorking && !isBlocked && (
+                          <span className="rounded-full bg-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold text-foreground/70 leading-none">
+                            OFF
+                          </span>
+                        )}
                         {isBlocked && (
                           <span className="rounded-full bg-plum px-1.5 py-0.5 text-[10px] font-semibold text-white leading-none">
-                            OFF
+                            BLOCKED
                           </span>
                         )}
                         {hasExtra && (
