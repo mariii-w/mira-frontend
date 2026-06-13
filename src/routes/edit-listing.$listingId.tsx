@@ -521,7 +521,7 @@ export function EditListingPage() {
           {!isDeleted && (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <Label>Images</Label>
+                <Label htmlFor="listing-images">Images</Label>
                 <span aria-live="polite" className="text-small text-muted">
                   {totalImages}/10
                 </span>
@@ -588,11 +588,11 @@ export function EditListingPage() {
               </div>
               <input
                 ref={fileInputRef}
+                id="listing-images"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 multiple
                 className="sr-only"
-                aria-hidden="true"
                 onChange={handleFileChange}
               />
             </div>

@@ -4,6 +4,7 @@ interface AvatarIconProps {
   firstName?: string
   lastName?: string
   picture?: string
+  alt?: string
   size?: number
 }
 
@@ -26,14 +27,17 @@ export function AvatarIcon({
   firstName,
   lastName,
   picture,
+  alt,
   size = 40,
 }: AvatarIconProps) {
   const [imgFailed, setImgFailed] = useState(false)
+  const fullName = `${firstName ?? ''} ${lastName ?? ''}`.trim()
 
   if (picture && !imgFailed) {
     return (
       <img
         src={picture}
+        alt={alt ?? (fullName ? `${fullName} avatar` : 'User avatar')}
         style={{ width: size, height: size }}
         className="rounded-full object-cover block shrink-0"
         onError={() => setImgFailed(true)}
@@ -44,11 +48,13 @@ export function AvatarIcon({
   const first = firstName?.[0]?.toUpperCase() ?? ''
   const last = lastName?.[0]?.toUpperCase() ?? ''
   const initials = first + last || '?'
-  const fullName = `${firstName ?? ''}${lastName ?? ''}`
   const bgColor = nameToBgColor(fullName)
+  const fallbackLabel = alt ?? (fullName ? `${fullName} avatar` : 'User avatar')
 
   return (
     <div
+      role="img"
+      aria-label={fallbackLabel}
       style={{
         width: size,
         height: size,
