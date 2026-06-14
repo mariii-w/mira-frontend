@@ -11,6 +11,7 @@ import { ServiceProviderToggle } from '../components/ServiceProviderToggle'
 import { Breadcrumb } from '../components/BreadCrumb'
 import { Pagination } from '../components/Pagination'
 import { FilterDrawer } from '../components/FilterDrawer'
+import { useAccessibilityStore } from '../stores/accessibility'
 
 // Types
 
@@ -39,6 +40,8 @@ type PublicListingSummary = {
   tags: ServiceTag[]
   title: string
   description: string | null
+  easyDescription: string | null
+  easyDescriptionStatus: string | null
   price: number
   author: { name: string; surname: string }
   publishedAt: string | null
@@ -106,6 +109,7 @@ async function fetchServiceTags(): Promise<ServiceTag[]> {
 export function SearchPage() {
   const search = Route.useSearch()
   const navigate = useNavigate({ from: '/search' })
+  const easyRead = useAccessibilityStore(state => state.easyRead)
 
   // Pending filter state — committed to URL on "Apply" / "Search"
   const [pendingQuery, setPendingQuery] = useState(search.q)
@@ -401,7 +405,7 @@ export function SearchPage() {
                         providerFirstName={listing.author.name}
                         providerLastName={listing.author.surname}
                         label={listing.title}
-                        description={listing.description ?? undefined}
+                        description={(easyRead && listing.easyDescription ? listing.easyDescription : listing.description) ?? undefined}
                         tags={listing.tags}
                         hourRate={listing.price}
                       />
