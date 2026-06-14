@@ -2,18 +2,18 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
+  getGetV1ListingsListingIdAvailabilityQueryKey,
   getGetV1PublicListingsListingIdQueryKey,
+  getV1ListingsListingIdAvailability,
   getV1PublicListingsListingId,
   postV1Bookings,
 } from "../../api/mira";
 import type {
   CreateBookingRequest,
   ProblemDetailsResponse,
-  ProviderAvailabilityResponse,
   UnauthorizedErrorResponse,
 } from "../../api/model";
 import { BookingPage } from "../../components/BookingPage";
-import { authFetch } from "../../lib/queryClient";
 import { get_access_token } from "../../stores/auth";
 
 export const Route = createFileRoute("/listings/$listingId/book")({
@@ -48,14 +48,27 @@ function BookingRoute() {
   const to = new Date(year, month, 0);
 
   const { data: availability } = useQuery({
-    queryKey: ["listing-availability", listingId, year, month],
+    queryKey: getGetV1ListingsListingIdAvailabilityQueryKey(listingId, {
+      from: toLocalDate(from),
+      to: toLocalDate(to),
+    }),
     queryFn: async () => {
-      const res = await authFetch(
-        `/v1/listings/${listingId}/availability?from=${toLocalDate(from)}&to=${toLocalDate(to)}`,
+      const response = await getV1ListingsListingIdAvailability(
+        listingId,
+        {
+          from: toLocalDate(from),
+          to: toLocalDate(to),
+        },
         await getAuthOptions(),
       );
-      if (!res.ok) throw new Error("Failed to fetch availability");
-      return res.json() as Promise<ProviderAvailabilityResponse>;
+
+      if (response.status !== 200) {
+        throw new Error(
+          getErrorDetail(response.data) ?? "Failed to fetch availability",
+        );
+      }
+
+      return response.data;
     },
     staleTime: 5 * 60 * 1000,
   });

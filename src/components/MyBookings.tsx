@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { BookingCard } from "./BookingCard";
+import {
+  BookingCard,
+  type AllowedAction,
+  type BookingDetails,
+} from "./BookingCard";
 import { Navbar } from "./Navbar";
 import type { BookingStatus, BookingSummary } from "../api/model";
 
@@ -11,6 +15,11 @@ interface MyBookingsProps {
   loading: boolean;
   error: string | null;
   onActionComplete: () => void;
+  loadBookingDetails: (bookingId: string) => Promise<BookingDetails | null>;
+  performBookingAction: (
+    bookingId: string,
+    action: AllowedAction,
+  ) => Promise<string | null>;
 }
 
 function buildFilters(
@@ -105,6 +114,8 @@ export function MyBookings({
   loading,
   error,
   onActionComplete,
+  loadBookingDetails,
+  performBookingAction,
 }: MyBookingsProps) {
   const [activeFilter, setActiveFilter] = useState<BookingFilter>("ALL");
   const filtered = applyFilter(bookings, activeFilter);
@@ -191,6 +202,8 @@ export function MyBookings({
                   <BookingCard
                     booking={booking}
                     onActionComplete={onActionComplete}
+                    loadBookingDetails={loadBookingDetails}
+                    performBookingAction={performBookingAction}
                   />
                 </li>
               ))}
