@@ -11,7 +11,7 @@ import { Breadcrumb } from '../components/BreadCrumb'
 import { Pagination } from '../components/Pagination'
 import { FilterDrawer } from '../components/FilterDrawer'
 
-// ─── API types ────────────────────────────────────────────────────────────────
+// Types
 
 type ServiceTag = {
   tagId: string
@@ -50,30 +50,60 @@ type PublicListingCollectionResponse = {
   cursor: { limit: number; next: string | null }
 }
 
-// ─── URL search params ────────────────────────────────────────────────────────
+// SearchParams
 
-type SearchParams = {
+interface SearchParams {
   q: string
   city: string
   radius: number
   tagIds: string[]
   maxPrice: number
-  from: string | undefined
+  from?: string
 }
 
-// ─── Route ────────────────────────────────────────────────────────────────────
+// Parsing and Validation
+
+function parseQ(raw: unknown): string {
+  return typeof raw === 'string' ? raw : ''
+}
+
+function parseCity(raw: unknown): string {
+  return typeof raw === 'string' ? raw : ''
+}
+
+function parseRadius(raw: unknown): number {
+  return typeof raw === 'number' ? Math.max(1, Math.min(50, raw)) : 20
+}
+
+function parseTagIds(raw: unknown): string[] {
+  return Array.isArray(raw)
+    ? (raw as unknown[]).filter((id): id is string => typeof id === 'string')
+    : []
+}
+
+function parseMaxPrice(raw: unknown): number {
+  return typeof raw === 'number' ? raw : 100
+}
+
+function parseFrom(raw: unknown): string | undefined {
+  return typeof raw === 'string' ? raw : undefined
+}
+
+function validateSearch(raw: Record<string, unknown>): SearchParams {
+  return {
+    q: parseQ(raw.q),
+    city: parseCity(raw.city),
+    radius: parseRadius(raw.radius),
+    tagIds: parseTagIds(raw.tagIds),
+    maxPrice: parseMaxPrice(raw.maxPrice),
+    from: parseFrom(raw.from),
+  }
+}
+
+// Route
 
 export const Route = createFileRoute('/search')({
-  validateSearch: (raw: Record<string, unknown>): SearchParams => ({
-    q: typeof raw.q === 'string' ? raw.q : '',
-    city: typeof raw.city === 'string' ? raw.city : '',
-    radius: typeof raw.radius === 'number' ? Math.max(1, Math.min(50, raw.radius)) : 20,
-    tagIds: Array.isArray(raw.tagIds)
-      ? (raw.tagIds as unknown[]).filter((id): id is string => typeof id === 'string')
-      : [],
-    maxPrice: typeof raw.maxPrice === 'number' ? raw.maxPrice : 100,
-    from: typeof raw.from === 'string' ? raw.from : undefined,
-  }),
+  validateSearch,
   component: SearchPage,
 })
 
