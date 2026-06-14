@@ -119,7 +119,7 @@ describe('<SearchPage />', () => {
       mockFetch.mockReturnValue(new Promise(() => {}))
       renderPage()
       expect(screen.getByRole('status')).toBeInTheDocument()
-      expect(screen.getByText('Laden…')).toBeInTheDocument()
+      expect(screen.getByText('Loading…')).toBeInTheDocument()
     })
 
     it('shows error message when listings fetch fails', async () => {
@@ -129,7 +129,7 @@ describe('<SearchPage />', () => {
       })
       renderPage()
       await waitFor(() =>
-        expect(screen.getByRole('alert')).toHaveTextContent('Listings konnten nicht geladen werden.')
+        expect(screen.getByRole('alert')).toHaveTextContent('Listings could not be loaded.')
       )
     })
 
@@ -137,9 +137,9 @@ describe('<SearchPage />', () => {
       mockApiSuccess({ items: [] })
       renderPage()
       await waitFor(() =>
-        expect(screen.getByText('Keine Services gefunden.')).toBeInTheDocument()
+        expect(screen.getByText('No services found.')).toBeInTheDocument()
       )
-      expect(screen.queryByRole('list', { name: 'Suchergebnisse' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('list', { name: 'Search results' })).not.toBeInTheDocument()
     })
 
     it('shows "Filter zurücksetzen" in empty state when filters are active', async () => {
@@ -147,9 +147,9 @@ describe('<SearchPage />', () => {
       mockApiSuccess({ items: [] })
       renderPage()
       await waitFor(() =>
-        expect(screen.getByText('Keine Services gefunden.')).toBeInTheDocument()
+        expect(screen.getByText('No services found.')).toBeInTheDocument()
       )
-      expect(screen.getByRole('button', { name: 'Filter zurücksetzen' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Reset filters' })).toBeInTheDocument()
     })
   })
 
@@ -195,7 +195,7 @@ describe('<SearchPage />', () => {
       mockApiSuccess()
       renderPage()
       await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
-      expect(screen.getByRole('list', { name: 'Suchergebnisse' })).toBeInTheDocument()
+      expect(screen.getByRole('list', { name: 'Search results' })).toBeInTheDocument()
     })
   })
 
@@ -205,7 +205,7 @@ describe('<SearchPage />', () => {
       mockApiSuccess()
       renderPage()
       await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
-      expect(screen.getByRole('heading', { name: 'Services für "PC Support"' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Services for "PC Support"' })).toBeInTheDocument()
     })
 
     it('shows generic heading when no query', async () => {
@@ -304,7 +304,7 @@ describe('<SearchPage />', () => {
       mockApiSuccess()
       renderPage()
       await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
-      expect(screen.queryByRole('group', { name: 'Aktive Filter' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('group', { name: 'Active filters' })).not.toBeInTheDocument()
     })
 
     it('shows price chip when maxPrice is below 100', async () => {
@@ -312,16 +312,16 @@ describe('<SearchPage />', () => {
       mockApiSuccess()
       renderPage()
       await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
-      expect(screen.getByRole('group', { name: 'Aktive Filter' })).toBeInTheDocument()
+      expect(screen.getByRole('group', { name: 'Active filters' })).toBeInTheDocument()
       expect(screen.getByText('40€/h')).toBeInTheDocument()
     })
 
-    it('shows "Alle löschen" button when any filter is active', async () => {
+    it('shows "Clear all" button when any filter is active', async () => {
       mockSearchParams = { ...DEFAULT_PARAMS, maxPrice: 40 }
       mockApiSuccess()
       renderPage()
       await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
-      expect(screen.getByRole('button', { name: 'Alle löschen' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Clear all' })).toBeInTheDocument()
     })
 
     it('navigates with maxPrice=100 when price chip × is clicked', async () => {
@@ -329,7 +329,7 @@ describe('<SearchPage />', () => {
       mockApiSuccess()
       renderPage()
       await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
-      fireEvent.click(screen.getByRole('button', { name: 'Preisfilter entfernen' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Remove price filter' }))
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
           search: expect.objectContaining({ maxPrice: 100 }),
@@ -337,17 +337,26 @@ describe('<SearchPage />', () => {
       )
     })
 
-    it('navigates with empty tagIds and maxPrice=100 when "Alle löschen" is clicked', async () => {
+    it('navigates with empty tagIds and maxPrice=100 when "Clear all" is clicked', async () => {
       mockSearchParams = { ...DEFAULT_PARAMS, maxPrice: 40 }
       mockApiSuccess()
       renderPage()
       await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
-      fireEvent.click(screen.getByRole('button', { name: 'Alle löschen' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Clear all' }))
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
           search: expect.objectContaining({ tagIds: [], maxPrice: 100 }),
         })
       )
+    })
+  })
+
+  describe('responsive layout', () => {
+    it('renders a "Filters" trigger button for the mobile drawer', async () => {
+      mockApiSuccess()
+      renderPage()
+      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+      expect(screen.getByRole('button', { name: /filters/i })).toBeInTheDocument()
     })
   })
 })

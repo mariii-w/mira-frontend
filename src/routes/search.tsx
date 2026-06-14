@@ -9,6 +9,7 @@ import { ServiceCard } from '../components/ServiceCard'
 import { ServiceProviderToggle } from '../components/ServiceProviderToggle'
 import { Breadcrumb } from '../components/BreadCrumb'
 import { Pagination } from '../components/Pagination'
+import { FilterDrawer } from '../components/FilterDrawer'
 
 // ─── API types ────────────────────────────────────────────────────────────────
 
@@ -218,8 +219,8 @@ export function SearchPage() {
 
         {/* ── Search bar row ── */}
         <div className="bg-background px-6 py-3">
-          <div className="mx-auto max-w-6xl flex items-center gap-20">
-            <div className="shrink-0 w-64">
+          <div className="mx-auto max-w-6xl flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-20">
+            <div className="flex justify-center lg:block lg:shrink-0 lg:w-64">
               <ServiceProviderToggle
                 id="search-toggle"
                 labelLeft="Services"
@@ -247,8 +248,8 @@ export function SearchPage() {
 
         {/* ── Breadcrumb + active filter chips row ── */}
         <div className="bg-background px-6 py-2">
-          <div className="mx-auto max-w-6xl flex items-center gap-20">
-            <div className="shrink-0 w-64">
+          <div className="mx-auto max-w-6xl flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-20">
+            <div className="lg:shrink-0 lg:w-64">
               <Breadcrumb links={breadcrumbLinks} />
             </div>
 
@@ -304,10 +305,10 @@ export function SearchPage() {
 
         {/* ── Content ── */}
         <div className="px-6">
-        <div className="mx-auto max-w-6xl py-6 flex gap-20 items-start">
+        <div className="mx-auto max-w-6xl pt-1 pb-6 lg:py-6 flex gap-20 items-start">
 
-          {/* ── Sidebar ── */}
-          <aside className="shrink-0 w-64">
+          {/* ── Sidebar (desktop only) ── */}
+          <aside className="hidden lg:block shrink-0 w-64">
             <FilterBar
               tags={allTags}
               selectedTagIds={pendingTagIds}
@@ -326,13 +327,29 @@ export function SearchPage() {
           <div className="flex-1 flex flex-col gap-4 min-w-0">
 
             {/* Results header */}
-            <div>
-              <h1 className="font-heading text-h1 font-bold text-foreground">
-                {search.q ? `Services for "${search.q}"` : 'Services'}
-              </h1>
-              {subtitleParts.length > 0 && (
-                <p className="text-small text-muted mt-1">{subtitleParts.join(' · ')}</p>
-              )}
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h1 className="font-heading text-h1 font-bold text-foreground">
+                  {search.q ? `Services for "${search.q}"` : 'Services'}
+                </h1>
+                {subtitleParts.length > 0 && (
+                  <p className="text-small text-muted mt-1">{subtitleParts.join(' · ')}</p>
+                )}
+              </div>
+              <div className="lg:hidden shrink-0">
+                <FilterDrawer
+                  tags={allTags}
+                  selectedTagIds={pendingTagIds}
+                  onTagToggle={handleTagToggle}
+                  distanceKm={pendingRadius}
+                  onDistanceChange={setPendingRadius}
+                  maxPrice={pendingMaxPrice}
+                  onMaxPriceChange={setPendingMaxPrice}
+                  onApply={commitFilters}
+                  resultCount={listingsQuery.isSuccess ? listings.length : undefined}
+                  activeCount={activeCount}
+                />
+              </div>
             </div>
 
             {/* Loading */}
