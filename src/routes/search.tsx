@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { z } from 'zod'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { X, Wrench, Users } from 'lucide-react'
@@ -52,87 +53,56 @@ type PublicListingCollectionResponse = {
 
 // SearchParams
 
-interface SearchParams {
-  q: string
-  city: string
-  radius: number
-  tagIds: string[]
-  maxPrice: number
-  from?: string
-}
+const searchSchema = z.object({
+  q: z.string().catch(''),
+  city: z.string().catch(''),
+  radiusKm: z.coerce.number().int().min(1).max(100).optional().catch(undefined),
+  tagIds: z.array(z.string().uuid()).catch([]),
+  minPrice: z.coerce.number().min(0).optional().catch(undefined),
+  maxPrice: z.coerce.number().min(0).optional().catch(undefined),
+  from: z.string().uuid().optional().catch(undefined),
+})
 
-// Parsing and Validation
-
-function parseQ(raw: unknown): string {
-  return typeof raw === 'string' ? raw : ''
-}
-
-function parseCity(raw: unknown): string {
-  return typeof raw === 'string' ? raw : ''
-}
-
-function parseRadius(raw: unknown): number {
-  return typeof raw === 'number' ? Math.max(1, Math.min(50, raw)) : 20
-}
-
-function parseTagIds(raw: unknown): string[] {
-  return Array.isArray(raw)
-    ? (raw as unknown[]).filter((id): id is string => typeof id === 'string')
-    : []
-}
-
-function parseMaxPrice(raw: unknown): number {
-  return typeof raw === 'number' ? raw : 100
-}
-
-function parseFrom(raw: unknown): string | undefined {
-  return typeof raw === 'string' ? raw : undefined
-}
-
-function validateSearch(raw: Record<string, unknown>): SearchParams {
-  return {
-    q: parseQ(raw.q),
-    city: parseCity(raw.city),
-    radius: parseRadius(raw.radius),
-    tagIds: parseTagIds(raw.tagIds),
-    maxPrice: parseMaxPrice(raw.maxPrice),
-    from: parseFrom(raw.from),
-  }
-}
+type SearchParams = z.infer<typeof searchSchema>
 
 // Route
 
 export const Route = createFileRoute('/search')({
-  validateSearch,
+  validateSearch: searchSchema,
   component: SearchPage,
 })
 
-// ─── Fetch helpers ────────────────────────────────────────────────────────────
+// Helper
+
+function toPublicListingsQuery(params: SearchParams): URLSearchParams {
+  const freeQuery = params.q.trim()
+  const city = params.city.trim()
+  const queryParams = new URLSearchParams({ limit: '20' })
+
+  if (freeQuery) queryParams.set('q', freeQuery)
+  if (city) queryParams.set('city', city)
+  if (city && params.radiusKm != null) queryParams.set('radiusKm', String(params.radiusKm))
+  if (params.minPrice != null) queryParams.set('minPrice', String(params.minPrice))
+  if (params.maxPrice != null) queryParams.set('maxPrice', String(params.maxPrice))
+  for (const id of params.tagIds) queryParams.append('tagIds', id)
+  if (params.from) queryParams.set('from', params.from)
+
+  return queryParams
+}
 
 async function fetchPublicListings(params: SearchParams): Promise<PublicListingCollectionResponse> {
-  const qs = new URLSearchParams({ limit: '20' })
-  if (params.city) {
-    qs.set('city', params.city)
-    qs.set('radiusKm', String(params.radius))
-  }
-  if (params.maxPrice < 100) qs.set('maxPrice', String(params.maxPrice))
-  for (const id of params.tagIds) qs.append('tagIds', id)
-  if (params.from) qs.set('from', params.from)
-
-  const res = await fetch(`/v1/public-listings?${qs.toString()}`)
-  if (!res.ok) throw new Error('Listings could not be loaded.')
-  return res.json()
+  const response = await fetch(`/v1/public-listings?${toPublicListingsQuery(params)}`)
+  if (!response.ok) throw new Error('Listings could not be loaded.')
+  return response.json()
 }
 
 async function fetchServiceTags(): Promise<ServiceTag[]> {
-  const res = await fetch('/v1/service-tags')
-  if (!res.ok) throw new Error('Tags could not be loaded.')
-  return res.json()
+  const response = await fetch('/v1/service-tags')
+  if (!response.ok) throw new Error('Tags could not be loaded.')
+  return response.json()
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
-// eslint-disable-next-line react-refresh/only-export-components
+// Search Page
 export function SearchPage() {
   const search = Route.useSearch()
   const navigate = useNavigate({ from: '/search' })
@@ -140,9 +110,9 @@ export function SearchPage() {
   // Pending filter state — committed to URL on "Apply" / "Search"
   const [pendingQuery, setPendingQuery] = useState(search.q)
   const [pendingCity, setPendingCity] = useState(search.city)
-  const [pendingRadius, setPendingRadius] = useState(search.radius)
+  const [pendingRadius, setPendingRadius] = useState(search.radiusKm ?? 20)
   const [pendingTagIds, setPendingTagIds] = useState<string[]>(search.tagIds)
-  const [pendingMaxPrice, setPendingMaxPrice] = useState(search.maxPrice)
+  const [pendingMaxPrice, setPendingMaxPrice] = useState(search.maxPrice ?? 100)
 
   // Queries
   const listingsQuery = useQuery({
@@ -159,21 +129,23 @@ export function SearchPage() {
   const listings = listingsQuery.data?.items ?? []
   const nextCursor = listingsQuery.data?.cursor.next ?? null
   const allTags: ServiceTagOption[] = (tagsQuery.data ?? [])
-    .filter(t => t.isActive)
-    .map(t => ({ tagId: t.tagId, name: t.name }))
+    .filter(tag => tag.isActive)
+    .map(tag => ({ tagId: tag.tagId, name: tag.name }))
 
   // Pagination history
   const [prevCursors, setPrevCursors] = useState<(string | undefined)[]>([])
   const hasPrev = prevCursors.length > 0
 
   function commitSearch() {
+    const city = pendingCity.trim()
+
     setPrevCursors([])
     navigate({
       search: {
         ...search,
         q: pendingQuery,
-        city: pendingCity,
-        radius: pendingRadius,
+        city,
+        radiusKm: city ? pendingRadius : undefined,
         from: undefined,
       },
     })
@@ -200,9 +172,9 @@ export function SearchPage() {
   function handlePrev() {
     if (!hasPrev) return
     const stack = prevCursors.slice()
-    const from = stack.pop()
+    const previousCursor = stack.pop()
     setPrevCursors(stack)
-    navigate({ search: { ...search, from } })
+    navigate({ search: { ...search, from: previousCursor } })
   }
 
   function handleTagToggle(tagId: string) {
@@ -215,16 +187,16 @@ export function SearchPage() {
     setPendingTagIds([])
     setPendingMaxPrice(100)
     navigate({
-      search: { ...search, tagIds: [], maxPrice: 100, from: undefined },
+      search: { ...search, tagIds: [], maxPrice: undefined, from: undefined },
     })
   }
 
   // Active filter chips (applied state, not pending)
   const activeTagChips = search.tagIds
-    .map(id => allTags.find(t => t.tagId === id))
-    .filter((t): t is ServiceTagOption => !!t)
+    .map(id => allTags.find(tag => tag.tagId === id))
+    .filter((tag): tag is ServiceTagOption => !!tag)
 
-  const hasPriceFilter = search.maxPrice < 100
+  const hasPriceFilter = search.maxPrice !== undefined
   const hasActiveFilters = activeTagChips.length > 0 || hasPriceFilter
 
   const activeCount = (search.tagIds.length > 0 ? 1 : 0) + (hasPriceFilter ? 1 : 0)
@@ -239,7 +211,7 @@ export function SearchPage() {
   // Subtitle line
   const subtitleParts: string[] = []
   if (search.city) subtitleParts.push(`In ${search.city}`)
-  if (search.city) subtitleParts.push(`Within ${search.radius} km`)
+  if (search.city && search.radiusKm) subtitleParts.push(`Within ${search.radiusKm} km`)
   subtitleParts.push('Sorted by relevance')
 
   return (
@@ -295,7 +267,7 @@ export function SearchPage() {
                       aria-label="Remove price filter"
                       onClick={() => {
                         setPendingMaxPrice(100)
-                        navigate({ search: { ...search, maxPrice: 100, from: undefined } })
+                        navigate({ search: { ...search, maxPrice: undefined, from: undefined } })
                       }}
                       className="text-muted hover:text-foreground transition-colors"
                     >
@@ -310,9 +282,9 @@ export function SearchPage() {
                       type="button"
                       aria-label={`Remove filter "${tag.name}"`}
                       onClick={() => {
-                        const next = search.tagIds.filter(id => id !== tag.tagId)
-                        setPendingTagIds(next)
-                        navigate({ search: { ...search, tagIds: next, from: undefined } })
+                        const updatedTagIds = search.tagIds.filter(id => id !== tag.tagId)
+                        setPendingTagIds(updatedTagIds)
+                        navigate({ search: { ...search, tagIds: updatedTagIds, from: undefined } })
                       }}
                       className="text-muted hover:text-foreground transition-colors"
                     >
