@@ -83,7 +83,6 @@ describe("patchUser", () => {
     expect(mockedPatchUserProfile).toHaveBeenCalledWith(
       "user-1",
       { firstName: "Mira" },
-      { headers: { Authorization: `Bearer ${token}` } },
     );
     expect(useAuthStore.getState().user).toEqual(updatedUser);
   });
@@ -126,14 +125,10 @@ describe("patchUser", () => {
 
     await uploadProfilePhoto(file);
 
-    expect(mockedUploadProfilePicture).toHaveBeenCalledWith(
-      "user-1",
-      { file },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-    expect(mockedGetPrivateUserProfile).toHaveBeenCalledWith("user-1", {
-      headers: { Authorization: `Bearer ${token}` },
+    expect(mockedUploadProfilePicture).toHaveBeenCalledWith("user-1", {
+      file,
     });
+    expect(mockedGetPrivateUserProfile).toHaveBeenCalledWith("user-1");
     expect(useAuthStore.getState().user).toEqual(updatedUser);
   });
 });

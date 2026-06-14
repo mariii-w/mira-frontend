@@ -509,7 +509,14 @@ function Styleguide() {
       <h2>Booking Card</h2>
       <div className="flex flex-col gap-4 max-w-2xl">
         {BOOKING_SAMPLES.map(({ summary, detail }) => (
-          <BookingCard key={summary.bookingId} booking={summary} mockDetail={detail} onActionComplete={() => {}} />
+          <BookingCard
+            key={summary.bookingId}
+            booking={summary}
+            mockDetail={detail}
+            onActionComplete={() => {}}
+            loadBookingDetails={async () => detail}
+            performBookingAction={async () => null}
+          />
         ))}
       </div>
     </section>

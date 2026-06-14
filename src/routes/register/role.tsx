@@ -9,7 +9,7 @@ import {
   type RegisterRoleSubmitError,
   type RegisterRoleSubmitValues,
 } from "../../components/RegisterRole";
-import { get_access_token, useAuthStore } from "../../stores/auth";
+import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/role")({
   component: RegisterRoleRoute,
@@ -30,11 +30,6 @@ function getSubmitError(
   };
 }
 
-async function getAuthOptions(): Promise<RequestInit> {
-  const token = await get_access_token();
-  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-}
-
 // eslint-disable-next-line react-refresh/only-export-components
 function RegisterRoleRoute() {
   const navigate = useNavigate();
@@ -50,11 +45,7 @@ function RegisterRoleRoute() {
     }
 
     const payload: PatchUserProfileRequest = values;
-    const response = await patchUserProfile(
-      user.userId,
-      payload,
-      await getAuthOptions(),
-    );
+    const response = await patchUserProfile(user.userId, payload);
 
     if (response.status !== 200) {
       throw getSubmitError(response.status, response.data);

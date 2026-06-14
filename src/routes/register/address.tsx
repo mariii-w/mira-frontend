@@ -5,7 +5,7 @@ import {
   RegisterAddress,
   type RegisterAddressSubmitValues,
 } from "../../components/RegisterAddress";
-import { get_access_token, useAuthStore } from "../../stores/auth";
+import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/address")({
   component: RegisterAddressRoute,
@@ -22,11 +22,6 @@ function getErrorMessage(status: number, detail?: string) {
   return detail ?? `Unexpected error (${status}). Please try again.`;
 }
 
-async function getAuthOptions(): Promise<RequestInit> {
-  const token = await get_access_token();
-  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-}
-
 // eslint-disable-next-line react-refresh/only-export-components
 function RegisterAddressRoute() {
   const navigate = useNavigate();
@@ -40,11 +35,7 @@ function RegisterAddressRoute() {
       privateAddress: values,
     };
 
-    const response = await patchUserProfile(
-      user.userId,
-      payload,
-      await getAuthOptions(),
-    );
+    const response = await patchUserProfile(user.userId, payload);
 
     if (response.status !== 200) {
       throw new Error(getErrorMessage(response.status, response.data.detail));

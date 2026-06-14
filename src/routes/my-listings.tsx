@@ -12,7 +12,7 @@ import type {
 } from "../api/model";
 import { MyListings, type StatusFilter } from "../components/MyListings";
 import type { MyListingSummary } from "../components/MyListingCard";
-import { get_access_token, useAuthStore } from "../stores/auth";
+import { useAuthStore } from "../stores/auth";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/my-listings")({
@@ -23,11 +23,6 @@ function getErrorDetail(
   data: ProblemDetailsResponse | UnauthorizedErrorResponse,
 ) {
   return "detail" in data ? data.detail : undefined;
-}
-
-async function getAuthOptions(): Promise<RequestInit> {
-  const token = await get_access_token();
-  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 }
 
 function getListingParams(
@@ -79,7 +74,6 @@ export function MyListingsRoute() {
       const response = await getV1UsersUserIdListings(
         userId,
         params,
-        await getAuthOptions(),
       );
 
       if (response.status !== 200) {
@@ -103,7 +97,6 @@ export function MyListingsRoute() {
       const response = await getV1UsersUserIdListings(
         userId,
         { limit: 100 },
-        await getAuthOptions(),
       );
 
       if (response.status !== 200) {

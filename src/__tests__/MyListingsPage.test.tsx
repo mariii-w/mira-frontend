@@ -18,7 +18,6 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
 vi.mock('../stores/auth', () => ({
   useAuthStore: (selector: (s: { user: { userId: string } }) => unknown) =>
     selector({ user: { userId: 'user-1' } }),
-  get_access_token: vi.fn().mockResolvedValue('access-token'),
 }))
 
 vi.mock('../api/mira', () => ({
@@ -142,9 +141,6 @@ describe('<MyListingsPage />', () => {
       expect(mockGetListings).toHaveBeenCalledWith(
         'user-1',
         { limit: 20 },
-        expect.objectContaining({
-          headers: { Authorization: 'Bearer access-token' },
-        }),
       )
     )
   })
@@ -183,9 +179,6 @@ describe('<MyListingsPage />', () => {
     expect(mockGetListings).toHaveBeenCalledWith(
       'user-1',
       { limit: 20, from: 'cursor-p2' },
-      expect.objectContaining({
-        headers: { Authorization: 'Bearer access-token' },
-      }),
     )
     expect(screen.getByRole('button', { name: /previous/i })).toBeEnabled()
     expect(screen.getByRole('button', { name: /next/i })).toBeDisabled()
@@ -212,9 +205,6 @@ describe('<MyListingsPage />', () => {
     expect(mockGetListings).toHaveBeenLastCalledWith(
       'user-1',
       { limit: 20 },
-      expect.objectContaining({
-        headers: { Authorization: 'Bearer access-token' },
-      }),
     )
   })
 
@@ -254,9 +244,6 @@ describe('<MyListingsPage />', () => {
         expect(mockGetListings).toHaveBeenCalledWith(
           'user-1',
           { limit: 20 },
-          expect.objectContaining({
-            headers: { Authorization: 'Bearer access-token' },
-          }),
         )
       )
     })
@@ -273,9 +260,6 @@ describe('<MyListingsPage />', () => {
         expect(mockGetListings).toHaveBeenCalledWith(
           'user-1',
           { limit: 20, publicationStatus: 'DRAFT' },
-          expect.objectContaining({
-            headers: { Authorization: 'Bearer access-token' },
-          }),
         )
       )
     })
@@ -313,9 +297,6 @@ describe('<MyListingsPage />', () => {
         expect(mockGetListings).toHaveBeenCalledWith(
           'user-1',
           { limit: 20, publicationStatus: 'DRAFT' },
-          expect.objectContaining({
-            headers: { Authorization: 'Bearer access-token' },
-          }),
         )
       )
     })

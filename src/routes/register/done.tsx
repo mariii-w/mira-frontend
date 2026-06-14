@@ -8,16 +8,11 @@ import {
 } from "../../api/mira";
 import type { PrivateUserProfileResponse } from "../../api/model";
 import { RegisterDone } from "../../components/RegisterDone";
-import { get_access_token, useAuthStore } from "../../stores/auth";
+import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/done")({
   component: RegisterDoneRoute,
 });
-
-async function getAuthOptions(): Promise<RequestInit> {
-  const token = await get_access_token();
-  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-}
 
 function getAuthedPrivateUserProfileQueryOptions(userId: string | undefined) {
   return {
@@ -28,10 +23,7 @@ function getAuthedPrivateUserProfileQueryOptions(userId: string | undefined) {
     }: QueryFunctionContext): Promise<PrivateUserProfileResponse> => {
       if (!userId) throw new Error("Not logged in.");
 
-      const response = await getPrivateUserProfile(userId, {
-        signal,
-        ...(await getAuthOptions()),
-      });
+      const response = await getPrivateUserProfile(userId, { signal });
       if (response.status !== 200) throw new Error("Failed to load profile.");
 
       return response.data;

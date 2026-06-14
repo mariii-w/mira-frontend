@@ -38,9 +38,7 @@ async function completeLogin(): Promise<User | null> {
     permissions: claims.scp ?? [],
   });
 
-  const userResponse = await getPrivateUserProfile(claims.user_id, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  const userResponse = await getPrivateUserProfile(claims.user_id);
 
   if (userResponse.status !== 200) {
     useAuthStore.getState().clear();

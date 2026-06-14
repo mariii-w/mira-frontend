@@ -2,9 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  getGetV1ListingsListingIdAvailabilityQueryKey,
   getGetV1PublicListingsListingIdQueryKey,
-  getV1ListingsListingIdAvailability,
   getV1PublicListingsListingId,
   postV1Bookings,
 } from "../../api/mira";
@@ -14,7 +12,10 @@ import type {
   UnauthorizedErrorResponse,
 } from "../../api/model";
 import { BookingPage } from "../../components/BookingPage";
-import { get_access_token } from "../../stores/auth";
+import {
+  getListingAvailability,
+  getListingAvailabilityQueryKey,
+} from "../../lib/listingAvailability";
 
 export const Route = createFileRoute("/listings/$listingId/book")({
   component: BookingRoute,
@@ -31,11 +32,6 @@ function getErrorDetail(
   return "detail" in data ? data.detail : undefined;
 }
 
-async function getAuthOptions(): Promise<RequestInit> {
-  const token = await get_access_token();
-  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-}
-
 // eslint-disable-next-line react-refresh/only-export-components
 function BookingRoute() {
   const { listingId } = Route.useParams();
@@ -48,18 +44,17 @@ function BookingRoute() {
   const to = new Date(year, month, 0);
 
   const { data: availability } = useQuery({
-    queryKey: getGetV1ListingsListingIdAvailabilityQueryKey(listingId, {
+    queryKey: getListingAvailabilityQueryKey(listingId, {
       from: toLocalDate(from),
       to: toLocalDate(to),
     }),
     queryFn: async () => {
-      const response = await getV1ListingsListingIdAvailability(
+      const response = await getListingAvailability(
         listingId,
         {
           from: toLocalDate(from),
           to: toLocalDate(to),
         },
-        await getAuthOptions(),
       );
 
       if (response.status !== 200) {
@@ -91,7 +86,7 @@ function BookingRoute() {
 
   const bookingMutation = useMutation({
     mutationFn: async (booking: CreateBookingRequest) => {
-      const response = await postV1Bookings(booking, await getAuthOptions());
+      const response = await postV1Bookings(booking);
 
       if (response.status !== 201) {
         throw new Error(getErrorDetail(response.data) ?? "Booking failed");

@@ -9,6 +9,7 @@
     "openapi": "orval --config ./orval.config.ts",
     "openapi:watch": "orval --config ./orval.config.ts --watch",
     "lint": "eslint .",
+    "check:routes-no-html": "node scripts/check-routes-no-html.mjs",
     "preview": "vite preview",
     "test": "vitest",
     "test:ci": "vitest run --coverage",

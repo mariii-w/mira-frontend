@@ -96,9 +96,7 @@ describe("auth store", () => {
 
     await expect(exchangeRefreshForAccess()).resolves.toBe(true);
 
-    expect(mockedGetPrivateUserProfile).toHaveBeenCalledWith("user-1", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    expect(mockedGetPrivateUserProfile).toHaveBeenCalledWith("user-1");
     expect(useAuthStore.getState().user).toEqual(user);
   });
 
@@ -119,7 +117,6 @@ describe("auth store", () => {
 
     expect(mockedPostAuthLogout).toHaveBeenCalledWith({
       credentials: "include",
-      headers: { Authorization: `Bearer ${token}` },
     });
     expect(useAuthStore.getState()).toMatchObject({
       accessToken: null,

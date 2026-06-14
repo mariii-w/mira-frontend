@@ -5,16 +5,11 @@ import {
   RegisterPhoto,
   type RegisterPhotoSubmitError,
 } from "../../components/RegisterPhoto";
-import { get_access_token, useAuthStore } from "../../stores/auth";
+import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/photo")({
   component: RegisterPhotoRoute,
 });
-
-async function getAuthOptions(): Promise<RequestInit> {
-  const token = await get_access_token();
-  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-}
 
 function getDetail(data: ProblemDetailsResponse | unknown): string | undefined {
   return typeof data === "object" && data !== null && "detail" in data
@@ -60,18 +55,13 @@ function RegisterPhotoRoute() {
     if (!user) throw new Error("Not logged in.");
 
     if (file) {
-      const authOptions = await getAuthOptions();
-      const response = await uploadProfilePicture(
-        user.userId,
-        { file },
-        authOptions,
-      );
+      const response = await uploadProfilePicture(user.userId, { file });
 
       if (response.status !== 200) {
         throw getUploadError(response.status, getDetail(response.data));
       }
 
-      const refresh = await getPrivateUserProfile(user.userId, authOptions);
+      const refresh = await getPrivateUserProfile(user.userId);
       if (refresh.status === 200) setUser(refresh.data);
     }
 

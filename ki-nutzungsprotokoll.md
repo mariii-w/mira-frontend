@@ -5,7 +5,7 @@
 - Gruppenname: Mudkip
 - Titel der Studienarbeit: Mira
 - KI genutzt: ja
-- Verwendete KI-Werkzeuge: Claude, ChatGPT 
+- Verwendete KI-Werkzeuge: Claude, ChatGPT, Codex
 
 Wenn keine KI genutzt wurde, reicht hier die Angabe "nein". In diesem Fall müssen die folgenden Abschnitte nicht ausgefüllt werden.
 
@@ -87,6 +87,9 @@ Pflegen Sie das Protokoll möglichst zeitnah, damit die Git-Historie die Entwick
 | 2026-06-11 | Frederik | ChatGPT/Codex | Coverage-Scan durchgeführt, fehlende Testabdeckung identifiziert, passende Tests generiert und anschließend erneut einen Coverage-Scan zur Kontrolle ausgeführt. | Generierte Tests fachlich geprüft, an das vorhandene Vitest-Setup angepasst und die erneute Coverage-Auswertung zur Kontrolle genutzt. |
 | 2026-06-11 | Frederik | ChatGPT/Codex | Tests für die `MultiSelect`-Komponente aktualisiert: Required-Zustand wird nicht mehr fälschlich am Button erwartet, sondern als zugängliche Beschreibung am Trigger und als `aria-required` am geöffneten Listbox-Element geprüft. Zusätzlich wurde getestet, dass vorhandene `aria-describedby`-Verknüpfungen erhalten bleiben. | Testanpassungen an das tatsächliche Headless-UI-Verhalten und die WAI-ARIA-Semantik angepasst; Assertions fachlich geprüft und auf die bestehende Vitest-/Testing-Library-Struktur abgestimmt. |
 | 2026-06-12/13 | Frederik | ChatGPT | Besprechung möglicher accessibility features und improvements, teilweise mit File-Context (mehrere Chats). | `aria-*`-Ergänzungen des letzten Commits geprüft und übernommen. |
+| 2026-06-14 | Frederik | Claude/ChatGPT/Codex | Unterstützung bei der Migration der API-Anbindung auf Orval: OpenAPI-Spec, `orval.config.ts`, generierte Client-Struktur und Einbindung in die vorhandene React-/TanStack-Query-Architektur wurden mit KI-Unterstützung analysiert und angepasst. | Ziel, Umfang und Vorgehen wurden vom Anwender vorgegeben. KI-Vorschläge wurden fachlich geprüft, an die bestehende Codebasis angepasst und nur übernommen, wenn sie zur API-Spec und Projektstruktur passten. |
+| 2026-06-14 | Frederik | Claude/ChatGPT/Codex | Tests im Zusammenhang mit der Orval-Migration ergänzt und angepasst, unter anderem für API-Helfer, Komponentenverhalten und bestehende User-Flows, damit die geänderte API-Schicht regressionssicher bleibt. | Testfälle und erwartetes Verhalten wurden durch den Anwender vorgegeben bzw. validiert. KI wurde zur Formulierung und Fehlersuche genutzt; Assertions, Mocks und Testgrenzen wurden an das vorhandene Vitest-/Testing-Library-Setup angepasst. |
+| 2026-06-14 | Frederik | Claude/ChatGPT/Codex | CI-Konfiguration im Zuge der Migration erweitert bzw. angepasst, damit Build, Linting, Tests, Accessibility-Checks und projektbezogene Validierungen automatisiert ausgeführt werden. | CI-Schritte wurden vom Anwender angewiesen und in die bestehende Pipeline eingeordnet. KI-Unterstützung diente zur Syntax-, Struktur- und Fehlerprüfung; finale Befehle und Reihenfolge wurden projektbezogen geprüft. |
 
 ## Optionale ergänzende Hinweise
 

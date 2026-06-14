@@ -121,9 +121,7 @@ export async function exchangeRefreshForAccess(): Promise<boolean> {
     permissions: claims.scp ?? [],
   });
 
-  const userRes = await getPrivateUserProfile(claims.user_id, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  const userRes = await getPrivateUserProfile(claims.user_id);
   if (userRes.status !== 200) {
     useAuthStore.getState().clear();
     return false;
@@ -134,12 +132,8 @@ export async function exchangeRefreshForAccess(): Promise<boolean> {
 }
 
 export async function logout(): Promise<void> {
-  const token = useAuthStore.getState().accessToken;
   try {
-    await postAuthLogout({
-      credentials: "include",
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    });
+    await postAuthLogout({ credentials: "include" });
   } finally {
     useAuthStore.getState().clear();
   }

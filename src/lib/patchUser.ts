@@ -7,7 +7,7 @@ import type {
   PatchUserProfileRequest,
   ProblemDetailsResponse,
 } from "../api/model";
-import { get_access_token, useAuthStore } from "../stores/auth";
+import { useAuthStore } from "../stores/auth";
 
 export type UserType = "CUSTOMER" | "PROVIDER";
 export type AccessibilityPreference = "EASY_LANGUAGE" | "REDUCED_MOTION";
@@ -41,11 +41,6 @@ export interface UploadPhotoError {
   message: string;
 }
 
-async function getAuthOptions(): Promise<RequestInit> {
-  const token = await get_access_token();
-  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-}
-
 function getDetail(data: ProblemDetailsResponse | unknown): string | undefined {
   return typeof data === "object" && data !== null && "detail" in data
     ? String(data.detail)
@@ -64,7 +59,6 @@ export async function patchUser(payload: PatchUserPayload): Promise<void> {
   const res = await patchUserProfile(
     user.userId,
     payload satisfies PatchUserProfileRequest,
-    await getAuthOptions(),
   );
 
   if (res.status !== 200) {
@@ -107,8 +101,7 @@ export async function uploadProfilePhoto(file: File): Promise<void> {
     } satisfies UploadPhotoError;
   }
 
-  const authOptions = await getAuthOptions();
-  const res = await uploadProfilePicture(user.userId, { file }, authOptions);
+  const res = await uploadProfilePicture(user.userId, { file });
 
   if (res.status !== 200) {
     const detail = getDetail(res.data);
@@ -138,7 +131,7 @@ export async function uploadProfilePhoto(file: File): Promise<void> {
     } satisfies UploadPhotoError;
   }
 
-  const refresh = await getPrivateUserProfile(user.userId, authOptions);
+  const refresh = await getPrivateUserProfile(user.userId);
   if (refresh.status === 200) {
     useAuthStore.getState().setUser(refresh.data);
   }

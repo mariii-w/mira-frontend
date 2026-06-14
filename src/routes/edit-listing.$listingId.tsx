@@ -19,7 +19,7 @@ import {
   postV1ListingsListingIdPublish,
   postV1ListingsListingIdResume,
 } from "../api/mira";
-import { get_access_token, useAuthStore } from "../stores/auth";
+import { useAuthStore } from "../stores/auth";
 import type { ProblemDetailsResponse } from "../api/model";
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -29,11 +29,6 @@ export const Route = createFileRoute("/edit-listing/$listingId")({
 
 function getProblemDetail(data: unknown): string | undefined {
   return (data as Partial<ProblemDetailsResponse> | null)?.detail;
-}
-
-async function getAuthOptions(): Promise<RequestInit> {
-  const token = await get_access_token();
-  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 }
 
 function toEditListingDetails(listing: EditListingDetails): EditListingDetails {
@@ -61,7 +56,6 @@ export function EditListingPage() {
     const response = await getV1UsersUserIdListingsListingId(
       userId,
       listingId,
-      await getAuthOptions(),
     );
 
     if (response.status !== 200) {
@@ -137,7 +131,6 @@ export function EditListingPage() {
         tagIds: values.tagIds,
         location: values.location,
       },
-      await getAuthOptions(),
     );
 
     if (updateResponse.status !== 200) {
@@ -151,7 +144,6 @@ export function EditListingPage() {
       const mediaResponse = await postV1ListingsListingIdMedia(
         listingId,
         { files: values.imageFiles },
-        await getAuthOptions(),
       );
 
       if (mediaResponse.status !== 200) {
@@ -169,7 +161,6 @@ export function EditListingPage() {
     const response = await deleteV1ListingsListingIdMediaMediaId(
       listingId,
       mediaId,
-      await getAuthOptions(),
     );
 
     if (response.status !== 204) {
@@ -186,7 +177,7 @@ export function EditListingPage() {
       pause: postV1ListingsListingIdPause,
       resume: postV1ListingsListingIdResume,
     };
-    const response = await actionMap[action](listingId, await getAuthOptions());
+    const response = await actionMap[action](listingId);
 
     if (response.status !== 200) {
       throw new Error(
@@ -199,10 +190,7 @@ export function EditListingPage() {
   }
 
   async function handleDelete() {
-    const response = await deleteV1ListingsListingId(
-      listingId,
-      await getAuthOptions(),
-    );
+    const response = await deleteV1ListingsListingId(listingId);
 
     if (response.status !== 204) {
       throw new Error(

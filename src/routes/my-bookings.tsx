@@ -17,7 +17,7 @@ import type {
 } from "../api/model";
 import { MyBookings } from "../components/MyBookings";
 import type { AllowedAction, BookingDetails } from "../components/BookingCard";
-import { get_access_token, useAuthStore } from "../stores/auth";
+import { useAuthStore } from "../stores/auth";
 
 export const Route = createFileRoute("/my-bookings")({
   component: MyBookingsRoute,
@@ -33,11 +33,6 @@ function getUnknownErrorDetail(data: unknown): string | undefined {
   return typeof data === "object" && data !== null && "detail" in data
     ? String(data.detail)
     : undefined;
-}
-
-async function getAuthOptions(): Promise<RequestInit> {
-  const token = await get_access_token();
-  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 }
 
 function buildAllowedActions(
@@ -86,11 +81,7 @@ function MyBookingsRoute() {
     queryFn: async () => {
       if (!userId) throw new Error("You must be signed in to view bookings.");
 
-      const response = await getV1UsersUserIdBookings(
-        userId,
-        undefined,
-        await getAuthOptions(),
-      );
+      const response = await getV1UsersUserIdBookings(userId);
 
       if (response.status !== 200) {
         throw new Error(
@@ -106,10 +97,7 @@ function MyBookingsRoute() {
   async function loadBookingDetails(
     bookingId: string,
   ): Promise<BookingDetails | null> {
-    const response = await getV1BookingsBookingId(
-      bookingId,
-      await getAuthOptions(),
-    );
+    const response = await getV1BookingsBookingId(bookingId);
 
     if (response.status !== 200) return null;
 
@@ -124,28 +112,17 @@ function MyBookingsRoute() {
     bookingId: string,
     action: AllowedAction,
   ): Promise<string | null> {
-    const authOptions = await getAuthOptions();
     const response =
       action.rel === "cancel"
-        ? await deleteV1BookingsBookingId(bookingId, authOptions)
+        ? await deleteV1BookingsBookingId(bookingId)
         : action.rel === "accept"
-          ? await postV1BookingsBookingIdAccept(bookingId, authOptions)
+          ? await postV1BookingsBookingIdAccept(bookingId)
           : action.rel === "refuse"
-            ? await postV1BookingsBookingIdRefuse(
-                bookingId,
-                undefined,
-                authOptions,
-              )
+            ? await postV1BookingsBookingIdRefuse(bookingId)
             : action.rel === "mark-delivered"
-              ? await postV1BookingsBookingIdMarkDelivered(
-                  bookingId,
-                  authOptions,
-                )
+              ? await postV1BookingsBookingIdMarkDelivered(bookingId)
               : action.rel === "acknowledge-delivery"
-                ? await postV1BookingsBookingIdAcknowledgeDelivery(
-                    bookingId,
-                    authOptions,
-                  )
+                ? await postV1BookingsBookingIdAcknowledgeDelivery(bookingId)
                 : null;
 
     if (!response) return "This booking action is not supported yet.";
