@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { authFetch } from '../lib/queryClient'
+import { authFetch } from '../lib/authFetch'
 import { CalendarPage } from '../routes/calendar'
 
 // ─── Router mock ─────────────────────────────────────────────────────────────
@@ -21,7 +21,7 @@ vi.mock('../stores/auth', () => ({
 }))
 
 // ─── authFetch mock ───────────────────────────────────────────────────────────
-vi.mock('../lib/queryClient', () => ({ authFetch: vi.fn() }))
+vi.mock('../lib/authFetch', () => ({ authFetch: vi.fn() }))
 const mockFetch = vi.mocked(authFetch)
 
 // ─── Component stubs ──────────────────────────────────────────────────────────
@@ -62,13 +62,17 @@ function renderPage() {
   return render(<CalendarPage />, { wrapper: Wrapper })
 }
 
+function apiResponse<T>(data: T, status = 200) {
+  return { data, status, headers: new Headers() }
+}
+
 function mockEmptyCalendar() {
-  mockFetch.mockImplementation(async (url: RequestInfo) => {
+  mockFetch.mockImplementation(async (url: RequestInfo | URL) => {
     const u = String(url)
-    if (u.includes('/calendar')) return { ok: true, json: async () => ({ items: [] }) } as Response
-    if (u.includes('/exceptions')) return { ok: true, json: async () => ({ items: [] }) } as Response
-    if (u.includes('/schedule')) return { ok: true, json: async () => ({ entries: [] }) } as Response
-    return { ok: true, json: async () => ({}) } as Response
+    if (u.includes('/calendar')) return apiResponse({ items: [] })
+    if (u.includes('/exceptions')) return apiResponse({ items: [] })
+    if (u.includes('/schedule')) return apiResponse({ entries: [] })
+    return apiResponse({})
   })
 }
 
@@ -201,12 +205,12 @@ describe('<CalendarPage />', () => {
 
     it('shows booking card when selected date has bookings', async () => {
       const booking = makeBooking({ bookedStart: '2026-06-10T09:00:00Z', bookedEnd: '2026-06-10T10:00:00Z' })
-      mockFetch.mockImplementation(async (url: RequestInfo) => {
+      mockFetch.mockImplementation(async (url: RequestInfo | URL) => {
         const u = String(url)
-        if (u.includes('/calendar')) return { ok: true, json: async () => ({ items: [booking] }) } as Response
-        if (u.includes('/exceptions')) return { ok: true, json: async () => ({ items: [] }) } as Response
-        if (u.includes('/schedule')) return { ok: true, json: async () => ({ entries: [] }) } as Response
-        return { ok: true, json: async () => ({}) } as Response
+        if (u.includes('/calendar')) return apiResponse({ items: [booking] })
+        if (u.includes('/exceptions')) return apiResponse({ items: [] })
+        if (u.includes('/schedule')) return apiResponse({ entries: [] })
+        return apiResponse({})
       })
       renderPage()
       fireEvent.click(screen.getByRole('button', { name: /Wednesday, June 10, 2026/i }))
@@ -231,12 +235,12 @@ describe('<CalendarPage />', () => {
       const isoEnd = new Date(future.getTime() + 3600000).toISOString()
       const booking = makeBooking({ bookingId: 'b-future', bookedStart: isoStart, bookedEnd: isoEnd, title: 'Laptop Fix' })
 
-      mockFetch.mockImplementation(async (url: RequestInfo) => {
+      mockFetch.mockImplementation(async (url: RequestInfo | URL) => {
         const u = String(url)
-        if (u.includes('/calendar')) return { ok: true, json: async () => ({ items: [booking] }) } as Response
-        if (u.includes('/exceptions')) return { ok: true, json: async () => ({ items: [] }) } as Response
-        if (u.includes('/schedule')) return { ok: true, json: async () => ({ entries: [] }) } as Response
-        return { ok: true, json: async () => ({}) } as Response
+        if (u.includes('/calendar')) return apiResponse({ items: [booking] })
+        if (u.includes('/exceptions')) return apiResponse({ items: [] })
+        if (u.includes('/schedule')) return apiResponse({ entries: [] })
+        return apiResponse({})
       })
       renderPage()
       await waitFor(() =>

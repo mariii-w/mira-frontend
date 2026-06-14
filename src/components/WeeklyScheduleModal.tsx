@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Modal } from './Modal'
 import { Button } from './Button'
-import { authFetch } from '../lib/queryClient'
+import { authFetch, type FetchResponse } from '../lib/authFetch'
 
 type BackendDay = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN'
 
@@ -16,6 +16,8 @@ const DAY_LABEL: Record<BackendDay, string> = {
 interface ScheduleEntry { dayOfWeek: BackendDay; startTime: string; endTime: string }
 interface DayState { enabled: boolean; start: string; end: string }
 type ScheduleState = Record<BackendDay, DayState>
+type ScheduleResponse = { entries: ScheduleEntry[] }
+type ErrorResponse = { detail?: string }
 
 function toInputTime(backendTime: string): string {
   return backendTime.slice(0, 5)
@@ -50,9 +52,9 @@ export function WeeklyScheduleModal({ open, onClose, userId }: Props) {
   const { data, isLoading } = useQuery({
     queryKey: ['schedule', userId],
     queryFn: async () => {
-      const res = await authFetch(`/v1/users/${userId}/schedule`)
-      if (!res.ok) throw new Error('Failed to load schedule')
-      return res.json() as Promise<{ entries: ScheduleEntry[] }>
+      const res = await authFetch<FetchResponse<ScheduleResponse>>(`/v1/users/${userId}/schedule`)
+      if (res.status !== 200) throw new Error('Failed to load schedule')
+      return res.data
     },
     enabled: open && !!userId,
   })
@@ -67,16 +69,15 @@ export function WeeklyScheduleModal({ open, onClose, userId }: Props) {
         startTime: toBackendTime(state[d].start),
         endTime: toBackendTime(state[d].end),
       }))
-      const res = await authFetch(`/v1/users/${userId}/schedule`, {
+      const res = await authFetch<FetchResponse<ScheduleResponse | ErrorResponse>>(`/v1/users/${userId}/schedule`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ entries }),
       })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as { detail?: string }).detail ?? 'Failed to save schedule')
+      if (res.status < 200 || res.status >= 300) {
+        throw new Error(('detail' in res.data ? res.data.detail : undefined) ?? 'Failed to save schedule')
       }
-      return res.json()
+      return res.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedule', userId] })

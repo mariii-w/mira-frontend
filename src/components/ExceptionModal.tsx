@@ -3,7 +3,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { Pencil, Trash2, Check, X } from 'lucide-react'
 import { Modal } from './Modal'
 import { Button } from './Button'
-import { authFetch } from '../lib/queryClient'
+import { authFetch, type FetchResponse } from '../lib/authFetch'
 
 type ExceptionType = 'BLOCKED' | 'AVAILABLE'
 type Tab = 'add' | 'manage'
@@ -15,6 +15,8 @@ interface ScheduleException {
   startTime: string | null
   endTime: string | null
 }
+type ExceptionsResponse = { items: ScheduleException[] }
+type ErrorResponse = { detail?: string }
 
 interface Props {
   open: boolean
@@ -48,14 +50,13 @@ function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId
 
   const { mutate: save, isPending: saving } = useMutation({
     mutationFn: async () => {
-      const res = await authFetch(`/v1/users/${userId}/exceptions/${ex.exceptionId}`, {
+      const res = await authFetch<FetchResponse<ScheduleException | ErrorResponse>>(`/v1/users/${userId}/exceptions/${ex.exceptionId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ startTime: `${start}:00`, endTime: `${end}:00` }),
       })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as { detail?: string }).detail ?? 'Failed to update')
+      if (res.status < 200 || res.status >= 300) {
+        throw new Error(('detail' in res.data ? res.data.detail : undefined) ?? 'Failed to update')
       }
     },
     onSuccess: () => { setEditing(false); onMutated() },
@@ -63,8 +64,8 @@ function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId
 
   const { mutate: remove, isPending: removing } = useMutation({
     mutationFn: async () => {
-      const res = await authFetch(`/v1/users/${userId}/exceptions/${ex.exceptionId}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Failed to delete')
+      const res = await authFetch<FetchResponse<ErrorResponse>>(`/v1/users/${userId}/exceptions/${ex.exceptionId}`, { method: 'DELETE' })
+      if (res.status < 200 || res.status >= 300) throw new Error('Failed to delete')
     },
     onSuccess: onMutated,
   })
@@ -197,9 +198,9 @@ export function ExceptionModal({ open, onClose, userId }: Props) {
   const { data: exceptionsData } = useQuery({
     queryKey: ['exceptions', userId],
     queryFn: async () => {
-      const res = await authFetch(`/v1/users/${userId}/exceptions`)
-      if (!res.ok) throw new Error('Failed to load exceptions')
-      return res.json() as Promise<{ items: ScheduleException[] }>
+      const res = await authFetch<FetchResponse<ExceptionsResponse>>(`/v1/users/${userId}/exceptions`)
+      if (res.status !== 200) throw new Error('Failed to load exceptions')
+      return res.data
     },
     enabled: open && !!userId && tab === 'manage',
   })
@@ -213,16 +214,15 @@ export function ExceptionModal({ open, onClose, userId }: Props) {
         body.startTime = `${start}:00`
         body.endTime = `${end}:00`
       }
-      const res = await authFetch(`/v1/users/${userId}/exceptions`, {
+      const res = await authFetch<FetchResponse<ScheduleException | ErrorResponse>>(`/v1/users/${userId}/exceptions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as { detail?: string }).detail ?? 'Failed to add exception')
+      if (res.status < 200 || res.status >= 300) {
+        throw new Error(('detail' in res.data ? res.data.detail : undefined) ?? 'Failed to add exception')
       }
-      return res.json()
+      return res.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exceptions', userId] })

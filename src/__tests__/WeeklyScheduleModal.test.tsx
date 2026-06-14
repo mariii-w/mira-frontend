@@ -3,10 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { authFetch } from '../lib/queryClient'
+import { authFetch } from '../lib/authFetch'
 import { WeeklyScheduleModal } from '../components/WeeklyScheduleModal'
 
-vi.mock('../lib/queryClient', () => ({ authFetch: vi.fn() }))
+vi.mock('../lib/authFetch', () => ({ authFetch: vi.fn() }))
 const mockFetch = vi.mocked(authFetch)
 
 vi.mock('../components/Modal', () => ({
@@ -24,11 +24,12 @@ function Wrapper({ children }: { children: ReactNode }) {
 
 const defaultProps = { open: true, onClose: vi.fn(), userId: 'user-1' }
 
+function apiResponse<T>(data: T, status = 200) {
+  return { data, status, headers: new Headers() }
+}
+
 function mockSchedule(entries: object[] = []) {
-  mockFetch.mockResolvedValue({
-    ok: true,
-    json: async () => ({ entries }),
-  } as Response)
+  mockFetch.mockResolvedValue(apiResponse({ entries }))
 }
 
 beforeEach(() => vi.clearAllMocks())
@@ -83,7 +84,7 @@ describe('<WeeklyScheduleModal />', () => {
 
   it('calls PUT with enabled days on save', async () => {
     mockSchedule([{ dayOfWeek: 'MON', startTime: '09:00:00', endTime: '17:00:00' }])
-    mockFetch.mockResolvedValue({ ok: true, json: async () => ({}) } as Response)
+    mockFetch.mockResolvedValue(apiResponse({}))
     render(<WeeklyScheduleModal {...defaultProps} />, { wrapper: Wrapper })
     await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: 'Save schedule' }))
@@ -98,8 +99,8 @@ describe('<WeeklyScheduleModal />', () => {
   it('shows error message when save fails', async () => {
     mockSchedule()
     mockFetch
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ entries: [] }) } as Response)
-      .mockResolvedValueOnce({ ok: false, json: async () => ({ detail: 'Server error' }) } as Response)
+      .mockResolvedValueOnce(apiResponse({ entries: [] }))
+      .mockResolvedValueOnce(apiResponse({ detail: 'Server error' }, 500))
     render(<WeeklyScheduleModal {...defaultProps} />, { wrapper: Wrapper })
     await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: 'Save schedule' }))

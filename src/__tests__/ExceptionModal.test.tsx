@@ -3,10 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { authFetch } from '../lib/queryClient'
+import { authFetch } from '../lib/authFetch'
 import { ExceptionModal } from '../components/ExceptionModal'
 
-vi.mock('../lib/queryClient', () => ({ authFetch: vi.fn() }))
+vi.mock('../lib/authFetch', () => ({ authFetch: vi.fn() }))
 const mockFetch = vi.mocked(authFetch)
 
 vi.mock('../components/Modal', () => ({
@@ -23,6 +23,10 @@ function Wrapper({ children }: { children: ReactNode }) {
 }
 
 const defaultProps = { open: true, onClose: vi.fn(), userId: 'user-1' }
+
+function apiResponse<T>(data: T, status = 200) {
+  return { data, status, headers: new Headers() }
+}
 
 beforeEach(() => vi.clearAllMocks())
 
@@ -69,7 +73,7 @@ describe('<ExceptionModal />', () => {
   })
 
   it('calls POST with correct body on submit', async () => {
-    mockFetch.mockResolvedValue({ ok: true, json: async () => ({}) } as Response)
+    mockFetch.mockResolvedValue(apiResponse({}))
     render(<ExceptionModal {...defaultProps} />, { wrapper: Wrapper })
 
     fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2026-07-01' } })
@@ -87,10 +91,7 @@ describe('<ExceptionModal />', () => {
   })
 
   it('shows error alert when POST fails', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      json: async () => ({ detail: 'Conflict' }),
-    } as Response)
+    mockFetch.mockResolvedValue(apiResponse({ detail: 'Conflict' }, 409))
     render(<ExceptionModal {...defaultProps} />, { wrapper: Wrapper })
     fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2026-07-01' } })
     fireEvent.click(screen.getByRole('button', { name: /block this time/i }))
@@ -98,7 +99,7 @@ describe('<ExceptionModal />', () => {
   })
 
   it('switches to Manage tab and shows empty state', async () => {
-    mockFetch.mockResolvedValue({ ok: true, json: async () => ({ items: [] }) } as Response)
+    mockFetch.mockResolvedValue(apiResponse({ items: [] }))
     render(<ExceptionModal {...defaultProps} />, { wrapper: Wrapper })
     fireEvent.click(screen.getByRole('tab', { name: 'Manage exceptions' }))
     await waitFor(() =>
@@ -107,14 +108,11 @@ describe('<ExceptionModal />', () => {
   })
 
   it('lists existing exceptions in Manage tab', async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        items: [
-          { exceptionId: 'e-1', date: '2026-07-05', exceptionType: 'BLOCKED', startTime: null, endTime: null },
-        ],
-      }),
-    } as Response)
+    mockFetch.mockResolvedValue(apiResponse({
+      items: [
+        { exceptionId: 'e-1', date: '2026-07-05', exceptionType: 'BLOCKED', startTime: null, endTime: null },
+      ],
+    }))
     render(<ExceptionModal {...defaultProps} />, { wrapper: Wrapper })
     fireEvent.click(screen.getByRole('tab', { name: 'Manage exceptions' }))
     await waitFor(() => expect(screen.getByText(/Jul/)).toBeInTheDocument())

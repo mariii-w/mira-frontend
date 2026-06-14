@@ -9,7 +9,7 @@ import { StatusBadge, type BookingStatus } from '../components/BookingCard'
 import { WeeklyScheduleModal } from '../components/WeeklyScheduleModal'
 import { ExceptionModal } from '../components/ExceptionModal'
 import { useAuthStore } from '../stores/auth'
-import { authFetch } from '../lib/queryClient'
+import { authFetch, type FetchResponse } from '../lib/authFetch'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute('/calendar')({
@@ -48,6 +48,10 @@ interface CalendarBooking {
   bookedEnd: string
 }
 
+type CalendarResponse = { items: CalendarBooking[] }
+type ExceptionsResponse = { items: ScheduleException[] }
+type ScheduleResponse = { entries: ScheduleEntry[] }
+
 // --- Helpers ---
 function toLocalDate(date: Date): string {
   const p = (n: number) => String(n).padStart(2, '0')
@@ -78,10 +82,10 @@ function groupByDate(bookings: CalendarBooking[]): Record<string, CalendarBookin
 }
 
 function fetchCalendar(userId: string, from: string, to: string) {
-  return authFetch(`/v1/users/${userId}/calendar?from=${from}&to=${to}`)
-    .then((r) => {
-      if (!r.ok) throw new Error('Failed to load calendar')
-      return r.json() as Promise<{ items: CalendarBooking[] }>
+  return authFetch<FetchResponse<CalendarResponse>>(`/v1/users/${userId}/calendar?from=${from}&to=${to}`)
+    .then((res) => {
+      if (res.status !== 200) throw new Error('Failed to load calendar')
+      return res.data
     })
 }
 
@@ -184,9 +188,9 @@ export function CalendarPage() {
   const { data: exceptionsData } = useQuery({
     queryKey: ['exceptions', userId],
     queryFn: async () => {
-      const res = await authFetch(`/v1/users/${userId}/exceptions`)
-      if (!res.ok) throw new Error('Failed to load exceptions')
-      return res.json() as Promise<{ items: ScheduleException[] }>
+      const res = await authFetch<FetchResponse<ExceptionsResponse>>(`/v1/users/${userId}/exceptions`)
+      if (res.status !== 200) throw new Error('Failed to load exceptions')
+      return res.data
     },
     enabled: !!userId && isProvider,
   })
@@ -194,9 +198,9 @@ export function CalendarPage() {
   const { data: scheduleData } = useQuery({
     queryKey: ['schedule', userId],
     queryFn: async () => {
-      const res = await authFetch(`/v1/users/${userId}/schedule`)
-      if (!res.ok) throw new Error('Failed to load schedule')
-      return res.json() as Promise<{ entries: ScheduleEntry[] }>
+      const res = await authFetch<FetchResponse<ScheduleResponse>>(`/v1/users/${userId}/schedule`)
+      if (res.status !== 200) throw new Error('Failed to load schedule')
+      return res.data
     },
     enabled: !!userId && isProvider,
   })
