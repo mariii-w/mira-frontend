@@ -1,34 +1,34 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { getV1PublicListings } from '../api/mira'
-import { Home } from '../components/Home'
-import type { PublicListingSummary } from '../api/model'
+import { createFileRoute } from "@tanstack/react-router";
+import { getV1PublicListings } from "../api/mira";
+import { Home } from "../components/Home";
+import type { PublicListingSummary } from "../api/model";
 
 interface HomeLoaderData {
-  featuredListings: PublicListingSummary[]
+  featuredListings: PublicListingSummary[];
 }
 
 /* eslint-disable react-refresh/only-export-components */
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   loader: loadHome,
   component: HomeRoute,
-})
+});
 
 async function loadHome(): Promise<HomeLoaderData> {
   try {
-    const response = await getV1PublicListings({ limit: 8 })
+    const response = await getV1PublicListings({ limit: 8 });
 
     if (response.status !== 200) {
-      return { featuredListings: [] }
+      return { featuredListings: [] };
     }
 
-    return { featuredListings: response.data.items }
+    return { featuredListings: response.data.items };
   } catch {
-    return { featuredListings: [] }
+    return { featuredListings: [] };
   }
 }
 
 function HomeRoute() {
-  const { featuredListings } = Route.useLoaderData()
+  const { featuredListings } = Route.useLoaderData();
 
-  return <Home featuredListings={featuredListings} />
+  return <Home featuredListings={featuredListings} />;
 }

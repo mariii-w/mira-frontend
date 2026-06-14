@@ -1,35 +1,7 @@
 import { create } from "zustand";
+import type { PrivateUserProfileResponse } from "../api/model";
 
-export type UserType = "CUSTOMER" | "PROVIDER";
-export type AccessibilityPreference = "EASY_LANGUAGE" | "REDUCED_MOTION";
-
-export interface PrivateAddress {
-  street: string;
-  houseNumber: string;
-  city: string;
-  postalCode: string;
-}
-
-export interface ProfileMedia {
-  mediaId: string;
-  url: string;
-}
-
-export interface User {
-  userId: string;
-  username: string | null;
-  firstName: string | null;
-  lastName: string | null;
-  userType: UserType | null;
-  bio: string | null;
-  simplifiedBio: string | null;
-  selfSummary: string | null;
-  accessibilityPreferences: AccessibilityPreference[];
-  profileMedia: ProfileMedia | null;
-  registrationComplete: boolean;
-  isPublic: boolean;
-  privateAddress: PrivateAddress | null;
-}
+export type User = PrivateUserProfileResponse;
 
 interface AuthState {
   accessToken: string | null;
