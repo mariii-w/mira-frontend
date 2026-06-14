@@ -24,7 +24,7 @@ export function Navbar() {
 
 
   function handleGoogleLogin() {
-    window.location.href = 'http://localhost:8080/auth/login/google'
+    window.location.href = 'http://localhost:8081/auth/login/google'
   }
 
   return (

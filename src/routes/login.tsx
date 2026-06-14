@@ -41,7 +41,7 @@ function LoginCallback() {
             </p>
           </div>
           
-            <a href="http://localhost:8080/auth/login/google"
+            <a href="http://localhost:8081/auth/login/google"
             className="w-full inline-flex items-center justify-center rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-medium text-small px-6 py-3 transition-colors no-underline"
           >
             Try again with Google

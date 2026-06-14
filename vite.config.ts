@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/v1': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8081',
         changeOrigin: false,
       },
     },
@@ -21,6 +21,7 @@ export default defineConfig({
     outputFile: './junit.xml',
     coverage: {
       provider: 'v8',
+
       reporter: ['text', 'cobertura', 'html'],
       reportsDirectory: './coverage',
     },
