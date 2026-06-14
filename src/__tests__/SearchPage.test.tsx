@@ -10,18 +10,18 @@ import { SearchPage } from '../routes/search'
 type SearchParams = {
   q: string
   city: string
-  radius: number
+  radiusKm?: number
   tagIds: string[]
-  maxPrice: number
-  from: string | undefined
+  maxPrice?: number
+  from?: string
 }
 
 const DEFAULT_PARAMS: SearchParams = {
   q: '',
   city: '',
-  radius: 20,
+  radiusKm: undefined,
   tagIds: [],
-  maxPrice: 100,
+  maxPrice: undefined,
   from: undefined,
 }
 
@@ -61,6 +61,8 @@ function makeListing(overrides: object = {}) {
     listingId: 'listing-1',
     title: 'Laptop Setup',
     description: 'I help with laptop setup.',
+    easyDescription: null,
+    easyDescriptionStatus: null,
     price: 25,
     author: { name: 'Patrick', surname: 'S.' },
     publishedAt: '2026-04-20T13:00:00Z',
@@ -216,7 +218,7 @@ describe('<SearchPage />', () => {
     })
 
     it('shows city and radius in subtitle when city is set', async () => {
-      mockSearchParams = { ...DEFAULT_PARAMS, city: 'Munich', radius: 10 }
+      mockSearchParams = { ...DEFAULT_PARAMS, city: 'Munich', radiusKm: 10 }
       mockApiSuccess()
       renderPage()
       await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
@@ -242,7 +244,7 @@ describe('<SearchPage />', () => {
     })
 
     it('sends city and radiusKm when city is set', async () => {
-      mockSearchParams = { ...DEFAULT_PARAMS, city: 'Munich', radius: 10 }
+      mockSearchParams = { ...DEFAULT_PARAMS, city: 'Munich', radiusKm: 10 }
       mockApiSuccess()
       renderPage()
       await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('city=Munich')))
@@ -259,7 +261,7 @@ describe('<SearchPage />', () => {
       expect(calledListingsUrl().searchParams.get('maxPrice')).toBe('40')
     })
 
-    it('omits maxPrice when it is 100', async () => {
+    it('omits maxPrice when undefined', async () => {
       mockApiSuccess()
       renderPage()
       await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/v1/public-listings')))
@@ -307,7 +309,7 @@ describe('<SearchPage />', () => {
       expect(screen.queryByRole('group', { name: 'Active filters' })).not.toBeInTheDocument()
     })
 
-    it('shows price chip when maxPrice is below 100', async () => {
+    it('shows price chip when maxPrice is set', async () => {
       mockSearchParams = { ...DEFAULT_PARAMS, maxPrice: 40 }
       mockApiSuccess()
       renderPage()
@@ -324,7 +326,7 @@ describe('<SearchPage />', () => {
       expect(screen.getByRole('button', { name: 'Clear all' })).toBeInTheDocument()
     })
 
-    it('navigates with maxPrice=100 when price chip × is clicked', async () => {
+    it('navigates with maxPrice=undefined when price chip × is clicked', async () => {
       mockSearchParams = { ...DEFAULT_PARAMS, maxPrice: 40 }
       mockApiSuccess()
       renderPage()
@@ -332,12 +334,12 @@ describe('<SearchPage />', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Remove price filter' }))
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ maxPrice: 100 }),
+          search: expect.objectContaining({ maxPrice: undefined }),
         })
       )
     })
 
-    it('navigates with empty tagIds and maxPrice=100 when "Clear all" is clicked', async () => {
+    it('navigates with empty tagIds and maxPrice=undefined when "Clear all" is clicked', async () => {
       mockSearchParams = { ...DEFAULT_PARAMS, maxPrice: 40 }
       mockApiSuccess()
       renderPage()
@@ -345,7 +347,7 @@ describe('<SearchPage />', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Clear all' }))
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ tagIds: [], maxPrice: 100 }),
+          search: expect.objectContaining({ tagIds: [], maxPrice: undefined }),
         })
       )
     })
