@@ -114,7 +114,7 @@ export function RegisterPhoto({
           <img
             src={previewUrl}
             alt="Profile preview"
-            className="h-[100px] w-[100px] rounded-full object-cover border-2 border-border"
+            className="h-25 w-25 rounded-full object-cover border-2 border-border"
           />
         ) : (
           <AvatarIcon
