@@ -1,9 +1,9 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { authFetch } from "../lib/queryClient";
 
 const mockNavigate = vi.fn();
+const mockFetch = vi.fn();
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual =
@@ -21,10 +21,65 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 vi.mock("../stores/auth", () => ({
   useAuthStore: (selector: (s: { user: { userId: string } }) => unknown) =>
     selector({ user: { userId: "user-1" } }),
+  get_access_token: vi.fn().mockResolvedValue("access-token"),
 }));
 
-vi.mock("../lib/queryClient", () => ({
-  authFetch: vi.fn(),
+vi.mock("../api/mira", () => ({
+  getV1UsersUserIdListingsListingId: vi.fn(
+    (userId: string, listingId: string, options?: RequestInit) =>
+      mockFetch(`/v1/users/${userId}/listings/${listingId}`, {
+        ...options,
+        method: "GET",
+      }),
+  ),
+  getV1ServiceTags: vi.fn(() => mockFetch("/v1/service-tags", { method: "GET" })),
+  patchV1ListingsListingId: vi.fn(
+    (listingId: string, data: unknown, options?: RequestInit) =>
+      mockFetch(`/v1/listings/${listingId}`, {
+        ...options,
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
+  ),
+  postV1ListingsListingIdMedia: vi.fn(
+    (listingId: string, data: { files: File[] }, options?: RequestInit) =>
+      mockFetch(`/v1/listings/${listingId}/media`, {
+        ...options,
+        method: "POST",
+        body: data,
+      }),
+  ),
+  postV1ListingsListingIdPublish: vi.fn(
+    (listingId: string, options?: RequestInit) =>
+      mockFetch(`/v1/listings/${listingId}/publish`, {
+        ...options,
+        method: "POST",
+      }),
+  ),
+  postV1ListingsListingIdPause: vi.fn(
+    (listingId: string, options?: RequestInit) =>
+      mockFetch(`/v1/listings/${listingId}/pause`, {
+        ...options,
+        method: "POST",
+      }),
+  ),
+  postV1ListingsListingIdResume: vi.fn(
+    (listingId: string, options?: RequestInit) =>
+      mockFetch(`/v1/listings/${listingId}/resume`, {
+        ...options,
+        method: "POST",
+      }),
+  ),
+  deleteV1ListingsListingId: vi.fn((listingId: string, options?: RequestInit) =>
+    mockFetch(`/v1/listings/${listingId}`, { ...options, method: "DELETE" }),
+  ),
+  deleteV1ListingsListingIdMediaMediaId: vi.fn(
+    (listingId: string, mediaId: string, options?: RequestInit) =>
+      mockFetch(`/v1/listings/${listingId}/media/${mediaId}`, {
+        ...options,
+        method: "DELETE",
+      }),
+  ),
 }));
 
 vi.mock("../components/Navbar", () => ({
@@ -55,8 +110,6 @@ vi.mock("../components/MultiSelect", () => ({
 import { EditListingPage } from "../routes/edit-listing.$listingId";
 import type { MultiSelectProps } from "../components/MultiSelect";
 
-const mockFetch = vi.mocked(authFetch);
-
 type PublicationStatus = "DRAFT" | "ACTIVE" | "PAUSED" | "DELETED";
 
 function makeListing(
@@ -81,21 +134,33 @@ function setupMocks(
   media: unknown[] = [],
   actionOk = true,
 ) {
-  mockFetch.mockImplementation(async (url: RequestInfo, init?: RequestInit) => {
+  mockFetch.mockImplementation(async (url: string, init?: RequestInit) => {
     const method = init?.method?.toUpperCase();
-    if (!method || method === "GET") {
-      if (String(url).includes("/media")) {
-        return { ok: true, json: async () => ({ items: media }) } as Response;
+    if (method === "GET") {
+      if (url === "/v1/service-tags") {
+        return {
+          status: 200,
+          data: {
+            items: [
+              {
+                tagId: "tag-1",
+                name: "IT",
+                isBarrierefrei: false,
+                isActive: true,
+              },
+            ],
+          },
+        };
       }
-      return { ok: true, json: async () => listing } as Response;
+      return { status: 200, data: { ...listing, media } };
     }
     if (actionOk) {
-      return { ok: true, json: async () => ({}) } as Response;
+      return { status: method === "DELETE" ? 204 : 200, data: {} };
     }
     return {
-      ok: false,
-      json: async () => ({ detail: "Action failed." }),
-    } as Response;
+      status: 400,
+      data: { detail: "Action failed." },
+    };
   });
 }
 
@@ -103,19 +168,11 @@ async function waitForLoad() {
   await waitFor(() =>
     expect(screen.queryByRole("status")).not.toBeInTheDocument(),
   );
+  await waitFor(() => expect(screen.getByLabelText(/title/i)).toHaveValue("PC Help"));
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => [
-        { tagId: "tag-1", name: "IT", isBarrierefrei: false, isActive: true },
-      ],
-    }),
-  );
 });
 
 afterEach(() => {
@@ -131,7 +188,7 @@ describe("<EditListingPage />", () => {
   });
 
   it("shows error when listing fetch fails", async () => {
-    mockFetch.mockResolvedValue({ ok: false } as Response);
+    mockFetch.mockResolvedValue({ status: 404, data: {} });
     render(<EditListingPage />);
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent(
