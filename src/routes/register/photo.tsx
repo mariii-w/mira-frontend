@@ -1,125 +1,88 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useRef, type ChangeEvent, type FormEvent } from 'react'
-import { ArrowLeft, ArrowRight, Upload } from 'lucide-react'
-import { Button } from '../../components/Button'
-import { AvatarIcon } from '../../components/AvatarIcon'
-import { useAuthStore } from '../../stores/auth'
-import { uploadProfilePhoto, type UploadPhotoError } from '../../lib/patchUser'
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { getPrivateUserProfile, uploadProfilePicture } from "../../api/mira";
+import type { ProblemDetailsResponse } from "../../api/model";
+import {
+  RegisterPhoto,
+  type RegisterPhotoSubmitError,
+} from "../../components/RegisterPhoto";
+import { get_access_token, useAuthStore } from "../../stores/auth";
 
-export const Route = createFileRoute('/register/photo')({
-  component: RegisterPhoto,
-})
+export const Route = createFileRoute("/register/photo")({
+  component: RegisterPhotoRoute,
+});
 
-const MAX_BYTES = 5 * 1024 * 1024
+async function getAuthOptions(): Promise<RequestInit> {
+  const token = await get_access_token();
+  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+}
 
-function validateFile(file: File): string | null {
-  if (file.size > MAX_BYTES) return 'Image is too large. Max 5 MB.'
-  if (!['image/jpeg', 'image/png'].includes(file.type)) {
-    return 'Unsupported format. Use JPG or PNG.'
+function getDetail(data: ProblemDetailsResponse | unknown): string | undefined {
+  return typeof data === "object" && data !== null && "detail" in data
+    ? String(data.detail)
+    : undefined;
+}
+
+function getUploadError(
+  status: number,
+  detail?: string,
+): RegisterPhotoSubmitError {
+  if (status === 413) {
+    return {
+      field: "file",
+      message: detail ?? "Image is too large. Max 5 MB.",
+    };
   }
-  return null
+  if (status === 415) {
+    return {
+      field: "file",
+      message: detail ?? "Unsupported image format. Use JPG or PNG.",
+    };
+  }
+  if (status === 422) {
+    return {
+      field: "file",
+      message: detail ?? "Image dimensions are too small. Min 200x200 pixels.",
+    };
+  }
+  return {
+    field: "server",
+    message: detail ?? `Upload failed (${status}). Please try again.`,
+  };
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-function RegisterPhoto() {
-  const navigate = useNavigate()
-  const user = useAuthStore((s) => s.user)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+function RegisterPhotoRoute() {
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
 
-  const [file, setFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(user?.profileMedia?.url ?? null)
-  const [error, setError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
+  async function handleContinue(file: File | null) {
+    if (!user) throw new Error("Not logged in.");
 
-  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const picked = e.target.files?.[0]
-    if (!picked) return
-    const validationError = validateFile(picked)
-    if (validationError) {
-      setError(validationError)
-      setFile(null)
-      return
-    }
-    setError(null)
-    setFile(picked)
-    setPreviewUrl(URL.createObjectURL(picked))
-  }
+    if (file) {
+      const authOptions = await getAuthOptions();
+      const response = await uploadProfilePicture(
+        user.userId,
+        { file },
+        authOptions,
+      );
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (submitting) return
-    setSubmitting(true)
-    setError(null)
-
-    try {
-      if (file) {
-        await uploadProfilePhoto(file)
+      if (response.status !== 200) {
+        throw getUploadError(response.status, getDetail(response.data));
       }
-      navigate({ to: '/register/done' })
-    } catch (e) {
-      setError((e as UploadPhotoError).message)
-      setSubmitting(false)
+
+      const refresh = await getPrivateUserProfile(user.userId, authOptions);
+      if (refresh.status === 200) setUser(refresh.data);
     }
+
+    await navigate({ to: "/register/done" });
   }
 
   return (
-    <form className="flex flex-col gap-6" onSubmit={handleSubmit} noValidate>
-      <header className="flex flex-col gap-2">
-        <h2 id="register-step-heading" className="font-heading text-3xl font-bold text-foreground">
-          Add a profile photo
-        </h2>
-        <p className="text-small text-muted">
-          Optional, but profiles with photos get faster responses. You can always add one later.
-        </p>
-      </header>
-
-      <div className="flex items-center gap-6 py-4">
-        {previewUrl ? (
-          <img
-            src={previewUrl}
-            alt="Profile preview"
-            className="h-[100px] w-[100px] rounded-full object-cover border-2 border-border"
-          />
-        ) : (
-          <AvatarIcon
-            firstName={user?.firstName ?? ''}
-            lastName={user?.lastName ?? ''}
-            size={100}
-          />
-        )}
-
-        <div className="flex flex-col gap-1.5">
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            leadingIcon={<Upload />}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Choose photo
-          </Button>
-          <input
-            ref={fileInputRef}
-            id="profile-photo-input"
-            type="file"
-            accept="image/jpeg,image/png"
-            className="sr-only"
-            onChange={handleFileChange}
-          />
-          <p className="text-small text-muted">JPG or PNG, max 5 MB.</p>
-        </div>
-      </div>
-
-      {error && (
-        <p role="alert" className="text-small text-red-600">{error}</p>
-      )}
-
-      <div className="flex items-center justify-between pt-4 border-t border-border/30 mt-2">
-        <Button type="button" variant="ghost" size="md" leadingIcon={<ArrowLeft />} onClick={() => navigate({ to: '/register/about' })}>Back</Button>
-        <Button type="submit" variant="primary" size="md" loading={submitting} trailingIcon={<ArrowRight />}>
-          Finish
-        </Button>
-      </div>
-    </form>
-  )
+    <RegisterPhoto
+      initialValues={user}
+      onBack={() => navigate({ to: "/register/about" })}
+      onContinue={handleContinue}
+    />
+  );
 }
