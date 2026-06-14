@@ -1,4 +1,9 @@
 import { create } from "zustand";
+import {
+  getPrivateUserProfile,
+  postAuthLogout,
+  postAuthRefresh,
+} from "../api/mira";
 import type { PrivateUserProfileResponse } from "../api/model";
 
 export type User = PrivateUserProfileResponse;
@@ -40,8 +45,6 @@ export function decodeJwtPayload<T = unknown>(token: string): T | null {
   }
 }
 
-const API_BASE = "";
-
 interface JwtClaims {
   sub: string;
   user_id: string;
@@ -72,17 +75,16 @@ export async function get_access_token(
   if (!forceRefresh && isAccessTokenUsable(cachedToken)) return cachedToken;
 
   if (!accessTokenRequest) {
-    accessTokenRequest = fetch(`${API_BASE}/v1/auth/refresh`, {
-      method: "POST",
+    accessTokenRequest = postAuthRefresh({
       credentials: "include",
     })
-      .then(async (refreshRes) => {
-        if (!refreshRes.ok) {
+      .then((refreshRes) => {
+        if (refreshRes.status !== 200) {
           useAuthStore.getState().clear();
           return null;
         }
 
-        const { accessToken } = await refreshRes.json();
+        const { accessToken } = refreshRes.data;
         const claims = decodeJwtPayload<JwtClaims>(accessToken);
         if (!claims?.sub || !claims.user_id) {
           useAuthStore.getState().clear();
@@ -119,15 +121,14 @@ export async function exchangeRefreshForAccess(): Promise<boolean> {
     permissions: claims.scp ?? [],
   });
 
-  const userRes = await fetch(`${API_BASE}/v1/users/${claims.user_id}`, {
+  const userRes = await getPrivateUserProfile(claims.user_id, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-  if (!userRes.ok) {
+  if (userRes.status !== 200) {
     useAuthStore.getState().clear();
     return false;
   }
-  const user = (await userRes.json()) as User;
-  useAuthStore.getState().setUser(user);
+  useAuthStore.getState().setUser(userRes.data);
 
   return true;
 }
@@ -135,8 +136,7 @@ export async function exchangeRefreshForAccess(): Promise<boolean> {
 export async function logout(): Promise<void> {
   const token = useAuthStore.getState().accessToken;
   try {
-    await fetch(`${API_BASE}/v1/auth/logout`, {
-      method: "POST",
+    await postAuthLogout({
       credentials: "include",
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
