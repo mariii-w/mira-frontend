@@ -1,6 +1,5 @@
 import { Link } from '@tanstack/react-router'
 import { Badge } from "./Badge"
-import { Button } from "./Button"
 import { MapPin, Dot, ArrowRight } from 'lucide-react'
 
 export interface ServiceCardTag {
@@ -46,7 +45,7 @@ export function ServiceCard(
                 )}
                 <div className='grid gap-2 flex-1 min-w-0'>
                     <div className="flex gap-8">
-                        <label className='text-h2'>{label}</label>
+                        <h2 className='text-h2'>{label}</h2>
 
                         <div className='flex gap-2 ml-auto shrink-0'>
                             <p className='ml-auto text-primary font-bold'>{hourRate}€</p>
@@ -78,7 +77,13 @@ export function ServiceCard(
                             <Badge key={tag.tagId} text={tag.name} variant={tag.isBarrierefrei ? 'accent' : 'primary'} />
                         ))}
                         <div className='ml-auto shrink-0 flex items-center gap-3'>
-                            <Button variant="primary" trailingIcon={<ArrowRight />}><Link to={link} className='text-white decoration-0'>View service</Link></Button>
+                            <Link
+                                to={link}
+                                className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-hover [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                            >
+                                View service
+                                <ArrowRight aria-hidden="true" />
+                            </Link>
                         </div>
                     </div>
 
