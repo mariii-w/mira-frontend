@@ -33,6 +33,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
     <div className="relative w-full">
       <input
         ref={ref}
+        aria-label="Search"
         className={cn(
           'w-full h-15 px-4 text-body text-foreground',
           'bg-white border border-border rounded-4xl',
