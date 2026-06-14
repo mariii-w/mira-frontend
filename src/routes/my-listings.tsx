@@ -54,7 +54,6 @@ function getStatusCounts(listings: MyListingSummary[]) {
   return counts;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function MyListingsRoute() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
