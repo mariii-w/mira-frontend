@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
-import { BrowseServicesPage } from '../routes/search/browse-services'
+import { BrowseServicesPage } from '../routes/_search/browse-services'
 
 // ─── Search params state ───────────────────────────────────────────────────────
 

@@ -70,7 +70,7 @@ type SearchParams = z.infer<typeof searchSchema>
 
 // Route
 
-export const Route = createFileRoute('/search/browse-services')({
+export const Route = createFileRoute('/_search/browse-services')({
   validateSearch: searchSchema,
   component: BrowseServicesPage,
 })
@@ -108,7 +108,7 @@ async function fetchServiceTags(): Promise<ServiceTag[]> {
 // Search Page
 export function BrowseServicesPage() {
   const search = Route.useSearch()
-  const navigate = useNavigate({ from: '/search/browse-services' })
+  const navigate = useNavigate({ from: '/browse-services' })
   const navigateToRoute = useNavigate()
   const easyRead = useAccessibilityStore(state => state.easyRead)
 
@@ -209,8 +209,8 @@ export function BrowseServicesPage() {
   // Breadcrumb
   const breadcrumbLinks = [
     { name: 'Home', href: '/' },
-    { name: 'Services', href: '/search/browse-services' },
-    ...(search.q ? [{ name: search.q, href: `/search/browse-services?q=${encodeURIComponent(search.q)}` }] : []),
+    { name: 'Services', href: '/browse-services' },
+    ...(search.q ? [{ name: search.q, href: `/browse-services?q=${encodeURIComponent(search.q)}` }] : []),
   ]
 
   // Subtitle line
@@ -235,7 +235,7 @@ export function BrowseServicesPage() {
                 iconLeft={<Wrench />}
                 iconRight={<Users />}
                 checked={false}
-                onCheckedChange={(checked) => { if (checked) navigateToRoute({ to: '/search/browse-users', search: { q: search.q, from: undefined } }) }}
+                onCheckedChange={(checked) => { if (checked) navigateToRoute({ to: '/browse-users', search: { q: search.q, from: undefined } }) }}
               />
             </div>
             <SearchBar

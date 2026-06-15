@@ -42,7 +42,7 @@ type BrowseUsersParams = z.infer<typeof browseUsersSchema>
 
 // Route
 
-export const Route = createFileRoute('/search/browse-users')({
+export const Route = createFileRoute('/_search/browse-users')({
   validateSearch: browseUsersSchema,
   component: BrowseUsersPage,
 })
@@ -67,7 +67,7 @@ async function fetchPublicProfiles(params: BrowseUsersParams): Promise<PublicPro
 
 export function BrowseUsersPage() {
   const search = Route.useSearch()
-  const navigate = useNavigate({ from: '/search/browse-users' })
+  const navigate = useNavigate({ from: '/browse-users' })
   const navigateToRoute = useNavigate()
   const easyRead = useAccessibilityStore(state => state.easyRead)
 
@@ -104,8 +104,8 @@ export function BrowseUsersPage() {
 
   const breadcrumbLinks = [
     { name: 'Home', href: '/' },
-    { name: 'Users', href: '/search/browse-users' },
-    ...(search.q ? [{ name: search.q, href: `/search/browse-users?q=${encodeURIComponent(search.q)}` }] : []),
+    { name: 'Users', href: '/browse-users' },
+    ...(search.q ? [{ name: search.q, href: `/browse-users?q=${encodeURIComponent(search.q)}` }] : []),
   ]
 
   return (
@@ -124,7 +124,7 @@ export function BrowseUsersPage() {
                 iconLeft={<Wrench />}
                 iconRight={<Users />}
                 checked={true}
-                onCheckedChange={(checked) => { if (!checked) navigateToRoute({ to: '/search/browse-services', search: { q: search.q, city: '', tagIds: [], from: undefined } }) }}
+                onCheckedChange={(checked) => { if (!checked) navigateToRoute({ to: '/browse-services', search: { q: search.q, city: '', tagIds: [], from: undefined } }) }}
               />
             </div>
             <SearchBar

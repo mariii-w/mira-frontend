@@ -16,8 +16,6 @@ import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as RegisterRouteRouteImport } from './routes/register/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegisterIndexRouteImport } from './routes/register/index'
-import { Route as SearchBrowseUsersRouteImport } from './routes/search/browse-users'
-import { Route as SearchBrowseServicesRouteImport } from './routes/search/browse-services'
 import { Route as RegisterRoleRouteImport } from './routes/register/role'
 import { Route as RegisterPhotoRouteImport } from './routes/register/photo'
 import { Route as RegisterNameRouteImport } from './routes/register/name'
@@ -25,6 +23,8 @@ import { Route as RegisterDoneRouteImport } from './routes/register/done'
 import { Route as RegisterAddressRouteImport } from './routes/register/address'
 import { Route as RegisterAboutRouteImport } from './routes/register/about'
 import { Route as EditListingListingIdRouteImport } from './routes/edit-listing.$listingId'
+import { Route as SearchBrowseUsersRouteImport } from './routes/_search/browse-users'
+import { Route as SearchBrowseServicesRouteImport } from './routes/_search/browse-services'
 
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
@@ -61,16 +61,6 @@ const RegisterIndexRoute = RegisterIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RegisterRouteRoute,
 } as any)
-const SearchBrowseUsersRoute = SearchBrowseUsersRouteImport.update({
-  id: '/search/browse-users',
-  path: '/search/browse-users',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchBrowseServicesRoute = SearchBrowseServicesRouteImport.update({
-  id: '/search/browse-services',
-  path: '/search/browse-services',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RegisterRoleRoute = RegisterRoleRouteImport.update({
   id: '/role',
   path: '/role',
@@ -106,6 +96,16 @@ const EditListingListingIdRoute = EditListingListingIdRouteImport.update({
   path: '/edit-listing/$listingId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchBrowseUsersRoute = SearchBrowseUsersRouteImport.update({
+  id: '/_search/browse-users',
+  path: '/browse-users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchBrowseServicesRoute = SearchBrowseServicesRouteImport.update({
+  id: '/_search/browse-services',
+  path: '/browse-services',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -114,6 +114,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/my-listings': typeof MyListingsRoute
   '/styleguide': typeof StyleguideRoute
+  '/browse-services': typeof SearchBrowseServicesRoute
+  '/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
@@ -121,8 +123,6 @@ export interface FileRoutesByFullPath {
   '/register/name': typeof RegisterNameRoute
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
-  '/search/browse-services': typeof SearchBrowseServicesRoute
-  '/search/browse-users': typeof SearchBrowseUsersRoute
   '/register/': typeof RegisterIndexRoute
 }
 export interface FileRoutesByTo {
@@ -131,6 +131,8 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/my-listings': typeof MyListingsRoute
   '/styleguide': typeof StyleguideRoute
+  '/browse-services': typeof SearchBrowseServicesRoute
+  '/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
@@ -138,8 +140,6 @@ export interface FileRoutesByTo {
   '/register/name': typeof RegisterNameRoute
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
-  '/search/browse-services': typeof SearchBrowseServicesRoute
-  '/search/browse-users': typeof SearchBrowseUsersRoute
   '/register': typeof RegisterIndexRoute
 }
 export interface FileRoutesById {
@@ -150,6 +150,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/my-listings': typeof MyListingsRoute
   '/styleguide': typeof StyleguideRoute
+  '/_search/browse-services': typeof SearchBrowseServicesRoute
+  '/_search/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
@@ -157,8 +159,6 @@ export interface FileRoutesById {
   '/register/name': typeof RegisterNameRoute
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
-  '/search/browse-services': typeof SearchBrowseServicesRoute
-  '/search/browse-users': typeof SearchBrowseUsersRoute
   '/register/': typeof RegisterIndexRoute
 }
 export interface FileRouteTypes {
@@ -170,6 +170,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/my-listings'
     | '/styleguide'
+    | '/browse-services'
+    | '/browse-users'
     | '/edit-listing/$listingId'
     | '/register/about'
     | '/register/address'
@@ -177,8 +179,6 @@ export interface FileRouteTypes {
     | '/register/name'
     | '/register/photo'
     | '/register/role'
-    | '/search/browse-services'
-    | '/search/browse-users'
     | '/register/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,6 +187,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/my-listings'
     | '/styleguide'
+    | '/browse-services'
+    | '/browse-users'
     | '/edit-listing/$listingId'
     | '/register/about'
     | '/register/address'
@@ -194,8 +196,6 @@ export interface FileRouteTypes {
     | '/register/name'
     | '/register/photo'
     | '/register/role'
-    | '/search/browse-services'
-    | '/search/browse-users'
     | '/register'
   id:
     | '__root__'
@@ -205,6 +205,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/my-listings'
     | '/styleguide'
+    | '/_search/browse-services'
+    | '/_search/browse-users'
     | '/edit-listing/$listingId'
     | '/register/about'
     | '/register/address'
@@ -212,8 +214,6 @@ export interface FileRouteTypes {
     | '/register/name'
     | '/register/photo'
     | '/register/role'
-    | '/search/browse-services'
-    | '/search/browse-users'
     | '/register/'
   fileRoutesById: FileRoutesById
 }
@@ -224,9 +224,9 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MyListingsRoute: typeof MyListingsRoute
   StyleguideRoute: typeof StyleguideRoute
-  EditListingListingIdRoute: typeof EditListingListingIdRoute
   SearchBrowseServicesRoute: typeof SearchBrowseServicesRoute
   SearchBrowseUsersRoute: typeof SearchBrowseUsersRoute
+  EditListingListingIdRoute: typeof EditListingListingIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -280,20 +280,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterIndexRouteImport
       parentRoute: typeof RegisterRouteRoute
     }
-    '/search/browse-users': {
-      id: '/search/browse-users'
-      path: '/search/browse-users'
-      fullPath: '/search/browse-users'
-      preLoaderRoute: typeof SearchBrowseUsersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/search/browse-services': {
-      id: '/search/browse-services'
-      path: '/search/browse-services'
-      fullPath: '/search/browse-services'
-      preLoaderRoute: typeof SearchBrowseServicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/register/role': {
       id: '/register/role'
       path: '/role'
@@ -343,6 +329,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditListingListingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_search/browse-users': {
+      id: '/_search/browse-users'
+      path: '/browse-users'
+      fullPath: '/browse-users'
+      preLoaderRoute: typeof SearchBrowseUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_search/browse-services': {
+      id: '/_search/browse-services'
+      path: '/browse-services'
+      fullPath: '/browse-services'
+      preLoaderRoute: typeof SearchBrowseServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -377,9 +377,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MyListingsRoute: MyListingsRoute,
   StyleguideRoute: StyleguideRoute,
-  EditListingListingIdRoute: EditListingListingIdRoute,
   SearchBrowseServicesRoute: SearchBrowseServicesRoute,
   SearchBrowseUsersRoute: SearchBrowseUsersRoute,
+  EditListingListingIdRoute: EditListingListingIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
