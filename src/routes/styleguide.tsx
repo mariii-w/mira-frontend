@@ -27,7 +27,7 @@ import { Badge } from '../components/Badge.tsx';
 import { Breadcrumb } from '../components/BreadCrumb.tsx';
 import { FilterBar } from '../components/FilterBar.tsx';
 import { ServiceCard } from '../components/ServiceCard.tsx';
-import { ServiceProviderToggle } from '../components/ServiceProviderToggle.tsx';
+import { ServiceUserToggle } from '../components/ServiceUserToggle.tsx';
 
 
 
@@ -384,14 +384,14 @@ function Styleguide() {
       </div>
     </section>
 
-      <h2>Service Provider Toggle</h2>
+      <h2>Service User Toggle</h2>
     <section>
       <div className='w-96 bg-charcoal p-6 rounded-lg'>
-        <ServiceProviderToggle
+        <ServiceUserToggle
             id="service-toggle"
-            labelLeft="Service"
-            labelRight="Provider" 
-            checked={checked} 
+            labelLeft="Services"
+            labelRight="Users"
+            checked={checked}
             onCheckedChange={setChecked}
         />
       </div>

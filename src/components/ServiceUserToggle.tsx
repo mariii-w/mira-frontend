@@ -1,7 +1,7 @@
 import * as Switch from "@radix-ui/react-switch";
 import { useRef, useEffect, useState, type ReactNode } from "react";
 
-interface ServiceProviderToggleProps {
+interface ServiceUserToggleProps {
   id: string;
   labelLeft: string;
   labelRight: string;
@@ -11,7 +11,7 @@ interface ServiceProviderToggleProps {
   onCheckedChange: (checked: boolean) => void;
 }
 
-export function ServiceProviderToggle({
+export function ServiceUserToggle({
   id,
   labelLeft,
   labelRight,
@@ -19,7 +19,7 @@ export function ServiceProviderToggle({
   iconRight,
   checked,
   onCheckedChange,
-}: ServiceProviderToggleProps) {
+}: ServiceUserToggleProps) {
   const leftRef = useRef<HTMLSpanElement>(null);
   const rightRef = useRef<HTMLSpanElement>(null);
   const [thumbStyle, setThumbStyle] = useState<React.CSSProperties>({});

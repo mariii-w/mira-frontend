@@ -7,7 +7,7 @@ import { Navbar } from '../components/Navbar'
 import { SearchBar } from '../components/SearchBar'
 import { FilterBar, type ServiceTagOption } from '../components/FilterBar'
 import { ServiceCard } from '../components/ServiceCard'
-import { ServiceProviderToggle } from '../components/ServiceProviderToggle'
+import { ServiceUserToggle } from '../components/ServiceUserToggle'
 import { Breadcrumb } from '../components/BreadCrumb'
 import { Pagination } from '../components/Pagination'
 import { FilterDrawer } from '../components/FilterDrawer'
@@ -110,6 +110,8 @@ export function SearchPage() {
   const search = Route.useSearch()
   const navigate = useNavigate({ from: '/search' })
   const easyRead = useAccessibilityStore(state => state.easyRead)
+
+  const [showUsers, setShowUsers] = useState(false)
 
   // Pending filter state — committed to URL on "Apply" / "Search"
   const [pendingQuery, setPendingQuery] = useState(search.q)
@@ -227,14 +229,14 @@ export function SearchPage() {
         <div className="bg-background px-6 py-3">
           <div className="mx-auto max-w-6xl flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-20">
             <div className="flex justify-center lg:block lg:shrink-0 lg:w-64">
-              <ServiceProviderToggle
+              <ServiceUserToggle
                 id="search-toggle"
                 labelLeft="Services"
-                labelRight="Providers"
+                labelRight="Users"
                 iconLeft={<Wrench />}
                 iconRight={<Users />}
-                checked={false}
-                onCheckedChange={() => {}}
+                checked={showUsers}
+                onCheckedChange={setShowUsers}
               />
             </div>
             <SearchBar
