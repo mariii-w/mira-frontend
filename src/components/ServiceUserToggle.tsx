@@ -1,5 +1,5 @@
 import * as Switch from "@radix-ui/react-switch";
-import { useRef, useEffect, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 interface ServiceUserToggleProps {
   id: string;
@@ -20,48 +20,65 @@ export function ServiceUserToggle({
   checked,
   onCheckedChange,
 }: ServiceUserToggleProps) {
-  const leftRef = useRef<HTMLSpanElement>(null);
-  const rightRef = useRef<HTMLSpanElement>(null);
-  const [thumbStyle, setThumbStyle] = useState<React.CSSProperties>({});
-
+  // "Services" and "Users" live on separate routes, so this component is freshly
+  // mounted on every switch and never sees `checked` change on a live node — a
+  // CSS transition would have nothing to animate. Instead we play an entry slide:
+  // first paint renders the pill at the *previous* tab's position, then we move
+  // it to the active one. The double rAF guarantees the start frame is painted
+  // before the change, so the transition actually fires. Under reduced motion the
+  // global `transition-duration: 0.01ms` rule makes this an instant snap.
+  const [settled, setSettled] = useState(false);
   useEffect(() => {
-    const el = checked ? rightRef.current : leftRef.current;
-    if (!el) return;
-    setThumbStyle({ left: el.offsetLeft, width: el.offsetWidth });
-  }, [checked, labelLeft, labelRight]);
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setSettled(true));
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, []);
+
+  // Before settling, sit on the opposite side so the pill slides into place.
+  const showRight = settled ? checked : !checked;
 
   return (
     <Switch.Root
       id={id}
       checked={checked}
       onCheckedChange={onCheckedChange}
-      className="relative inline-flex h-10 w-fit items-center rounded-full bg-linen px-1 cursor-pointer"
+      className="relative inline-grid grid-cols-2 h-10 rounded-full bg-linen p-1 cursor-pointer"
     >
-      {/* Sliding thumb */}
-      <Switch.Thumb
-        style={thumbStyle}
-        className="absolute top-1 h-8 rounded-full bg-primary transition-all duration-150"
+      {/* Sliding pill */}
+      <span
+        aria-hidden
+        data-testid="toggle-pill"
+        className={`toggle-pill-transition pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full ${
+          showRight ? "translate-x-full bg-accent" : "translate-x-0 bg-primary"
+        }`}
       />
 
-      {/* Left label */}
+      {/* Services label */}
       <span
-        ref={leftRef}
-        className={`relative z-10 inline-flex items-center gap-1.5 px-4 py-1 text-small font-medium select-none transition-colors duration-150 whitespace-nowrap ${
-          !checked ? "text-surface" : "text-charcoal"
+        className={`relative z-10 inline-flex items-center justify-center gap-1.5 px-3 py-1 text-small font-medium select-none whitespace-nowrap transition-colors duration-300 ${
+          showRight ? "text-charcoal" : "text-surface"
         }`}
       >
-        {iconLeft && <span className="shrink-0 [&>svg]:w-4 [&>svg]:h-4">{iconLeft}</span>}
+        {iconLeft && (
+          <span className="shrink-0 [&>svg]:w-4 [&>svg]:h-4">{iconLeft}</span>
+        )}
         {labelLeft}
       </span>
 
-      {/* Right label */}
+      {/* Users label */}
       <span
-        ref={rightRef}
-        className={`relative z-10 inline-flex items-center gap-1.5 px-4 py-1 text-small font-medium select-none transition-colors duration-150 whitespace-nowrap ${
-          checked ? "text-surface" : "text-charcoal"
+        className={`relative z-10 inline-flex items-center justify-center gap-1.5 px-3 py-1 text-small font-medium select-none whitespace-nowrap transition-colors duration-300 ${
+          showRight ? "text-accent-foreground" : "text-charcoal"
         }`}
       >
-        {iconRight && <span className="shrink-0 [&>svg]:w-4 [&>svg]:h-4">{iconRight}</span>}
+        {iconRight && (
+          <span className="shrink-0 [&>svg]:w-4 [&>svg]:h-4">{iconRight}</span>
+        )}
         {labelRight}
       </span>
     </Switch.Root>

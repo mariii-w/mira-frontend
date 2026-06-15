@@ -11,9 +11,9 @@ import { UserMenu } from './UserMenu'
 import { useAuthStore } from '../stores/auth'
 
 const NAV_LINKS = [
-  { label: 'Browse Services', to: '/browse-services' },
-  { label: 'Find providers',  to: '/' },
-] as const
+  { label: 'Browse Services', to: '/browse-services' as const },
+  { label: 'Find Users',      to: '/browse-users' as const },
+]
 
 export function Navbar() {
   const user = useAuthStore((s) => s.user)
@@ -44,8 +44,10 @@ export function Navbar() {
             <li key={label}>
               <Link
                 to={to}
-                className="text-cream/80 text-small font-medium no-underline hover:text-cream transition-colors duration-150"
-                activeProps={{ className: 'text-cream font-bold no-underline' }}
+                search={{} as never}
+                className="text-small font-medium no-underline transition-colors duration-150"
+                activeProps={{ className: 'text-cream font-bold' }}
+                inactiveProps={{ className: 'text-cream/80 hover:text-cream' }}
               >
                 {label}
               </Link>
