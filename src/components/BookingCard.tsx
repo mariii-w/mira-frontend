@@ -263,10 +263,8 @@ export function BookingCard({
       className={`bg-surface rounded-2xl border shadow-sm overflow-hidden ${CARD_BORDER[booking.status]}`}
     >
       <div className="flex items-start gap-4 p-4 sm:p-5">
-        <div
-          aria-label={`${month} ${day} at ${time}`}
-          className="flex flex-col items-center justify-center min-w-[3rem] text-center select-none self-center"
-        >
+        <div className="flex flex-col items-center justify-center min-w-[3rem] text-center select-none self-center">
+          <span className="sr-only">{`${month} ${day} at ${time}`}</span>
           <span
             aria-hidden="true"
             className="text-xs font-semibold text-muted uppercase tracking-wide leading-none"
@@ -288,12 +286,12 @@ export function BookingCard({
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3
+          <h2
             id={headingId}
             className="font-heading text-body font-semibold text-foreground truncate"
           >
             {booking.listing.title}
-          </h3>
+          </h2>
           <p className="text-small text-muted mt-0.5">
             {booking.counterparty.name} {booking.counterparty.surname}
           </p>

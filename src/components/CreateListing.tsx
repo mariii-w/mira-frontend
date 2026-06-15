@@ -1,79 +1,79 @@
-import { useState, useRef, type FormEvent, type ChangeEvent } from 'react'
-import { Plus, X, ArrowLeft } from 'lucide-react'
-import { Navbar } from './Navbar'
-import { Button } from './Button'
-import { Input } from './Input'
-import { Label } from './Label'
-import { Textarea } from './Textarea'
-import { Slider } from './Slider'
-import { MultiSelect } from './MultiSelect'
+import { useState, useRef, type FormEvent, type ChangeEvent } from "react";
+import { Plus, X, ArrowLeft } from "lucide-react";
+import { Navbar } from "./Navbar";
+import { Button } from "./Button";
+import { Input } from "./Input";
+import { Label } from "./Label";
+import { Textarea } from "./Textarea";
+import { Slider } from "./Slider";
+import { MultiSelect } from "./MultiSelect";
 
 export interface ServiceTag {
-  tagId: string
-  name: string
-  isBarrierefrei: boolean
-  isActive: boolean
+  tagId: string;
+  name: string;
+  isBarrierefrei: boolean;
+  isActive: boolean;
 }
 
 export interface CreateListingFormValues {
-  title: string
-  description: string
-  price: number
-  tagIds: string[]
+  title: string;
+  description: string;
+  price: number;
+  tagIds: string[];
   location: {
-    street: string
-    houseNumber: string
-    postalCode: string
-    city: string
-    serviceRadiusKm: number
-  }
-  imageFiles: File[]
+    street: string;
+    houseNumber: string;
+    postalCode: string;
+    city: string;
+    serviceRadiusKm: number;
+  };
+  imageFiles: File[];
 }
 
 interface CreateListingProps {
-  availableTags: ServiceTag[]
-  tagsLoading: boolean
-  onBack: () => void
-  onSubmit: (values: CreateListingFormValues) => Promise<void>
+  availableTags: ServiceTag[];
+  tagsLoading: boolean;
+  onBack: () => void;
+  onSubmit: (values: CreateListingFormValues) => Promise<void>;
 }
 
 function validateTitle(v: string) {
-  if (!v.trim()) return 'Required.'
-  if (v.trim().length < 3) return 'At least 3 characters.'
-  if (v.length > 120) return 'Maximum 120 characters.'
-  return null
+  if (!v.trim()) return "Required.";
+  if (v.trim().length < 3) return "At least 3 characters.";
+  if (v.length > 120) return "Maximum 120 characters.";
+  return null;
 }
 function validateDescription(v: string) {
-  if (!v.trim()) return 'Required.'
-  if (v.trim().length < 10) return 'At least 10 characters.'
-  if (v.length > 2000) return 'Maximum 2000 characters.'
-  return null
+  if (!v.trim()) return "Required.";
+  if (v.trim().length < 10) return "At least 10 characters.";
+  if (v.length > 2000) return "Maximum 2000 characters.";
+  return null;
 }
 function validatePrice(v: string) {
-  if (!v.trim()) return 'Required.'
-  const n = Number(v)
-  if (isNaN(n) || n < 0) return 'Must be a positive number.'
-  return null
+  if (!v.trim()) return "Required.";
+  const n = Number(v);
+  if (isNaN(n) || n < 0) return "Must be a positive number.";
+  return null;
 }
 function validateStreet(v: string) {
-  if (!v.trim()) return 'Required.'
-  if (v.length > 120) return 'Maximum 120 characters.'
-  return null
+  if (!v.trim()) return "Required.";
+  if (v.length > 120) return "Maximum 120 characters.";
+  return null;
 }
 function validateHouseNumber(v: string) {
-  if (!v.trim()) return 'Required.'
-  if (v.length > 20) return 'Maximum 20 characters.'
-  return null
+  if (!v.trim()) return "Required.";
+  if (v.length > 20) return "Maximum 20 characters.";
+  return null;
 }
 function validatePostalCode(v: string) {
-  if (!v) return 'Required.'
-  if (!/^\d{5}$/.test(v)) return 'Must be exactly 5 digits.'
-  return null
+  if (!v) return "Required.";
+  if (!/^\d{5}$/.test(v)) return "Must be exactly 5 digits.";
+  return null;
 }
 function validateCity(v: string) {
-  if (!v.trim()) return 'Required.'
-  if (v.length > 120) return 'Maximum 120 characters.'
-  return null
+  if (!v.trim()) return "Required.";
+  if (v.length > 120) return "Maximum 120 characters.";
+  return null;
 }
 
 export function CreateListing({
@@ -82,72 +82,78 @@ export function CreateListing({
   onBack,
   onSubmit,
 }: CreateListingProps) {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [price, setPrice] = useState('')
-  const [street, setStreet] = useState('')
-  const [houseNumber, setHouseNumber] = useState('')
-  const [postalCode, setPostalCode] = useState('')
-  const [city, setCity] = useState('')
-  const [radiusKm, setRadiusKm] = useState(20)
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
-  const [imageFiles, setImageFiles] = useState<File[]>([])
-  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [street, setStreet] = useState("");
+  const [houseNumber, setHouseNumber] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [city, setCity] = useState("");
+  const [radiusKm, setRadiusKm] = useState(20);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
-  const [titleError, setTitleError] = useState<string | null>(null)
-  const [descriptionError, setDescriptionError] = useState<string | null>(null)
-  const [priceError, setPriceError] = useState<string | null>(null)
-  const [streetError, setStreetError] = useState<string | null>(null)
-  const [houseNumberError, setHouseNumberError] = useState<string | null>(null)
-  const [postalCodeError, setPostalCodeError] = useState<string | null>(null)
-  const [cityError, setCityError] = useState<string | null>(null)
-  const [tagError, setTagError] = useState<string | null>(null)
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
+  const [priceError, setPriceError] = useState<string | null>(null);
+  const [streetError, setStreetError] = useState<string | null>(null);
+  const [houseNumberError, setHouseNumberError] = useState<string | null>(null);
+  const [postalCodeError, setPostalCodeError] = useState<string | null>(null);
+  const [cityError, setCityError] = useState<string | null>(null);
+  const [tagError, setTagError] = useState<string | null>(null);
 
-  const [submitting, setSubmitting] = useState(false)
-  const [serverError, setServerError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const picked = Array.from(e.target.files ?? []).slice(0, 10 - imageFiles.length)
-    setImageFiles((prev) => [...prev, ...picked])
-    setImagePreviews((prev) => [...prev, ...picked.map((f) => URL.createObjectURL(f))])
-    e.target.value = ''
+    const picked = Array.from(e.target.files ?? []).slice(
+      0,
+      10 - imageFiles.length,
+    );
+    setImageFiles((prev) => [...prev, ...picked]);
+    setImagePreviews((prev) => [
+      ...prev,
+      ...picked.map((f) => URL.createObjectURL(f)),
+    ]);
+    e.target.value = "";
   }
 
   function removeImage(idx: number) {
-    URL.revokeObjectURL(imagePreviews[idx])
-    setImageFiles((prev) => prev.filter((_, i) => i !== idx))
-    setImagePreviews((prev) => prev.filter((_, i) => i !== idx))
+    URL.revokeObjectURL(imagePreviews[idx]);
+    setImageFiles((prev) => prev.filter((_, i) => i !== idx));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== idx));
   }
 
-
   async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    if (submitting) return
+    e.preventDefault();
+    if (submitting) return;
 
-    const tErr = validateTitle(title)
-    const dErr = validateDescription(description)
-    const pErr = validatePrice(price)
-    const sErr = validateStreet(street)
-    const hErr = validateHouseNumber(houseNumber)
-    const pcErr = validatePostalCode(postalCode)
-    const cErr = validateCity(city)
-    const tagErr = selectedTagIds.length === 0 ? 'Select at least one tag.' : null
+    const tErr = validateTitle(title);
+    const dErr = validateDescription(description);
+    const pErr = validatePrice(price);
+    const sErr = validateStreet(street);
+    const hErr = validateHouseNumber(houseNumber);
+    const pcErr = validatePostalCode(postalCode);
+    const cErr = validateCity(city);
+    const tagErr =
+      selectedTagIds.length === 0 ? "Select at least one tag." : null;
 
-    setTitleError(tErr)
-    setDescriptionError(dErr)
-    setPriceError(pErr)
-    setStreetError(sErr)
-    setHouseNumberError(hErr)
-    setPostalCodeError(pcErr)
-    setCityError(cErr)
-    setTagError(tagErr)
+    setTitleError(tErr);
+    setDescriptionError(dErr);
+    setPriceError(pErr);
+    setStreetError(sErr);
+    setHouseNumberError(hErr);
+    setPostalCodeError(pcErr);
+    setCityError(cErr);
+    setTagError(tagErr);
 
-    if (tErr || dErr || pErr || sErr || hErr || pcErr || cErr || tagErr) return
+    if (tErr || dErr || pErr || sErr || hErr || pcErr || cErr || tagErr) return;
 
-    setSubmitting(true)
-    setServerError(null)
+    setSubmitting(true);
+    setServerError(null);
 
     try {
       await onSubmit({
@@ -163,17 +169,20 @@ export function CreateListing({
           serviceRadiusKm: radiusKm,
         },
         imageFiles,
-      })
+      });
     } catch (err) {
-      setServerError((err as Error).message)
-      setSubmitting(false)
+      setServerError((err as Error).message);
+      setSubmitting(false);
     }
   }
 
   return (
     <>
       <Navbar />
-      <main id="main-content" className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8">
+      <main
+        id="main-content"
+        className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
+      >
         <form
           onSubmit={handleSubmit}
           noValidate
@@ -190,7 +199,9 @@ export function CreateListing({
               >
                 <ArrowLeft size={20} aria-hidden="true" />
               </button>
-              <h1 className="font-heading text-h1 font-bold text-foreground">New Service</h1>
+              <h1 className="font-heading text-h1 font-bold text-foreground">
+                New Service
+              </h1>
             </div>
             <div className="flex items-center gap-3">
               {submitting && (
@@ -202,19 +213,28 @@ export function CreateListing({
               <Button type="button" variant="secondary" size="md">
                 Preview
               </Button>
-              <Button type="submit" variant="primary" size="md" loading={submitting}>
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                loading={submitting}
+              >
                 Save
               </Button>
             </div>
           </div>
 
           {serverError && (
-            <p role="alert" className="text-small text-red-600">{serverError}</p>
+            <p role="alert" className="text-small text-red-600">
+              {serverError}
+            </p>
           )}
 
           {/* Title */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="listing-title" required>Title</Label>
+            <Label htmlFor="listing-title" required>
+              Title
+            </Label>
             <Input
               id="listing-title"
               value={title}
@@ -228,12 +248,16 @@ export function CreateListing({
 
           {/* Description */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="listing-description" required>Description</Label>
+            <Label htmlFor="listing-description" required>
+              Description
+            </Label>
             <Textarea
               id="listing-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              onBlur={() => setDescriptionError(validateDescription(description))}
+              onBlur={() =>
+                setDescriptionError(validateDescription(description))
+              }
               maxLength={2000}
               rows={6}
               placeholder="Describe what you offer, your experience and availability…"
@@ -243,7 +267,9 @@ export function CreateListing({
 
           {/* Hourly rate */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="listing-price" required>Hourly rate (€)</Label>
+            <Label htmlFor="listing-price" required>
+              Hourly rate (€)
+            </Label>
             <Input
               id="listing-price"
               type="number"
@@ -266,24 +292,34 @@ export function CreateListing({
                 {imageFiles.length}/10
               </span>
             </div>
-            <div className="flex flex-wrap gap-3" role="list" aria-label="Uploaded images">
-              {imagePreviews.map((url, i) => (
-                <div
-                  key={url}
-                  role="listitem"
-                  className="relative w-36 h-36 rounded-xl overflow-hidden border border-border/30 shrink-0 animate-scale-in"
-                >
-                  <img src={url} alt={`Uploaded image ${i + 1}`} className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(i)}
-                    aria-label={`Remove image ${i + 1}`}
-                    className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-charcoal/70 text-cream flex items-center justify-center hover:bg-charcoal transition-colors"
+            <div className="flex flex-wrap gap-3">
+              <div
+                className="flex flex-wrap gap-3"
+                role="list"
+                aria-label="Uploaded images"
+              >
+                {imagePreviews.map((url, i) => (
+                  <div
+                    key={url}
+                    role="listitem"
+                    className="relative w-36 h-36 rounded-xl overflow-hidden border border-border/30 shrink-0 animate-scale-in"
                   >
-                    <X size={12} aria-hidden="true" />
-                  </button>
-                </div>
-              ))}
+                    <img
+                      src={url}
+                      alt={`Uploaded image ${i + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      aria-label={`Remove image ${i + 1}`}
+                      className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-charcoal/70 text-cream flex items-center justify-center hover:bg-charcoal transition-colors"
+                    >
+                      <X size={12} aria-hidden="true" />
+                    </button>
+                  </div>
+                ))}
+              </div>
               {imageFiles.length < 10 && (
                 <button
                   type="button"
@@ -316,7 +352,9 @@ export function CreateListing({
 
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_8rem] gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="listing-street" required>Street</Label>
+                <Label htmlFor="listing-street" required>
+                  Street
+                </Label>
                 <Input
                   id="listing-street"
                   value={street}
@@ -327,12 +365,16 @@ export function CreateListing({
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="listing-house" required>No.</Label>
+                <Label htmlFor="listing-house" required>
+                  No.
+                </Label>
                 <Input
                   id="listing-house"
                   value={houseNumber}
                   onChange={(e) => setHouseNumber(e.target.value)}
-                  onBlur={() => setHouseNumberError(validateHouseNumber(houseNumber))}
+                  onBlur={() =>
+                    setHouseNumberError(validateHouseNumber(houseNumber))
+                  }
                   placeholder="12a"
                   error={houseNumberError}
                 />
@@ -341,12 +383,18 @@ export function CreateListing({
 
             <div className="grid grid-cols-1 sm:grid-cols-[8rem_1fr] gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="listing-postal" required>Postal code</Label>
+                <Label htmlFor="listing-postal" required>
+                  Postal code
+                </Label>
                 <Input
                   id="listing-postal"
                   value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, ''))}
-                  onBlur={() => setPostalCodeError(validatePostalCode(postalCode))}
+                  onChange={(e) =>
+                    setPostalCode(e.target.value.replace(/\D/g, ""))
+                  }
+                  onBlur={() =>
+                    setPostalCodeError(validatePostalCode(postalCode))
+                  }
                   inputMode="numeric"
                   maxLength={5}
                   placeholder="12345"
@@ -354,7 +402,9 @@ export function CreateListing({
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="listing-city" required>City</Label>
+                <Label htmlFor="listing-city" required>
+                  City
+                </Label>
                 <Input
                   id="listing-city"
                   value={city}
@@ -382,7 +432,9 @@ export function CreateListing({
 
           {/* Tags */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="listing-tags" required>Tags</Label>
+            <Label htmlFor="listing-tags" required>
+              Tags
+            </Label>
             <MultiSelect
               id="listing-tags"
               options={availableTags
@@ -390,26 +442,34 @@ export function CreateListing({
                 .map((t) => ({
                   id: t.tagId,
                   label: t.name,
-                  badge: t.isBarrierefrei ? 'barrierefrei' : undefined,
-                  variant: t.isBarrierefrei ? 'accent' : 'default',
+                  badge: t.isBarrierefrei ? "barrierefrei" : undefined,
+                  variant: t.isBarrierefrei ? "accent" : "default",
                 }))}
               value={selectedTagIds}
-              onChange={(ids) => { setSelectedTagIds(ids); setTagError(null) }}
+              onChange={(ids) => {
+                setSelectedTagIds(ids);
+                setTagError(null);
+              }}
               placeholder="Select tags…"
               loading={tagsLoading}
               aria-label="Service tags"
-              aria-describedby={tagError ? 'listing-tags-error' : undefined}
+              aria-describedby={tagError ? "listing-tags-error" : undefined}
               aria-required
             />
             {tagError && (
-              <p id="listing-tags-error" role="alert" className="text-small text-red-600">{tagError}</p>
+              <p
+                id="listing-tags-error"
+                role="alert"
+                className="text-small text-red-600"
+              >
+                {tagError}
+              </p>
             )}
           </div>
 
           <div className="pb-8" />
-
         </form>
       </main>
     </>
-  )
+  );
 }
