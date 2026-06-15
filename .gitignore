@@ -27,3 +27,5 @@ coverage-a11y/
 *.njsproj
 *.sln
 *.sw?
+
+src/api/

@@ -1,11 +1,10 @@
 import { Clock } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Modal } from './Modal'
 import { Button } from './Button'
-import { authFetch } from '../lib/queryClient'
+import type { DayOfWeek, ReplaceWeeklyScheduleRequest, WeeklyScheduleEntry } from '../api/model'
 
-type BackendDay = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN'
+type BackendDay = DayOfWeek
 
 const ALL_DAYS: BackendDay[] = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 const DAY_LABEL: Record<BackendDay, string> = {
@@ -13,7 +12,6 @@ const DAY_LABEL: Record<BackendDay, string> = {
   THU: 'Thursday', FRI: 'Friday', SAT: 'Saturday', SUN: 'Sunday',
 }
 
-interface ScheduleEntry { dayOfWeek: BackendDay; startTime: string; endTime: string }
 interface DayState { enabled: boolean; start: string; end: string }
 type ScheduleState = Record<BackendDay, DayState>
 
@@ -21,12 +19,8 @@ function toInputTime(backendTime: string): string {
   return backendTime.slice(0, 5)
 }
 
-function toBackendTime(inputTime: string): string {
-  return `${inputTime}:00`
-}
-
-function buildInitialState(entries: ScheduleEntry[]): ScheduleState {
-  const map = Object.fromEntries(entries.map((e) => [e.dayOfWeek, e])) as Record<BackendDay, ScheduleEntry>
+function buildInitialState(entries: WeeklyScheduleEntry[]): ScheduleState {
+  const map = Object.fromEntries(entries.map((e) => [e.dayOfWeek, e])) as Record<BackendDay, WeeklyScheduleEntry>
   return Object.fromEntries(
     ALL_DAYS.map((day) => [
       day,
@@ -40,50 +34,26 @@ function buildInitialState(entries: ScheduleEntry[]): ScheduleState {
 interface Props {
   open: boolean
   onClose: () => void
-  userId: string
+  entries: WeeklyScheduleEntry[]
+  isLoading: boolean
+  isSaving: boolean
+  errorMessage: string | null
+  onSave: (schedule: Pick<ReplaceWeeklyScheduleRequest, 'entries'>) => void
 }
 
-export function WeeklyScheduleModal({ open, onClose, userId }: Props) {
-  const queryClient = useQueryClient()
+export function WeeklyScheduleModal({
+  open,
+  onClose,
+  entries,
+  isLoading,
+  isSaving,
+  errorMessage,
+  onSave,
+}: Props) {
   const [overrides, setOverrides] = useState<Partial<ScheduleState>>({})
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['schedule', userId],
-    queryFn: async () => {
-      const res = await authFetch(`/v1/users/${userId}/schedule`)
-      if (!res.ok) throw new Error('Failed to load schedule')
-      return res.json() as Promise<{ entries: ScheduleEntry[] }>
-    },
-    enabled: open && !!userId,
-  })
-
-  const baseState = useMemo(() => buildInitialState(data?.entries ?? []), [data])
+  const baseState = useMemo(() => buildInitialState(entries), [entries])
   const state = useMemo(() => ({ ...baseState, ...overrides }), [baseState, overrides])
-
-  const { mutate: saveSchedule, isPending, error } = useMutation({
-    mutationFn: async () => {
-      const entries = ALL_DAYS.filter((d) => state[d].enabled).map((d) => ({
-        dayOfWeek: d,
-        startTime: toBackendTime(state[d].start),
-        endTime: toBackendTime(state[d].end),
-      }))
-      const res = await authFetch(`/v1/users/${userId}/schedule`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entries }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as { detail?: string }).detail ?? 'Failed to save schedule')
-      }
-      return res.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedule', userId] })
-      setOverrides({})
-      onClose()
-    },
-  })
 
   function toggle(day: BackendDay) {
     setOverrides((o) => ({ ...o, [day]: { ...state[day], enabled: !state[day].enabled } }))
@@ -91,6 +61,17 @@ export function WeeklyScheduleModal({ open, onClose, userId }: Props) {
 
   function setTime(day: BackendDay, field: 'start' | 'end', value: string) {
     setOverrides((o) => ({ ...o, [day]: { ...state[day], [field]: value } }))
+  }
+
+  function saveSchedule() {
+    onSave({
+      entries: ALL_DAYS.filter((d) => state[d].enabled).map((d) => ({
+        dayOfWeek: d,
+        startTime: state[d].start,
+        endTime: state[d].end,
+      })),
+    })
+    setOverrides({})
   }
 
   return (
@@ -159,23 +140,23 @@ export function WeeklyScheduleModal({ open, onClose, userId }: Props) {
             )
           })}
 
-          {error && (
+          {errorMessage && (
             <p role="alert" className="mt-1 text-sm text-red-600">
-              {(error as Error).message}
+              {errorMessage}
             </p>
           )}
 
           <div className="mt-4 flex justify-end gap-3">
-            <Button variant="secondary" size="md" onClick={onClose} disabled={isPending}>
+            <Button variant="secondary" size="md" onClick={onClose} disabled={isSaving}>
               Cancel
             </Button>
             <Button
               variant="primary"
               size="md"
-              onClick={() => saveSchedule()}
-              disabled={isPending}
+              onClick={saveSchedule}
+              disabled={isSaving}
             >
-              {isPending ? 'Saving…' : 'Save schedule'}
+              {isSaving ? 'Saving…' : 'Save schedule'}
             </Button>
           </div>
         </div>

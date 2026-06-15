@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "openapi": "orval --config ./orval.config.ts",
+    "openapi:watch": "orval --config ./orval.config.ts --watch",
     "lint": "eslint .",
+    "check:routes-no-html": "node scripts/check-routes-no-html.mjs",
     "preview": "vite preview",
     "test": "vitest",
     "test:ci": "vitest run --coverage",
@@ -43,6 +46,7 @@
     "globals": "^17.4.0",
     "identity-obj-proxy": "^3.0.0",
     "jsdom": "^29.0.2",
+    "orval": "^8.17.0",
     "ts-node": "^10.9.2",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.0",

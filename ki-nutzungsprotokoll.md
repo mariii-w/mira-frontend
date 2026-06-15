@@ -5,7 +5,7 @@
 - Gruppenname: Mudkip
 - Titel der Studienarbeit: Mira
 - KI genutzt: ja
-- Verwendete KI-Werkzeuge: Claude, ChatGPT 
+- Verwendete KI-Werkzeuge: Claude, ChatGPT, Codex
 
 Wenn keine KI genutzt wurde, reicht hier die Angabe "nein". In diesem Fall müssen die folgenden Abschnitte nicht ausgefüllt werden.
 
@@ -93,6 +93,11 @@ Pflegen Sie das Protokoll möglichst zeitnah, damit die Git-Historie die Entwick
 | 2026-06-13 | Frederik Schwarz | Claude | Unterstützung bei der Überarbeitung der Kalender-Zell-Badges: Positionierung und Unterscheidung von OFF/BLK/+AVAIL, Begrenzung der Buchungsanzeige. | Visuelles Ergebnis im Browser geprüft; Badge-Platzierung, Benennung und Größe anhand eigener Rückmeldung angepasst. |
 | 2026-06-13 | Frederik Schwarz | Claude | Unterstützung beim Accessibility-Review über `calendar.tsx`, `WeeklyScheduleModal.tsx`, `ExceptionModal.tsx`: aria-live, Tab-Rollen, aria-pressed, erweiterte aria-labels, role alert, aria-hidden auf Trennzeichen. | ARIA-Vorschläge geprüft; jedes Attribut vor der Einbindung erläutert; Umfang des Reviews durch Nutzerin vorgegeben. |
 | 2026-06-13 | Frederik Schwarz | Claude | Unterstützung beim Schreiben der Unit-Tests für `CalendarPage`, `WeeklyScheduleModal` und `ExceptionModal` mit Vitest und React Testing Library. | Testfälle eigenständig ausgewählt und priorisiert; generierte Tests geprüft, fehlgeschlagene Fälle analysiert und Korrekturen (z.B. fehlender `export` in `CalendarPage`, `QueryClientProvider`-Wrapping) selbst eingebracht. |
+| 2026-06-14 | Frederik | Claude/ChatGPT/Codex | Unterstützung bei der Migration der API-Anbindung auf Orval: OpenAPI-Spec, `orval.config.ts`, generierte Client-Struktur und Einbindung in die vorhandene React-/TanStack-Query-Architektur wurden mit KI-Unterstützung analysiert und angepasst. | Ziel, Umfang und Vorgehen wurden vom Anwender vorgegeben. KI-Vorschläge wurden fachlich geprüft, an die bestehende Codebasis angepasst und nur übernommen, wenn sie zur API-Spec und Projektstruktur passten. |
+| 2026-06-14 | Frederik | Claude/ChatGPT/Codex | Tests im Zusammenhang mit der Orval-Migration ergänzt und angepasst, unter anderem für API-Helfer, Komponentenverhalten und bestehende User-Flows, damit die geänderte API-Schicht regressionssicher bleibt. | Testfälle und erwartetes Verhalten wurden durch den Anwender vorgegeben bzw. validiert. KI wurde zur Formulierung und Fehlersuche genutzt; Assertions, Mocks und Testgrenzen wurden an das vorhandene Vitest-/Testing-Library-Setup angepasst. |
+| 2026-06-14 | Frederik | Claude/ChatGPT/Codex | CI-Konfiguration im Zuge der Migration erweitert bzw. angepasst, damit Build, Linting, Tests, Accessibility-Checks und projektbezogene Validierungen automatisiert ausgeführt werden. | CI-Schritte wurden vom Anwender angewiesen und in die bestehende Pipeline eingeordnet. KI-Unterstützung diente zur Syntax-, Struktur- und Fehlerprüfung; finale Befehle und Reihenfolge wurden projektbezogen geprüft. |
+| 2026-06-15 | Frederik | ChatGPT/Codex | Erneute Unterstützung bei der API-Migration und beim Auflösen von Merge-Conflict-Folgen: generierte Orval-Exportnamen, geänderte Booking-Cancel-Route und Listing-Availability-Anbindung wurden mit KI-Hilfe abgeglichen und korrigiert. | Änderungen wurden anhand der generierten Client-Dateien und der OpenAPI-Spec fachlich geprüft. Die übernommenen Anpassungen wurden auf die bestehende Codebasis begrenzt und anschließend mit Build, Linting und Tests verifiziert. |
+| 2026-06-15 | Frederik | ChatGPT/Codex | KI-Unterstützung genutzt, um die Accessibility-Coverage für wiederverwendbare Komponenten zu erhöhen: bestehende Komponenten und Tests wurden analysiert, fehlende A11y-Testfälle identifiziert und zusätzliche Axe-/Testing-Library-Abdeckung für relevante Komponentenzustände formuliert. | Vorschläge wurden fachlich geprüft und an die vorhandene Komponenten-API sowie das Vitest-/Testing-Library-Setup angepasst. Nicht aussagekräftige oder JSDOM-bedingt unzuverlässige Prüfungen wurden nicht übernommen; die finale Auswahl der Testfälle blieb projektbezogen. |
 
 ## Optionale ergänzende Hinweise
 

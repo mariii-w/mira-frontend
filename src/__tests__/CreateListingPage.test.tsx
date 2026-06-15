@@ -1,28 +1,7 @@
 import "@testing-library/jest-dom/vitest";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { authFetch } from "../lib/queryClient";
-
-const mockNavigate = vi.fn();
-
-vi.mock("@tanstack/react-router", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@tanstack/react-router")>();
-  return {
-    ...actual,
-    createFileRoute: () => (config: unknown) => config,
-    useNavigate: () => mockNavigate,
-  };
-});
-
-vi.mock("../stores/auth", () => ({
-  useAuthStore: (selector: (s: { user: { userId: string } }) => unknown) =>
-    selector({ user: { userId: "user-1" } }),
-}));
-
-vi.mock("../lib/queryClient", () => ({
-  authFetch: vi.fn(),
-}));
+import type { ComponentProps } from "react";
 
 vi.mock("../components/Navbar", () => ({
   Navbar: () => <nav data-testid="navbar" />,
@@ -48,10 +27,31 @@ vi.mock("../components/MultiSelect", () => ({
   ),
 }));
 
-import { CreateListingPage } from "../routes/create-listing";
+import { CreateListing } from "../components/CreateListing";
 import type { MultiSelectProps } from "../components/MultiSelect";
 
-const mockFetch = vi.mocked(authFetch);
+const availableTags = [
+  {
+    tagId: "tag-1",
+    name: "Computer help",
+    isBarrierefrei: false,
+    isActive: true,
+  },
+];
+
+function renderCreateListing(
+  props: Partial<ComponentProps<typeof CreateListing>> = {},
+) {
+  return render(
+    <CreateListing
+      availableTags={availableTags}
+      tagsLoading={false}
+      onBack={vi.fn()}
+      onSubmit={vi.fn().mockResolvedValue(undefined)}
+      {...props}
+    />,
+  );
+}
 
 function fillForm() {
   fireEvent.change(screen.getByLabelText(/title/i), {
@@ -79,22 +79,11 @@ function fillForm() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => [],
-    }),
-  );
 });
 
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
-
-describe("<CreateListingPage />", () => {
+describe("<CreateListing />", () => {
   it("renders all main form sections", () => {
-    render(<CreateListingPage />);
+    renderCreateListing();
     expect(
       screen.getByRole("heading", { name: "New Service" }),
     ).toBeInTheDocument();
@@ -107,27 +96,29 @@ describe("<CreateListingPage />", () => {
   });
 
   it("shows required field errors when submitting an empty form", () => {
-    render(<CreateListingPage />);
+    renderCreateListing();
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
     expect(screen.getAllByRole("alert").length).toBeGreaterThanOrEqual(7);
   });
 
   it("shows tag error when no tags are selected", () => {
-    render(<CreateListingPage />);
+    renderCreateListing();
     fillForm();
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
     expect(screen.getByText("Select at least one tag.")).toBeInTheDocument();
   });
 
-  it("does not call authFetch when the form is invalid", () => {
-    render(<CreateListingPage />);
+  it("does not call onSubmit when the form is invalid", () => {
+    const onSubmit = vi.fn();
+    renderCreateListing({ onSubmit });
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
-    expect(mockFetch).not.toHaveBeenCalled();
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it('shows "Service is being saved…" while the request is pending', async () => {
-    mockFetch.mockReturnValue(new Promise(() => {}));
-    render(<CreateListingPage />);
+    renderCreateListing({
+      onSubmit: vi.fn().mockReturnValue(new Promise(() => {})),
+    });
     fillForm();
     fireEvent.click(screen.getByTestId("multiselect"));
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
@@ -136,53 +127,44 @@ describe("<CreateListingPage />", () => {
     );
   });
 
-  it("sends a multipart POST to /v1/listings with correct JSON payload", async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({ listingId: "new-id" }),
-    } as Response);
-    render(<CreateListingPage />);
+  it("calls onSubmit with normalized form values", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    renderCreateListing({ onSubmit });
     fillForm();
     fireEvent.click(screen.getByTestId("multiselect"));
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
 
-    await waitFor(() => expect(mockFetch).toHaveBeenCalledOnce());
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
 
-    const [url, init] = mockFetch.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe("/v1/listings");
-    expect(init.method).toBe("POST");
-    expect(init.body).toBeInstanceOf(FormData);
-
-    const listingBlob = (init.body as FormData).get("listing") as Blob;
-    const json = JSON.parse(await listingBlob.text());
-    expect(json.title).toBe("Valid Title Here");
-    expect(json.price).toBe(25);
-    expect(json.tagIds).toEqual(["tag-1"]);
-    expect(json.location.city).toBe("Berlin");
-    expect(json.location.postalCode).toBe("12345");
+    expect(onSubmit).toHaveBeenCalledWith({
+      title: "Valid Title Here",
+      description: "A valid description with enough text.",
+      price: 25,
+      tagIds: ["tag-1"],
+      location: {
+        street: "Main Street",
+        houseNumber: "12a",
+        postalCode: "12345",
+        city: "Berlin",
+        serviceRadiusKm: 20,
+      },
+      imageFiles: [],
+    });
   });
 
-  it("navigates to /my-listings on successful submission", async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({ listingId: "new-id" }),
-    } as Response);
-    render(<CreateListingPage />);
-    fillForm();
-    fireEvent.click(screen.getByTestId("multiselect"));
-    fireEvent.click(screen.getByRole("button", { name: /save/i }));
-
-    await waitFor(() =>
-      expect(mockNavigate).toHaveBeenCalledWith({ to: "/my-listings" }),
+  it("calls onBack from the back button", () => {
+    const onBack = vi.fn();
+    renderCreateListing({ onBack });
+    fireEvent.click(
+      screen.getByRole("button", { name: /back to my services/i }),
     );
+    expect(onBack).toHaveBeenCalledOnce();
   });
 
-  it("shows a server error message when the request fails", async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      json: async () => ({ detail: "Something went wrong." }),
-    } as Response);
-    render(<CreateListingPage />);
+  it("shows an error message when submission fails", async () => {
+    renderCreateListing({
+      onSubmit: vi.fn().mockRejectedValue(new Error("Something went wrong.")),
+    });
     fillForm();
     fireEvent.click(screen.getByTestId("multiselect"));
     fireEvent.click(screen.getByRole("button", { name: /save/i }));

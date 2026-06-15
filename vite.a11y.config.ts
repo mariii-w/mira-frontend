@@ -24,6 +24,7 @@ export default defineConfig({
       exclude: [
         "src/**/*.test.tsx",
         "src/**/*.a11y.test.tsx",
+        "src/routes/**/*.tsx",
         "src/routeTree.gen.ts",
         "src/main.tsx",
         "src/router.tsx",
