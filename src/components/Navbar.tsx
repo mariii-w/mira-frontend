@@ -1,31 +1,30 @@
 // src/components/Navbar.tsx
 //
 // Logged-out navbar variant
-// Logged-in variant 
+// Logged-in variant
 
-import { Link } from '@tanstack/react-router'
-import { Logo } from './Logo'
-import { Button } from './Button'
-import { AccessibilityPanel } from './AccessibilityPanel'
-import { UserMenu } from './UserMenu'
-import { useAuthStore } from '../stores/auth'
+import { Link } from "@tanstack/react-router";
+import { Logo } from "./Logo";
+import { Button } from "./Button";
+import { AccessibilityPanel } from "./AccessibilityPanel";
+import { UserMenu } from "./UserMenu";
+import { useAuthStore } from "../stores/auth";
 
 const NAV_LINKS = [
-  { label: 'Browse Services', to: '/' },
-  { label: 'Find providers',  to: '/' },
-  { label: 'Calendar',        to: '/calendar' },
-] as const
+  { label: "Browse Services", to: "/" },
+  { label: "Find providers", to: "/" },
+  { label: "Calendar", to: "/calendar" },
+] as const;
 
 export function Navbar() {
-  const user = useAuthStore((s) => s.user)
-  const firstName = user?.firstName ?? ''
-  const lastName = user?.lastName ?? ''
-  const isProvider = user?.userType === 'PROVIDER'
-  const pictureUrl = user?.profileMedia?.url ?? undefined
-
+  const user = useAuthStore((s) => s.user);
+  const firstName = user?.firstName ?? "";
+  const lastName = user?.lastName ?? "";
+  const isProvider = user?.userType === "PROVIDER";
+  const pictureUrl = user?.profileMedia?.url ?? undefined;
 
   function handleGoogleLogin() {
-    window.location.href = 'http://localhost:8080/auth/login/google'
+    window.location.href = "http://localhost:8081/auth/login/google";
   }
 
   return (
@@ -52,14 +51,15 @@ export function Navbar() {
               <Link
                 to={to}
                 className="text-cream/80 text-small font-medium no-underline hover:text-cream transition-colors duration-150"
-                activeProps={{ className: 'text-cream font-bold no-underline' }}
+                activeProps={{ className: "text-cream font-bold no-underline" }}
               >
                 {label}
               </Link>
             </li>
           ))}
           <li>
-            <a href="#how-it-works"
+            <a
+              href="#how-it-works"
               className="text-cream/80 text-small font-medium no-underline hover:text-cream transition-colors duration-150"
             >
               How it works
@@ -89,5 +89,5 @@ export function Navbar() {
         </div>
       </nav>
     </header>
-  )
+  );
 }

@@ -14,7 +14,8 @@ function isRefreshRequest(input: RequestInfo | URL): boolean {
         ? input.pathname
         : input.url;
 
-  return new URL(url, window.location.origin).pathname === "/auth/refresh";
+  const pathname = new URL(url, window.location.origin).pathname;
+  return pathname === "/auth/refresh" || pathname === "/v1/auth/refresh";
 }
 
 function hasAuthorization(headers?: HeadersInit): boolean {

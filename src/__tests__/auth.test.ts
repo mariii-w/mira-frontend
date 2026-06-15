@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PrivateUserProfileResponse } from "../api/model";
 import {
   getPrivateUserProfile,
-  postAuthLogout,
-  postAuthRefresh,
+  postV1AuthLogout,
+  postV1AuthRefresh,
 } from "../api/mira";
 import {
   exchangeRefreshForAccess,
@@ -14,13 +14,13 @@ import {
 
 vi.mock("../api/mira", () => ({
   getPrivateUserProfile: vi.fn(),
-  postAuthLogout: vi.fn(),
-  postAuthRefresh: vi.fn(),
+  postV1AuthLogout: vi.fn(),
+  postV1AuthRefresh: vi.fn(),
 }));
 
-const mockedPostAuthRefresh = vi.mocked(postAuthRefresh);
+const mockedPostAuthRefresh = vi.mocked(postV1AuthRefresh);
 const mockedGetPrivateUserProfile = vi.mocked(getPrivateUserProfile);
-const mockedPostAuthLogout = vi.mocked(postAuthLogout);
+const mockedPostAuthLogout = vi.mocked(postV1AuthLogout);
 
 function makeJwt(claims: Record<string, unknown>) {
   const encode = (value: unknown) =>

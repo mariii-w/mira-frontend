@@ -1,35 +1,10 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { CalendarPage } from '../routes/calendar'
-
-vi.mock('@tanstack/react-router', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@tanstack/react-router')>()
-  return { ...actual, createFileRoute: () => (config: unknown) => config }
-})
-
-const mockUser = { userId: 'user-1', userType: 'PROVIDER' as string }
-
-vi.mock('../stores/auth', () => ({
-  useAuthStore: (selector: (s: { user: typeof mockUser }) => unknown) =>
-    selector({ user: mockUser }),
-}))
-
-const apiMocks = vi.hoisted(() => ({
-  useGetV1UsersUserIdCalendar: vi.fn(),
-  useGetV1UsersUserIdSchedule: vi.fn(),
-  useListScheduleExceptions: vi.fn(),
-  usePutV1UsersUserIdSchedule: vi.fn(),
-  useCreateScheduleException: vi.fn(),
-  useUpdateScheduleException: vi.fn(),
-  useDeleteScheduleException: vi.fn(),
-  getGetV1UsersUserIdScheduleQueryKey: vi.fn((userId: string) => [`/v1/users/${userId}/schedule`]),
-  getListScheduleExceptionsQueryKey: vi.fn((userId: string) => [`/v1/users/${userId}/exceptions`]),
-}))
-
-vi.mock('../api/mira', () => apiMocks)
+import { CalendarPage, type CalendarPageProps } from '../components/CalendarPage'
+import type { BookingSummary, ScheduleExceptionResponse } from '../api/model'
 
 vi.mock('../components/Navbar', () => ({
   Navbar: () => <nav data-testid="navbar" />,
@@ -79,29 +54,13 @@ vi.mock('../components/BookingCard', () => ({
   StatusBadge: ({ status }: { status: string }) => <span data-testid="status-badge">{status}</span>,
 }))
 
-function makeClient() {
-  return new QueryClient({ defaultOptions: { queries: { retry: false } } })
-}
-
-function Wrapper({ children }: { children: ReactNode }) {
-  return <QueryClientProvider client={makeClient()}>{children}</QueryClientProvider>
-}
-
-function renderPage() {
-  return render(<CalendarPage />, { wrapper: Wrapper })
-}
-
-function success<T>(data: T) {
-  return { data, status: 200, headers: new Headers() }
-}
-
 function makeBooking(overrides: Partial<{
   bookingId: string
   bookedStart: string
   bookedEnd: string
   counterpartyName: string
   title: string
-}> = {}) {
+}> = {}): BookingSummary {
   const {
     bookingId = 'b-1',
     bookedStart = '2026-06-10T09:00:00Z',
@@ -114,27 +73,82 @@ function makeBooking(overrides: Partial<{
     listingId: 'l-1',
     listing: { title },
     counterparty: { userId: 'u-2', name: counterpartyName, surname: 'Muster' },
-    status: 'CONFIRMED',
-    locationType: 'REMOTE',
+    status: 'CONFIRMED' as const,
     serviceAddress: null,
     totalPrice: 50,
     bookedStart,
     bookedEnd,
-    durationHours: 1,
     createdAt: '2026-06-01T10:00:00Z',
   }
 }
 
+function makeException(
+  overrides: Partial<ScheduleExceptionResponse> = {},
+): ScheduleExceptionResponse {
+  return {
+    exceptionId: 'e-1',
+    userId: 'user-1',
+    date: '2026-07-01',
+    exceptionType: 'BLOCKED',
+    startTime: null,
+    endTime: null,
+    createdAt: '2026-06-01T10:00:00Z',
+    updatedAt: '2026-06-01T10:00:00Z',
+    ...overrides,
+  }
+}
+
+function makeProps(overrides: Partial<CalendarPageProps> = {}): CalendarPageProps {
+  return {
+    userId: 'user-1',
+    isProvider: true,
+    today: new Date(2026, 5, 10),
+    year: 2026,
+    month: 6,
+    selectedDate: new Date(2026, 5, 10),
+    monthBookings: [],
+    upcomingBookings: [],
+    scheduleEntries: [],
+    scheduleLoaded: true,
+    scheduleLoading: false,
+    exceptions: [],
+    scheduleSaving: false,
+    scheduleError: null,
+    exceptionCreating: false,
+    exceptionError: null,
+    onMonthChange: vi.fn(),
+    onSelectedDateChange: vi.fn(),
+    onToday: vi.fn(),
+    onSaveSchedule: vi.fn(),
+    onCreateException: vi.fn(),
+    onUpdateException: vi.fn(),
+    onDeleteException: vi.fn(),
+    ...overrides,
+  }
+}
+
+function StatefulCalendarPage({ initialProps }: { initialProps: CalendarPageProps }) {
+  const [selectedDate, setSelectedDate] = useState(initialProps.selectedDate)
+
+  return (
+    <CalendarPage
+      {...initialProps}
+      selectedDate={selectedDate}
+      onSelectedDateChange={setSelectedDate}
+    />
+  )
+}
+
+function renderPage(overrides: Partial<CalendarPageProps> = {}) {
+  return render(<CalendarPage {...makeProps(overrides)} />)
+}
+
+function renderStatefulPage(overrides: Partial<CalendarPageProps> = {}) {
+  return render(<StatefulCalendarPage initialProps={makeProps(overrides)} />)
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
-  mockUser.userType = 'PROVIDER'
-  apiMocks.useGetV1UsersUserIdCalendar.mockReturnValue({ data: success({ items: [] }) })
-  apiMocks.useGetV1UsersUserIdSchedule.mockReturnValue({ data: success({ timezone: 'Europe/Berlin', entries: [] }), isLoading: false })
-  apiMocks.useListScheduleExceptions.mockReturnValue({ data: success({ items: [] }), isLoading: false })
-  apiMocks.usePutV1UsersUserIdSchedule.mockReturnValue({ mutate: vi.fn(), isPending: false, error: null })
-  apiMocks.useCreateScheduleException.mockReturnValue({ mutate: vi.fn(), isPending: false, error: null })
-  apiMocks.useUpdateScheduleException.mockReturnValue({ mutate: vi.fn(), isPending: false, error: null })
-  apiMocks.useDeleteScheduleException.mockReturnValue({ mutate: vi.fn(), isPending: false, error: null })
 })
 
 describe('<CalendarPage />', () => {
@@ -154,65 +168,45 @@ describe('<CalendarPage />', () => {
   })
 
   it('opens modals with route-owned data', () => {
-    apiMocks.useGetV1UsersUserIdSchedule.mockReturnValue({
-      data: success({ timezone: 'Europe/Berlin', entries: [{ dayOfWeek: 'MON', startTime: '09:00', endTime: '17:00' }] }),
-      isLoading: false,
+    renderPage({
+      scheduleEntries: [{ dayOfWeek: 'MON', startTime: '09:00', endTime: '17:00' }],
+      exceptions: [makeException()],
     })
-    apiMocks.useListScheduleExceptions.mockReturnValue({
-      data: success({ items: [{ exceptionId: 'e-1', date: '2026-07-01', exceptionType: 'BLOCKED', startTime: null, endTime: null }] }),
-      isLoading: false,
-    })
-    renderPage()
     fireEvent.click(screen.getByRole('button', { name: /weekly schedule/i }))
     expect(screen.getByTestId('schedule-entry-count')).toHaveTextContent('1')
     fireEvent.click(screen.getByRole('button', { name: /add exception/i }))
     expect(screen.getByTestId('exception-count')).toHaveTextContent('1')
   })
 
-  it('uses Orval hooks for calendar, schedule, and exceptions', () => {
-    renderPage()
-    expect(apiMocks.useGetV1UsersUserIdCalendar).toHaveBeenCalledWith('user-1', expect.objectContaining({ from: expect.any(String), to: expect.any(String) }), expect.any(Object))
-    expect(apiMocks.useGetV1UsersUserIdSchedule).toHaveBeenCalledWith('user-1', expect.any(Object))
-    expect(apiMocks.useListScheduleExceptions).toHaveBeenCalledWith('user-1', expect.any(Object))
-  })
-
-  it('routes modal actions through Orval mutations', () => {
-    const saveSchedule = vi.fn()
-    const createException = vi.fn()
-    const updateException = vi.fn()
-    const deleteException = vi.fn()
-    apiMocks.usePutV1UsersUserIdSchedule.mockReturnValue({ mutate: saveSchedule, isPending: false, error: null })
-    apiMocks.useCreateScheduleException.mockReturnValue({ mutate: createException, isPending: false, error: null })
-    apiMocks.useUpdateScheduleException.mockReturnValue({ mutate: updateException, isPending: false, error: null })
-    apiMocks.useDeleteScheduleException.mockReturnValue({ mutate: deleteException, isPending: false, error: null })
-    renderPage()
+  it('routes modal actions through component callbacks', () => {
+    const onSaveSchedule = vi.fn()
+    const onCreateException = vi.fn()
+    const onUpdateException = vi.fn()
+    const onDeleteException = vi.fn()
+    renderPage({ onSaveSchedule, onCreateException, onUpdateException, onDeleteException })
 
     fireEvent.click(screen.getByRole('button', { name: /weekly schedule/i }))
     fireEvent.click(screen.getByRole('button', { name: 'modal save schedule' }))
-    expect(saveSchedule).toHaveBeenCalledWith({ userId: 'user-1', data: { entries: [] } })
+    expect(onSaveSchedule).toHaveBeenCalledWith({ entries: [] })
 
     fireEvent.click(screen.getByRole('button', { name: /add exception/i }))
     fireEvent.click(screen.getByRole('button', { name: 'modal create exception' }))
-    expect(createException).toHaveBeenCalledWith({ userId: 'user-1', data: { date: '2026-07-01', exceptionType: 'BLOCKED' } })
+    expect(onCreateException).toHaveBeenCalledWith({ date: '2026-07-01', exceptionType: 'BLOCKED' })
     fireEvent.click(screen.getByRole('button', { name: 'modal update exception' }))
-    expect(updateException).toHaveBeenCalledWith({ userId: 'user-1', exceptionId: 'e-1', data: { startTime: '10:00', endTime: '11:00' } })
+    expect(onUpdateException).toHaveBeenCalledWith('e-1', { startTime: '10:00', endTime: '11:00' })
     fireEvent.click(screen.getByRole('button', { name: 'modal delete exception' }))
-    expect(deleteException).toHaveBeenCalledWith({ userId: 'user-1', exceptionId: 'e-1' })
+    expect(onDeleteException).toHaveBeenCalledWith('e-1')
   })
 
-  it('does not fetch schedule or exceptions for consumer', () => {
-    mockUser.userType = 'CONSUMER'
-    renderPage()
+  it('hides provider-only controls for consumers', () => {
+    renderPage({ isProvider: false })
     expect(screen.getByText(/See your upcoming bookings/i)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /weekly schedule/i })).not.toBeInTheDocument()
-    expect(apiMocks.useGetV1UsersUserIdSchedule).toHaveBeenCalledWith('user-1', expect.objectContaining({ query: expect.objectContaining({ enabled: false }) }))
-    expect(apiMocks.useListScheduleExceptions).toHaveBeenCalledWith('user-1', expect.objectContaining({ query: expect.objectContaining({ enabled: false }) }))
   })
 
   it('shows booking card when selected date has bookings', () => {
     const booking = makeBooking()
-    apiMocks.useGetV1UsersUserIdCalendar.mockReturnValue({ data: success({ items: [booking] }) })
-    renderPage()
+    renderStatefulPage({ monthBookings: [booking] })
     fireEvent.click(screen.getByRole('button', { name: /Wednesday, June 10, 2026/i }))
     expect(screen.getByText('PC Repair')).toBeInTheDocument()
   })
@@ -226,8 +220,7 @@ describe('<CalendarPage />', () => {
       bookedEnd: new Date(future.getTime() + 3600000).toISOString(),
       title: 'Laptop Fix',
     })
-    apiMocks.useGetV1UsersUserIdCalendar.mockReturnValue({ data: success({ items: [booking] }) })
-    renderPage()
+    renderPage({ upcomingBookings: [booking] })
     expect(screen.getAllByText('Laptop Fix').length).toBeGreaterThan(0)
   })
 
