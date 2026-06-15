@@ -4,7 +4,7 @@ info:
   version: "1.0.0"
   description: This API describes the backend of Mira, a platform for offering and booking services. It enables users to search for service providers, view service details, manage bookings, communicate with each other, and handle payments and scheduling. The platform is designed to support everyday local services in a simple and accessible way.
 servers:
-  - url: "http://127.0.0.1:8081"
+  - url: "http://127.0.0.1:8080"
     description: Local development backend server for the Mira REST API
 tags:
   - name: Auth
@@ -31,6 +31,8 @@ tags:
     description: Calendar views of bookings for authenticated users.
   - name: Schedule
     description: Provider weekly schedule resources used to compute availability.
+  - name: Exceptions
+    description: Schedule exception resources. Providers use these to block time off or add extra availability on specific dates, overriding their recurring weekly schedule.
 paths:
   "/auth/login/google":
     get:
@@ -2520,12 +2522,12 @@ paths:
                     status: 409
                     detail: Media of deleted listings cannot be deleted
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/media/11111111-2222-3333-4444-555555555555
-  "/v1/providers/{providerId}/availability":
+  "/v1/listings/{listingId}/availability":
     parameters:
-      - "$ref": "#/components/parameters/ProviderIdParam"
+      - "$ref": "#/components/parameters/ListingIdParam"
     get:
-      summary: Get provider availability
-      description: Returns the provider availability over the requested date range. For each day, returns the working hours envelope and the free windows within it, after applying the recurring weekly schedule and active bookings.
+      summary: Get provider availability for a listing
+      description: Returns the provider availability over the requested date range for the given listing. For each day, returns the working hours envelope and the free windows within it, after applying the recurring weekly schedule and active bookings.
       tags:
         - Bookings
       parameters:
@@ -2556,8 +2558,7 @@ paths:
                 default:
                   summary: Example provider availability
                   value:
-                    providerId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
-                    timezone: Europe/Berlin
+                    userId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
                     days:
                       - date: "2026-04-27"
                         workingHours:
@@ -2593,7 +2594,7 @@ paths:
                     title: Bad Request
                     status: 400
                     detail: Query parameter validation failed
-                    instance: /v1/providers/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/availability
+                    instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/availability
                     errors:
                       - field: to
                         message: "must not be more than 31 days after 'from'"
@@ -2610,7 +2611,7 @@ paths:
                     title: Not Found
                     status: 404
                     detail: Provider with the given identifier was not found
-                    instance: /v1/providers/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/availability
+                    instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/availability
   "/v1/bookings":
     post:
       summary: Create a booking
@@ -2658,8 +2659,8 @@ paths:
                       title: Laptop setup and software installation
                     consumer:
                       userId: "11aa11aa-1111-1111-1111-aaaaaaaaaaaa"
-                      name: Marija
-                      surname: Volodermann
+                      name: Anne
+                      surname: Schmidt
                     provider:
                       userId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
                       name: Anna
@@ -2675,7 +2676,6 @@ paths:
                     totalPrice: 37.5
                     bookedStart: "2026-05-05T14:00:00Z"
                     bookedEnd: "2026-05-05T15:30:00Z"
-                    durationHours: 1
                     createdAt: "2026-04-28T10:00:00Z"
                     confirmedAt: null
                     completedAt: null
@@ -2683,6 +2683,7 @@ paths:
                     consumerConfirmedAt: null
                     consumerConfirmationType: null
                     autoConfirmAt: null
+                    paidAt: null
                     cancelledAt: null
                     expiresAt: null
         "400":
@@ -2796,8 +2797,8 @@ paths:
                       title: Laptop setup and software installation
                     consumer:
                       userId: "11aa11aa-1111-1111-1111-aaaaaaaaaaaa"
-                      name: Marija
-                      surname: Volodermann
+                      name: Anne
+                      surname: Schmidt
                     provider:
                       userId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
                       name: Anna
@@ -2813,7 +2814,6 @@ paths:
                     totalPrice: 37.5
                     bookedStart: "2026-05-05T14:00:00Z"
                     bookedEnd: "2026-05-05T15:30:00Z"
-                    durationHours: 1
                     createdAt: "2026-04-28T10:00:00Z"
                     confirmedAt: "2026-04-28T10:30:00Z"
                     completedAt: null
@@ -2821,8 +2821,13 @@ paths:
                     consumerConfirmedAt: null
                     consumerConfirmationType: null
                     autoConfirmAt: null
+                    paidAt: null
                     cancelledAt: null
                     expiresAt: "2026-04-30T10:30:00Z"
+                    allowedActions:
+                      - rel: "cancel"
+                        href: "/v1/bookings/3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10/cancel"
+                        method: "POST"
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -2839,61 +2844,6 @@ paths:
                     title: Not Found
                     status: 404
                     detail: Booking with the given identifier was not found
-                    instance: /v1/bookings/3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10
-    delete:
-      summary: Cancel booking
-      description: Cancels a booking on behalf of the authenticated consumer. Only allowed while the booking is PENDING, CONFIRMED, or PAID, before delivery acknowledgement begins. The record is retained with status CANCELLED.
-      tags:
-        - Bookings
-      security:
-        - bearerHttpAuthentication: []
-      responses:
-        "204":
-          description: Booking cancelled successfully.
-        "401":
-          "$ref": "#/components/responses/UnauthorizedError"
-          description: Unauthorized. Authentication is required.
-        "403":
-          description: Forbidden. The authenticated account is not allowed to access this resource.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                forbidden:
-                  value:
-                    type: "https://api.mira.example/problems/insufficient-permissions"
-                    title: Forbidden
-                    status: 403
-                    detail: Authenticated user is not allowed to cancel this booking
-                    instance: /v1/bookings/3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10
-        "404":
-          description: Not Found. No resource exists for the given identifier.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                notFound:
-                  value:
-                    type: "https://api.mira.example/problems/resource-not-found"
-                    title: Not Found
-                    status: 404
-                    detail: Booking with the given identifier was not found
-                    instance: /v1/bookings/3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10
-        "409":
-          description: Conflict. The request conflicts with the current resource state.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                invalidState:
-                  value:
-                    type: "https://api.mira.example/problems/resource-conflict"
-                    title: Conflict
-                    status: 409
-                    detail: Only pending, confirmed, or paid bookings can be cancelled before delivery acknowledgement begins
                     instance: /v1/bookings/3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10
   "/v1/users/{userId}/bookings":
     parameters:
@@ -2935,7 +2885,6 @@ paths:
                           name: Anna
                           surname: Schmidt
                         status: CONFIRMED
-                        locationType: AT_CONSUMER
                         serviceAddress:
                           street: "Brunnenstraße"
                           houseNumber: "25"
@@ -2944,7 +2893,6 @@ paths:
                         totalPrice: 37.5
                         bookedStart: "2026-05-05T14:00:00Z"
                         bookedEnd: "2026-05-05T15:30:00Z"
-                        durationHours: 1
                         createdAt: "2026-04-28T10:00:00Z"
                     cursor:
                       limit: 20
@@ -2997,94 +2945,48 @@ paths:
                     status: 404
                     detail: User with the given identifier was not found
                     instance: /v1/users/11aa11aa-1111-1111-1111-aaaaaaaaaaaa/bookings
-  "/v1/users/{userId}/incoming-bookings":
+  "/v1/bookings/{bookingId}/cancel":
     parameters:
-      - "$ref": "#/components/parameters/UserIdPathParam"
-    get:
-      summary: "List a user's incoming bookings (as provider)"
-      description: Returns bookings made against listings owned by the user. Defaults to PENDING; use the status query parameter to retrieve other states. The userId in the path must match the authenticated user, or the authenticated user must have administrator privileges. The response may be paginated when pagination query parameters are provided.
+      - "$ref": "#/components/parameters/BookingIdParam"
+    post:
+      summary: Cancel booking
+      description: Cancels a booking. Both the consumer and the provider are allowed to cancel. Only allowed while the booking is PENDING, CONFIRMED, or PAID. The record is retained with status CANCELLED.
       tags:
         - Bookings
       security:
         - bearerHttpAuthentication: []
-      parameters:
-        - name: status
-          in: query
-          required: false
-          description: Filter bookings by status. Defaults to PENDING when omitted.
-          schema:
-            "$ref": "#/components/schemas/BookingStatus"
-        - "$ref": "#/components/parameters/LimitQueryParam"
-        - "$ref": "#/components/parameters/FromQueryParam"
       responses:
         "200":
-          description: Bookings retrieved successfully.
+          description: Booking cancelled successfully.
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/BookingCollectionResponse"
+                "$ref": "#/components/schemas/BookingDetails"
               examples:
                 default:
-                  summary: "Example list of the user's incoming bookings"
+                  summary: Example cancelled booking
                   value:
-                    items:
-                      - bookingId: "3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10"
-                        listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
-                        listing:
-                          title: Laptop setup and software installation
-                        counterparty:
-                          userId: "11aa11aa-1111-1111-1111-aaaaaaaaaaaa"
-                          name: Marija
-                          surname: Volodermann
-                        status: PENDING
-                        locationType: AT_CONSUMER
-                        serviceAddress:
-                          street: "Brunnenstraße"
-                          houseNumber: "25"
-                          city: Berlin
-                          postalCode: "10119"
-                        totalPrice: 37.5
-                        bookedStart: "2026-05-05T14:00:00Z"
-                        bookedEnd: "2026-05-05T15:30:00Z"
-                        durationHours: 1
-                        createdAt: "2026-04-28T10:00:00Z"
-                    cursor:
-                      limit: 20
-                      next: null
-        "400":
-          description: Bad Request. One or more path or query parameters are invalid.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                invalidPagination:
-                  value:
-                    type: "https://api.mira.example/problems/invalid-query-parameter"
-                    title: Bad Request
-                    status: 400
-                    detail: Query parameter validation failed
-                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/incoming-bookings
-                    errors:
-                      - field: limit
-                        message: must be less than or equal to 100
+                    bookingId: "3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10"
+                    status: CANCELLED
+                    paidAt: null
+                    cancelledAt: "2026-05-01T09:00:00Z"
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
         "403":
-          description: Forbidden. The authenticated account is not allowed to access this resource.
+          description: Forbidden. The authenticated account is not allowed to cancel this booking.
           content:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
               examples:
-                notOwner:
+                forbidden:
                   value:
                     type: "https://api.mira.example/problems/insufficient-permissions"
                     title: Forbidden
                     status: 403
-                    detail: "Authenticated user is not allowed to access this user's incoming bookings"
-                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/incoming-bookings
+                    detail: Authenticated user is not allowed to cancel this booking
+                    instance: /v1/bookings/3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10/cancel
         "404":
           description: Not Found. No resource exists for the given identifier.
           content:
@@ -3097,8 +2999,22 @@ paths:
                     type: "https://api.mira.example/problems/resource-not-found"
                     title: Not Found
                     status: 404
-                    detail: User with the given identifier was not found
-                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/incoming-bookings
+                    detail: Booking with the given identifier was not found
+                    instance: /v1/bookings/3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10/cancel
+        "409":
+          description: Conflict. The request conflicts with the current resource state.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                invalidState:
+                  value:
+                    type: "https://api.mira.example/problems/resource-conflict"
+                    title: Conflict
+                    status: 409
+                    detail: Only pending, confirmed, or paid bookings can be cancelled
+                    instance: /v1/bookings/3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10/cancel
   "/v1/bookings/{bookingId}/accept":
     parameters:
       - "$ref": "#/components/parameters/BookingIdParam"
@@ -3126,8 +3042,8 @@ paths:
                       title: Laptop setup and software installation
                     consumer:
                       userId: "11aa11aa-1111-1111-1111-aaaaaaaaaaaa"
-                      name: Marija
-                      surname: Volodermann
+                      name: Anne
+                      surname: Schmidt
                     provider:
                       userId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
                       name: Anna
@@ -3143,7 +3059,6 @@ paths:
                     totalPrice: 37.5
                     bookedStart: "2026-05-05T14:00:00Z"
                     bookedEnd: "2026-05-05T15:30:00Z"
-                    durationHours: 1
                     createdAt: "2026-04-28T10:00:00Z"
                     confirmedAt: "2026-04-28T10:30:00Z"
                     completedAt: null
@@ -3151,6 +3066,7 @@ paths:
                     consumerConfirmedAt: null
                     consumerConfirmationType: null
                     autoConfirmAt: null
+                    paidAt: null
                     cancelledAt: null
                     expiresAt: "2026-04-30T10:30:00Z"
         "401":
@@ -3236,8 +3152,8 @@ paths:
                       title: Laptop setup and software installation
                     consumer:
                       userId: "11aa11aa-1111-1111-1111-aaaaaaaaaaaa"
-                      name: Marija
-                      surname: Volodermann
+                      name: Anne
+                      surname: Schmidt
                     provider:
                       userId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
                       name: Anna
@@ -3253,7 +3169,6 @@ paths:
                     totalPrice: 37.5
                     bookedStart: "2026-05-05T14:00:00Z"
                     bookedEnd: "2026-05-05T15:30:00Z"
-                    durationHours: 1
                     createdAt: "2026-04-28T10:00:00Z"
                     confirmedAt: null
                     completedAt: null
@@ -3261,6 +3176,7 @@ paths:
                     consumerConfirmedAt: null
                     consumerConfirmationType: null
                     autoConfirmAt: null
+                    paidAt: null
                     cancelledAt: "2026-04-28T10:32:00Z"
                     expiresAt: null
         "400":
@@ -3352,8 +3268,8 @@ paths:
                       title: Laptop setup and software installation
                     consumer:
                       userId: "11aa11aa-1111-1111-1111-aaaaaaaaaaaa"
-                      name: Marija
-                      surname: Volodermann
+                      name: Anne
+                      surname: Schmidt
                     provider:
                       userId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
                       name: Anna
@@ -3369,7 +3285,6 @@ paths:
                     totalPrice: 37.5
                     bookedStart: "2026-05-05T14:00:00Z"
                     bookedEnd: "2026-05-05T15:30:00Z"
-                    durationHours: 1
                     createdAt: "2026-04-28T10:00:00Z"
                     confirmedAt: "2026-04-28T10:30:00Z"
                     completedAt: null
@@ -3377,6 +3292,7 @@ paths:
                     consumerConfirmedAt: null
                     consumerConfirmationType: null
                     autoConfirmAt: "2026-05-12T15:35:00Z"
+                    paidAt: "2026-05-01T10:00:00Z"
                     cancelledAt: null
                     expiresAt: "2026-04-30T10:30:00Z"
                 completed:
@@ -3388,8 +3304,8 @@ paths:
                       title: Laptop setup and software installation
                     consumer:
                       userId: "11aa11aa-1111-1111-1111-aaaaaaaaaaaa"
-                      name: Marija
-                      surname: Volodermann
+                      name: Anne
+                      surname: Schmidt
                     provider:
                       userId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
                       name: Anna
@@ -3405,7 +3321,6 @@ paths:
                     totalPrice: 37.5
                     bookedStart: "2026-05-05T14:00:00Z"
                     bookedEnd: "2026-05-05T15:30:00Z"
-                    durationHours: 1
                     createdAt: "2026-04-28T10:00:00Z"
                     confirmedAt: "2026-04-28T10:30:00Z"
                     completedAt: "2026-05-05T15:35:00Z"
@@ -3413,6 +3328,7 @@ paths:
                     consumerConfirmedAt: "2026-05-05T15:20:00Z"
                     consumerConfirmationType: EXPLICIT
                     autoConfirmAt: null
+                    paidAt: null
                     cancelledAt: null
                     expiresAt: "2026-04-30T10:30:00Z"
         "401":
@@ -3487,8 +3403,8 @@ paths:
                       title: Laptop setup and software installation
                     consumer:
                       userId: "11aa11aa-1111-1111-1111-aaaaaaaaaaaa"
-                      name: Marija
-                      surname: Volodermann
+                      name: Anne
+                      surname: Schmidt
                     provider:
                       userId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
                       name: Anna
@@ -3504,7 +3420,6 @@ paths:
                     totalPrice: 37.5
                     bookedStart: "2026-05-05T14:00:00Z"
                     bookedEnd: "2026-05-05T15:30:00Z"
-                    durationHours: 1
                     createdAt: "2026-04-28T10:00:00Z"
                     confirmedAt: "2026-04-28T10:30:00Z"
                     completedAt: null
@@ -3512,6 +3427,7 @@ paths:
                     consumerConfirmedAt: "2026-05-05T15:20:00Z"
                     consumerConfirmationType: EXPLICIT
                     autoConfirmAt: "2026-05-12T15:20:00Z"
+                    paidAt: "2026-05-01T10:00:00Z"
                     cancelledAt: null
                     expiresAt: "2026-04-30T10:30:00Z"
                 completed:
@@ -3523,8 +3439,8 @@ paths:
                       title: Laptop setup and software installation
                     consumer:
                       userId: "11aa11aa-1111-1111-1111-aaaaaaaaaaaa"
-                      name: Marija
-                      surname: Volodermann
+                      name: Anne
+                      surname: Schmidt
                     provider:
                       userId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
                       name: Anna
@@ -3540,7 +3456,6 @@ paths:
                     totalPrice: 37.5
                     bookedStart: "2026-05-05T14:00:00Z"
                     bookedEnd: "2026-05-05T15:30:00Z"
-                    durationHours: 1
                     createdAt: "2026-04-28T10:00:00Z"
                     confirmedAt: "2026-04-28T10:30:00Z"
                     completedAt: "2026-05-05T15:35:00Z"
@@ -3548,6 +3463,7 @@ paths:
                     consumerConfirmedAt: "2026-05-05T15:35:00Z"
                     consumerConfirmationType: EXPLICIT
                     autoConfirmAt: null
+                    paidAt: null
                     cancelledAt: null
                     expiresAt: "2026-04-30T10:30:00Z"
         "401":
@@ -3600,7 +3516,7 @@ paths:
       - "$ref": "#/components/parameters/UserIdPathParam"
     get:
       summary: List calendar bookings of a user
-      description: "Returns the user's bookings within the requested date range, regardless of role (consumer or provider). Defaults to bookings in CONFIRMED, PAID, or COMPLETED status; pass the status query parameter to retrieve a single specific status. Results are sorted by bookedStart in ascending order. The userId in the path must match the authenticated user, or the authenticated user must have administrator privileges."
+      description: "Returns the user's bookings within the requested date range, regardless of role (consumer or provider). Defaults to bookings in CONFIRMED, PAID, AWAITING_CONFIRMATION, or COMPLETED status; pass the status query parameter to retrieve a single specific status. Results are sorted by bookedStart in ascending order. The userId in the path must match the authenticated user, or the authenticated user must have administrator privileges."
       tags:
         - Calendar
       security:
@@ -3649,7 +3565,6 @@ paths:
                           name: Anna
                           surname: Schmidt
                         status: CONFIRMED
-                        locationType: AT_CONSUMER
                         serviceAddress:
                           street: "Brunnenstraße"
                           houseNumber: "25"
@@ -3658,7 +3573,6 @@ paths:
                         totalPrice: 37.5
                         bookedStart: "2026-05-05T14:00:00Z"
                         bookedEnd: "2026-05-05T15:30:00Z"
-                        durationHours: 1
                         createdAt: "2026-04-28T10:00:00Z"
         "400":
           description: Bad Request. One or more path or query parameters are invalid.
@@ -3729,7 +3643,6 @@ paths:
                 default:
                   summary: Example weekly schedule
                   value:
-                    timezone: Europe/Berlin
                     entries:
                       - dayOfWeek: MON
                         startTime: "09:00"
@@ -3803,7 +3716,6 @@ paths:
               default:
                 summary: Example weekly schedule replacement
                 value:
-                  timezone: Europe/Berlin
                   entries:
                     - dayOfWeek: MON
                       startTime: "09:00"
@@ -3834,7 +3746,6 @@ paths:
                 default:
                   summary: Example replaced weekly schedule
                   value:
-                    timezone: Europe/Berlin
                     entries:
                       - dayOfWeek: MON
                         startTime: "09:00"
@@ -3928,8 +3839,325 @@ paths:
                     errors:
                       - field: entries
                         message: overlapping schedule entries are not allowed on the same day
-                      - field: timezone
-                        message: must be a valid IANA timezone identifier
+  "/v1/users/{userId}/exceptions":
+    parameters:
+      - "$ref": "#/components/parameters/UserIdPathParam"
+    get:
+      summary: List schedule exceptions
+      description: "Returns all schedule exceptions for the provider identified by userId. Requires the authenticated user to be the owner or an admin."
+      operationId: listScheduleExceptions
+      tags:
+        - Exceptions
+      security:
+        - bearerHttpAuthentication: []
+      responses:
+        "200":
+          description: Schedule exceptions retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ScheduleExceptionCollectionResponse"
+              examples:
+                default:
+                  summary: Example exception list
+                  value:
+                    items:
+                      - exceptionId: "aa000000-0000-0000-0000-000000000001"
+                        userId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
+                        date: "2026-04-24"
+                        exceptionType: BLOCKED
+                        startTime: null
+                        endTime: null
+                        createdAt: "2026-04-10T08:00:00Z"
+                        updatedAt: "2026-04-10T08:00:00Z"
+                      - exceptionId: "aa000000-0000-0000-0000-000000000002"
+                        userId: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
+                        date: "2026-04-26"
+                        exceptionType: AVAILABLE
+                        startTime: "10:00"
+                        endTime: "14:00"
+                        createdAt: "2026-04-11T09:00:00Z"
+                        updatedAt: "2026-04-11T09:00:00Z"
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                notOwner:
+                  value:
+                    type: "https://api.mira.example/problems/insufficient-permissions"
+                    title: Forbidden
+                    status: 403
+                    detail: "Authenticated user is not allowed to access this user's exceptions"
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions
+                notProvider:
+                  value:
+                    type: "https://api.mira.example/problems/insufficient-permissions"
+                    title: Forbidden
+                    status: 403
+                    detail: Only providers can manage schedule exceptions
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions
+        "404":
+          description: Not Found. No resource exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                notFound:
+                  value:
+                    type: "https://api.mira.example/problems/resource-not-found"
+                    title: Not Found
+                    status: 404
+                    detail: User with the given identifier was not found
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions
+    post:
+      summary: Create schedule exception
+      description: "Creates a schedule exception for the given date. BLOCKED marks the provider fully unavailable (startTime/endTime must be null). AVAILABLE adds an extra window outside recurring hours (startTime and endTime required, endTime must be after startTime). Only one exception per date is allowed; duplicate dates are rejected with 409."
+      operationId: createScheduleException
+      tags:
+        - Exceptions
+      security:
+        - bearerHttpAuthentication: []
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/CreateScheduleExceptionRequest"
+            examples:
+              blocked:
+                summary: Block a full day
+                value:
+                  date: "2026-04-24"
+                  exceptionType: BLOCKED
+              available:
+                summary: Add extra availability window
+                value:
+                  date: "2026-04-26"
+                  exceptionType: AVAILABLE
+                  startTime: "10:00"
+                  endTime: "14:00"
+      responses:
+        "201":
+          description: Schedule exception created successfully.
+          headers:
+            Location:
+              description: URI of the created schedule exception.
+              required: true
+              schema:
+                type: string
+                format: uri-reference
+                example: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions/aa000000-0000-0000-0000-000000000001
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ScheduleExceptionResponse"
+        "400":
+          description: Bad Request. The request payload is invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                missingTime:
+                  value:
+                    type: "https://api.mira.example/problems/validation-error"
+                    title: Bad Request
+                    status: 400
+                    detail: Request body validation failed
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions
+                    errors:
+                      - field: startTime
+                        message: must not be null when exceptionType is AVAILABLE
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                notOwner:
+                  value:
+                    type: "https://api.mira.example/problems/insufficient-permissions"
+                    title: Forbidden
+                    status: 403
+                    detail: "Authenticated user is not allowed to modify this user's exceptions"
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions
+                notProvider:
+                  value:
+                    type: "https://api.mira.example/problems/insufficient-permissions"
+                    title: Forbidden
+                    status: 403
+                    detail: Only providers can manage schedule exceptions
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions
+        "404":
+          description: Not Found. No resource exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                notFound:
+                  value:
+                    type: "https://api.mira.example/problems/resource-not-found"
+                    title: Not Found
+                    status: 404
+                    detail: User with the given identifier was not found
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions
+        "409":
+          description: Conflict. An exception already exists for the given date.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                duplicateDate:
+                  value:
+                    type: "https://api.mira.example/problems/conflict"
+                    title: Conflict
+                    status: 409
+                    detail: A schedule exception already exists for this date
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions
+  "/v1/users/{userId}/exceptions/{exceptionId}":
+    parameters:
+      - "$ref": "#/components/parameters/UserIdPathParam"
+      - "$ref": "#/components/parameters/ExceptionIdPathParam"
+    patch:
+      summary: Update schedule exception
+      description: "Partially updates a schedule exception. Only startTime and endTime can be updated; both must be non-null and endTime must be after startTime."
+      operationId: updateScheduleException
+      tags:
+        - Exceptions
+      security:
+        - bearerHttpAuthentication: []
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/UpdateScheduleExceptionRequest"
+            examples:
+              updateTime:
+                summary: Update availability window
+                value:
+                  startTime: "10:00"
+                  endTime: "14:00"
+      responses:
+        "200":
+          description: Schedule exception updated successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ScheduleExceptionResponse"
+        "400":
+          description: Bad Request. The request payload is invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                invalidTime:
+                  value:
+                    type: "https://api.mira.example/problems/validation-error"
+                    title: Bad Request
+                    status: 400
+                    detail: Request body validation failed
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions/aa000000-0000-0000-0000-000000000001
+                    errors:
+                      - field: endTime
+                        message: must be after startTime
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                notOwner:
+                  value:
+                    type: "https://api.mira.example/problems/insufficient-permissions"
+                    title: Forbidden
+                    status: 403
+                    detail: "Authenticated user is not allowed to modify this user's exceptions"
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions/aa000000-0000-0000-0000-000000000001
+                notProvider:
+                  value:
+                    type: "https://api.mira.example/problems/insufficient-permissions"
+                    title: Forbidden
+                    status: 403
+                    detail: Only providers can manage schedule exceptions
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions/aa000000-0000-0000-0000-000000000001
+        "404":
+          description: Not Found. No resource exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                notFound:
+                  value:
+                    type: "https://api.mira.example/problems/resource-not-found"
+                    title: Not Found
+                    status: 404
+                    detail: Schedule exception with the given identifier was not found
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions/aa000000-0000-0000-0000-000000000001
+    delete:
+      summary: Delete schedule exception
+      description: "Deletes the schedule exception. Once removed, the recurring weekly schedule applies again for that date. Requires the authenticated user to be the owner or an admin."
+      operationId: deleteScheduleException
+      tags:
+        - Exceptions
+      security:
+        - bearerHttpAuthentication: []
+      responses:
+        "204":
+          description: Schedule exception deleted successfully.
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                notOwner:
+                  value:
+                    type: "https://api.mira.example/problems/insufficient-permissions"
+                    title: Forbidden
+                    status: 403
+                    detail: "Authenticated user is not allowed to modify this user's exceptions"
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions/aa000000-0000-0000-0000-000000000001
+                notProvider:
+                  value:
+                    type: "https://api.mira.example/problems/insufficient-permissions"
+                    title: Forbidden
+                    status: 403
+                    detail: Only providers can manage schedule exceptions
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions/aa000000-0000-0000-0000-000000000001
+        "404":
+          description: Not Found. No resource exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                notFound:
+                  value:
+                    type: "https://api.mira.example/problems/resource-not-found"
+                    title: Not Found
+                    status: 404
+                    detail: Schedule exception with the given identifier was not found
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions/aa000000-0000-0000-0000-000000000001  
 components:
   securitySchemes:
     bearerHttpAuthentication:
@@ -4006,10 +4234,18 @@ components:
         type: string
         format: uuid
     ProviderIdParam:
-      name: providerId
+      name: userId
       in: path
       required: true
       description: Provider user UUID.
+      schema:
+        type: string
+        format: uuid
+    ExceptionIdPathParam:
+      name: exceptionId
+      in: path
+      required: true
+      description: Schedule exception UUID.
       schema:
         type: string
         format: uuid
@@ -5262,12 +5498,10 @@ components:
         - listing
         - counterparty
         - status
-        - locationType
         - serviceAddress
         - totalPrice
         - bookedStart
         - bookedEnd
-        - durationHours
         - createdAt
       properties:
         bookingId:
@@ -5285,13 +5519,11 @@ components:
           description: The other party on this booking, relative to the authenticated user. For consumers, this is the provider. For providers, this is the consumer.
         status:
           "$ref": "#/components/schemas/BookingStatus"
-        locationType:
-          "$ref": "#/components/schemas/LocationType"
         serviceAddress:
           oneOf:
             - "$ref": "#/components/schemas/BookingServiceAddress"
             - type: "null"
-          description: "The address where the service will take place, resolved from locationType: AT_CONSUMER returns the consumer's private address, AT_PROVIDER returns the listing's address, and REMOTE returns null."
+          description: "Snapshot of the service address captured at booking creation time. For AT_CONSUMER bookings this is the consumer's address; for AT_PROVIDER bookings this is the listing's address."
         totalPrice:
           type: number
           format: double
@@ -5305,9 +5537,6 @@ components:
           type: string
           format: date-time
           example: "2026-05-05T15:30:00Z"
-        durationHours:
-          type: integer
-          example: 1
         createdAt:
           type: string
           format: date-time
@@ -5326,7 +5555,6 @@ components:
         - totalPrice
         - bookedStart
         - bookedEnd
-        - durationHours
         - createdAt
         - confirmedAt
         - completedAt
@@ -5334,8 +5562,10 @@ components:
         - consumerConfirmedAt
         - consumerConfirmationType
         - autoConfirmAt
+        - paidAt
         - cancelledAt
         - expiresAt
+        - allowedActions
       properties:
         bookingId:
           type: string
@@ -5359,7 +5589,7 @@ components:
           oneOf:
             - "$ref": "#/components/schemas/BookingServiceAddress"
             - type: "null"
-          description: "The address where the service will take place, resolved from locationType: AT_CONSUMER returns the consumer's private address, AT_PROVIDER returns the listing's address, and REMOTE returns null."
+          description: "Snapshot of the service address captured at booking creation time. For AT_CONSUMER bookings this is the consumer's address; for AT_PROVIDER bookings this is the listing's address."
         description:
           type: string
           example: Need help installing Office and migrating files from an old laptop. Two devices total.
@@ -5377,9 +5607,6 @@ components:
           type: string
           format: date-time
           example: "2026-05-05T15:30:00Z"
-        durationHours:
-          type: integer
-          example: 1
         createdAt:
           type: string
           format: date-time
@@ -5418,6 +5645,12 @@ components:
             - "null"
           format: date-time
           description: Timestamp at which the booking will be auto-completed if the second party does not acknowledge delivery in time.
+        paidAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: Set when payment is successfully completed.
         cancelledAt:
           type:
             - string
@@ -5430,6 +5663,24 @@ components:
             - "null"
           format: date-time
           description: Deadline by which a CONFIRMED booking must be paid. After this time the booking is automatically transitioned to EXPIRED.
+        allowedActions:
+          type: array
+          description: Actions the authenticated user is permitted to perform on this booking, based on current status and role.
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                description: Name of the action.
+                example: "cancel"
+              href:
+                type: string
+                description: API endpoint to call to perform the action.
+                example: "/v1/bookings/3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10/cancel"
+              method:
+                type: string
+                description: HTTP method to use.
+                example: "POST"
     BookingListingPreview:
       type: object
       required:
@@ -5466,7 +5717,7 @@ components:
         - houseNumber
         - city
         - postalCode
-      description: "The address at which the service will be delivered. The values are resolved at response time from the relevant source: for AT_CONSUMER bookings, the consumer's private address; for AT_PROVIDER bookings, the listing's address."
+      description: "Snapshot of the service address captured at booking creation time. For AT_CONSUMER bookings this is the consumer's address; for AT_PROVIDER bookings this is the listing's address."
       properties:
         street:
           type: string
@@ -5494,18 +5745,13 @@ components:
     ProviderAvailabilityResponse:
       type: object
       required:
-        - providerId
-        - timezone
+        - userId
         - days
       properties:
-        providerId:
+        userId:
           type: string
           format: uuid
           example: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
-        timezone:
-          type: string
-          description: "IANA timezone identifier in which the provider's working hours are defined."
-          example: Europe/Berlin
         days:
           type: array
           description: One entry per day in the requested range, in chronological order.
@@ -5567,7 +5813,6 @@ components:
       enum:
         - AT_CONSUMER
         - AT_PROVIDER
-        - REMOTE
     CalendarBookingsResponse:
       type: object
       required:
@@ -5580,13 +5825,8 @@ components:
     WeeklySchedule:
       type: object
       required:
-        - timezone
         - entries
       properties:
-        timezone:
-          type: string
-          description: IANA timezone identifier in which the schedule entries are interpreted.
-          example: Europe/Berlin
         entries:
           type: array
           description: Recurring weekly working windows. Multiple entries on the same day are allowed (for example, a morning and an afternoon block) but must not overlap.
@@ -5614,13 +5854,8 @@ components:
     ReplaceWeeklyScheduleRequest:
       type: object
       required:
-        - timezone
         - entries
       properties:
-        timezone:
-          type: string
-          description: IANA timezone identifier in which the schedule entries are interpreted.
-          example: Europe/Berlin
         entries:
           type: array
           minItems: 0
@@ -5637,6 +5872,116 @@ components:
         - FRI
         - SAT
         - SUN
+    ExceptionType:
+      type: string
+      enum:
+        - AVAILABLE
+        - BLOCKED
+    ScheduleExceptionResponse:
+      type: object
+      required:
+        - exceptionId
+        - userId
+        - date
+        - exceptionType
+        - startTime
+        - endTime
+        - createdAt
+        - updatedAt
+      properties:
+        exceptionId:
+          type: string
+          format: uuid
+          readOnly: true
+          example: "aa000000-0000-0000-0000-000000000001"
+        userId:
+          type: string
+          format: uuid
+          readOnly: true
+          example: "22bb22bb-2222-2222-2222-bbbbbbbbbbbb"
+        date:
+          type: string
+          format: date
+          description: "The calendar date this exception applies to, in ISO 8601 format."
+          example: "2026-04-24"
+        exceptionType:
+          "$ref": "#/components/schemas/ExceptionType"
+        startTime:
+          type:
+            - string
+            - "null"
+          pattern: "^([01]\\d|2[0-3]):([0-5]\\d)$"
+          description: "Local start time in HH:mm format. Null for all-day BLOCKED exceptions."
+          example: "10:00"
+        endTime:
+          type:
+            - string
+            - "null"
+          pattern: "^([01]\\d|2[0-3]):([0-5]\\d)$"
+          description: "Local end time in HH:mm format. Null for all-day BLOCKED exceptions. Must be strictly after startTime."
+          example: "14:00"
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+    ScheduleExceptionCollectionResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ScheduleExceptionResponse"
+    CreateScheduleExceptionRequest:
+      type: object
+      required:
+        - date
+        - exceptionType
+      additionalProperties: false
+      properties:
+        date:
+          type: string
+          format: date
+          description: "The calendar date to create the exception for, in ISO 8601 format."
+          example: "2026-04-24"
+        exceptionType:
+          "$ref": "#/components/schemas/ExceptionType"
+        startTime:
+          type:
+            - string
+            - "null"
+          pattern: "^([01]\\d|2[0-3]):([0-5]\\d)$"
+          description: "Required when exceptionType is AVAILABLE. Must be null or omitted when exceptionType is BLOCKED."
+          example: "10:00"
+        endTime:
+          type:
+            - string
+            - "null"
+          pattern: "^([01]\\d|2[0-3]):([0-5]\\d)$"
+          description: "Required when exceptionType is AVAILABLE. Must be strictly after startTime. Must be null or omitted when exceptionType is BLOCKED."
+          example: "14:00"
+    UpdateScheduleExceptionRequest:
+      type: object
+      required:
+        - startTime
+        - endTime
+      additionalProperties: false
+      properties:
+        startTime:
+          type: string
+          pattern: "^([01]\\d|2[0-3]):([0-5]\\d)$"
+          description: "Local start time in HH:mm format."
+          example: "10:00"
+        endTime:
+          type: string
+          pattern: "^([01]\\d|2[0-3]):([0-5]\\d)$"
+          description: "Local end time in HH:mm format. Must be strictly after startTime."
+          example: "14:00"
   responses:
     UnauthorizedError:
       description: Unauthorized. Authentication is required.

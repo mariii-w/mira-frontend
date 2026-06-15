@@ -1,27 +1,40 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { Pencil, Trash2, Check, X } from 'lucide-react'
 import { Modal } from './Modal'
 import { Button } from './Button'
-import { authFetch, type FetchResponse } from '../lib/authFetch'
 
-type ExceptionType = 'BLOCKED' | 'AVAILABLE'
+export type ExceptionType = 'BLOCKED' | 'AVAILABLE'
 type Tab = 'add' | 'manage'
 
-interface ScheduleException {
+export interface ScheduleException {
   exceptionId: string
   date: string
   exceptionType: ExceptionType
   startTime: string | null
   endTime: string | null
 }
-type ExceptionsResponse = { items: ScheduleException[] }
-type ErrorResponse = { detail?: string }
+
+export interface CreateScheduleExceptionInput {
+  date: string
+  exceptionType: ExceptionType
+  startTime?: string
+  endTime?: string
+}
+
+export interface UpdateScheduleExceptionInput {
+  startTime: string
+  endTime: string
+}
 
 interface Props {
   open: boolean
   onClose: () => void
-  userId: string
+  exceptions: ScheduleException[]
+  isCreating: boolean
+  errorMessage: string | null
+  onCreate: (exception: CreateScheduleExceptionInput) => void
+  onUpdate: (exceptionId: string, exception: UpdateScheduleExceptionInput) => void
+  onDelete: (exceptionId: string) => void
 }
 
 function tomorrowStr() {
@@ -41,36 +54,27 @@ function formatDate(dateStr: string) {
 }
 
 // --- Manage tab row ---
-function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId: string; onMutated: () => void }) {
+function ExceptionRow({
+  ex,
+  onUpdate,
+  onDelete,
+}: {
+  ex: ScheduleException
+  onUpdate: (exceptionId: string, exception: UpdateScheduleExceptionInput) => void
+  onDelete: (exceptionId: string) => void
+}) {
   const [editing, setEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [start, setStart] = useState(ex.startTime ? toInputTime(ex.startTime) : '09:00')
   const [end, setEnd] = useState(ex.endTime ? toInputTime(ex.endTime) : '17:00')
   const timeError = editing && start >= end ? 'End must be after start' : null
 
-  const { mutate: save, isPending: saving } = useMutation({
-    mutationFn: async () => {
-      const res = await authFetch<FetchResponse<ScheduleException | ErrorResponse>>(`/v1/users/${userId}/exceptions/${ex.exceptionId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ startTime: `${start}:00`, endTime: `${end}:00` }),
-      })
-      if (res.status < 200 || res.status >= 300) {
-        throw new Error(('detail' in res.data ? res.data.detail : undefined) ?? 'Failed to update')
-      }
-    },
-    onSuccess: () => { setEditing(false); onMutated() },
-  })
-
-  const { mutate: remove, isPending: removing } = useMutation({
-    mutationFn: async () => {
-      const res = await authFetch<FetchResponse<ErrorResponse>>(`/v1/users/${userId}/exceptions/${ex.exceptionId}`, { method: 'DELETE' })
-      if (res.status < 200 || res.status >= 300) throw new Error('Failed to delete')
-    },
-    onSuccess: onMutated,
-  })
-
   const canEdit = ex.startTime !== null && ex.endTime !== null
+
+  function save() {
+    onUpdate(ex.exceptionId, { startTime: start, endTime: end })
+    setEditing(false)
+  }
 
   return (
     <div className="rounded-xl border border-border p-3 flex flex-col gap-2">
@@ -118,11 +122,10 @@ function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId
               Cancel
             </button>
             <button
-              onClick={() => remove()}
-              disabled={removing}
+              onClick={() => onDelete(ex.exceptionId)}
               className="rounded-lg bg-red-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-40 transition-colors"
             >
-              {removing ? 'Deleting…' : 'Delete'}
+              Delete
             </button>
           </div>
         </div>
@@ -157,8 +160,8 @@ function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId
               className="flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-plum [&::-webkit-calendar-picker-indicator]:hidden"
             />
             <button
-              onClick={() => save()}
-              disabled={saving || !!timeError}
+              onClick={save}
+              disabled={!!timeError}
               aria-label="Save"
               className="p-1.5 rounded-lg bg-forest text-white hover:bg-forest/90 disabled:opacity-40 transition-colors"
             >
@@ -180,8 +183,16 @@ function ExceptionRow({ ex, userId, onMutated }: { ex: ScheduleException; userId
 }
 
 // --- Main modal ---
-export function ExceptionModal({ open, onClose, userId }: Props) {
-  const queryClient = useQueryClient()
+export function ExceptionModal({
+  open,
+  onClose,
+  exceptions,
+  isCreating,
+  errorMessage,
+  onCreate,
+  onUpdate,
+  onDelete,
+}: Props) {
   const [tab, setTab] = useState<Tab>('add')
 
   // Add form state
@@ -194,50 +205,28 @@ export function ExceptionModal({ open, onClose, userId }: Props) {
   const needsTimes = type === 'AVAILABLE' || !allDay
   const timeError = needsTimes && start >= end ? 'End time must be after start time' : null
 
-  // Exceptions list for manage tab
-  const { data: exceptionsData } = useQuery({
-    queryKey: ['exceptions', userId],
-    queryFn: async () => {
-      const res = await authFetch<FetchResponse<ExceptionsResponse>>(`/v1/users/${userId}/exceptions`)
-      if (res.status !== 200) throw new Error('Failed to load exceptions')
-      return res.data
-    },
-    enabled: open && !!userId && tab === 'manage',
-  })
+  const sortedExceptions = [...exceptions].sort((a, b) => a.date.localeCompare(b.date))
 
-  const exceptions = (exceptionsData?.items ?? []).sort((a, b) => a.date.localeCompare(b.date))
+  function resetForm() {
+    setType('BLOCKED')
+    setDate('')
+    setAllDay(true)
+    setStart('09:00')
+    setEnd('17:00')
+  }
 
-  const { mutate, isPending, error, reset } = useMutation({
-    mutationFn: async () => {
-      const body: Record<string, string> = { date, exceptionType: type }
-      if (needsTimes) {
-        body.startTime = `${start}:00`
-        body.endTime = `${end}:00`
-      }
-      const res = await authFetch<FetchResponse<ScheduleException | ErrorResponse>>(`/v1/users/${userId}/exceptions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (res.status < 200 || res.status >= 300) {
-        throw new Error(('detail' in res.data ? res.data.detail : undefined) ?? 'Failed to add exception')
-      }
-      return res.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exceptions', userId] })
-      setType('BLOCKED')
-      setDate('')
-      setAllDay(true)
-      setStart('09:00')
-      setEnd('17:00')
-      reset()
-      onClose()
-    },
-  })
+  function createException() {
+    const body: CreateScheduleExceptionInput = { date, exceptionType: type }
+    if (needsTimes) {
+      body.startTime = start
+      body.endTime = end
+    }
+    onCreate(body)
+    resetForm()
+  }
 
   function handleClose() {
-    reset()
+    resetForm()
     onClose()
   }
 
@@ -348,31 +337,31 @@ export function ExceptionModal({ open, onClose, userId }: Props) {
             </div>
           )}
 
-          {error && <p role="alert" className="text-sm text-red-600">{(error as Error).message}</p>}
+          {errorMessage && <p role="alert" className="text-sm text-red-600">{errorMessage}</p>}
 
           <div className="flex justify-end gap-3 mt-1">
-            <Button variant="secondary" size="md" onClick={handleClose} disabled={isPending}>Cancel</Button>
+            <Button variant="secondary" size="md" onClick={handleClose} disabled={isCreating}>Cancel</Button>
             <Button
               variant="accent"
               size="md"
-              onClick={() => mutate()}
-              disabled={isPending || !!timeError || !date}
+              onClick={createException}
+              disabled={isCreating || !!timeError || !date}
             >
-              {isPending ? 'Saving…' : type === 'BLOCKED' ? 'Block this time' : 'Add availability'}
+              {isCreating ? 'Saving…' : type === 'BLOCKED' ? 'Block this time' : 'Add availability'}
             </Button>
           </div>
         </div>
       ) : (
         <div role="tabpanel" className="mt-4 flex flex-col gap-2">
-          {exceptions.length === 0 ? (
+          {sortedExceptions.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">No exceptions set yet.</p>
           ) : (
-            exceptions.map((ex) => (
+            sortedExceptions.map((ex) => (
               <ExceptionRow
                 key={ex.exceptionId}
                 ex={ex}
-                userId={userId}
-                onMutated={() => queryClient.invalidateQueries({ queryKey: ['exceptions', userId] })}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
               />
             ))
           )}

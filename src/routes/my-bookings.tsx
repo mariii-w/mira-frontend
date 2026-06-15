@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  deleteV1BookingsBookingId,
   getGetV1UsersUserIdBookingsQueryKey,
   getV1BookingsBookingId,
   getV1UsersUserIdBookings,
   postV1BookingsBookingIdAccept,
   postV1BookingsBookingIdAcknowledgeDelivery,
+  postV1BookingsBookingIdCancel,
   postV1BookingsBookingIdMarkDelivered,
   postV1BookingsBookingIdRefuse,
 } from "../api/mira";
@@ -57,7 +57,7 @@ function buildAllowedActions(
   }
 
   if (!isProvider && ["PENDING", "CONFIRMED", "PAID"].includes(status)) {
-    actions.push({ rel: "cancel", href: "", method: "DELETE" });
+    actions.push({ rel: "cancel", href: "", method: "POST" });
   }
 
   return actions;
@@ -114,7 +114,7 @@ function MyBookingsRoute() {
   ): Promise<string | null> {
     const response =
       action.rel === "cancel"
-        ? await deleteV1BookingsBookingId(bookingId)
+        ? await postV1BookingsBookingIdCancel(bookingId)
         : action.rel === "accept"
           ? await postV1BookingsBookingIdAccept(bookingId)
           : action.rel === "refuse"

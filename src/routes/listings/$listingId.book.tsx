@@ -3,6 +3,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   getGetV1PublicListingsListingIdQueryKey,
+  getGetV1ListingsListingIdAvailabilityQueryKey,
+  getV1ListingsListingIdAvailability,
   getV1PublicListingsListingId,
   postV1Bookings,
 } from "../../api/mira";
@@ -12,10 +14,6 @@ import type {
   UnauthorizedErrorResponse,
 } from "../../api/model";
 import { BookingPage } from "../../components/BookingPage";
-import {
-  getListingAvailability,
-  getListingAvailabilityQueryKey,
-} from "../../lib/listingAvailability";
 
 export const Route = createFileRoute("/listings/$listingId/book")({
   component: BookingRoute,
@@ -44,12 +42,12 @@ function BookingRoute() {
   const to = new Date(year, month, 0);
 
   const { data: availability } = useQuery({
-    queryKey: getListingAvailabilityQueryKey(listingId, {
+    queryKey: getGetV1ListingsListingIdAvailabilityQueryKey(listingId, {
       from: toLocalDate(from),
       to: toLocalDate(to),
     }),
     queryFn: async () => {
-      const response = await getListingAvailability(
+      const response = await getV1ListingsListingIdAvailability(
         listingId,
         {
           from: toLocalDate(from),

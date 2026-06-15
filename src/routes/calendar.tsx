@@ -1,15 +1,26 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { CalendarDays, Plus, Clock, MapPin } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { CalendarGrid } from '../components/CalendarGrid'
 import { Button } from '../components/Button'
-import { StatusBadge, type BookingStatus } from '../components/BookingCard'
+import { StatusBadge } from '../components/BookingCard'
 import { WeeklyScheduleModal } from '../components/WeeklyScheduleModal'
 import { ExceptionModal } from '../components/ExceptionModal'
 import { useAuthStore } from '../stores/auth'
-import { authFetch, type FetchResponse } from '../lib/authFetch'
+import {
+  getGetV1UsersUserIdScheduleQueryKey,
+  getListScheduleExceptionsQueryKey,
+  useCreateScheduleException,
+  useDeleteScheduleException,
+  useGetV1UsersUserIdCalendar,
+  useGetV1UsersUserIdSchedule,
+  useListScheduleExceptions,
+  usePutV1UsersUserIdSchedule,
+  useUpdateScheduleException,
+} from '../api/mira'
+import type { BookingSummary, DayOfWeek, ProblemDetailsResponse, ScheduleExceptionResponse } from '../api/model'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute('/calendar')({
@@ -17,40 +28,12 @@ export const Route = createFileRoute('/calendar')({
 })
 
 // --- Types ---
-type BackendDayOfWeek = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN'
-
-interface ScheduleEntry {
-  dayOfWeek: BackendDayOfWeek
-  startTime: string
-  endTime: string
-}
+type BackendDayOfWeek = DayOfWeek
 
 // JS getDay(): 0=Sun,1=Mon,...,6=Sat  →  backend enum
 const JS_DAY_TO_BACKEND: BackendDayOfWeek[] = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
-interface ScheduleException {
-  exceptionId: string
-  date: string          // "YYYY-MM-DD"
-  exceptionType: 'BLOCKED' | 'AVAILABLE'
-  startTime: string | null
-  endTime: string | null
-}
-
-interface CalendarBooking {
-  bookingId: string
-  listingId: string
-  listing: { title: string }
-  counterparty: { userId: string; name: string; surname: string }
-  status: BookingStatus
-  serviceAddress: { street: string; houseNumber: string; city: string; postalCode: string } | null
-  totalPrice: number
-  bookedStart: string
-  bookedEnd: string
-}
-
-type CalendarResponse = { items: CalendarBooking[] }
-type ExceptionsResponse = { items: ScheduleException[] }
-type ScheduleResponse = { entries: ScheduleEntry[] }
+type CalendarBooking = BookingSummary
 
 // --- Helpers ---
 function toLocalDate(date: Date): string {
@@ -81,16 +64,13 @@ function groupByDate(bookings: CalendarBooking[]): Record<string, CalendarBookin
   return map
 }
 
-function fetchCalendar(userId: string, from: string, to: string) {
-  return authFetch<FetchResponse<CalendarResponse>>(`/v1/users/${userId}/calendar?from=${from}&to=${to}`)
-    .then((res) => {
-      if (res.status !== 200) throw new Error('Failed to load calendar')
-      return res.data
-    })
+function mutationErrorMessage(error: unknown, fallback: string) {
+  if (!error) return null
+  const problem = error as ProblemDetailsResponse | undefined
+  return problem?.detail ?? fallback
 }
 
 // --- Sub-components ---
-// eslint-disable-next-line react-refresh/only-export-components
 function BookingDayCard({ booking }: { booking: CalendarBooking }) {
   const duration = durationHours(booking.bookedStart, booking.bookedEnd)
   const address = booking.serviceAddress
@@ -118,7 +98,6 @@ function BookingDayCard({ booking }: { booking: CalendarBooking }) {
   )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 function UpcomingRow({ booking }: { booking: CalendarBooking }) {
   const d = new Date(booking.bookedStart)
   const monthAbbr = d.toLocaleString('en', { month: 'short' }).toUpperCase()
@@ -150,10 +129,11 @@ function UpcomingRow({ booking }: { booking: CalendarBooking }) {
 }
 
 // --- Main page ---
-// eslint-disable-next-line react-refresh/only-export-components
 export function CalendarPage() {
+  const queryClient = useQueryClient()
   const user = useAuthStore((s) => s.user)
   const userId = user?.userId
+  const queryUserId = userId ?? ''
   const isProvider = user?.userType === 'PROVIDER'
 
   const today = new Date()
@@ -173,41 +153,70 @@ export function CalendarPage() {
   const upcomingFrom = toLocalDate(today)
   const upcomingToStr = toLocalDate(upcomingTo)
 
-  const { data: monthData } = useQuery({
-    queryKey: ['calendar', userId, from, to],
-    queryFn: () => fetchCalendar(userId!, from, to),
-    enabled: !!userId,
-  })
+  const { data: monthResponse } = useGetV1UsersUserIdCalendar(
+    queryUserId,
+    { from, to },
+    { query: { enabled: !!userId } },
+  )
 
-  const { data: upcomingData } = useQuery({
-    queryKey: ['calendar-upcoming', userId, upcomingFrom, upcomingToStr],
-    queryFn: () => fetchCalendar(userId!, upcomingFrom, upcomingToStr),
-    enabled: !!userId,
-  })
+  const { data: upcomingResponse } = useGetV1UsersUserIdCalendar(
+    queryUserId,
+    { from: upcomingFrom, to: upcomingToStr },
+    { query: { enabled: !!userId } },
+  )
 
-  const { data: exceptionsData } = useQuery({
-    queryKey: ['exceptions', userId],
-    queryFn: async () => {
-      const res = await authFetch<FetchResponse<ExceptionsResponse>>(`/v1/users/${userId}/exceptions`)
-      if (res.status !== 200) throw new Error('Failed to load exceptions')
-      return res.data
+  const { data: exceptionsResponse } = useListScheduleExceptions(
+    queryUserId,
+    { query: { enabled: !!userId && isProvider } },
+  )
+
+  const { data: scheduleResponse, isLoading: scheduleLoading } = useGetV1UsersUserIdSchedule(
+    queryUserId,
+    { query: { enabled: !!userId && isProvider } },
+  )
+
+  const saveSchedule = usePutV1UsersUserIdSchedule({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetV1UsersUserIdScheduleQueryKey(queryUserId) })
+        setScheduleOpen(false)
+      },
     },
-    enabled: !!userId && isProvider,
   })
 
-  const { data: scheduleData } = useQuery({
-    queryKey: ['schedule', userId],
-    queryFn: async () => {
-      const res = await authFetch<FetchResponse<ScheduleResponse>>(`/v1/users/${userId}/schedule`)
-      if (res.status !== 200) throw new Error('Failed to load schedule')
-      return res.data
+  const createException = useCreateScheduleException({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListScheduleExceptionsQueryKey(queryUserId) })
+        setExceptionOpen(false)
+      },
     },
-    enabled: !!userId && isProvider,
   })
+
+  const updateException = useUpdateScheduleException({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListScheduleExceptionsQueryKey(queryUserId) })
+      },
+    },
+  })
+
+  const deleteException = useDeleteScheduleException({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListScheduleExceptionsQueryKey(queryUserId) })
+      },
+    },
+  })
+
+  const scheduleData = scheduleResponse?.status === 200 ? scheduleResponse.data : undefined
+  const exceptionsData = exceptionsResponse?.status === 200 ? exceptionsResponse.data : undefined
+  const monthData = monthResponse?.status === 200 ? monthResponse.data : undefined
+  const upcomingData = upcomingResponse?.status === 200 ? upcomingResponse.data : undefined
 
   const workingDays = new Set((scheduleData?.entries ?? []).map((e) => e.dayOfWeek))
 
-  const exceptionsByDate = (exceptionsData?.items ?? []).reduce<Record<string, ScheduleException[]>>(
+  const exceptionsByDate = (exceptionsData?.items ?? []).reduce<Record<string, ScheduleExceptionResponse[]>>(
     (acc, ex) => {
       if (!acc[ex.date]) acc[ex.date] = []
       acc[ex.date].push(ex)
@@ -450,12 +459,24 @@ export function CalendarPage() {
           <WeeklyScheduleModal
             open={scheduleOpen}
             onClose={() => setScheduleOpen(false)}
-            userId={userId}
+            entries={scheduleData?.entries ?? []}
+            isLoading={scheduleLoading}
+            isSaving={saveSchedule.isPending}
+            errorMessage={mutationErrorMessage(saveSchedule.error, 'Failed to save schedule')}
+            onSave={(schedule) => saveSchedule.mutate({
+              userId,
+              data: { entries: schedule.entries },
+            })}
           />
           <ExceptionModal
             open={exceptionOpen}
             onClose={() => setExceptionOpen(false)}
-            userId={userId}
+            exceptions={exceptionsData?.items ?? []}
+            isCreating={createException.isPending}
+            errorMessage={mutationErrorMessage(createException.error, 'Failed to add exception')}
+            onCreate={(exception) => createException.mutate({ userId, data: exception })}
+            onUpdate={(exceptionId, exception) => updateException.mutate({ userId, exceptionId, data: exception })}
+            onDelete={(exceptionId) => deleteException.mutate({ userId, exceptionId })}
           />
         </>
       )}
