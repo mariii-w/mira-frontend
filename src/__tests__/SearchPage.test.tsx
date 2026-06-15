@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
-import { SearchPage } from '../routes/search'
+import { BrowseServicesPage } from '../routes/search/browse-services'
 
 // ─── Search params state ───────────────────────────────────────────────────────
 
@@ -102,7 +102,7 @@ function renderPage() {
   })
   return render(
     <QueryClientProvider client={queryClient}>
-      <SearchPage />
+      <BrowseServicesPage />
     </QueryClientProvider>
   )
 }
@@ -114,7 +114,7 @@ beforeEach(() => {
   mockSearchParams = { ...DEFAULT_PARAMS }
 })
 
-describe('<SearchPage />', () => {
+describe('<BrowseServicesPage />', () => {
 
   describe('loading / error / empty states', () => {
     it('shows loading state while fetching', () => {

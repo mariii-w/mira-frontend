@@ -11,7 +11,7 @@ import { UserMenu } from './UserMenu'
 import { useAuthStore } from '../stores/auth'
 
 const NAV_LINKS = [
-  { label: 'Browse Services', to: '/search' },
+  { label: 'Browse Services', to: '/search/browse-services' },
   { label: 'Find providers',  to: '/' },
 ] as const
 

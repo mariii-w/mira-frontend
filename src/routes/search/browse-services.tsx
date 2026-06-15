@@ -3,15 +3,15 @@ import { z } from 'zod'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { X, Wrench, Users } from 'lucide-react'
-import { Navbar } from '../components/Navbar'
-import { SearchBar } from '../components/SearchBar'
-import { FilterBar, type ServiceTagOption } from '../components/FilterBar'
-import { ServiceCard } from '../components/ServiceCard'
-import { ServiceUserToggle } from '../components/ServiceUserToggle'
-import { Breadcrumb } from '../components/BreadCrumb'
-import { Pagination } from '../components/Pagination'
-import { FilterDrawer } from '../components/FilterDrawer'
-import { useAccessibilityStore } from '../stores/accessibility'
+import { Navbar } from '../../components/Navbar'
+import { SearchBar } from '../../components/SearchBar'
+import { FilterBar, type ServiceTagOption } from '../../components/FilterBar'
+import { ServiceCard } from '../../components/ServiceCard'
+import { ServiceUserToggle } from '../../components/ServiceUserToggle'
+import { Breadcrumb } from '../../components/BreadCrumb'
+import { Pagination } from '../../components/Pagination'
+import { FilterDrawer } from '../../components/FilterDrawer'
+import { useAccessibilityStore } from '../../stores/accessibility'
 
 // Types
 
@@ -70,9 +70,9 @@ type SearchParams = z.infer<typeof searchSchema>
 
 // Route
 
-export const Route = createFileRoute('/search')({
+export const Route = createFileRoute('/search/browse-services')({
   validateSearch: searchSchema,
-  component: SearchPage,
+  component: BrowseServicesPage,
 })
 
 // Helper
@@ -106,12 +106,11 @@ async function fetchServiceTags(): Promise<ServiceTag[]> {
 }
 
 // Search Page
-export function SearchPage() {
+export function BrowseServicesPage() {
   const search = Route.useSearch()
-  const navigate = useNavigate({ from: '/search' })
+  const navigate = useNavigate({ from: '/search/browse-services' })
+  const navigateToRoute = useNavigate()
   const easyRead = useAccessibilityStore(state => state.easyRead)
-
-  const [showUsers, setShowUsers] = useState(false)
 
   // Pending filter state — committed to URL on "Apply" / "Search"
   const [pendingQuery, setPendingQuery] = useState(search.q)
@@ -210,8 +209,8 @@ export function SearchPage() {
   // Breadcrumb
   const breadcrumbLinks = [
     { name: 'Home', href: '/' },
-    { name: 'Services', href: '/search' },
-    ...(search.q ? [{ name: search.q, href: `/search?q=${encodeURIComponent(search.q)}` }] : []),
+    { name: 'Services', href: '/search/browse-services' },
+    ...(search.q ? [{ name: search.q, href: `/search/browse-services?q=${encodeURIComponent(search.q)}` }] : []),
   ]
 
   // Subtitle line
@@ -235,8 +234,8 @@ export function SearchPage() {
                 labelRight="Users"
                 iconLeft={<Wrench />}
                 iconRight={<Users />}
-                checked={showUsers}
-                onCheckedChange={setShowUsers}
+                checked={false}
+                onCheckedChange={(checked) => { if (checked) navigateToRoute({ to: '/search/browse-users', search: { q: search.q, from: undefined } }) }}
               />
             </div>
             <SearchBar

@@ -10,13 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StyleguideRouteImport } from './routes/styleguide'
-import { Route as SearchRouteImport } from './routes/search'
 import { Route as MyListingsRouteImport } from './routes/my-listings'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as RegisterRouteRouteImport } from './routes/register/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegisterIndexRouteImport } from './routes/register/index'
+import { Route as SearchBrowseUsersRouteImport } from './routes/search/browse-users'
+import { Route as SearchBrowseServicesRouteImport } from './routes/search/browse-services'
 import { Route as RegisterRoleRouteImport } from './routes/register/role'
 import { Route as RegisterPhotoRouteImport } from './routes/register/photo'
 import { Route as RegisterNameRouteImport } from './routes/register/name'
@@ -28,11 +29,6 @@ import { Route as EditListingListingIdRouteImport } from './routes/edit-listing.
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
   path: '/styleguide',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MyListingsRoute = MyListingsRouteImport.update({
@@ -64,6 +60,16 @@ const RegisterIndexRoute = RegisterIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => RegisterRouteRoute,
+} as any)
+const SearchBrowseUsersRoute = SearchBrowseUsersRouteImport.update({
+  id: '/search/browse-users',
+  path: '/search/browse-users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchBrowseServicesRoute = SearchBrowseServicesRouteImport.update({
+  id: '/search/browse-services',
+  path: '/search/browse-services',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoleRoute = RegisterRoleRouteImport.update({
   id: '/role',
@@ -107,7 +113,6 @@ export interface FileRoutesByFullPath {
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-listings': typeof MyListingsRoute
-  '/search': typeof SearchRoute
   '/styleguide': typeof StyleguideRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
   '/register/about': typeof RegisterAboutRoute
@@ -116,6 +121,8 @@ export interface FileRoutesByFullPath {
   '/register/name': typeof RegisterNameRoute
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
+  '/search/browse-services': typeof SearchBrowseServicesRoute
+  '/search/browse-users': typeof SearchBrowseUsersRoute
   '/register/': typeof RegisterIndexRoute
 }
 export interface FileRoutesByTo {
@@ -123,7 +130,6 @@ export interface FileRoutesByTo {
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-listings': typeof MyListingsRoute
-  '/search': typeof SearchRoute
   '/styleguide': typeof StyleguideRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
   '/register/about': typeof RegisterAboutRoute
@@ -132,6 +138,8 @@ export interface FileRoutesByTo {
   '/register/name': typeof RegisterNameRoute
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
+  '/search/browse-services': typeof SearchBrowseServicesRoute
+  '/search/browse-users': typeof SearchBrowseUsersRoute
   '/register': typeof RegisterIndexRoute
 }
 export interface FileRoutesById {
@@ -141,7 +149,6 @@ export interface FileRoutesById {
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-listings': typeof MyListingsRoute
-  '/search': typeof SearchRoute
   '/styleguide': typeof StyleguideRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
   '/register/about': typeof RegisterAboutRoute
@@ -150,6 +157,8 @@ export interface FileRoutesById {
   '/register/name': typeof RegisterNameRoute
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
+  '/search/browse-services': typeof SearchBrowseServicesRoute
+  '/search/browse-users': typeof SearchBrowseUsersRoute
   '/register/': typeof RegisterIndexRoute
 }
 export interface FileRouteTypes {
@@ -160,7 +169,6 @@ export interface FileRouteTypes {
     | '/create-listing'
     | '/login'
     | '/my-listings'
-    | '/search'
     | '/styleguide'
     | '/edit-listing/$listingId'
     | '/register/about'
@@ -169,6 +177,8 @@ export interface FileRouteTypes {
     | '/register/name'
     | '/register/photo'
     | '/register/role'
+    | '/search/browse-services'
+    | '/search/browse-users'
     | '/register/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -176,7 +186,6 @@ export interface FileRouteTypes {
     | '/create-listing'
     | '/login'
     | '/my-listings'
-    | '/search'
     | '/styleguide'
     | '/edit-listing/$listingId'
     | '/register/about'
@@ -185,6 +194,8 @@ export interface FileRouteTypes {
     | '/register/name'
     | '/register/photo'
     | '/register/role'
+    | '/search/browse-services'
+    | '/search/browse-users'
     | '/register'
   id:
     | '__root__'
@@ -193,7 +204,6 @@ export interface FileRouteTypes {
     | '/create-listing'
     | '/login'
     | '/my-listings'
-    | '/search'
     | '/styleguide'
     | '/edit-listing/$listingId'
     | '/register/about'
@@ -202,6 +212,8 @@ export interface FileRouteTypes {
     | '/register/name'
     | '/register/photo'
     | '/register/role'
+    | '/search/browse-services'
+    | '/search/browse-users'
     | '/register/'
   fileRoutesById: FileRoutesById
 }
@@ -211,9 +223,10 @@ export interface RootRouteChildren {
   CreateListingRoute: typeof CreateListingRoute
   LoginRoute: typeof LoginRoute
   MyListingsRoute: typeof MyListingsRoute
-  SearchRoute: typeof SearchRoute
   StyleguideRoute: typeof StyleguideRoute
   EditListingListingIdRoute: typeof EditListingListingIdRoute
+  SearchBrowseServicesRoute: typeof SearchBrowseServicesRoute
+  SearchBrowseUsersRoute: typeof SearchBrowseUsersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -223,13 +236,6 @@ declare module '@tanstack/react-router' {
       path: '/styleguide'
       fullPath: '/styleguide'
       preLoaderRoute: typeof StyleguideRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/search': {
-      id: '/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/my-listings': {
@@ -273,6 +279,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/register/'
       preLoaderRoute: typeof RegisterIndexRouteImport
       parentRoute: typeof RegisterRouteRoute
+    }
+    '/search/browse-users': {
+      id: '/search/browse-users'
+      path: '/search/browse-users'
+      fullPath: '/search/browse-users'
+      preLoaderRoute: typeof SearchBrowseUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search/browse-services': {
+      id: '/search/browse-services'
+      path: '/search/browse-services'
+      fullPath: '/search/browse-services'
+      preLoaderRoute: typeof SearchBrowseServicesRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/register/role': {
       id: '/register/role'
@@ -356,9 +376,10 @@ const rootRouteChildren: RootRouteChildren = {
   CreateListingRoute: CreateListingRoute,
   LoginRoute: LoginRoute,
   MyListingsRoute: MyListingsRoute,
-  SearchRoute: SearchRoute,
   StyleguideRoute: StyleguideRoute,
   EditListingListingIdRoute: EditListingListingIdRoute,
+  SearchBrowseServicesRoute: SearchBrowseServicesRoute,
+  SearchBrowseUsersRoute: SearchBrowseUsersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
