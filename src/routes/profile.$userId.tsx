@@ -9,7 +9,7 @@ import { ServiceCard, type ServiceCardProps } from '../components/ServiceCard'
 import { useAuthStore } from '../stores/auth'
 import { fetchUser } from '../lib/fetchUser'
 import {useQuery} from '@tanstack/react-query'
-import { fetchUserListings } from '../lib/fetchListings'
+import { fetchUserPrivateListings, fetchUserPublicListings } from '../lib/fetchListings'
 
 /* eslint-disable react-refresh/only-export-components */
 export const Route = createFileRoute('/profile/$userId')({
@@ -37,7 +37,14 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
         queryFn: () => fetchUser(userId),
     })
 
-    
+    const { data: listingsResponse, isLoading: listingsLoading, error: listingsError } = useQuery({
+        queryKey: ['listings', userId],
+        queryFn: () => {
+                if(isOwner && isProvider) return fetchUserPrivateListings(userId)
+                if(isProvider) return fetchUserPublicListings(userId)
+            },
+        enabled: isProvider,
+    })
 
     if (isLoading) return <p>Loading…</p>
     if (error) return <p>Failed to load profile.</p>
@@ -48,12 +55,6 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
 
     const adress = user?.privateAddress
     const city = adress?.city ?? ''
-
-    const { data: listingsResponse, isLoading: listingsLoading, error: listingsError } = useQuery({
-        queryKey: ['listings', userId],
-        queryFn: () => fetchUserListings(userId),
-        enabled: isProvider,
-    })
 
     const serviceListings: ServiceCardEditProps[] = listingsResponse?.items?.map((listing) => ({
         link: `/service/${listing.listingId}`,
