@@ -25,6 +25,7 @@ export function AccessibilityPanel() {
 
       <Popover.Portal>
         <Popover.Content
+          aria-label="Accessibility settings"
           align="end"
           sideOffset={8}
           className="z-50 w-80 rounded-xl border border-border bg-surface p-2 shadow-lg"

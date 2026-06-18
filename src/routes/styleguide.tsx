@@ -27,6 +27,8 @@ import { Badge } from '../components/Badge.tsx';
 import { Breadcrumb } from '../components/BreadCrumb.tsx';
 import { FilterBar } from '../components/FilterBar.tsx';
 import { ServiceCard } from '../components/ServiceCard.tsx';
+import { BookingCard, type BookingSummary, type BookingDetails } from '../components/BookingCard.tsx';
+import { CalendarGrid } from '../components/CalendarGrid.tsx';
 import { ServiceUserToggle } from '../components/ServiceUserToggle.tsx';
 
 
@@ -65,11 +67,131 @@ const TEXT_VARIANTS: { variant: ButtonVariant; label: string }[] = [
 
 const SIZES: ButtonSize[] = ['sm', 'md', 'lg']
 
+const MOCK_PARTICIPANT = { userId: 'demo', name: 'Demo', surname: 'User' }
+
+function makeMockDetail(
+  bookingId: string,
+  description: string,
+  autoConfirmAt: string | null,
+  allowedActions: BookingDetails['allowedActions'],
+): BookingDetails {
+  return {
+    bookingId,
+    listingId: 'l-demo',
+    listing: { title: '' },
+    consumer: MOCK_PARTICIPANT,
+    provider: MOCK_PARTICIPANT,
+    status: 'PENDING',
+    locationType: 'AT_CONSUMER',
+    serviceAddress: null,
+    description,
+    totalPrice: 0,
+    bookedStart: new Date().toISOString(),
+    bookedEnd:   new Date().toISOString(),
+    createdAt:   new Date().toISOString(),
+    confirmedAt: null, paidAt: null, providerCompletedAt: null,
+    consumerConfirmedAt: null, consumerConfirmationType: null,
+    autoConfirmAt,
+    completedAt: null, cancelledAt: null, expiresAt: null,
+    allowedActions,
+  }
+}
+
+const BOOKING_SAMPLES: { summary: BookingSummary; detail: BookingDetails }[] = [
+  {
+    summary: {
+      bookingId: '1',
+      listingId: 'l1',
+      listing: { title: 'PC Support & Laptop Help' },
+      counterparty: { userId: 'u1', name: 'Klaus', surname: 'Müller' },
+      status: 'PENDING',
+      serviceAddress: { street: 'Hauptstraße', houseNumber: '24', city: 'Berlin', postalCode: '10115' },
+      totalPrice: 22,
+      bookedStart: new Date(Date.now() + 86400000 * 3).toISOString(),
+      bookedEnd:   new Date(Date.now() + 86400000 * 3 + 3600000).toISOString(),
+      createdAt:   new Date().toISOString(),
+    },
+    detail: makeMockDetail('1', 'My Windows laptop is running very slowly and fans are loud. Please scan and clean it up.', null, [
+      { rel: 'accept', href: '#', method: 'POST' },
+      { rel: 'refuse', href: '#', method: 'POST' },
+    ]),
+  },
+  {
+    summary: {
+      bookingId: '2',
+      listingId: 'l2',
+      listing: { title: 'Wi-Fi & Router Setup' },
+      counterparty: { userId: 'u2', name: 'Anna', surname: 'Weiß' },
+      status: 'AWAITING_CONFIRMATION',
+      serviceAddress: { street: 'Torstraße', houseNumber: '12', city: 'Berlin', postalCode: '10119' },
+      totalPrice: 25,
+      bookedStart: new Date(Date.now() - 86400000).toISOString(),
+      bookedEnd:   new Date(Date.now() - 86400000 + 3600000).toISOString(),
+      createdAt:   new Date().toISOString(),
+    },
+    detail: makeMockDetail('2', 'New Fritzbox, please configure.', new Date(Date.now() + 86400000 * 7).toISOString(), [
+      { rel: 'acknowledge-delivery', href: '#', method: 'POST' },
+    ]),
+  },
+  {
+    summary: {
+      bookingId: '3',
+      listingId: 'l3',
+      listing: { title: 'Smart Home Setup' },
+      counterparty: { userId: 'u3', name: 'Lena', surname: 'Kraus' },
+      status: 'COMPLETED',
+      serviceAddress: { street: 'Ludwigstraße', houseNumber: '11', city: 'Berlin', postalCode: '10115' },
+      totalPrice: 50,
+      bookedStart: new Date(Date.now() - 86400000 * 5).toISOString(),
+      bookedEnd:   new Date(Date.now() - 86400000 * 5 + 7200000).toISOString(),
+      createdAt:   new Date().toISOString(),
+    },
+    detail: makeMockDetail('3', 'Set up Philips Hue lights and Google Home in the living room.', null, []),
+  },
+]
+
+
+interface CalDayProps {
+  date: Date
+  calToday: Date
+  selectedDay: Date | null
+  onSelect: (d: Date) => void
+}
+
+function CalDay({ date, calToday, selectedDay, onSelect }: CalDayProps) {
+  const todayMidnight = new Date(calToday.getFullYear(), calToday.getMonth(), calToday.getDate())
+  const dateMidnight  = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const isPast     = todayMidnight.getTime() > dateMidnight.getTime()
+  const isSelected = selectedDay?.toDateString() === date.toDateString()
+  const isToday    = date.toDateString() === calToday.toDateString()
+  return (
+    <button
+      type="button"
+      disabled={isPast}
+      onClick={() => onSelect(date)}
+      aria-label={date.toDateString()}
+      aria-pressed={isSelected}
+      className={[
+        'w-full aspect-square rounded-lg text-small font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+        isPast     ? 'text-muted/40 cursor-not-allowed' : 'hover:bg-mint',
+        isSelected ? 'bg-primary text-primary-foreground hover:bg-primary' : '',
+        isToday && !isSelected ? 'ring-1 ring-primary text-primary' : '',
+        !isSelected && !isToday && !isPast ? 'text-foreground' : '',
+      ].join(' ')}
+    >
+      {date.getDate()}
+    </button>
+  )
+}
+
 export const Route = createFileRoute('/styleguide')({ component: Styleguide })
 
 function Styleguide() {
-  const [checked, setChecked] = useState(false);
-  
+  const [checked, setChecked] = useState(false)
+  const [calYear, setCalYear] = useState(new Date().getFullYear())
+  const [calMonth, setCalMonth] = useState(new Date().getMonth() + 1)
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null)
+  const calToday = new Date()
   return (
     <div className="p-6 space-y-12 bg-white min-h-dvh">
       <section>
@@ -361,39 +483,81 @@ function Styleguide() {
       </div>
     </section>
 
+      <section className="flex flex-col gap-3">
+        <h2>Service Card</h2>
+        <div className='w-5xl'>
+          <ServiceCard
+              link='#'
+              pictureLink='./pic/ServiceExample1.png'
+              location={'München'}
+              providerFirstName={'Patrick'}
+              providerLastName={'Stock'}
+              varified={true}
+              label={'Laptop & Wi-Fi setup'}
+              description={'I help with Windows, macOS, printers, Wi-Fi, smart TVs and phone-to-laptop setups. Friendly with first-time users and seniors.'}
+              tags={[
+                { tagId: '1', name: 'Wi-Fi',       isBarrierefrei: false },
+                { tagId: '2', name: 'Windows',      isBarrierefrei: false },
+                { tagId: '3', name: 'Printers',     isBarrierefrei: false },
+                { tagId: '4', name: 'Barrierefrei', isBarrierefrei: true  },
+              ]}
+              hourRate={20}
+          />
+        </div>
+      </section>
+
+      <h2>Service User Toggle</h2>
+      <section>
+        <div className='w-96 bg-charcoal p-6 rounded-lg'>
+          <ServiceUserToggle
+              id="service-toggle"
+              labelLeft="Services"
+              labelRight="Users"
+              checked={checked}
+              onCheckedChange={setChecked}
+          />
+        </div>
+      </section>
+
     <section className="flex flex-col gap-3">
-      <h2>Service Card</h2>
-      <div className='w-5xl'>
-        <ServiceCard
-            link='#'
-            pictureLink='./pic/ServiceExample1.png' 
-            location={'München'} 
-            providerFirstName={'Patrick'} 
-            providerLastName={'Stock'} 
-            varified={true} 
-            label={'Laptop & Wi-Fi setup'} 
-            description={'I help with Windows, macOS, printers, Wi-Fi, smart TVs and phone-to-laptop setups. Friendly with first-time users and seniors.'} 
-            tags={[
-              { tagId: '1', name: 'Wi-Fi',       isBarrierefrei: false },
-              { tagId: '2', name: 'Windows',      isBarrierefrei: false },
-              { tagId: '3', name: 'Printers',     isBarrierefrei: false },
-              { tagId: '4', name: 'Barrierefrei', isBarrierefrei: true  },
-            ]}
-            hourRate={20}
-            />
+      <h2>Booking Card</h2>
+      <div className="flex flex-col gap-4 max-w-2xl">
+        {BOOKING_SAMPLES.map(({ summary, detail }) => (
+          <BookingCard
+            key={summary.bookingId}
+            booking={summary}
+            mockDetail={detail}
+            onActionComplete={() => {}}
+            loadBookingDetails={async () => detail}
+            performBookingAction={async () => null}
+          />
+        ))}
       </div>
     </section>
 
-      <h2>Service User Toggle</h2>
-    <section>
-      <div className='w-96 bg-charcoal p-6 rounded-lg'>
-        <ServiceUserToggle
-            id="service-toggle"
-            labelLeft="Services"
-            labelRight="Users"
-            checked={checked}
-            onCheckedChange={setChecked}
+
+    <section className="flex flex-col gap-3">
+      <h2>Calendar Grid</h2>
+      <div className="p-6 bg-surface border border-border rounded-lg max-w-sm">
+        <CalendarGrid
+          year={calYear}
+          month={calMonth}
+          onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m) }}
+          minDate={calToday}
+          renderDay={(date) => (
+            <CalDay
+              date={date}
+              calToday={calToday}
+              selectedDay={selectedDay}
+              onSelect={setSelectedDay}
+            />
+          )}
         />
+        {selectedDay && (
+          <p className="mt-3 text-small text-muted text-center">
+            Selected: {selectedDay.toLocaleDateString('default', { weekday: 'short', day: 'numeric', month: 'long' })}
+          </p>
+        )}
       </div>
     </section>
 

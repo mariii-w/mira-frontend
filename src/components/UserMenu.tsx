@@ -35,12 +35,13 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
 
       <Popover.Portal>
         <Popover.Content
+          aria-label="User menu"
           align="end"
           sideOffset={8}
           className="z-50 w-56 rounded-xl border border-border bg-surface p-2 shadow-lg"
         >
           <Row icon={<UserRound size={15} />} title="View Profile" to="/" />
-          <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/" />
+          <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/my-bookings" />
           {isProvider && (
             <Row icon={<LayoutList size={15} />} title="My Services" to="/my-listings" />
           )}

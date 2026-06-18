@@ -60,9 +60,17 @@ describe('<MultiSelect />', () => {
     expect(screen.getByRole('button', { name: 'Service tags, 2 selected' })).toBeInTheDocument()
   })
 
-  it('passes aria-required to the button', () => {
+  it('describes the trigger as required without marking the button required', () => {
     render(<MultiSelect options={OPTIONS} value={[]} onChange={vi.fn()} aria-label="Service tags" aria-required />)
-    expect(screen.getByRole('button', { name: 'Service tags' })).toHaveAttribute('aria-required', 'true')
+    const button = screen.getByRole('button', { name: 'Service tags' })
+    expect(button).not.toHaveAttribute('aria-required')
+    expect(button).toHaveAccessibleDescription('Required')
+  })
+
+  it('marks the listbox as required when opened', () => {
+    render(<MultiSelect options={OPTIONS} value={[]} onChange={vi.fn()} aria-label="Service tags" aria-required />)
+    fireEvent.click(screen.getByRole('button', { name: 'Service tags' }))
+    expect(screen.getByRole('listbox', { name: 'Service tags' })).toHaveAttribute('aria-required', 'true')
   })
 
   it('passes aria-describedby to the button', () => {
@@ -76,6 +84,22 @@ describe('<MultiSelect />', () => {
       />,
     )
     expect(screen.getByRole('button', { name: 'Service tags' })).toHaveAttribute('aria-describedby', 'tags-error')
+  })
+
+  it('keeps caller descriptions when adding a generated helper description', () => {
+    render(
+      <MultiSelect
+        options={OPTIONS}
+        value={['1']}
+        onChange={vi.fn()}
+        aria-label="Service tags"
+        aria-describedby="tags-help"
+      />,
+    )
+    expect(screen.getByRole('button', { name: 'Service tags, 1 selected' })).toHaveAttribute(
+      'aria-describedby',
+      'tags-help',
+    )
   })
 
   it('sets the id on the button', () => {
