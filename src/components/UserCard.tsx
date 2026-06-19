@@ -31,6 +31,8 @@ export function UserCard({
   const displayName = [firstName, lastName].filter(Boolean).join(' ') || username
   const initials = getInitials(firstName, lastName, username)
 
+  // Providers use the page's primary colour (violet on the users search, via
+  // the variant remap); plain users stay green.
   const avatarBg = isProvider ? 'bg-primary' : 'bg-green-500'
   const badgeBg = isProvider ? 'bg-primary text-primary-foreground' : 'bg-green-500 text-white'
 
@@ -58,7 +60,7 @@ export function UserCard({
               <p className="text-small text-muted">@{username}</p>
             </div>
             <span className={`shrink-0 ml-auto text-label font-medium px-2.5 py-0.5 rounded-full ${badgeBg}`}>
-              {isProvider ? 'Provider' : 'User'}
+              {isProvider ? 'Provider' : 'Consumer'}
             </span>
           </div>
 

@@ -12,6 +12,8 @@ import { Breadcrumb } from '../../components/BreadCrumb'
 import { Pagination } from '../../components/Pagination'
 import { FilterDrawer } from '../../components/FilterDrawer'
 import { useAccessibilityStore } from '../../stores/accessibility'
+import { getPublicListings, getServiceTags } from '../../api/mira'
+import type { GetPublicListingsParams } from '../../api/model'
 
 // Types
 
@@ -75,34 +77,33 @@ export const Route = createFileRoute('/_search/browse-services')({
   component: BrowseServicesPage,
 })
 
-// Helper
+// Helper — map UI search state to the generated client's params.
+// The listings endpoint has no free-text param, so `q` is not sent here;
+// it only drives the heading and the search box.
 
-function toPublicListingsQuery(params: SearchParams): URLSearchParams {
-  const freeQuery = params.q.trim()
+function toListingsParams(params: SearchParams): GetPublicListingsParams {
   const city = params.city.trim()
-  const queryParams = new URLSearchParams({ limit: '20' })
-
-  if (freeQuery) queryParams.set('q', freeQuery)
-  if (city) queryParams.set('city', city)
-  if (city && params.radiusKm != null) queryParams.set('radiusKm', String(params.radiusKm))
-  if (params.minPrice != null) queryParams.set('minPrice', String(params.minPrice))
-  if (params.maxPrice != null) queryParams.set('maxPrice', String(params.maxPrice))
-  for (const id of params.tagIds) queryParams.append('tagIds', id)
-  if (params.from) queryParams.set('from', params.from)
-
-  return queryParams
+  return {
+    limit: 20,
+    ...(city ? { city } : {}),
+    ...(city && params.radiusKm != null ? { radiusKm: params.radiusKm } : {}),
+    ...(params.minPrice != null ? { minPrice: params.minPrice } : {}),
+    ...(params.maxPrice != null ? { maxPrice: params.maxPrice } : {}),
+    ...(params.tagIds.length ? { tagIds: params.tagIds } : {}),
+    ...(params.from ? { from: params.from } : {}),
+  }
 }
 
 async function fetchPublicListings(params: SearchParams): Promise<PublicListingCollectionResponse> {
-  const response = await fetch(`/v1/public-listings?${toPublicListingsQuery(params)}`)
-  if (!response.ok) throw new Error('Listings could not be loaded.')
-  return response.json()
+  const response = await getPublicListings(toListingsParams(params))
+  if (response.status !== 200) throw new Error('Listings could not be loaded.')
+  return response.data as unknown as PublicListingCollectionResponse
 }
 
 async function fetchServiceTags(): Promise<ServiceTag[]> {
-  const response = await fetch('/v1/service-tags')
-  if (!response.ok) throw new Error('Tags could not be loaded.')
-  return response.json()
+  const response = await getServiceTags()
+  if (response.status !== 200) throw new Error('Tags could not be loaded.')
+  return (response.data ?? []) as unknown as ServiceTag[]
 }
 
 // Search Page

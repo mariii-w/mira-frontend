@@ -13,6 +13,8 @@ export interface SearchBarProps extends InputHTMLAttributes<HTMLInputElement> {
   onCityChange?: (city: string) => void
   onRadiusChange?: (radius: number) => void
   onSearch?: () => void
+  /** Show the location/radius popover. Defaults to true (Services search). */
+  showLocation?: boolean
 }
 
 export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function SearchBar(
@@ -23,6 +25,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
     onCityChange,
     onRadiusChange,
     onSearch,
+    showLocation = true,
     ...rest
   },
   ref,
@@ -46,6 +49,8 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
         {...rest}
       />
       <div className="absolute inset-y-0 right-0 flex items-center gap-2 pr-2">
+        {showLocation && (
+        <>
         <div className="my-1 w-0.5 bg-border/30" />
         <div className="p-2">
           <Popover.Root>
@@ -86,7 +91,9 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
             </Popover.Portal>
           </Popover.Root>
         </div>
-        <Button variant="accent" onClick={onSearch} aria-label="Search">
+        </>
+        )}
+        <Button variant="primary" onClick={onSearch} aria-label="Search">
           <Search size={18} className="lg:hidden" aria-hidden="true" />
           <span className="hidden lg:inline">Search</span>
         </Button>

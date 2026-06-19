@@ -105,7 +105,7 @@ export function EditListingPage() {
       try {
         const response = await getServiceTags();
         if (!cancelled && response.status === 200) {
-          setAvailableTags(response.data.items);
+          setAvailableTags(response.data ?? []);
         }
       } catch (err) {
         console.error("Failed to load tags:", err);

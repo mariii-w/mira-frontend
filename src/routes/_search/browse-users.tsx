@@ -10,6 +10,8 @@ import { Breadcrumb } from '../../components/BreadCrumb'
 import { Pagination } from '../../components/Pagination'
 import { UserCard } from '../../components/UserCard'
 import { useAccessibilityStore } from '../../stores/accessibility'
+import { getPublicProfilesCollection } from '../../api/mira'
+import type { GetPublicProfilesCollectionParams } from '../../api/model'
 
 // Types
 
@@ -47,20 +49,21 @@ export const Route = createFileRoute('/_search/browse-users')({
   component: BrowseUsersPage,
 })
 
-// Helpers
+// Helpers — the profiles endpoint supports only free-text + cursor pagination.
 
-function toBrowseUsersQuery(params: BrowseUsersParams): URLSearchParams {
-  const queryParams = new URLSearchParams({ limit: '20' })
+function toProfilesParams(params: BrowseUsersParams): GetPublicProfilesCollectionParams {
   const freeQuery = params.q.trim()
-  if (freeQuery) queryParams.set('q', freeQuery)
-  if (params.from) queryParams.set('from', params.from)
-  return queryParams
+  return {
+    limit: 20,
+    ...(freeQuery ? { 'free-query': freeQuery } : {}),
+    ...(params.from ? { from: params.from } : {}),
+  }
 }
 
 async function fetchPublicProfiles(params: BrowseUsersParams): Promise<PublicProfileCollectionResponse> {
-  const response = await fetch(`/v1/public-profiles?${toBrowseUsersQuery(params)}`)
-  if (!response.ok) throw new Error('Users could not be loaded.')
-  return response.json()
+  const response = await getPublicProfilesCollection(toProfilesParams(params))
+  if (response.status !== 200) throw new Error('Users could not be loaded.')
+  return response.data as unknown as PublicProfileCollectionResponse
 }
 
 // Browse Users Page
@@ -129,7 +132,8 @@ export function BrowseUsersPage() {
             </div>
             <SearchBar
               className="flex-1"
-              placeholder="Search for a user…"
+              placeholder="Search by name or username…"
+              showLocation={false}
               value={pendingQuery}
               onChange={(e) => setPendingQuery(e.target.value)}
               onSearch={commitSearch}
@@ -156,7 +160,7 @@ export function BrowseUsersPage() {
               <h1 className="font-heading text-h1 font-bold text-foreground">
                 {search.q ? `Users matching "${search.q}"` : 'Users'}
               </h1>
-              <p className="text-small text-muted mt-1">Sorted by relevance</p>
+              <p className="text-small text-muted mt-1">Showing public profiles</p>
             </div>
 
             {/* Loading */}
@@ -183,7 +187,7 @@ export function BrowseUsersPage() {
             {/* Results list */}
             {profilesQuery.isSuccess && profiles.length > 0 && (
               <>
-                <ul role="list" aria-label="User results" className="flex flex-col gap-4 list-none m-0 p-0">
+                <ul role="list" aria-label="User results" className="grid grid-cols-1 lg:grid-cols-2 gap-4 list-none m-0 p-0">
                   {profiles.map((profile) => (
                     <li key={profile.userId}>
                       <UserCard

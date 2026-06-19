@@ -140,16 +140,14 @@ function setupMocks(
       if (url === "/v1/service-tags") {
         return {
           status: 200,
-          data: {
-            items: [
-              {
-                tagId: "tag-1",
-                name: "IT",
-                isBarrierefrei: false,
-                isActive: true,
-              },
-            ],
-          },
+          data: [
+            {
+              tagId: "tag-1",
+              name: "IT",
+              isBarrierefrei: false,
+              isActive: true,
+            },
+          ],
         };
       }
       return { status: 200, data: { ...listing, media } };

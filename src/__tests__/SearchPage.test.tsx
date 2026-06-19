@@ -4,6 +4,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import { BrowseServicesPage } from '../routes/_search/browse-services'
+import { getPublicListings, getServiceTags } from '../api/mira'
 
 // ─── Search params state ───────────────────────────────────────────────────────
 
@@ -49,10 +50,15 @@ vi.mock('../components/Navbar', () => ({
   Navbar: () => <nav data-testid="navbar" />,
 }))
 
-// ─── Fetch mock ────────────────────────────────────────────────────────────────
+// ─── Generated-client mock ───────────────────────────────────────────────────
 
-const mockFetch = vi.fn()
-vi.stubGlobal('fetch', mockFetch)
+vi.mock('../api/mira', () => ({
+  getPublicListings: vi.fn(),
+  getServiceTags: vi.fn(),
+}))
+
+const mockGetPublicListings = vi.mocked(getPublicListings)
+const mockGetServiceTags = vi.mocked(getServiceTags)
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -78,22 +84,21 @@ function mockApiSuccess({
   next = null as string | null,
   tags = [] as object[],
 } = {}) {
-  mockFetch.mockImplementation(async (url: string) => {
-    if (String(url).startsWith('/v1/service-tags')) {
-      return { ok: true, json: async () => tags }
-    }
-    return {
-      ok: true,
-      json: async () => ({ items, cursor: { limit: 20, next } }),
-    }
-  })
+  mockGetPublicListings.mockResolvedValue({
+    data: { items, cursor: { limit: 20, next } },
+    status: 200,
+    headers: new Headers(),
+  } as never)
+  mockGetServiceTags.mockResolvedValue({
+    data: tags,
+    status: 200,
+    headers: new Headers(),
+  } as never)
 }
 
-function calledListingsUrl(): URL {
-  const call = mockFetch.mock.calls.find((c: unknown[]) =>
-    String(c[0]).includes('/v1/public-listings')
-  )
-  return new URL(String(call![0]), 'http://localhost')
+function listingsParams(): Record<string, unknown> {
+  const call = mockGetPublicListings.mock.calls.at(-1)
+  return (call?.[0] ?? {}) as Record<string, unknown>
 }
 
 function renderPage() {
@@ -118,17 +123,16 @@ describe('<BrowseServicesPage />', () => {
 
   describe('loading / error / empty states', () => {
     it('shows loading state while fetching', () => {
-      mockFetch.mockReturnValue(new Promise(() => {}))
+      mockGetPublicListings.mockReturnValue(new Promise(() => {}) as never)
+      mockGetServiceTags.mockResolvedValue({ data: [], status: 200, headers: new Headers() } as never)
       renderPage()
       expect(screen.getByRole('status')).toBeInTheDocument()
       expect(screen.getByText('Loading…')).toBeInTheDocument()
     })
 
     it('shows error message when listings fetch fails', async () => {
-      mockFetch.mockImplementation(async (url: string) => {
-        if (String(url).startsWith('/v1/service-tags')) return { ok: true, json: async () => [] }
-        return { ok: false }
-      })
+      mockGetServiceTags.mockResolvedValue({ data: [], status: 200, headers: new Headers() } as never)
+      mockGetPublicListings.mockResolvedValue({ data: {}, status: 500, headers: new Headers() } as never)
       renderPage()
       await waitFor(() =>
         expect(screen.getByRole('alert')).toHaveTextContent('Listings could not be loaded.')
@@ -228,59 +232,57 @@ describe('<BrowseServicesPage />', () => {
   })
 
   describe('API parameters', () => {
-    it('calls /v1/public-listings with limit=20', async () => {
+    it('calls getPublicListings with limit=20', async () => {
       mockApiSuccess()
       renderPage()
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/v1/public-listings')))
-      expect(calledListingsUrl().searchParams.get('limit')).toBe('20')
+      await waitFor(() => expect(mockGetPublicListings).toHaveBeenCalled())
+      expect(listingsParams().limit).toBe(20)
     })
 
-    it('does not send radiusKm when city is empty', async () => {
+    it('does not send radiusKm or city when city is empty', async () => {
       mockApiSuccess()
       renderPage()
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/v1/public-listings')))
-      expect(calledListingsUrl().searchParams.has('radiusKm')).toBe(false)
-      expect(calledListingsUrl().searchParams.has('city')).toBe(false)
+      await waitFor(() => expect(mockGetPublicListings).toHaveBeenCalled())
+      expect(listingsParams()).not.toHaveProperty('radiusKm')
+      expect(listingsParams()).not.toHaveProperty('city')
     })
 
     it('sends city and radiusKm when city is set', async () => {
       mockSearchParams = { ...DEFAULT_PARAMS, city: 'Munich', radiusKm: 10 }
       mockApiSuccess()
       renderPage()
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('city=Munich')))
-      const url = calledListingsUrl()
-      expect(url.searchParams.get('city')).toBe('Munich')
-      expect(url.searchParams.get('radiusKm')).toBe('10')
+      await waitFor(() => expect(mockGetPublicListings).toHaveBeenCalled())
+      expect(listingsParams().city).toBe('Munich')
+      expect(listingsParams().radiusKm).toBe(10)
     })
 
     it('sends maxPrice when below 100', async () => {
       mockSearchParams = { ...DEFAULT_PARAMS, maxPrice: 40 }
       mockApiSuccess()
       renderPage()
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('maxPrice=40')))
-      expect(calledListingsUrl().searchParams.get('maxPrice')).toBe('40')
+      await waitFor(() => expect(mockGetPublicListings).toHaveBeenCalled())
+      expect(listingsParams().maxPrice).toBe(40)
     })
 
     it('omits maxPrice when undefined', async () => {
       mockApiSuccess()
       renderPage()
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/v1/public-listings')))
-      expect(calledListingsUrl().searchParams.has('maxPrice')).toBe(false)
+      await waitFor(() => expect(mockGetPublicListings).toHaveBeenCalled())
+      expect(listingsParams()).not.toHaveProperty('maxPrice')
     })
 
-    it('sends tagIds as repeated params', async () => {
+    it('sends tagIds', async () => {
       mockSearchParams = { ...DEFAULT_PARAMS, tagIds: ['uuid-a', 'uuid-b'] }
       mockApiSuccess()
       renderPage()
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('tagIds=uuid-a')))
-      const url = calledListingsUrl()
-      expect(url.searchParams.getAll('tagIds')).toEqual(['uuid-a', 'uuid-b'])
+      await waitFor(() => expect(mockGetPublicListings).toHaveBeenCalled())
+      expect(listingsParams().tagIds).toEqual(['uuid-a', 'uuid-b'])
     })
 
-    it('fetches /v1/service-tags on mount', async () => {
+    it('loads service tags on mount', async () => {
       mockApiSuccess()
       renderPage()
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledWith('/v1/service-tags'))
+      await waitFor(() => expect(mockGetServiceTags).toHaveBeenCalled())
     })
   })
 

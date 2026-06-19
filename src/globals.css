@@ -93,6 +93,16 @@
   }
 }
 
+/* Users variant repaints the search UI violet by remapping the primary token
+   for this subtree only. Existing `*-primary` utilities follow automatically,
+   so no per-component changes are needed. Scoped to <main>, so the Navbar
+   (and its primary-coloured Login button) stays green. */
+[data-search-variant="users"] {
+  --color-primary: var(--color-accent);
+  --color-primary-hover: var(--color-accent-hover);
+  --color-primary-foreground: var(--color-accent-foreground);
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
