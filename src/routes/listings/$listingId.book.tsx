@@ -2,11 +2,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  getGetV1PublicListingsListingIdQueryKey,
-  getGetV1ListingsListingIdAvailabilityQueryKey,
-  getV1ListingsListingIdAvailability,
-  getV1PublicListingsListingId,
-  postV1Bookings,
+  getGetPublicListingQueryKey,
+  getGetAvailabilityQueryKey,
+  getAvailability,
+  getPublicListing,
+  createBooking,
 } from "../../api/mira";
 import type {
   CreateBookingRequest,
@@ -42,12 +42,12 @@ function BookingRoute() {
   const to = new Date(year, month, 0);
 
   const { data: availability } = useQuery({
-    queryKey: getGetV1ListingsListingIdAvailabilityQueryKey(listingId, {
+    queryKey: getGetAvailabilityQueryKey(listingId, {
       from: toLocalDate(from),
       to: toLocalDate(to),
     }),
     queryFn: async () => {
-      const response = await getV1ListingsListingIdAvailability(
+      const response = await getAvailability(
         listingId,
         {
           from: toLocalDate(from),
@@ -67,9 +67,9 @@ function BookingRoute() {
   });
 
   const { data: listing } = useQuery({
-    queryKey: getGetV1PublicListingsListingIdQueryKey(listingId),
+    queryKey: getGetPublicListingQueryKey(listingId),
     queryFn: async () => {
-      const response = await getV1PublicListingsListingId(listingId);
+      const response = await getPublicListing(listingId);
 
       if (response.status !== 200) {
         throw new Error(
@@ -84,7 +84,7 @@ function BookingRoute() {
 
   const bookingMutation = useMutation({
     mutationFn: async (booking: CreateBookingRequest) => {
-      const response = await postV1Bookings(booking);
+      const response = await createBooking(booking);
 
       if (response.status !== 201) {
         throw new Error(getErrorDetail(response.data) ?? "Booking failed");

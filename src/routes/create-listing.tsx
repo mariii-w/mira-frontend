@@ -6,9 +6,9 @@ import {
   type ServiceTag,
 } from "../components/CreateListing";
 import {
-  getV1ServiceTags,
-  postV1Listings,
-  postV1ListingsListingIdMedia,
+  getServiceTags,
+  createListing,
+  uploadListingMedia,
 } from "../api/mira";
 
 export const Route = createFileRoute("/create-listing")({
@@ -28,7 +28,7 @@ function CreateListingPage() {
       setTagsLoading(true);
 
       try {
-        const response = await getV1ServiceTags();
+        const response = await getServiceTags();
         if (!cancelled) setAvailableTags(response.data.items);
       } catch (err) {
         console.error("Failed to load tags:", err);
@@ -45,7 +45,7 @@ function CreateListingPage() {
   }, []);
 
   async function handleSubmit(values: CreateListingFormValues) {
-    const response = await postV1Listings({
+    const response = await createListing({
       title: values.title,
       description: values.description,
       price: values.price,
@@ -61,7 +61,7 @@ function CreateListingPage() {
     }
 
     if (values.imageFiles.length > 0) {
-      const mediaResponse = await postV1ListingsListingIdMedia(
+      const mediaResponse = await uploadListingMedia(
         response.data.listingId,
         {
           files: values.imageFiles,

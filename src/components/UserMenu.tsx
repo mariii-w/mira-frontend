@@ -3,7 +3,7 @@ import { ChevronDown, LogOut, CalendarCheck, LayoutList, UserRound } from 'lucid
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from './Button'
 import { AvatarIcon } from './AvatarIcon'
-import { logout } from '../stores/auth'
+import { signOut } from '../stores/auth'
 
 interface UserMenuProps {
   firstName: string
@@ -17,7 +17,7 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
   const displayName = lastName ? `${firstName} ${lastName[0]}.` : firstName
 
   async function handleLogout() {
-    await logout()
+    await signOut()
     navigate({ to: '/' })
   }
 

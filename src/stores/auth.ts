@@ -1,9 +1,5 @@
 import { create } from "zustand";
-import {
-  getPrivateUserProfile,
-  postV1AuthLogout,
-  postV1AuthRefresh,
-} from "../api/mira";
+import { getPrivateUserProfile, logout, refresh } from "../api/mira";
 import type { PrivateUserProfileResponse } from "../api/model";
 
 export type User = PrivateUserProfileResponse;
@@ -75,7 +71,7 @@ export async function get_access_token(
   if (!forceRefresh && isAccessTokenUsable(cachedToken)) return cachedToken;
 
   if (!accessTokenRequest) {
-    accessTokenRequest = postV1AuthRefresh({
+    accessTokenRequest = refresh({
       credentials: "include",
     })
       .then((refreshRes) => {
@@ -131,9 +127,9 @@ export async function exchangeRefreshForAccess(): Promise<boolean> {
   return true;
 }
 
-export async function logout(): Promise<void> {
+export async function signOut(): Promise<void> {
   try {
-    await postV1AuthLogout({ credentials: "include" });
+    await logout({ credentials: "include" });
   } finally {
     useAuthStore.getState().clear();
   }

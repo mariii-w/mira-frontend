@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getV1PublicListings } from "../api/mira";
+import { getPublicListings } from "../api/mira";
 import { Home } from "../components/Home";
 import type { PublicListingSummary } from "../api/model";
 
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
 
 async function loadHome(): Promise<HomeLoaderData> {
   try {
-    const response = await getV1PublicListings({ limit: 8 });
+    const response = await getPublicListings({ limit: 8 });
 
     if (response.status !== 200) {
       return { featuredListings: [] };

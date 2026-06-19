@@ -2,11 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  getGetV1UsersUserIdListingsQueryKey,
-  getV1UsersUserIdListings,
+  getGetAuthorListingsQueryKey,
+  getAuthorListings,
 } from "../api/mira";
 import type {
-  GetV1UsersUserIdListingsParams,
+  GetAuthorListingsParams,
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
 } from "../api/model";
@@ -28,7 +28,7 @@ function getErrorDetail(
 function getListingParams(
   statusFilter: StatusFilter,
   currentFrom: string | null,
-): GetV1UsersUserIdListingsParams {
+): GetAuthorListingsParams {
   return {
     limit: 20,
     ...(currentFrom ? { from: currentFrom } : {}),
@@ -66,12 +66,12 @@ export function MyListingsRoute() {
     error: queryError,
   } = useQuery({
     queryKey: userId
-      ? getGetV1UsersUserIdListingsQueryKey(userId, params)
+      ? getGetAuthorListingsQueryKey(userId, params)
       : ["my-listings"],
     queryFn: async () => {
       if (!userId) throw new Error("You must be signed in to view services.");
 
-      const response = await getV1UsersUserIdListings(
+      const response = await getAuthorListings(
         userId,
         params,
       );
@@ -89,12 +89,12 @@ export function MyListingsRoute() {
 
   const { data: countsData } = useQuery({
     queryKey: userId
-      ? getGetV1UsersUserIdListingsQueryKey(userId, { limit: 100 })
+      ? getGetAuthorListingsQueryKey(userId, { limit: 100 })
       : ["my-listings", "counts"],
     queryFn: async () => {
       if (!userId) throw new Error("You must be signed in to view services.");
 
-      const response = await getV1UsersUserIdListings(
+      const response = await getAuthorListings(
         userId,
         { limit: 100 },
       );

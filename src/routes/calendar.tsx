@@ -2,16 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  createScheduleException,
-  deleteScheduleException,
-  getGetV1UsersUserIdCalendarQueryKey,
-  getGetV1UsersUserIdScheduleQueryKey,
-  getListScheduleExceptionsQueryKey,
-  getV1UsersUserIdCalendar,
-  getV1UsersUserIdSchedule,
-  listScheduleExceptions,
-  putV1UsersUserIdSchedule,
-  updateScheduleException,
+  createException,
+  deleteException,
+  getGetCalendarQueryKey,
+  getGetWeeklyScheduleQueryKey,
+  getListExceptionsQueryKey,
+  getCalendar,
+  getWeeklySchedule,
+  listExceptions,
+  replaceWeeklySchedule,
+  updateException,
 } from "../api/mira";
 import type {
   CreateScheduleExceptionRequest,
@@ -61,9 +61,9 @@ function CalendarRoute() {
   const upcomingToStr = toLocalDate(upcomingTo);
 
   const { data: monthResponse } = useQuery({
-    queryKey: getGetV1UsersUserIdCalendarQueryKey(queryUserId, { from, to }),
+    queryKey: getGetCalendarQueryKey(queryUserId, { from, to }),
     queryFn: async ({ signal }) =>
-      getV1UsersUserIdCalendar(
+      getCalendar(
         queryUserId,
         { from, to },
         { signal, headers: await getAuthHeaders() },
@@ -72,12 +72,12 @@ function CalendarRoute() {
   });
 
   const { data: upcomingResponse } = useQuery({
-    queryKey: getGetV1UsersUserIdCalendarQueryKey(queryUserId, {
+    queryKey: getGetCalendarQueryKey(queryUserId, {
       from: upcomingFrom,
       to: upcomingToStr,
     }),
     queryFn: async ({ signal }) =>
-      getV1UsersUserIdCalendar(
+      getCalendar(
         queryUserId,
         { from: upcomingFrom, to: upcomingToStr },
         { signal, headers: await getAuthHeaders() },
@@ -86,9 +86,9 @@ function CalendarRoute() {
   });
 
   const { data: exceptionsResponse } = useQuery({
-    queryKey: getListScheduleExceptionsQueryKey(queryUserId),
+    queryKey: getListExceptionsQueryKey(queryUserId),
     queryFn: async ({ signal }) =>
-      listScheduleExceptions(queryUserId, {
+      listExceptions(queryUserId, {
         signal,
         headers: await getAuthHeaders(),
       }),
@@ -96,9 +96,9 @@ function CalendarRoute() {
   });
 
   const { data: scheduleResponse, isLoading: scheduleLoading } = useQuery({
-    queryKey: getGetV1UsersUserIdScheduleQueryKey(queryUserId),
+    queryKey: getGetWeeklyScheduleQueryKey(queryUserId),
     queryFn: async ({ signal }) =>
-      getV1UsersUserIdSchedule(queryUserId, {
+      getWeeklySchedule(queryUserId, {
         signal,
         headers: await getAuthHeaders(),
       }),
@@ -109,31 +109,31 @@ function CalendarRoute() {
     mutationFn: async (
       schedule: Pick<ReplaceWeeklyScheduleRequest, "entries">,
     ) =>
-      putV1UsersUserIdSchedule(
+      replaceWeeklySchedule(
         queryUserId,
         { entries: schedule.entries },
         { headers: await getAuthHeaders() },
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: getGetV1UsersUserIdScheduleQueryKey(queryUserId),
+        queryKey: getGetWeeklyScheduleQueryKey(queryUserId),
       });
     },
   });
 
-  const createException = useMutation({
+  const createExceptionMutation = useMutation({
     mutationFn: async (exception: CreateScheduleExceptionRequest) =>
-      createScheduleException(queryUserId, exception, {
+      createException(queryUserId, exception, {
         headers: await getAuthHeaders(),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: getListScheduleExceptionsQueryKey(queryUserId),
+        queryKey: getListExceptionsQueryKey(queryUserId),
       });
     },
   });
 
-  const updateException = useMutation({
+  const updateExceptionMutation = useMutation({
     mutationFn: async ({
       exceptionId,
       exception,
@@ -141,24 +141,24 @@ function CalendarRoute() {
       exceptionId: string;
       exception: UpdateScheduleExceptionRequest;
     }) =>
-      updateScheduleException(queryUserId, exceptionId, exception, {
+      updateException(queryUserId, exceptionId, exception, {
         headers: await getAuthHeaders(),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: getListScheduleExceptionsQueryKey(queryUserId),
+        queryKey: getListExceptionsQueryKey(queryUserId),
       });
     },
   });
 
-  const deleteException = useMutation({
+  const deleteExceptionMutation = useMutation({
     mutationFn: async (exceptionId: string) =>
-      deleteScheduleException(queryUserId, exceptionId, {
+      deleteException(queryUserId, exceptionId, {
         headers: await getAuthHeaders(),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: getListScheduleExceptionsQueryKey(queryUserId),
+        queryKey: getListExceptionsQueryKey(queryUserId),
       });
     },
   });
@@ -209,21 +209,21 @@ function CalendarRoute() {
           ? saveSchedule.error
           : saveSchedule.data?.data
       }
-      exceptionCreating={createException.isPending}
+      exceptionCreating={createExceptionMutation.isPending}
       exceptionError={
-        isSuccessStatus(createException.data?.status ?? 201)
-          ? createException.error
-          : createException.data?.data
+        isSuccessStatus(createExceptionMutation.data?.status ?? 201)
+          ? createExceptionMutation.error
+          : createExceptionMutation.data?.data
       }
       onMonthChange={handleMonthChange}
       onSelectedDateChange={setSelectedDate}
       onToday={goToday}
       onSaveSchedule={(schedule) => saveSchedule.mutate(schedule)}
-      onCreateException={(exception) => createException.mutate(exception)}
+      onCreateException={(exception) => createExceptionMutation.mutate(exception)}
       onUpdateException={(exceptionId, exception) =>
-        updateException.mutate({ exceptionId, exception })
+        updateExceptionMutation.mutate({ exceptionId, exception })
       }
-      onDeleteException={(exceptionId) => deleteException.mutate(exceptionId)}
+      onDeleteException={(exceptionId) => deleteExceptionMutation.mutate(exceptionId)}
     />
   );
 }
