@@ -4,28 +4,39 @@ import { Button } from "./Button";
 import * as Popover from "@radix-ui/react-popover";
 import { Label } from "./Label";
 import { Input } from "./Input";
-import { MapPin } from 'lucide-react'
+import { MapPin, Search } from 'lucide-react'
 import { Slider } from "./Slider";
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement>
-{
-  place?: string
+export interface SearchBarProps extends InputHTMLAttributes<HTMLInputElement> {
+  city?: string
   radius?: number
+  onCityChange?: (city: string) => void
+  onRadiusChange?: (radius: number) => void
+  onSearch?: () => void
+  /** Show the location/radius popover. Defaults to true (Services search). */
+  showLocation?: boolean
 }
 
-export const SearchBar = forwardRef<HTMLInputElement, InputProps>(function SearchBar(
-  { className,
-    place,
+export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function SearchBar(
+  {
+    className,
+    city = '',
     radius = 20,
-     ...rest 
-    },
-  ref, 
+    onCityChange,
+    onRadiusChange,
+    onSearch,
+    showLocation = true,
+    ...rest
+  },
+  ref,
 ) {
-  let placeButtonContent = (!place ? "Ort": place) + " - " + radius +"km"
+  const locationLabel = (city || 'Location') + ' · ' + radius + 'km'
+
   return (
     <div className="relative w-full">
       <input
         ref={ref}
+        aria-label="Search"
         className={cn(
           'w-full h-15 px-4 text-body text-foreground',
           'bg-white border border-border rounded-4xl',
@@ -38,36 +49,55 @@ export const SearchBar = forwardRef<HTMLInputElement, InputProps>(function Searc
         {...rest}
       />
       <div className="absolute inset-y-0 right-0 flex items-center gap-2 pr-2">
+        {showLocation && (
+        <>
         <div className="my-1 w-0.5 bg-border/30" />
         <div className="p-2">
-            <Popover.Root>
-                <Popover.Trigger asChild>
-                    <Button variant="ghost" leadingIcon={<MapPin/>}>{placeButtonContent}</Button>
-                </Popover.Trigger>
-                <Popover.Portal>                    
-                    <Popover.Content
-                    align="end"
-                    sideOffset={8}
-                    className="z-50 w-70 rounded-xl border border-border bg-surface p-2 shadow-lg"
-                    >
-                      <div className="mx-5">
-
-                      
-                        <div className="flex flex-col gap-1.5">
-                            <Label>Ort</Label>
-                            <Input placeholder="Ortssuche" />
-                        </div>
-                        <div className="my-2 h-px bg-border/30" />
-                        <div className="flex flex-col gap-1.5">
-                            <Label>Radius</Label>
-                            <Slider label={""} min={10} max={50}/>
-                        </div>
-                      </div>
-                    </Popover.Content>
-                </Popover.Portal>
-            </Popover.Root>
+          <Popover.Root>
+            <Popover.Trigger asChild>
+              <Button variant="ghost" leadingIcon={<MapPin />}>
+                <span className="hidden lg:inline">{locationLabel}</span>
+              </Button>
+            </Popover.Trigger>
+            <Popover.Portal>
+              <Popover.Content
+                aria-label="Search location filters"
+                align="end"
+                sideOffset={8}
+                className="z-50 w-70 rounded-xl border border-border bg-surface p-2 shadow-lg"
+              >
+                <div className="mx-5">
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Location</Label>
+                    <Input
+                      placeholder="Search location"
+                      value={city}
+                      onChange={(e) => onCityChange?.(e.target.value)}
+                    />
+                  </div>
+                  <div className="my-2 h-px bg-border/30" />
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Radius</Label>
+                    <Slider
+                      label="Radius"
+                      min={1}
+                      max={50}
+                      unit="km"
+                      value={radius}
+                      onChange={onRadiusChange}
+                    />
+                  </div>
+                </div>
+              </Popover.Content>
+            </Popover.Portal>
+          </Popover.Root>
         </div>
-        <Button variant="accent">Suchen</Button>
+        </>
+        )}
+        <Button variant="primary" onClick={onSearch} aria-label="Search">
+          <Search size={18} className="lg:hidden" aria-hidden="true" />
+          <span className="hidden lg:inline">Search</span>
+        </Button>
       </div>
     </div>
   );

@@ -7,11 +7,12 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  function Textarea({ className, rows = 4, error, id, ...rest }, ref) {
+  function Textarea({ className, rows = 4, error, id, 'aria-describedby': ariaDescribedby, ...rest }, ref) {
     const generatedId = useId()
     const textareaId = id ?? generatedId
     const hasError = !!error
     const errorId = `${textareaId}-error`
+    const describedBy = [ariaDescribedby, hasError ? errorId : undefined].filter(Boolean).join(' ') || undefined
 
     return (
       <div className="flex w-full flex-col gap-1.5">
@@ -20,7 +21,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={textareaId}
           rows={rows}
           aria-invalid={hasError || undefined}
-          aria-describedby={hasError ? errorId : undefined}
+          aria-describedby={describedBy}
           className={cn(
             'w-full px-4 py-3 text-body text-foreground',
             'bg-linen border rounded-lg',

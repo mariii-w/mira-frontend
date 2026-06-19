@@ -2,17 +2,17 @@ import { createRootRoute, Outlet, useLocation, useNavigate } from '@tanstack/rea
 import { useEffect } from 'react'
 import { exchangeRefreshForAccess, useAuthStore } from '../stores/auth'
 
-const REGISTRATION_STEP_PATHS = [
+// Steps that should redirect to "/" once registration is complete.
+// about/photo/done stay excluded so the flow can still show them.
+const REQUIRED_REGISTRATION_STEP_PATHS = [
   '/register',
   '/register/role',
   '/register/name',
   '/register/address',
-  '/register/about',
-  '/register/photo',
 ] as const
 
-function isRegistrationStep(pathname: string): boolean {
-  return (REGISTRATION_STEP_PATHS as readonly string[]).includes(pathname)
+function isRequiredRegistrationStep(pathname: string): boolean {
+  return (REQUIRED_REGISTRATION_STEP_PATHS as readonly string[]).includes(pathname)
 }
 
 function shouldSkipUnregisteredGuard(pathname: string): boolean {
@@ -33,11 +33,9 @@ function RootComponent() {
     if (!user) return
 
     if (user.registrationComplete) {
-      // TEMP (testing): registered users may revisit registration steps.
-
-      
-      if (isRegistrationStep(location.pathname)) {
-      navigate({ to: '/' })
+      // Only bounce from required steps — let about/photo/done stay reachable.
+      if (isRequiredRegistrationStep(location.pathname)) {
+        navigate({ to: '/' })
       }
       return
     }

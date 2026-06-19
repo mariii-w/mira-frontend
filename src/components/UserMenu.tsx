@@ -3,7 +3,7 @@ import { ChevronDown, LogOut, CalendarCheck, LayoutList, UserRound } from 'lucid
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from './Button'
 import { AvatarIcon } from './AvatarIcon'
-import { logout } from '../stores/auth'
+import { signOut } from '../stores/auth'
 
 interface UserMenuProps {
   firstName: string
@@ -17,7 +17,7 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
   const displayName = lastName ? `${firstName} ${lastName[0]}.` : firstName
 
   async function handleLogout() {
-    await logout()
+    await signOut()
     navigate({ to: '/' })
   }
 
@@ -35,14 +35,15 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
 
       <Popover.Portal>
         <Popover.Content
+          aria-label="User menu"
           align="end"
           sideOffset={8}
           className="z-50 w-56 rounded-xl border border-border bg-surface p-2 shadow-lg"
         >
           <Row icon={<UserRound size={15} />} title="View Profile" to="/" />
-          <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/" />
+          <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/my-bookings" />
           {isProvider && (
-            <Row icon={<LayoutList size={15} />} title="Meine Anzeigen" to="/" />
+            <Row icon={<LayoutList size={15} />} title="My Services" to="/my-listings" />
           )}
           <div className="my-1 h-px bg-border/30" />
           <button

@@ -8,15 +8,36 @@ default:
       - node_modules/
   before_script:
     - npm ci --prefer-offline --no-audit
+    - npm run openapi
 
 stages:
   - build
   - test
+  - accessibility-route-check
+  - accessibility
+  - lint
+  - release
 
 build:
   stage: build
   script:
     - npm run build
+    - apk add --no-cache zip
+    - zip -r dist.zip dist/
+  artifacts:
+    paths:
+      - dist.zip
+    expire_in: never
+
+lint:
+  stage: lint
+  script:
+    - npm run lint
+
+accessibility-route-check:
+  stage: accessibility-route-check
+  script:
+    - npm run check:routes-no-html
 
 test:
   stage: test
@@ -32,3 +53,43 @@ test:
       coverage_report:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
+
+accessibility:
+  stage: accessibility
+  script:
+    - npm run test:a11y
+  coverage: '/All files\s+\|\s+(\d+\.?\d*)/'
+  artifacts:
+    when: always
+    paths:
+      - coverage-a11y/
+    reports:
+      junit: junit-a11y.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage-a11y/cobertura-coverage.xml
+
+create_release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: "$CI_COMMIT_TAG"
+  before_script: []
+  needs:
+    - job: build
+      artifacts: true
+    - job: test
+    - job: accessibility
+  script:
+    - echo "Creating release for $CI_COMMIT_TAG"
+  release:
+    tag_name: "$CI_COMMIT_TAG"
+    name: "Release $CI_COMMIT_TAG"
+    description: |
+      Automated release for $CI_COMMIT_TAG.
+      Commit: $CI_COMMIT_SHA
+      Pipeline: $CI_PIPELINE_URL
+    assets:
+      links:
+        - name: "dist.zip"
+          url: "$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist.zip?job=build"
