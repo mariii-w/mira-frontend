@@ -9,15 +9,15 @@ import {
   type EditListingStatusAction,
 } from "../components/EditListing";
 import {
-  deleteV1ListingsListingId,
-  deleteV1ListingsListingIdMediaMediaId,
-  getV1ServiceTags,
-  getV1UsersUserIdListingsListingId,
-  patchV1ListingsListingId,
-  postV1ListingsListingIdMedia,
-  postV1ListingsListingIdPause,
-  postV1ListingsListingIdPublish,
-  postV1ListingsListingIdResume,
+  deleteListing,
+  deleteListingMedia,
+  getServiceTags,
+  getAuthorListing,
+  updateListing,
+  uploadListingMedia,
+  pauseListing,
+  publishListing,
+  resumeListing,
 } from "../api/mira";
 import { useAuthStore } from "../stores/auth";
 import type { ProblemDetailsResponse } from "../api/model";
@@ -53,7 +53,7 @@ export function EditListingPage() {
   const refreshListing = useCallback(async (): Promise<EditListingDetails> => {
     if (!userId) throw new Error("You must be signed in to edit this listing.");
 
-    const response = await getV1UsersUserIdListingsListingId(
+    const response = await getAuthorListing(
       userId,
       listingId,
     );
@@ -103,9 +103,9 @@ export function EditListingPage() {
       setTagsLoading(true);
 
       try {
-        const response = await getV1ServiceTags();
+        const response = await getServiceTags();
         if (!cancelled && response.status === 200) {
-          setAvailableTags(response.data.items);
+          setAvailableTags(response.data ?? []);
         }
       } catch (err) {
         console.error("Failed to load tags:", err);
@@ -122,7 +122,7 @@ export function EditListingPage() {
   }, []);
 
   async function handleSubmit(values: EditListingFormValues) {
-    const updateResponse = await patchV1ListingsListingId(
+    const updateResponse = await updateListing(
       listingId,
       {
         title: values.title,
@@ -141,7 +141,7 @@ export function EditListingPage() {
     }
 
     if (values.imageFiles.length > 0) {
-      const mediaResponse = await postV1ListingsListingIdMedia(
+      const mediaResponse = await uploadListingMedia(
         listingId,
         { files: values.imageFiles },
       );
@@ -158,7 +158,7 @@ export function EditListingPage() {
   }
 
   async function handleRemoveImage(mediaId: string) {
-    const response = await deleteV1ListingsListingIdMediaMediaId(
+    const response = await deleteListingMedia(
       listingId,
       mediaId,
     );
@@ -173,9 +173,9 @@ export function EditListingPage() {
 
   async function handleStatusAction(action: EditListingStatusAction) {
     const actionMap = {
-      publish: postV1ListingsListingIdPublish,
-      pause: postV1ListingsListingIdPause,
-      resume: postV1ListingsListingIdResume,
+      publish: publishListing,
+      pause: pauseListing,
+      resume: resumeListing,
     };
     const response = await actionMap[action](listingId);
 
@@ -190,7 +190,7 @@ export function EditListingPage() {
   }
 
   async function handleDelete() {
-    const response = await deleteV1ListingsListingId(listingId);
+    const response = await deleteListing(listingId);
 
     if (response.status !== 204) {
       throw new Error(

@@ -50,7 +50,7 @@ paths:
               schema:
                 type: string
                 format: uri
-                example: "https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=113909603744-a8iqpkeu4nrf5c8nfkeumnleregp3iqq.apps.googleusercontent.com&scope=openid%20profile%20email&state=generated-state&redirect_uri=http://localhost:8080/auth/callback/google&nonce=generated-nonce&code_challenge=generated-code-challenge&code_challenge_method=S256"
+                example: "https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=113909603744-a8iqpkeu4nrf5c8nfkeumnleregp3iqq.apps.googleusercontent.com&scope=openid%20profile%20email&state=generated-state&redirect_uri=http://localhost:8081/auth/callback/google&nonce=generated-nonce&code_challenge=generated-code-challenge&code_challenge_method=S256"
   "/auth/callback/google":
     get:
       tags:
@@ -105,6 +105,7 @@ paths:
     post:
       tags:
         - Auth
+      operationId: refresh
       summary: Refresh access token
       description: Uses the refresh token from the HttpOnly refresh cookie to issue a new access token and renew the refresh cookie.
       security:
@@ -126,6 +127,7 @@ paths:
     post:
       tags:
         - Auth
+      operationId: logout
       summary: Logout account
       description: Invalidates all currently issued Mira access and refresh tokens for the authenticated account and clears the refresh cookie.
       security:
@@ -583,7 +585,6 @@ paths:
     get:
       tags:
         - Public Credentials
-      operationId: listPublicCredentials
       summary: List public credentials
       description: "Returns the public credential projection for the user profile identified by userId. Public credentials are derived from the user's credentials. The parent user profile must be publicly eligible, meaning registrationComplete is true and isPublic is true. Only credentials with status ACTIVE and isVisible set to true are included."
       parameters:
@@ -611,7 +612,6 @@ paths:
     get:
       tags:
         - Public Credentials
-      operationId: getPublicCredential
       summary: Get public credential
       description: "Returns the public credential projection identified by credentialId for the user profile identified by userId. Public credentials are derived from the user's credentials. The parent user profile must be publicly eligible, meaning registrationComplete is true and isPublic is true. This route returns only credentials with status ACTIVE and isVisible set to true. If the user profile does not exist, is not publicly eligible, the credential does not belong to the user, or the credential is not part of the public projection, no public credential is returned."
       parameters:
@@ -640,7 +640,6 @@ paths:
     get:
       tags:
         - Credentials
-      operationId: listCredentials
       summary: List credentials
       description: Returns all credentials assigned to the user profile identified by userId. This includes pending, active, expired, denied, and hidden credentials. Access is allowed when the authenticated account owns the target user profile or is an admin account.
       security:
@@ -681,7 +680,6 @@ paths:
     post:
       tags:
         - Credentials
-      operationId: submitCredential
       summary: Submit credential
       description: Submits one credential claim for the user profile identified by userId. Access is allowed only when the authenticated account owns the target user profile. The request references a preseeded credential type and one uploaded evidence media file. If accepted, the backend creates a credential with status PENDING and isVisible set to false.
       security:
@@ -744,7 +742,6 @@ paths:
     get:
       tags:
         - Credentials
-      operationId: getCredential
       summary: Get credential
       description: Returns one credential assigned to the user profile identified by userId. Access is allowed when the authenticated account owns the target user profile or is an admin account.
       security:
@@ -786,7 +783,6 @@ paths:
     patch:
       tags:
         - Credentials
-      operationId: updateCredential
       summary: Update credential
       description: Partially updates a credential. Owners may update only isVisible. Admin accounts may additionally update status and expiresAt. The request body may include any allowed subset of these fields. If a request includes any field that the caller is not allowed to update, the request is rejected with 403 Forbidden.
       security:
@@ -851,7 +847,6 @@ paths:
     delete:
       tags:
         - Credentials
-      operationId: deleteCredential
       summary: Delete credential
       description: "Deletes a credential assigned to the user profile identified by userId. Access is allowed only when the authenticated account owns the target user profile. Admin accounts cannot use this route to delete another user's credential. Deleting a credential removes it from the managed credentials collection and from the public credential projection if it was publicly visible."
       security:
@@ -889,6 +884,7 @@ paths:
   "/v1/public-listings":
     get:
       summary: List public listings
+      operationId: getPublicListings
       description: Returns public listings. A listing is visible in public endpoints only when publicationStatus is ACTIVE and moderationStatus is VISIBLE. Without radiusKm, city filters listings by their stored address city. With radiusKm, city is geocoded and used as the search origin for a PostGIS distance search. The response may be paginated when pagination query parameters are provided.
       tags:
         - Listings (Public)
@@ -990,6 +986,7 @@ paths:
   "/v1/listings":
     post:
       summary: Create a new listing
+      operationId: createListing
       description: Creates a draft listing for the authenticated user. The provided location is synchronously validated and geocoded before the listing is created.
       tags:
         - Listings (Author)
@@ -998,24 +995,39 @@ paths:
       requestBody:
         required: true
         content:
-          "application/json":
+          "multipart/form-data":
             schema:
-              "$ref": "#/components/schemas/CreateListingRequest"
+              type: object
+              required:
+                - listing
+              properties:
+                listing:
+                  "$ref": "#/components/schemas/CreateListingRequest"
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+            encoding:
+              listing:
+                contentType: application/json
             examples:
               default:
-                summary: Example listing creation request
+                summary: Example multipart listing creation request
                 value:
-                  tagIds:
-                    - dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
-                  title: Laptop setup and software installation
-                  description: I help with setting up laptops, installing software, and solving basic PC issues.
-                  price: 25.0
-                  location:
-                    street: "Hauptstraße"
-                    houseNumber: "10"
-                    city: Berlin
-                    postalCode: "10115"
-                    serviceRadiusKm: 15
+                  listing:
+                    tagIds:
+                      - dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                    title: Laptop setup and software installation
+                    description: I help with setting up laptops, installing software, and solving basic PC issues.
+                    price: 25.0
+                    location:
+                      street: "Hauptstraße"
+                      houseNumber: "10"
+                      city: Berlin
+                      postalCode: "10115"
+                      serviceRadiusKm: 15
+                  files: []
       responses:
         "201":
           description: Listing created successfully.
@@ -1118,6 +1130,7 @@ paths:
       - "$ref": "#/components/parameters/ListingIdParam"
     get:
       summary: Get public listing details
+      operationId: getPublicListing
       description: Returns a publicly visible listing by its identifier. A listing is visible in public endpoints only when publicationStatus is ACTIVE and moderationStatus is VISIBLE. Listings in other combinations are returned as not found.
       tags:
         - Listings (Public)
@@ -1180,6 +1193,7 @@ paths:
       - "$ref": "#/components/parameters/ListingIdParam"
     patch:
       summary: Update listing
+      operationId: updateListing
       description: Partially updates mutable fields of a listing owned by the authenticated user. Only the fields provided in the request body are changed. If the location is changed, it is synchronously validated and geocoded before the listing is updated.
       tags:
         - Listings (Author)
@@ -1320,6 +1334,7 @@ paths:
           description: Service Unavailable. A required downstream service is temporarily unavailable.
     delete:
       summary: Delete listing
+      operationId: deleteListing
       description: Soft-deletes a listing owned by the authenticated user. Deleted listings are no longer accessible through public endpoints.
       tags:
         - Listings (Author)
@@ -1490,7 +1505,7 @@ paths:
                     instance: /v1/admin/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/moderation
                     errors:
                       - field: moderationStatus
-                        message: must be either VISIBLE or BLOCKED
+                        message: must be one of VISIBLE, BLOCKED, or REPORTED
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -1552,10 +1567,11 @@ paths:
                     instance: /v1/admin/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/moderation
                     errors:
                       - field: moderationStatus
-                        message: must be either VISIBLE or BLOCKED
+                        message: must be one of VISIBLE, BLOCKED, or REPORTED
   "/v1/service-tags":
     get:
       summary: List service tags
+      operationId: getServiceTags
       description: Returns the predefined service tags that can be assigned to listings.
       tags:
         - Listings (Public)
@@ -1565,25 +1581,27 @@ paths:
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/ServiceTagCollectionResponse"
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ServiceTag"
               examples:
                 default:
                   summary: Example service tags
                   value:
-                    items:
-                      - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
-                        name: Laptop support
-                        isBarrierefrei: false
-                        isActive: true
-                      - tagId: "5f5b9e3a-0c7c-45f4-9d8d-59f1d15a2a77"
-                        name: Wheelchair accessible
-                        isBarrierefrei: true
-                        isActive: true
+                    - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                      name: Laptop support
+                      isBarrierefrei: false
+                      isActive: true
+                    - tagId: "5f5b9e3a-0c7c-45f4-9d8d-59f1d15a2a77"
+                      name: Wheelchair accessible
+                      isBarrierefrei: true
+                      isActive: true
   "/v1/users/{userId}/listings":
     parameters:
       - "$ref": "#/components/parameters/UserIdPathParam"
     get:
       summary: "List user's listings"
+      operationId: getAuthorListings
       description: Returns listings owned by the specified user, including draft, active, paused, and deleted listings. This endpoint is accessible only when userId matches the authenticated user. The response may be paginated when pagination query parameters are provided.
       tags:
         - Listings (Author)
@@ -1671,6 +1689,7 @@ paths:
       - "$ref": "#/components/parameters/ListingIdParam"
     get:
       summary: "Get user's listing details"
+      operationId: getAuthorListing
       description: Returns the details of a listing owned by the specified user, including draft, paused, and deleted listings, as well as listings hidden from public endpoints by moderation. This endpoint is accessible only when userId matches the authenticated user. If the listing does not belong to the specified authenticated user, it is returned as not found.
       tags:
         - Listings (Author)
@@ -1739,6 +1758,7 @@ paths:
       - "$ref": "#/components/parameters/ListingIdParam"
     post:
       summary: Publish listing
+      operationId: publishListing
       description: Publishes a draft listing owned by the authenticated user. The listing must contain a title, description, price, and location. The provided location is synchronously validated and geocoded before the listing is published.
       tags:
         - Listings (Author)
@@ -1857,6 +1877,7 @@ paths:
       - "$ref": "#/components/parameters/ListingIdParam"
     post:
       summary: Pause listing
+      operationId: pauseListing
       description: Pauses an active listing owned by the authenticated user.
       tags:
         - Listings (Author)
@@ -1953,6 +1974,7 @@ paths:
       - "$ref": "#/components/parameters/ListingIdParam"
     post:
       summary: Resume listing
+      operationId: resumeListing
       description: Resumes a paused listing owned by the authenticated user.
       tags:
         - Listings (Author)
@@ -2230,6 +2252,7 @@ paths:
       - "$ref": "#/components/parameters/ListingIdParam"
     post:
       summary: Upload listing media
+      operationId: uploadListingMedia
       description: "Uploads one or more media files to a listing owned by the authenticated user. The request may partially succeed: valid files are uploaded, invalid files are reported in the failed collection. Upload is allowed for draft, active, and paused listings, but not for deleted listings. A listing can have at most 10 media items in total; if the upload would exceed the limit, only the allowed files are uploaded and the remaining files are returned in the failed collection."
       tags:
         - Listings (Media)
@@ -2243,28 +2266,26 @@ paths:
               "$ref": "#/components/schemas/UploadListingMediaRequest"
       responses:
         "200":
-          description: Media upload processed successfully, possibly with partial failures.
+          description: Media upload processed successfully.
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/BulkUploadListingMediaResponse"
+                "$ref": "#/components/schemas/ListingMediaUploadResponse"
               examples:
-                partialSuccess:
-                  summary: Example partial upload result
+                default:
+                  summary: Example upload result
                   value:
                     uploaded:
                       - mediaId: "11111111-2222-3333-4444-555555555555"
+                        position: 0
                         url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
                         altText: Open laptop on a wooden desk
+                        altTextStatus: COMPLETED
                         mimeType: image/jpeg
                         size: 248576
                         width: 1280
                         height: 720
                         createdAt: "2026-04-20T16:10:00Z"
-                    failed:
-                      - fileName: too-large.png
-                        errorCode: FILE_TOO_LARGE
-                        message: File exceeds the maximum allowed size
         "400":
           description: Bad Request. The request payload is invalid.
           content:
@@ -2466,6 +2487,7 @@ paths:
                         message: alt text contains unsupported content
     delete:
       summary: Delete listing media
+      operationId: deleteListingMedia
       description: Deletes a media item from a listing owned by the authenticated user.
       tags:
         - Listings (Media)
@@ -2527,6 +2549,7 @@ paths:
       - "$ref": "#/components/parameters/ListingIdParam"
     get:
       summary: Get provider availability for a listing
+      operationId: getAvailability
       description: Returns the provider availability over the requested date range for the given listing. For each day, returns the working hours envelope and the free windows within it, after applying the recurring weekly schedule and active bookings.
       tags:
         - Bookings
@@ -2615,6 +2638,7 @@ paths:
   "/v1/bookings":
     post:
       summary: Create a booking
+      operationId: createBooking
       description: Creates a booking request for a published listing on behalf of the authenticated consumer. The booking is created with status PENDING and must be accepted by the provider before payment.
       tags:
         - Bookings
@@ -2775,6 +2799,7 @@ paths:
       - "$ref": "#/components/parameters/BookingIdParam"
     get:
       summary: Get booking details
+      operationId: getBooking
       description: Returns the full details of a booking. Only visible to the consumer who created it and the provider whose listing was booked.
       tags:
         - Bookings
@@ -2850,6 +2875,7 @@ paths:
       - "$ref": "#/components/parameters/UserIdPathParam"
     get:
       summary: "List a user's bookings (as consumer)"
+      operationId: listMyBookings
       description: Returns bookings created by the user as a consumer, sorted by bookedStart in descending order. The userId in the path must match the authenticated user, or the authenticated user must have administrator privileges. The response may be paginated when pagination query parameters are provided.
       tags:
         - Bookings
@@ -2950,6 +2976,7 @@ paths:
       - "$ref": "#/components/parameters/BookingIdParam"
     post:
       summary: Cancel booking
+      operationId: cancelBooking
       description: Cancels a booking. Both the consumer and the provider are allowed to cancel. Only allowed while the booking is PENDING, CONFIRMED, or PAID. The record is retained with status CANCELLED.
       tags:
         - Bookings
@@ -3020,6 +3047,7 @@ paths:
       - "$ref": "#/components/parameters/BookingIdParam"
     post:
       summary: Accept booking
+      operationId: acceptBooking
       description: Accepts a pending booking as the provider. Transitions PENDING to CONFIRMED and sets an expiration deadline for payment.
       tags:
         - Bookings
@@ -3119,6 +3147,7 @@ paths:
       - "$ref": "#/components/parameters/BookingIdParam"
     post:
       summary: Refuse booking
+      operationId: refuseBooking
       description: Refuses a pending booking as the provider. Transitions PENDING to REFUSED, with an optional reason message shared with the consumer.
       tags:
         - Bookings
@@ -3246,6 +3275,7 @@ paths:
       - "$ref": "#/components/parameters/BookingIdParam"
     post:
       summary: Mark booking as delivered
+      operationId: markDelivered
       description: Allows the provider to mark the service as delivered. If this is the first acknowledgement on a PAID booking, the booking transitions to AWAITING_CONFIRMATION and the consumer has 7 days to acknowledge delivery before the booking is auto-completed. If the consumer already acknowledged delivery first, this call completes the booking immediately. If the provider never calls this endpoint, the system auto-marks delivery 7 days after bookedEnd and starts the same 7-day consumer confirmation window.
       tags:
         - Bookings
@@ -3381,6 +3411,7 @@ paths:
       - "$ref": "#/components/parameters/BookingIdParam"
     post:
       summary: Acknowledge booking delivery
+      operationId: acknowledgeDelivery
       description: Allows the consumer to acknowledge that the service was delivered. If this is the first acknowledgement on a PAID booking, the booking transitions to AWAITING_CONFIRMATION and the provider has 7 days to mark delivery before the booking is auto-completed. If the provider already marked the booking as delivered first, this call completes the booking immediately.
       tags:
         - Bookings
@@ -3516,6 +3547,7 @@ paths:
       - "$ref": "#/components/parameters/UserIdPathParam"
     get:
       summary: List calendar bookings of a user
+      operationId: getCalendar
       description: "Returns the user's bookings within the requested date range, regardless of role (consumer or provider). Defaults to bookings in CONFIRMED, PAID, AWAITING_CONFIRMATION, or COMPLETED status; pass the status query parameter to retrieve a single specific status. Results are sorted by bookedStart in ascending order. The userId in the path must match the authenticated user, or the authenticated user must have administrator privileges."
       tags:
         - Calendar
@@ -3627,6 +3659,7 @@ paths:
       - "$ref": "#/components/parameters/UserIdPathParam"
     get:
       summary: "Get a user's weekly schedule"
+      operationId: getWeeklySchedule
       description: "Returns the user's recurring weekly working hours, used as the default availability envelope when consumers browse the provider's calendar. Returns an empty entries array if the provider has not yet set up a schedule. The userId in the path must match the authenticated user, or the authenticated user must have administrator privileges."
       tags:
         - Schedule
@@ -3701,6 +3734,7 @@ paths:
                     instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/schedule
     put:
       summary: "Replace a user's weekly schedule"
+      operationId: replaceWeeklySchedule
       description: "Replaces the user's recurring weekly schedule with the provided entries. The whole schedule is rewritten atomically; entries not present in the request body are removed. Entries on the same day must not overlap and each entry's endTime must be strictly after its startTime. The userId in the path must match the authenticated user, or the authenticated user must have administrator privileges."
       tags:
         - Schedule
@@ -3845,7 +3879,7 @@ paths:
     get:
       summary: List schedule exceptions
       description: "Returns all schedule exceptions for the provider identified by userId. Requires the authenticated user to be the owner or an admin."
-      operationId: listScheduleExceptions
+      operationId: listExceptions
       tags:
         - Exceptions
       security:
@@ -3918,7 +3952,7 @@ paths:
     post:
       summary: Create schedule exception
       description: "Creates a schedule exception for the given date. BLOCKED marks the provider fully unavailable (startTime/endTime must be null). AVAILABLE adds an extra window outside recurring hours (startTime and endTime required, endTime must be after startTime). Only one exception per date is allowed; duplicate dates are rejected with 409."
-      operationId: createScheduleException
+      operationId: createException
       tags:
         - Exceptions
       security:
@@ -4032,7 +4066,7 @@ paths:
     patch:
       summary: Update schedule exception
       description: "Partially updates a schedule exception. Only startTime and endTime can be updated; both must be non-null and endTime must be after startTime."
-      operationId: updateScheduleException
+      operationId: updateException
       tags:
         - Exceptions
       security:
@@ -4113,7 +4147,7 @@ paths:
     delete:
       summary: Delete schedule exception
       description: "Deletes the schedule exception. Once removed, the recurring weekly schedule applies again for that date. Requires the authenticated user to be the owner or an admin."
-      operationId: deleteScheduleException
+      operationId: deleteException
       tags:
         - Exceptions
       security:
@@ -4169,7 +4203,7 @@ components:
       type: apiKey
       in: cookie
       name: refresh_token
-      description: HttpOnly refresh token cookie used by POST /auth/refresh.
+      description: HttpOnly refresh token cookie used by POST /v1/auth/refresh.
   parameters:
     UserIdPathParam:
       name: userId
@@ -4757,22 +4791,12 @@ components:
           type: boolean
           description: Indicates whether this predefined tag can currently be selected for listings.
           example: true
-    ServiceTagCollectionResponse:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: array
-          items:
-            "$ref": "#/components/schemas/ServiceTag"
     CreateListingRequest:
       type: object
       required:
         - tagIds
         - title
         - description
-        - easyDescriptionStatus
         - price
         - location
       properties:
@@ -4901,6 +4925,7 @@ components:
       type: object
       required:
         - mediaId
+        - position
         - url
         - altTextStatus
         - mimeType
@@ -4913,6 +4938,11 @@ components:
           type: string
           format: uuid
           example: "11111111-2222-3333-4444-555555555555"
+        position:
+          type: integer
+          minimum: 0
+          description: Zero-based order of this media item within the listing.
+          example: 0
         url:
           type: string
           format: uri
@@ -5043,42 +5073,23 @@ components:
             "$ref": "#/components/schemas/AdminReportedListingItem"
         cursor:
           "$ref": "#/components/schemas/Cursor"
-    BulkUploadListingMediaResponse:
+    ListingMediaUploadResponse:
       type: object
       required:
         - uploaded
-        - failed
       properties:
         uploaded:
           type: array
           items:
             "$ref": "#/components/schemas/ListingMediaItem"
-        failed:
-          type: array
-          items:
-            "$ref": "#/components/schemas/BulkUploadListingMediaFailure"
-    BulkUploadListingMediaFailure:
-      type: object
-      required:
-        - fileName
-        - errorCode
-        - message
-      properties:
-        fileName:
-          type: string
-          example: too-large.png
-        errorCode:
-          type: string
-          example: FILE_TOO_LARGE
-        message:
-          type: string
-          example: File exceeds the maximum allowed size
     PublicListingSummary:
       type: object
       required:
         - listingId
         - tags
         - title
+        - description
+        - easyDescriptionStatus
         - price
         - author
         - publishedAt
@@ -5095,6 +5106,17 @@ components:
         title:
           type: string
           example: Laptop setup and software installation
+        description:
+          type: string
+          example: I help with setting up laptops, installing software, and solving basic PC issues.
+        easyDescription:
+          type:
+            - string
+            - "null"
+          description: AI-generated simplified version of the listing description. Null until generation completes.
+          example: I help you set up laptops. I install software. I help with simple computer problems.
+        easyDescriptionStatus:
+          "$ref": "#/components/schemas/AccessibilityGenerationStatus"
         price:
           type: number
           format: double
@@ -5125,6 +5147,7 @@ components:
         - location
         - createdAt
         - updatedAt
+        - media
       properties:
         listingId:
           type: string
@@ -5163,8 +5186,6 @@ components:
           format: date-time
         location:
           "$ref": "#/components/schemas/PublicListingLocation"
-        primaryMedia:
-          "$ref": "#/components/schemas/ListingMediaPreview"
         createdAt:
           type: string
           format: date-time
@@ -5238,6 +5259,7 @@ components:
         - location
         - createdAt
         - updatedAt
+        - media
       properties:
         listingId:
           type: string
@@ -5278,8 +5300,6 @@ components:
           format: date-time
         location:
           "$ref": "#/components/schemas/PublicListingLocation"
-        primaryMedia:
-          "$ref": "#/components/schemas/ListingMediaPreview"
         createdAt:
           type: string
           format: date-time
@@ -5394,6 +5414,7 @@ components:
       enum:
         - VISIBLE
         - BLOCKED
+        - REPORTED
     ProblemDetailsResponse:
       type: object
       required:

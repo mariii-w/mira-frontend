@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  getGetV1UsersUserIdBookingsQueryKey,
-  getV1BookingsBookingId,
-  getV1UsersUserIdBookings,
-  postV1BookingsBookingIdAccept,
-  postV1BookingsBookingIdAcknowledgeDelivery,
-  postV1BookingsBookingIdCancel,
-  postV1BookingsBookingIdMarkDelivered,
-  postV1BookingsBookingIdRefuse,
+  getListMyBookingsQueryKey,
+  getBooking,
+  listMyBookings,
+  acceptBooking,
+  acknowledgeDelivery,
+  cancelBooking,
+  markDelivered,
+  refuseBooking,
 } from "../api/mira";
 import type {
   BookingStatus,
@@ -76,12 +76,12 @@ function MyBookingsRoute() {
     refetch,
   } = useQuery({
     queryKey: userId
-      ? getGetV1UsersUserIdBookingsQueryKey(userId)
+      ? getListMyBookingsQueryKey(userId)
       : ["bookings"],
     queryFn: async () => {
       if (!userId) throw new Error("You must be signed in to view bookings.");
 
-      const response = await getV1UsersUserIdBookings(userId);
+      const response = await listMyBookings(userId);
 
       if (response.status !== 200) {
         throw new Error(
@@ -97,7 +97,7 @@ function MyBookingsRoute() {
   async function loadBookingDetails(
     bookingId: string,
   ): Promise<BookingDetails | null> {
-    const response = await getV1BookingsBookingId(bookingId);
+    const response = await getBooking(bookingId);
 
     if (response.status !== 200) return null;
 
@@ -114,15 +114,15 @@ function MyBookingsRoute() {
   ): Promise<string | null> {
     const response =
       action.rel === "cancel"
-        ? await postV1BookingsBookingIdCancel(bookingId)
+        ? await cancelBooking(bookingId)
         : action.rel === "accept"
-          ? await postV1BookingsBookingIdAccept(bookingId)
+          ? await acceptBooking(bookingId)
           : action.rel === "refuse"
-            ? await postV1BookingsBookingIdRefuse(bookingId)
+            ? await refuseBooking(bookingId)
             : action.rel === "mark-delivered"
-              ? await postV1BookingsBookingIdMarkDelivered(bookingId)
+              ? await markDelivered(bookingId)
               : action.rel === "acknowledge-delivery"
-                ? await postV1BookingsBookingIdAcknowledgeDelivery(bookingId)
+                ? await acknowledgeDelivery(bookingId)
                 : null;
 
     if (!response) return "This booking action is not supported yet.";

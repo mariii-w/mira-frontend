@@ -1,26 +1,22 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PrivateUserProfileResponse } from "../api/model";
-import {
-  getPrivateUserProfile,
-  postV1AuthLogout,
-  postV1AuthRefresh,
-} from "../api/mira";
+import { getPrivateUserProfile, logout, refresh } from "../api/mira";
 import {
   exchangeRefreshForAccess,
   get_access_token,
-  logout,
+  signOut,
   useAuthStore,
 } from "../stores/auth";
 
 vi.mock("../api/mira", () => ({
   getPrivateUserProfile: vi.fn(),
-  postV1AuthLogout: vi.fn(),
-  postV1AuthRefresh: vi.fn(),
+  logout: vi.fn(),
+  refresh: vi.fn(),
 }));
 
-const mockedPostAuthRefresh = vi.mocked(postV1AuthRefresh);
+const mockedPostAuthRefresh = vi.mocked(refresh);
 const mockedGetPrivateUserProfile = vi.mocked(getPrivateUserProfile);
-const mockedPostAuthLogout = vi.mocked(postV1AuthLogout);
+const mockedPostAuthLogout = vi.mocked(logout);
 
 function makeJwt(claims: Record<string, unknown>) {
   const encode = (value: unknown) =>
@@ -113,7 +109,7 @@ describe("auth store", () => {
       headers: new Headers(),
     });
 
-    await logout();
+    await signOut();
 
     expect(mockedPostAuthLogout).toHaveBeenCalledWith({
       credentials: "include",

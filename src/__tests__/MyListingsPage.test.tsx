@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { getV1UsersUserIdListings } from '../api/mira'
+import { getAuthorListings } from '../api/mira'
 
 const mockNavigate = vi.fn()
 
@@ -21,18 +21,18 @@ vi.mock('../stores/auth', () => ({
 }))
 
 vi.mock('../api/mira', () => ({
-  getGetV1UsersUserIdListingsQueryKey: (userId: string, params?: object) => [
+  getGetAuthorListingsQueryKey: (userId: string, params?: object) => [
     `/v1/users/${userId}/listings`,
     params,
   ],
-  getV1UsersUserIdListings: vi.fn(),
+  getAuthorListings: vi.fn(),
 }))
 
 vi.mock('../components/Navbar', () => ({
   Navbar: () => <nav data-testid="navbar" />,
 }))
 
-const mockGetListings = vi.mocked(getV1UsersUserIdListings)
+const mockGetListings = vi.mocked(getAuthorListings)
 
 function renderRoute() {
   const queryClient = new QueryClient({
@@ -69,7 +69,7 @@ function makeListingsResponse(items: object[], next: string | null = null) {
     status: 200,
     data: { items, cursor: { limit: 20, next } },
     headers: new Headers(),
-  } as Awaited<ReturnType<typeof getV1UsersUserIdListings>>
+  } as Awaited<ReturnType<typeof getAuthorListings>>
 }
 
 function mockSuccess(items: object[]) {
@@ -127,7 +127,7 @@ describe('<MyListingsPage />', () => {
         instance: '/v1/users/user-1/listings',
       },
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof getV1UsersUserIdListings>>)
+    } as Awaited<ReturnType<typeof getAuthorListings>>)
     renderRoute()
     await waitFor(() =>
       expect(screen.getByRole('alert')).toHaveTextContent('Failed to load listings.')

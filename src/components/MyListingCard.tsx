@@ -1,25 +1,13 @@
 import { SquarePen } from 'lucide-react'
 import { Button } from './Button'
+import type {
+  AccessibilityGenerationStatus,
+  MyListingSummary,
+  PublicationStatus,
+} from '../api/model'
 
-export type PublicationStatus = 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'DELETED'
-export type ModerationStatus = 'VISIBLE' | 'BLOCKED'
-export type VlmStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
-
-export interface MyListingSummary {
-  listingId: string
-  title: string
-  description: string
-  easyDescription?: string | null
-  easyDescriptionStatus?: VlmStatus
-  price: number
-  publicationStatus: PublicationStatus
-  moderationStatus: ModerationStatus
-  author: { name: string; surname: string }
-  publishedAt: string | null
-  location: { city: string; postalCode: string; serviceRadiusKm: number }
-  primaryMedia?: { mediaId: string; url: string; altText?: string | null; altTextStatus?: VlmStatus }
-  tags: Array<{ tagId: string; name: string; isBarrierefrei: boolean; isActive: boolean }>
-}
+export type { MyListingSummary, PublicationStatus } from '../api/model'
+export type VlmStatus = AccessibilityGenerationStatus
 
 interface MyListingCardProps {
   listing: MyListingSummary

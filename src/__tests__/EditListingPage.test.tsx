@@ -25,15 +25,15 @@ vi.mock("../stores/auth", () => ({
 }));
 
 vi.mock("../api/mira", () => ({
-  getV1UsersUserIdListingsListingId: vi.fn(
+  getAuthorListing: vi.fn(
     (userId: string, listingId: string, options?: RequestInit) =>
       mockFetch(`/v1/users/${userId}/listings/${listingId}`, {
         ...options,
         method: "GET",
       }),
   ),
-  getV1ServiceTags: vi.fn(() => mockFetch("/v1/service-tags", { method: "GET" })),
-  patchV1ListingsListingId: vi.fn(
+  getServiceTags: vi.fn(() => mockFetch("/v1/service-tags", { method: "GET" })),
+  updateListing: vi.fn(
     (listingId: string, data: unknown, options?: RequestInit) =>
       mockFetch(`/v1/listings/${listingId}`, {
         ...options,
@@ -41,7 +41,7 @@ vi.mock("../api/mira", () => ({
         body: JSON.stringify(data),
       }),
   ),
-  postV1ListingsListingIdMedia: vi.fn(
+  uploadListingMedia: vi.fn(
     (listingId: string, data: { files: File[] }, options?: RequestInit) =>
       mockFetch(`/v1/listings/${listingId}/media`, {
         ...options,
@@ -49,31 +49,31 @@ vi.mock("../api/mira", () => ({
         body: data,
       }),
   ),
-  postV1ListingsListingIdPublish: vi.fn(
+  publishListing: vi.fn(
     (listingId: string, options?: RequestInit) =>
       mockFetch(`/v1/listings/${listingId}/publish`, {
         ...options,
         method: "POST",
       }),
   ),
-  postV1ListingsListingIdPause: vi.fn(
+  pauseListing: vi.fn(
     (listingId: string, options?: RequestInit) =>
       mockFetch(`/v1/listings/${listingId}/pause`, {
         ...options,
         method: "POST",
       }),
   ),
-  postV1ListingsListingIdResume: vi.fn(
+  resumeListing: vi.fn(
     (listingId: string, options?: RequestInit) =>
       mockFetch(`/v1/listings/${listingId}/resume`, {
         ...options,
         method: "POST",
       }),
   ),
-  deleteV1ListingsListingId: vi.fn((listingId: string, options?: RequestInit) =>
+  deleteListing: vi.fn((listingId: string, options?: RequestInit) =>
     mockFetch(`/v1/listings/${listingId}`, { ...options, method: "DELETE" }),
   ),
-  deleteV1ListingsListingIdMediaMediaId: vi.fn(
+  deleteListingMedia: vi.fn(
     (listingId: string, mediaId: string, options?: RequestInit) =>
       mockFetch(`/v1/listings/${listingId}/media/${mediaId}`, {
         ...options,
@@ -140,16 +140,14 @@ function setupMocks(
       if (url === "/v1/service-tags") {
         return {
           status: 200,
-          data: {
-            items: [
-              {
-                tagId: "tag-1",
-                name: "IT",
-                isBarrierefrei: false,
-                isActive: true,
-              },
-            ],
-          },
+          data: [
+            {
+              tagId: "tag-1",
+              name: "IT",
+              isBarrierefrei: false,
+              isActive: true,
+            },
+          ],
         };
       }
       return { status: 200, data: { ...listing, media } };

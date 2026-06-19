@@ -27,9 +27,9 @@ import { Badge } from '../components/Badge.tsx';
 import { Breadcrumb } from '../components/BreadCrumb.tsx';
 import { FilterBar } from '../components/FilterBar.tsx';
 import { ServiceCard } from '../components/ServiceCard.tsx';
-import { ServiceProviderToggle } from '../components/ServiceProviderToggle.tsx'
 import { BookingCard, type BookingSummary, type BookingDetails } from '../components/BookingCard.tsx';
 import { CalendarGrid } from '../components/CalendarGrid.tsx';
+import { ServiceUserToggle } from '../components/ServiceUserToggle.tsx';
 
 
 
@@ -461,49 +461,63 @@ function Styleguide() {
     <section className="flex flex-col gap-3">
       <h2>Filter Leiste</h2>
       <div className='w-96'>
-        <FilterBar tagList={[
-          {name:"PC & Laptop", checked: false},
-          {name:"Phone & Tablet", checked: false},
-          {name:"Smart Home", checked: false},
-          {name:"Printers", checked: false},
-          {name:"Software Help", checked: false},
-          {name:"Email & Web", checked: false},
-          {name:"Linux", checked: false},
-        ]}/>
-      </div>
-    </section>
-
-    <section className="flex flex-col gap-3">
-      <h2>Service Card</h2>
-      <div className='w-5xl'>
-        <ServiceCard
-            link='#'
-            pictureLink='./pic/ServiceExample1.png' 
-            location={'München'} 
-            providerFirstName={'Patrick'} 
-            providerLastName={'Stock'} 
-            varified={true} 
-            label={'Laptop & Wi-Fi setup'} 
-            description={'I help with Windows, macOS, printers, Wi-Fi, smart TVs and phone-to-laptop setups. Friendly with first-time users and seniors.'} 
-          badges={[{text: 'Wi-Fi'}, {text: 'Windows'}, {text: 'Printers'}, {text: 'Barrierefrei', variant: 'accent'}]} 
-            hourRate={20} 
-            distance={10}
-            />
-      </div>
-    </section>
-
-      <h2>Service Provider Toggle</h2>
-    <section>
-      <div className='w-96 bg-charcoal p-6 rounded-lg'>
-        <ServiceProviderToggle
-            id="service-toggle"
-            labelLeft="Service"
-            labelRight="Provider"
-            checked={checked}
-            onCheckedChange={setChecked}
+        <FilterBar
+          tags={[
+            { tagId: '1', name: 'PC & Laptop' },
+            { tagId: '2', name: 'Phone & Tablet' },
+            { tagId: '3', name: 'Smart Home' },
+            { tagId: '4', name: 'Printers' },
+            { tagId: '5', name: 'Software Help' },
+            { tagId: '6', name: 'Email & Web' },
+            { tagId: '7', name: 'Linux' },
+          ]}
+          selectedTagIds={['1', '2']}
+          onTagToggle={() => {}}
+          distanceKm={10}
+          onDistanceChange={() => {}}
+          maxPrice={40}
+          onMaxPriceChange={() => {}}
+          onApply={() => {}}
+          activeCount={2}
         />
       </div>
     </section>
+
+      <section className="flex flex-col gap-3">
+        <h2>Service Card</h2>
+        <div className='w-5xl'>
+          <ServiceCard
+              link='#'
+              pictureLink='./pic/ServiceExample1.png'
+              location={'München'}
+              providerFirstName={'Patrick'}
+              providerLastName={'Stock'}
+              varified={true}
+              label={'Laptop & Wi-Fi setup'}
+              description={'I help with Windows, macOS, printers, Wi-Fi, smart TVs and phone-to-laptop setups. Friendly with first-time users and seniors.'}
+              tags={[
+                { tagId: '1', name: 'Wi-Fi',       isBarrierefrei: false },
+                { tagId: '2', name: 'Windows',      isBarrierefrei: false },
+                { tagId: '3', name: 'Printers',     isBarrierefrei: false },
+                { tagId: '4', name: 'Barrierefrei', isBarrierefrei: true  },
+              ]}
+              hourRate={20}
+          />
+        </div>
+      </section>
+
+      <h2>Service User Toggle</h2>
+      <section>
+        <div className='w-96 bg-charcoal p-6 rounded-lg'>
+          <ServiceUserToggle
+              id="service-toggle"
+              labelLeft="Services"
+              labelRight="Users"
+              checked={checked}
+              onCheckedChange={setChecked}
+          />
+        </div>
+      </section>
 
     <section className="flex flex-col gap-3">
       <h2>Booking Card</h2>
@@ -579,3 +593,4 @@ function ValidatedInput({
     />
   )
 }
+
