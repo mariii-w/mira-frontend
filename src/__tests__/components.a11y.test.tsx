@@ -53,7 +53,7 @@ import { RegisterPhoto } from "../components/RegisterPhoto";
 import { RegisterRole } from "../components/RegisterRole";
 import { SearchBar } from "../components/SearchBar";
 import { ServiceCard } from "../components/ServiceCard";
-import { ServiceProviderToggle } from "../components/ServiceProviderToggle";
+import { ServiceUserToggle } from "../components/ServiceUserToggle";
 import { Slider } from "../components/Slider";
 import * as Switch from "../components/Switch";
 import { Textarea } from "../components/Textarea";
@@ -286,10 +286,17 @@ const componentCases: Array<[string, ReactElement]> = [
   [
     "FilterBar",
     <FilterBar
-      tagList={[
-        { name: "Errands", checked: true },
-        { name: "Tutoring", checked: false },
+      tags={[
+        { tagId: "errands", name: "Errands" },
+        { tagId: "tutoring", name: "Tutoring" },
       ]}
+      selectedTagIds={["errands"]}
+      onTagToggle={vi.fn()}
+      distanceKm={20}
+      onDistanceChange={vi.fn()}
+      maxPrice={50}
+      onMaxPriceChange={vi.fn()}
+      onApply={vi.fn()}
     />,
   ],
   [
@@ -346,7 +353,7 @@ const componentCases: Array<[string, ReactElement]> = [
       services={[{ name: "Shopping", price: 20 }]}
     />,
   ],
-  ["SearchBar", <SearchBar aria-label="Search services" place="Berlin" />],
+  ["SearchBar", <SearchBar aria-label="Search services" city="Berlin" />],
   [
     "ServiceCard",
     <ServiceCard
@@ -358,14 +365,13 @@ const componentCases: Array<[string, ReactElement]> = [
       varified
       label="Shopping help"
       description="Help with weekly shopping."
-      badges={[{ text: "Errands" }]}
+      tags={[{ tagId: "errands", name: "Errands", isBarrierefrei: false }]}
       hourRate={20}
-      distance={3}
     />,
   ],
   [
-    "ServiceProviderToggle",
-    <ServiceProviderToggle
+    "ServiceUserToggle",
+    <ServiceUserToggle
       id="provider-toggle"
       labelLeft="Customer"
       labelRight="Provider"
@@ -620,6 +626,8 @@ describe("component accessibility", () => {
             listingId: "listing-1",
             tags: serviceTags,
             title: "Grocery pickup",
+            description: "Weekly pickup and drop-off support.",
+            easyDescriptionStatus: "COMPLETED",
             price: 24,
             author: { name: "Mira", surname: "Muster" },
             publishedAt: "2026-06-01T12:00:00.000Z",
@@ -1986,10 +1994,10 @@ describe("component accessibility", () => {
   });
 
   it("SearchBar has no automated accessibility violations when location filters are opened", async () => {
-    render(<SearchBar aria-label="Search services" place="Berlin" />);
+    render(<SearchBar aria-label="Search services" city="Berlin" />);
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /berlin - 20km/i }));
+      fireEvent.click(screen.getByRole("button", { name: /berlin · 20km/i }));
     });
 
     await waitFor(() => {
@@ -2041,15 +2049,22 @@ describe("component accessibility", () => {
   it("FilterBar search and collapsed sections have no automated accessibility violations", async () => {
     const { container } = render(
       <FilterBar
-        tagList={[
-          { name: "Errands", checked: true },
-          { name: "Tutoring", checked: false },
+        tags={[
+          { tagId: "errands", name: "Errands" },
+          { tagId: "tutoring", name: "Tutoring" },
         ]}
+        selectedTagIds={["errands"]}
+        onTagToggle={vi.fn()}
+        distanceKm={20}
+        onDistanceChange={vi.fn()}
+        maxPrice={50}
+        onMaxPriceChange={vi.fn()}
+        onApply={vi.fn()}
       />,
     );
 
     await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText(/tags suchen/i), {
+      fireEvent.change(screen.getByPlaceholderText(/search tags/i), {
         target: { value: "tut" },
       });
       fireEvent.click(screen.getByRole("button", { name: /tags/i }));
@@ -2605,8 +2620,8 @@ describe("component accessibility", () => {
     const toggleChange = vi.fn();
     const { container } = render(
       <div>
-        <SearchBar id="search-by-id" place="" />
-        <ServiceProviderToggle
+        <SearchBar id="search-by-id" city="" />
+        <ServiceUserToggle
           id="provider-toggle-checked"
           labelLeft="Customer"
           labelRight="Provider"

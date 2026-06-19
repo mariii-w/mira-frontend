@@ -33,7 +33,7 @@ describe('<MyListingCard />', () => {
   it('renders image with explicit altText when provided', () => {
     const listing = {
       ...baseListing,
-      primaryMedia: { mediaId: 'm1', url: 'https://cdn.example.com/img.jpg', altText: 'Open laptop on a desk' },
+      primaryMedia: { mediaId: 'm1', url: 'https://cdn.example.com/img.jpg', altText: 'Open laptop on a desk', altTextStatus: 'COMPLETED' as const },
     }
     render(<MyListingCard listing={listing} onEdit={() => {}} />)
     expect(screen.getByRole('img', { name: 'Open laptop on a desk' })).toBeInTheDocument()
@@ -42,7 +42,7 @@ describe('<MyListingCard />', () => {
   it('falls back to listing title as alt text when altText is absent', () => {
     const listing = {
       ...baseListing,
-      primaryMedia: { mediaId: 'm1', url: 'https://cdn.example.com/img.jpg' },
+      primaryMedia: { mediaId: 'm1', url: 'https://cdn.example.com/img.jpg', altTextStatus: 'COMPLETED' as const },
     }
     render(<MyListingCard listing={listing} onEdit={() => {}} />)
     expect(screen.getByRole('img', { name: baseListing.title })).toBeInTheDocument()

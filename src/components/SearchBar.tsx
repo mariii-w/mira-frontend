@@ -61,6 +61,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
             </Popover.Trigger>
             <Popover.Portal>
               <Popover.Content
+                aria-label="Search location filters"
                 align="end"
                 sideOffset={8}
                 className="z-50 w-70 rounded-xl border border-border bg-surface p-2 shadow-lg"
