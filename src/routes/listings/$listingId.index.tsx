@@ -2,10 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   getGetPublicListingQueryKey,
-  getGetPublicListingsQueryKey,
+  getGetPublicProfileListingsQueryKey,
   getGetAvailabilityQueryKey,
   getPublicListing,
-  getPublicListings,
+  getPublicProfileListings,
   getAvailability,
 } from "../../api/mira";
 import { ListingDetailPage } from "../../components/ListingDetailPage";
@@ -45,11 +45,19 @@ function ListingDetailRoute() {
   });
 
   const authorId = listing?.author.userId;
+  const queryAuthorId = authorId ?? "";
 
   const { data: otherListingsData } = useQuery({
-    queryKey: getGetPublicListingsQueryKey({ userId: authorId, limit: 5 }),
+    queryKey: getGetPublicProfileListingsQueryKey(queryAuthorId, { limit: 5 }),
     queryFn: async () => {
-      const response = await getPublicListings({ userId: authorId, limit: 5 });
+      const response = await getPublicProfileListings(queryAuthorId, { limit: 5 });
+
+      // A 404 means the author has no publicly eligible profile (not public yet,
+      // or registration incomplete) — treat that as "no other listings" rather
+      // than an error, since the viewed listing itself doesn't depend on that flag.
+      if (response.status === 404) {
+        return { items: [] };
+      }
 
       if (response.status !== 200) {
         throw new Error(response.data.detail ?? "Failed to load other listings.");
