@@ -457,6 +457,11 @@ export function Home({ featuredListings }: HomeProps) {
                 </button>
               </div>
             </div>
+            {tagsQuery.isLoading && (
+              <p role="status" aria-live="polite" className="sr-only">
+                Loading categories…
+              </p>
+            )}
             <ul
               id="categories-list"
               ref={categoryRef}
@@ -465,11 +470,20 @@ export function Home({ featuredListings }: HomeProps) {
               tabIndex={0}
               aria-label="Popular service categories"
             >
-              {categories.map((cat) => (
-                <li key={cat.tagId} className="snap-start shrink-0 w-48">
-                  <CategoryCard name={cat.name} imageSrc={cat.imageSrc} />
-                </li>
-              ))}
+              {tagsQuery.isLoading
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <li key={i} className="snap-start shrink-0 w-48">
+                      <div
+                        aria-hidden="true"
+                        className="aspect-square w-full animate-pulse rounded-2xl border border-border bg-linen"
+                      />
+                    </li>
+                  ))
+                : categories.map((cat) => (
+                    <li key={cat.tagId} className="snap-start shrink-0 w-48">
+                      <CategoryCard name={cat.name} imageSrc={cat.imageSrc} />
+                    </li>
+                  ))}
             </ul>
           </div>
         </section>
