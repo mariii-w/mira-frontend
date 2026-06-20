@@ -10,7 +10,7 @@ const baseListing: MyListingSummary = {
   price: 25,
   publicationStatus: 'ACTIVE',
   moderationStatus: 'VISIBLE',
-  author: { name: 'Klaus', surname: 'M' },
+  author: { userId: 'user-1', name: 'Klaus', surname: 'M' },
   publishedAt: '2024-01-01T00:00:00Z',
   location: { city: 'Berlin', postalCode: '10115', serviceRadiusKm: 15 },
   tags: [],
