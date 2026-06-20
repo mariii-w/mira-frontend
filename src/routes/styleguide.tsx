@@ -465,6 +465,28 @@ function Styleguide() {
               hourRate={20}
           />
         </div>
+
+        <h3 className="text-body font-bold">Service Card (compact)</h3>
+        <div className='w-64'>
+          <ServiceCard
+              variant='compact'
+              link='#'
+              pictureLink='./pic/ServiceExample1.png'
+              location={'München'}
+              providerFirstName={'Patrick'}
+              providerLastName={'Stock'}
+              varified={true}
+              label={'Laptop & Wi-Fi setup'}
+              description={'I help with Windows, macOS, printers, Wi-Fi, smart TVs and phone-to-laptop setups. Friendly with first-time users and seniors.'}
+              tags={[
+                { tagId: '1', name: 'Wi-Fi',       isBarrierefrei: false },
+                { tagId: '2', name: 'Windows',      isBarrierefrei: false },
+                { tagId: '3', name: 'Printers',     isBarrierefrei: false },
+                { tagId: '4', name: 'Barrierefrei', isBarrierefrei: true  },
+              ]}
+              hourRate={25}
+          />
+        </div>
       </section>
 
       <h2>Service User Toggle</h2>
