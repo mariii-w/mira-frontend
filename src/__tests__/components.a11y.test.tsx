@@ -46,7 +46,6 @@ import { MyListings } from "../components/MyListings";
 import { Navbar } from "../components/Navbar";
 import { Pagination } from "../components/Pagination";
 import * as Popover from "../components/Popover";
-import { ProviderCard } from "../components/ProviderCard";
 import { RegisterAbout } from "../components/RegisterAbout";
 import { RegisterAddress } from "../components/RegisterAddress";
 import { RegisterDone } from "../components/RegisterDone";
@@ -373,17 +372,6 @@ const componentCases: Array<[string, ReactElement]> = [
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>,
-  ],
-  [
-    "ProviderCard",
-    <ProviderCard
-      firstName="Mira"
-      lastName="Muster"
-      location="Munich"
-      bio="Friendly local support."
-      pricePerHour={20}
-      services={[{ name: "Shopping", price: 20 }]}
-    />,
   ],
   ["SearchBar", <SearchBar aria-label="Search services" city="Berlin" />],
   [
@@ -1987,7 +1975,7 @@ describe("component accessibility", () => {
         target: { value: "cleaning" },
       });
       fireEvent.click(screen.getByRole("button", { name: /scroll categories right/i }));
-      fireEvent.click(screen.getByRole("button", { name: /scroll providers left/i }));
+      fireEvent.click(screen.getByRole("button", { name: /scroll listings left/i }));
     });
 
     expect(scrollBy).toHaveBeenCalled();
@@ -2294,26 +2282,6 @@ describe("component accessibility", () => {
       screen.queryByRole("dialog", { name: /actions/i }),
     ).not.toBeInTheDocument();
     await expectNoAxeViolations(document.body);
-  });
-
-  it("ProviderCard full state has no automated accessibility violations", async () => {
-    const { container } = render(
-      <ProviderCard
-        variant="full"
-        firstName="Mira"
-        lastName="Muster"
-        avatar={<AvatarIcon firstName="Mira" lastName="Muster" />}
-        location="Munich"
-        bio="Friendly local support."
-        pricePerHour={20}
-        services={[{ name: "Shopping", price: 20 }]}
-        badges={<Badge text="Verified" />}
-        onMessage={vi.fn()}
-        onViewProfile={vi.fn()}
-      />,
-    );
-
-    await expectNoAxeViolations(container);
   });
 
   it("Slider disabled and controlled states have no automated accessibility violations", async () => {
@@ -2640,7 +2608,7 @@ describe("component accessibility", () => {
     await act(async () => {
       fireEvent.submit(screen.getByRole("search"));
       fireEvent.click(screen.getByRole("button", { name: /scroll categories left/i }));
-      fireEvent.click(screen.getByRole("button", { name: /scroll providers right/i }));
+      fireEvent.click(screen.getByRole("button", { name: /scroll listings right/i }));
     });
 
     expect(scrollBy).toHaveBeenCalled();

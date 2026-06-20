@@ -17,7 +17,6 @@ import { Input } from '../components/Input.tsx';
 import { Textarea } from '../components/Textarea.tsx';
 import { AccessibilityPanel } from '../components/AccessibilityPanel.tsx';
 import { CategoryCard } from '../components/CategoryCard.tsx';
-import { ProviderCard } from '../components/ProviderCard';
 import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
 import { AvatarIcon } from '../components/AvatarIcon.tsx';
@@ -374,44 +373,6 @@ function Styleguide() {
         </div>
       </section>
 
-     <section className="flex flex-col gap-6">
-        <h2>ProviderCard</h2>
-
-        <div className="flex flex-col gap-3">
-          <h3 className="text-small text-muted font-medium">Compact (Landing Page)</h3>
-          <div className="w-64">
-            <ProviderCard
-              variant="compact"
-              firstName="Patrick"
-              lastName='Smith'
-              location="Munich"
-              bio="Helps with Windows, printers, Wi-Fi setup and phone issues. Patient and friendly with first-time users and seniors."
-              pricePerHour={25}
-              avatar={<AvatarIcon firstName="Patrick" lastName="Smith" picture=''/*picture can be added here*/ />}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <h3 className="text-small text-muted font-medium">Full (Search Results)</h3>
-          <div className="w-96">
-            <ProviderCard
-              variant="full"
-              firstName="Lena"
-              lastName='Kross'
-              location="Berlin"
-              bio="Software engineer by day, helper by evening. I diagnose slow PCs, clean out junk, set up email and cloud backup."
-              pricePerHour={18}
-              services={[
-                { name: 'Windows Help', price: 32 },
-                { name: 'Email Setup', price: 18 },
-                { name: 'Cloud Backup', price: 28 },
-              ]}
-              avatar={<AvatarIcon firstName="Lena" lastName="Kross" picture=''/*picture can be added here*//>}
-            />
-          </div>
-        </div>
-      </section>
 
       <section className="flex flex-col gap-3">
         <h2>Pagination</h2>
@@ -593,4 +554,3 @@ function ValidatedInput({
     />
   )
 }
-

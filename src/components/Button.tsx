@@ -21,7 +21,7 @@ const VARIANT: Record<ButtonVariant, string> = {
   secondary: 'bg-transparent text-foreground border border-charcoal hover:bg-charcoal/5 active:bg-charcoal/10',
   ghost:     'bg-transparent text-foreground hover:bg-foreground/5 active:bg-foreground/10',
   icon:      'bg-transparent text-foreground border border-border hover:bg-foreground/5 active:bg-foreground/10',
-  userBadge: 'bg-cream text-charcoal border-charcoal hover:bg-charcoal/20 active:bg-charcoal/20',
+  userBadge: 'bg-cream text-charcoal border-charcoal hover:bg-charcoal/20 active:bg-charcoal/20 no-underline',
 };
 
 const SIZE: Record<ButtonSize, string> = {

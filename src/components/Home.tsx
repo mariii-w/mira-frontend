@@ -7,12 +7,12 @@ import {
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Navbar } from "./Navbar";
 import { Button } from "./Button";
 import { CategoryCard } from "./CategoryCard";
-import { ProviderCard } from "./ProviderCard";
+import { ServiceCard } from "./ServiceCard";
 import { Logo } from "./Logo";
-import { AvatarIcon } from "./AvatarIcon";
 import { useAccessibilityStore } from "../stores/accessibility";
 import { getServiceTags, getPublicListings } from "../api/mira";
 import type { PublicListingSummary, ServiceTag } from "../api/model";
@@ -30,15 +30,15 @@ async function fetchFeaturedListings(): Promise<PublicListingSummary[]> {
 }
 
 const NEED_HELP_BULLETS = [
-  "Browse by category, price, rating",
-  "Direct chat with providers",
-  "Secure Stripe Payments",
+  "Filter by category, price and location",
+  "See real bios before you book",
+  "Request a booking in a few clicks",
 ];
 
 const CAN_HELP_BULLETS = [
-  "Free to list, only pay on booking",
-  "Your schedule, your rates",
-  "Build reputation with reviews",
+  "List your services for free",
+  "Set your own price and schedule",
+  "Accept and manage booking requests",
 ];
 
 const NEED_HELP_STEPS = [
@@ -116,35 +116,24 @@ const FOOTER_LINKS = [
   "Privacy Policy",
 ];
 
-// `author` has no stable id (just name/surname), so dedupe on that as a proxy key and keep each provider's cheapest listing.
-function dedupeByCheapestListing(
-  listings: PublicListingSummary[],
-): PublicListingSummary[] {
-  const cheapestByProvider = new Map<string, PublicListingSummary>();
-  for (const listing of listings) {
-    const key = `${listing.author.name}|${listing.author.surname}`;
-    const cheapestSoFar = cheapestByProvider.get(key);
-    if (!cheapestSoFar || listing.price < cheapestSoFar.price) {
-      cheapestByProvider.set(key, listing);
-    }
-  }
-  return Array.from(cheapestByProvider.values());
-}
-
-function toProviderCards(listings: PublicListingSummary[], easyRead: boolean) {
-  return dedupeByCheapestListing(listings).map((listing) => ({
+function toListingCards(listings: PublicListingSummary[], easyRead: boolean) {
+  return listings.map((listing) => ({
     listingId: listing.listingId,
-    firstName: listing.author.name,
-    lastName: listing.author.surname,
+    label: listing.title,
+    providerFirstName: listing.author.name,
+    providerLastName: listing.author.surname,
     location: listing.location.city,
-    bio: easyRead && listing.easyDescription
+    description: easyRead && listing.easyDescription
       ? listing.easyDescription
       : listing.description,
-    pricePerHour: listing.price,
+    tags: listing.tags,
+    hourRate: listing.price,
+    pictureLink: listing.primaryMedia?.url,
   }));
 }
 
 export function Home() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const categoryRef = useRef<HTMLUListElement>(null);
   const providerRef = useRef<HTMLUListElement>(null);
@@ -161,7 +150,7 @@ export function Home() {
     queryFn: fetchFeaturedListings,
   });
 
-  const providers = toProviderCards(featuredListingsQuery.data ?? [], easyRead);
+  const listingCards = toListingCards(featuredListingsQuery.data ?? [], easyRead);
 
   const categories = (tagsQuery.data ?? [])
     .filter((tag) => tag.isActive && tag.name in CATEGORY_IMAGES)
@@ -225,7 +214,10 @@ export function Home() {
               <form
                 role="search"
                 className="flex gap-2"
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  navigate({ to: "/browse-services", search: { q: query, city: "", tagIds: [], from: undefined } });
+                }}
               >
                 <label htmlFor="hero-search" className="sr-only">
                   Search for a service
@@ -287,6 +279,9 @@ export function Home() {
                 size="lg"
                 trailingIcon={<ArrowRight />}
                 fullWidth
+                onClick={() => {
+                  window.location.href = "http://localhost:8081/auth/login/google";
+                }}
               >
                 Get started
               </Button>
@@ -347,10 +342,10 @@ export function Home() {
                   {NEED_HELP_STEPS.map((step) => (
                     <li
                       key={step.n}
-                      className="flex gap-4 py-4 first:pt-0 last:pb-0"
+                      className="flex items-center gap-4 py-4 first:pt-0 last:pb-0"
                     >
                       <span
-                        className="shrink-0 w-6 h-6 rounded-full bg-mint border border-primary/30 flex items-center justify-center text-label font-bold text-primary mt-0.5"
+                        className="shrink-0 w-9 h-9 rounded-full bg-mint border border-primary/30 flex items-center justify-center text-small font-bold text-primary"
                         aria-hidden="true"
                       >
                         {step.n}
@@ -386,10 +381,10 @@ export function Home() {
                   {CAN_HELP_STEPS.map((step) => (
                     <li
                       key={step.n}
-                      className="flex gap-4 py-4 first:pt-0 last:pb-0"
+                      className="flex items-center gap-4 py-4 first:pt-0 last:pb-0"
                     >
                       <span
-                        className="shrink-0 w-6 h-6 rounded-full bg-blush border border-accent/30 flex items-center justify-center text-label font-bold text-accent mt-0.5"
+                        className="shrink-0 w-9 h-9 rounded-full bg-blush border border-accent/30 flex items-center justify-center text-small font-bold text-accent"
                         aria-hidden="true"
                       >
                         {step.n}
@@ -484,7 +479,16 @@ export function Home() {
                     ))
                   : categories.map((cat) => (
                       <li key={cat.tagId} className="snap-start shrink-0 w-48">
-                        <CategoryCard name={cat.name} imageSrc={cat.imageSrc} />
+                        <CategoryCard
+                          name={cat.name}
+                          imageSrc={cat.imageSrc}
+                          onClick={() =>
+                            navigate({
+                              to: "/browse-services",
+                              search: { q: "", city: "", tagIds: [cat.tagId], from: undefined },
+                            })
+                          }
+                        />
                       </li>
                     ))}
               </ul>
@@ -492,31 +496,31 @@ export function Home() {
           </div>
         </section>
 
-        {/* ── Help near you ── */}
+        {/* ── Popular listings ── */}
         <section className="bg-linen py-20" aria-labelledby="nearby-heading">
           <div className="mx-auto max-w-4xl px-6">
             <h2
               id="nearby-heading"
               className="font-heading text-3xl font-bold text-foreground mb-1"
             >
-              Help near you
+              Popular listings
             </h2>
             <div className="flex items-end justify-between mb-6">
               <p className="text-muted text-small">
-                Some of the helpers currently active on Mira
+                Some of the services currently listed on Mira
               </p>
               {!featuredListingsQuery.isError &&
-                (featuredListingsQuery.isLoading || providers.length > 0) && (
+                (featuredListingsQuery.isLoading || listingCards.length > 0) && (
                   <div
                     className="flex gap-2 shrink-0 ml-4"
                     role="group"
-                    aria-label="Scroll providers"
+                    aria-label="Scroll listings"
                   >
                     <button
                       type="button"
                       onClick={() => scroll(providerRef, "left")}
-                      aria-label="Scroll providers left"
-                      aria-controls="providers-list"
+                      aria-label="Scroll listings left"
+                      aria-controls="listings-list"
                       className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
                     >
                       <ChevronLeft size={18} aria-hidden="true" />
@@ -524,8 +528,8 @@ export function Home() {
                     <button
                       type="button"
                       onClick={() => scroll(providerRef, "right")}
-                      aria-label="Scroll providers right"
-                      aria-controls="providers-list"
+                      aria-label="Scroll listings right"
+                      aria-controls="listings-list"
                       className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
                     >
                       <ChevronRight size={18} aria-hidden="true" />
@@ -535,26 +539,26 @@ export function Home() {
             </div>
             {featuredListingsQuery.isLoading && (
               <p role="status" aria-live="polite" className="sr-only">
-                Loading helpers…
+                Loading listings…
               </p>
             )}
             {featuredListingsQuery.isError ? (
               <p role="alert" className="text-small text-red-600 py-8 text-center">
-                Helpers could not be loaded.
+                Listings could not be loaded.
               </p>
-            ) : !featuredListingsQuery.isLoading && providers.length === 0 ? (
+            ) : !featuredListingsQuery.isLoading && listingCards.length === 0 ? (
               <p className="text-body text-muted py-8 text-center">
-                No helpers found near you yet.
+                No listings found near you yet.
               </p>
             ) : (
               <>
                 <ul
-                  id="providers-list"
+                  id="listings-list"
                   ref={providerRef}
                   className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth list-none m-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
                   style={{ scrollbarWidth: "none" }}
                   tabIndex={0}
-                  aria-label="Helpers near you"
+                  aria-label="Popular listings"
                 >
                   {featuredListingsQuery.isLoading
                     ? Array.from({ length: 4 }).map((_, i) => (
@@ -565,35 +569,32 @@ export function Home() {
                           />
                         </li>
                       ))
-                    : providers.map((p) => (
-                        <li key={p.listingId} className="snap-start shrink-0 w-64">
-                          <ProviderCard
+                    : listingCards.map((listing) => (
+                        <li key={listing.listingId} className="snap-start shrink-0 w-64 flex">
+                          <ServiceCard
                             variant="compact"
-                            firstName={p.firstName}
-                            lastName={p.lastName}
-                            avatar={
-                              <AvatarIcon
-                                firstName={p.firstName}
-                                lastName={p.lastName}
-                                picture=""
-                              />
-                            }
-                            location={p.location}
-                            bio={p.bio}
-                            pricePerHour={p.pricePerHour}
+                            link="#"
+                            label={listing.label}
+                            providerFirstName={listing.providerFirstName}
+                            providerLastName={listing.providerLastName}
+                            location={listing.location}
+                            description={listing.description}
+                            tags={listing.tags}
+                            hourRate={listing.hourRate}
+                            pictureLink={listing.pictureLink}
                           />
                         </li>
                       ))}
                 </ul>
                 {!featuredListingsQuery.isLoading && (
                   <div className="mt-8 text-center">
-                    <a
-                      href="/"
-                      className="inline-flex items-center gap-2 text-primary font-medium no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                    <Link
+                      to="/browse-services"
+                      className="inline-flex items-center gap-2 text-primary font-medium no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
                     >
-                      View all helpers near you{" "}
+                      View all listings{" "}
                       <ArrowRight size={16} aria-hidden="true" />
-                    </a>
+                    </Link>
                   </div>
                 )}
               </>
