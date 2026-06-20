@@ -101,37 +101,6 @@ const CATEGORY_IMAGES: Record<string, string> = {
     "https://images.unsplash.com/photo-1723433892471-62f113c8c9a0?fm=jpg&q=60&w=800&auto=format&fit=crop",
 };
 
-const PROVIDERS = [
-  {
-    firstName: "Patrick ",
-    lastName: "Smith",
-    distanceKm: 1.2,
-    bio: "Helps with Windows, printers, Wi-Fi setup and phone issues. Patient and friendly with first-time users and seniors.",
-    pricePerHour: 25,
-  },
-  {
-    firstName: "Mira L.",
-    lastName: "Long",
-    distanceKm: 3.4,
-    bio: "Math tutor for high-school and first-year uni students. Exam preparation, homework help, flexible evening slots.",
-    pricePerHour: 20,
-  },
-  {
-    firstName: "Thomas R.",
-    lastName: "Richard",
-    distanceKm: 0.8,
-    bio: "Fast and reliable furniture assembly, IKEA & other brands. Also mounts TVs, shelves and blinds.",
-    pricePerHour: 28,
-  },
-  {
-    firstName: "Anna W.",
-    lastName: "Washington",
-    distanceKm: 2.2,
-    bio: "Professional cleaner with 5 years experience. Deep cleans, regular visits, and move-out cleaning available.",
-    pricePerHour: 22,
-  },
-];
-
 const FOOTER_LINKS = [
   "About",
   "Contact Us",
@@ -145,9 +114,8 @@ interface HomeProps {
 }
 
 function toProviderCards(listings: PublicListingSummary[]) {
-  if (listings.length === 0) return PROVIDERS;
-
   return listings.map((listing) => ({
+    listingId: listing.listingId,
     firstName: listing.author.name,
     lastName: listing.author.surname,
     distanceKm: listing.location.serviceRadiusKm,
@@ -510,71 +478,78 @@ export function Home({ featuredListings }: HomeProps) {
               <p className="text-muted text-small">
                 Based on your location • Munich, 10km radius
               </p>
-              <div
-                className="flex gap-2 shrink-0 ml-4"
-                role="group"
-                aria-label="Scroll providers"
-              >
-                <button
-                  type="button"
-                  onClick={() => scroll(providerRef, "left")}
-                  aria-label="Scroll providers left"
-                  aria-controls="providers-list"
-                  className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              {providers.length > 0 && (
+                <div
+                  className="flex gap-2 shrink-0 ml-4"
+                  role="group"
+                  aria-label="Scroll providers"
                 >
-                  <ChevronLeft size={18} aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scroll(providerRef, "right")}
-                  aria-label="Scroll providers right"
-                  aria-controls="providers-list"
-                  className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
-                >
-                  <ChevronRight size={18} aria-hidden="true" />
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => scroll(providerRef, "left")}
+                    aria-label="Scroll providers left"
+                    aria-controls="providers-list"
+                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                  >
+                    <ChevronLeft size={18} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scroll(providerRef, "right")}
+                    aria-label="Scroll providers right"
+                    aria-controls="providers-list"
+                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                  >
+                    <ChevronRight size={18} aria-hidden="true" />
+                  </button>
+                </div>
+              )}
             </div>
-            <ul
-              id="providers-list"
-              ref={providerRef}
-              className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth list-none m-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
-              style={{ scrollbarWidth: "none" }}
-              tabIndex={0}
-              aria-label="Helpers near you"
-            >
-              {providers.map((p) => (
-                <li
-                  key={`${p.firstName}-${p.lastName}-${p.bio}`}
-                  className="snap-start shrink-0 w-64"
+            {providers.length === 0 ? (
+              <p className="text-body text-muted py-8 text-center">
+                No helpers found near you yet.
+              </p>
+            ) : (
+              <>
+                <ul
+                  id="providers-list"
+                  ref={providerRef}
+                  className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth list-none m-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+                  style={{ scrollbarWidth: "none" }}
+                  tabIndex={0}
+                  aria-label="Helpers near you"
                 >
-                  <ProviderCard
-                    variant="compact"
-                    firstName={p.firstName}
-                    lastName={p.lastName}
-                    avatar={
-                      <AvatarIcon
+                  {providers.map((p) => (
+                    <li key={p.listingId} className="snap-start shrink-0 w-64">
+                      <ProviderCard
+                        variant="compact"
                         firstName={p.firstName}
                         lastName={p.lastName}
-                        picture=""
+                        avatar={
+                          <AvatarIcon
+                            firstName={p.firstName}
+                            lastName={p.lastName}
+                            picture=""
+                          />
+                        }
+                        distanceKm={p.distanceKm}
+                        bio={p.bio}
+                        pricePerHour={p.pricePerHour}
                       />
-                    }
-                    distanceKm={p.distanceKm}
-                    bio={p.bio}
-                    pricePerHour={p.pricePerHour}
-                  />
-                </li>
-              ))}
-            </ul>
-            <div className="mt-8 text-center">
-              <a
-                href="/"
-                className="inline-flex items-center gap-2 text-primary font-medium no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
-              >
-                View all helpers near you{" "}
-                <ArrowRight size={16} aria-hidden="true" />
-              </a>
-            </div>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-8 text-center">
+                  <a
+                    href="/"
+                    className="inline-flex items-center gap-2 text-primary font-medium no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                  >
+                    View all helpers near you{" "}
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </a>
+                </div>
+              </>
+            )}
           </div>
         </section>
       </main>
