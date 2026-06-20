@@ -116,8 +116,23 @@ const FOOTER_LINKS = [
   "Privacy Policy",
 ];
 
+// `author` has no stable id (just name/surname), so dedupe on that as a proxy key and keep each provider's cheapest listing.
+function dedupeByCheapestListing(
+  listings: PublicListingSummary[],
+): PublicListingSummary[] {
+  const cheapestByProvider = new Map<string, PublicListingSummary>();
+  for (const listing of listings) {
+    const key = `${listing.author.name}|${listing.author.surname}`;
+    const cheapestSoFar = cheapestByProvider.get(key);
+    if (!cheapestSoFar || listing.price < cheapestSoFar.price) {
+      cheapestByProvider.set(key, listing);
+    }
+  }
+  return Array.from(cheapestByProvider.values());
+}
+
 function toProviderCards(listings: PublicListingSummary[], easyRead: boolean) {
-  return listings.map((listing) => ({
+  return dedupeByCheapestListing(listings).map((listing) => ({
     listingId: listing.listingId,
     firstName: listing.author.name,
     lastName: listing.author.surname,
