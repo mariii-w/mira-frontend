@@ -19,6 +19,7 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const user = useAuthStore((s) => s.user);
+  const userId = user?.userId?? ''
   const firstName = user?.firstName ?? "";
   const lastName = user?.lastName ?? "";
   const isProvider = user?.userType === "PROVIDER";
@@ -79,7 +80,8 @@ export function Navbar() {
 
             {user ? (
                 <UserMenu
-                    firstName={firstName}
+                    userId = {userId}
+              firstName={firstName}
                     lastName={lastName}
                     isProvider={isProvider}
                     pictureUrl={pictureUrl}

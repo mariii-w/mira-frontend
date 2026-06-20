@@ -104,6 +104,7 @@ export function ServiceCard(
                         )}
                         <Dot />
                         <MapPin size={14} className='shrink-0 self-center text-foreground/70' />
+                        
                         <p className='font-bold'>{location}</p>
                     </div>
                     {description && (

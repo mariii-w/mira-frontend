@@ -6,16 +6,17 @@ import { AvatarIcon } from './AvatarIcon'
 import { signOut } from '../stores/auth'
 
 interface UserMenuProps {
+  userId: string
   firstName: string
   lastName: string
   isProvider?: boolean
   pictureUrl?: string
 }
 
-export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMenuProps) {
+export function UserMenu({ userId, firstName, lastName, isProvider, pictureUrl }: UserMenuProps) {
   const navigate = useNavigate()
   const displayName = lastName ? `${firstName} ${lastName[0]}.` : firstName
-
+  const userProfileUrl = '/profile/' + userId
   async function handleLogout() {
     await signOut()
     navigate({ to: '/' })
@@ -40,7 +41,7 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
           sideOffset={8}
           className="z-50 w-56 rounded-xl border border-border bg-surface p-2 shadow-lg"
         >
-          <Row icon={<UserRound size={15} />} title="View Profile" to="/" />
+          <Row icon={<UserRound size={15} />} title="View Profile" to={userProfileUrl} />
           <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/my-bookings" />
           {isProvider && (
             <Row icon={<LayoutList size={15} />} title="My Services" to="/my-listings" />
