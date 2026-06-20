@@ -7,20 +7,14 @@ import { Label } from "./Label";
 import { Textarea } from "./Textarea";
 import { Slider } from "./Slider";
 import { MultiSelect } from "./MultiSelect";
-import type { ServiceTag } from "../api/model";
+import type { ListingLocationRequest, ServiceTag } from "../api/model";
 
 export interface CreateListingFormValues {
   title: string;
   description: string;
   price: number;
   tagIds: string[];
-  location: {
-    street: string;
-    houseNumber: string;
-    postalCode: string;
-    city: string;
-    serviceRadiusKm: number;
-  };
+  location: ListingLocationRequest;
   imageFiles: File[];
 }
 

@@ -14,48 +14,27 @@ import { Textarea } from "./Textarea";
 import { Slider } from "./Slider";
 import { MultiSelect } from "./MultiSelect";
 import { mediaUrl } from "../lib/mediaUrl";
-import type { PublicationStatus, VlmStatus } from "./MyListingCard";
-import type { ServiceTag } from "../api/model";
-
-export interface EditListingImage {
-  mediaId: string;
-  url: string;
-  altText?: string | null;
-  altTextStatus?: VlmStatus;
-}
-
-export interface EditListingDetails {
-  listingId: string;
-  title: string;
-  description: string;
-  easyDescription?: string | null;
-  easyDescriptionStatus?: VlmStatus;
-  price: number;
-  publicationStatus: PublicationStatus;
-  tags: ServiceTag[];
-  location: { city: string; postalCode: string; serviceRadiusKm: number };
-  media?: EditListingImage[];
-}
+import type { PublicationStatus } from "./MyListingCard";
+import type {
+  ListingDetails,
+  ListingLocationRequest,
+  ListingMediaPreview,
+  ServiceTag,
+} from "../api/model";
 
 export interface EditListingFormValues {
   title: string;
   description: string;
   price: number;
   tagIds: string[];
-  location?: {
-    street: string;
-    houseNumber: string;
-    postalCode: string;
-    city: string;
-    serviceRadiusKm: number;
-  };
+  location?: ListingLocationRequest;
   imageFiles: File[];
 }
 
 export type EditListingStatusAction = "publish" | "pause" | "resume";
 
 interface EditListingProps {
-  listing: EditListingDetails | null;
+  listing: ListingDetails | null;
   loadError: string | null;
   availableTags: ServiceTag[];
   tagsLoading: boolean;
@@ -64,7 +43,7 @@ interface EditListingProps {
   onDelete: () => Promise<void>;
   onRemoveImage: (mediaId: string) => Promise<void>;
   onStatusAction: (action: EditListingStatusAction) => Promise<void>;
-  onRefreshMedia: () => Promise<EditListingImage[]>;
+  onRefreshMedia: () => Promise<ListingMediaPreview[]>;
 }
 
 function validateTitle(v: string) {
@@ -135,7 +114,7 @@ export function EditListing({
   const [radiusKm, setRadiusKm] = useState(20);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
-  const [existingImages, setExistingImages] = useState<EditListingImage[]>([]);
+  const [existingImages, setExistingImages] = useState<ListingMediaPreview[]>([]);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
 
@@ -198,7 +177,7 @@ export function EditListing({
     setCity(listing.location.city);
     setRadiusKm(listing.location.serviceRadiusKm);
     setSelectedTagIds(listing.tags.map((t) => t.tagId));
-    setExistingImages(listing.media ?? []);
+    setExistingImages(listing.media);
   }, [listing]);
   /* eslint-enable react-hooks/set-state-in-effect */
 

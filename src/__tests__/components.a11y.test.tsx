@@ -24,7 +24,8 @@ import { CalendarGrid } from "../components/CalendarGrid";
 import { CalendarPage } from "../components/CalendarPage";
 import { CategoryCard } from "../components/CategoryCard";
 import { CreateListing } from "../components/CreateListing";
-import { EditListing, type EditListingDetails } from "../components/EditListing";
+import { EditListing } from "../components/EditListing";
+import type { ListingDetails } from "../api/model";
 import { ExceptionModal } from "../components/ExceptionModal";
 import { FilterBar } from "../components/FilterBar";
 import { Home } from "../components/Home";
@@ -175,20 +176,31 @@ const serviceTags = [
   { tagId: "tag-2", name: "Accessible", isBarrierefrei: true, isActive: true },
 ];
 
-const editListing: EditListingDetails = {
+const editListing: ListingDetails = {
   listingId: "listing-1",
   title: "Grocery pickup",
   description: "Weekly pickup and drop-off support.",
   price: 24,
   publicationStatus: "ACTIVE",
+  moderationStatus: "VISIBLE",
+  author: { userId: "user-1", name: "Mira", surname: "Muster" },
+  publishedAt: "2026-01-01T00:00:00Z",
+  createdAt: "2026-01-01T00:00:00Z",
+  updatedAt: "2026-01-01T00:00:00Z",
   tags: serviceTags,
   location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 20 },
   media: [
     {
       mediaId: "media-1",
+      position: 0,
       url: "/listing.jpg",
       altText: "Shopping bags",
       altTextStatus: "COMPLETED",
+      mimeType: "image/jpeg",
+      size: 1000,
+      width: 800,
+      height: 600,
+      createdAt: "2026-01-01T00:00:00Z",
     },
   ],
 };

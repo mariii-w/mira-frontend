@@ -2,9 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   EditListing,
-  type EditListingDetails,
   type EditListingFormValues,
-  type EditListingImage,
   type EditListingStatusAction,
 } from "../components/EditListing";
 import {
@@ -19,7 +17,12 @@ import {
   resumeListing,
 } from "../api/mira";
 import { useAuthStore } from "../stores/auth";
-import type { ProblemDetailsResponse, ServiceTag } from "../api/model";
+import type {
+  ListingDetails,
+  ListingMediaPreview,
+  ProblemDetailsResponse,
+  ServiceTag,
+} from "../api/model";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/edit-listing/$listingId")({
@@ -30,24 +33,17 @@ function getProblemDetail(data: unknown): string | undefined {
   return (data as Partial<ProblemDetailsResponse> | null)?.detail;
 }
 
-function toEditListingDetails(listing: EditListingDetails): EditListingDetails {
-  return {
-    ...listing,
-    media: listing.media ?? [],
-  };
-}
-
 export function EditListingPage() {
   const { listingId } = Route.useParams();
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const userId = user?.userId;
-  const [listing, setListing] = useState<EditListingDetails | null>(null);
+  const [listing, setListing] = useState<ListingDetails | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [availableTags, setAvailableTags] = useState<ServiceTag[]>([]);
   const [tagsLoading, setTagsLoading] = useState(true);
 
-  const refreshListing = useCallback(async (): Promise<EditListingDetails> => {
+  const refreshListing = useCallback(async (): Promise<ListingDetails> => {
     if (!userId) throw new Error("You must be signed in to edit this listing.");
 
     const response = await getAuthorListing(
@@ -61,15 +57,15 @@ export function EditListingPage() {
       );
     }
 
-    return toEditListingDetails(response.data);
+    return response.data;
   }, [listingId, userId]);
 
   const handleRefreshMedia = useCallback(async (): Promise<
-    EditListingImage[]
+    ListingMediaPreview[]
   > => {
     const nextListing = await refreshListing();
     setListing(nextListing);
-    return nextListing.media ?? [];
+    return nextListing.media;
   }, [refreshListing]);
 
   useEffect(() => {
