@@ -78,7 +78,7 @@ export function ListingDetailPage({
                       ? activeMedia.altText
                       : listing.title
                   }
-                  className="w-full h-96 object-cover rounded-2xl"
+                  className="w-full h-[28rem] object-cover rounded-2xl"
                 />
                 {media.length > 1 && (
                   <div className="flex gap-3" role="list" aria-label="Listing photos">

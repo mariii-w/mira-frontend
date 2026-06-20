@@ -7,6 +7,7 @@ interface AvatarIconProps {
   alt?: string
   size?: number
   bgColorClassName?: string
+  className?: string
 }
 
 const BG_COLORS = [
@@ -31,6 +32,7 @@ export function AvatarIcon({
   alt,
   size = 40,
   bgColorClassName,
+  className,
 }: AvatarIconProps) {
   const [imgFailed, setImgFailed] = useState(false)
   const fullName = `${firstName ?? ''} ${lastName ?? ''}`.trim()
@@ -41,7 +43,7 @@ export function AvatarIcon({
         src={picture}
         alt={alt ?? (fullName ? `${fullName} avatar` : 'User avatar')}
         style={{ width: size, height: size }}
-        className="rounded-full object-cover block shrink-0"
+        className={`rounded-full object-cover block shrink-0 ${className ?? ''}`}
         onError={() => setImgFailed(true)}
       />
     )
@@ -63,7 +65,7 @@ export function AvatarIcon({
         fontSize: Math.round(size * 0.36),
         lineHeight: 1,
       }}
-      className={`${bgColor} text-cream rounded-full flex items-center justify-center font-semibold tracking-wide select-none shrink-0`}
+      className={`${bgColor} text-cream rounded-full flex items-center justify-center font-semibold tracking-wide select-none shrink-0 ${className ?? ''}`}
     >
       {initials}
     </div>

@@ -28,7 +28,12 @@ export function ListingProviderCard({
   return (
     <aside className="flex flex-col gap-5 bg-charcoal text-primary-foreground rounded-2xl p-6 h-fit">
       <div className="flex flex-col items-center text-center gap-2">
-        <AvatarIcon firstName={authorName} size={64} bgColorClassName="bg-primary" />
+        <AvatarIcon
+          firstName={authorName}
+          size={64}
+          bgColorClassName="bg-primary"
+          className="ring-2 ring-primary-foreground/70"
+        />
         <p className="font-semibold">{displayName}</p>
         {/* Always shown for now — tie to real verification status once credentials gating ships. */}
         <span className="inline-flex items-center gap-1 h-7 px-3 rounded-full text-small font-medium bg-primary text-primary-foreground">
