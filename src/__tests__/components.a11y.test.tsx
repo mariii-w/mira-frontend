@@ -365,7 +365,9 @@ const componentCases: Array<[string, ReactElement]> = [
       varified
       label="Shopping help"
       description="Help with weekly shopping."
-      tags={[{ tagId: "errands", name: "Errands", isBarrierefrei: false }]}
+      tags={[
+        { tagId: "errands", name: "Errands", isBarrierefrei: false, isActive: true },
+      ]}
       hourRate={20}
     />,
   ],

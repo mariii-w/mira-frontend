@@ -5,7 +5,6 @@ import {
   type EditListingDetails,
   type EditListingFormValues,
   type EditListingImage,
-  type EditListingServiceTag,
   type EditListingStatusAction,
 } from "../components/EditListing";
 import {
@@ -20,7 +19,7 @@ import {
   resumeListing,
 } from "../api/mira";
 import { useAuthStore } from "../stores/auth";
-import type { ProblemDetailsResponse } from "../api/model";
+import type { ProblemDetailsResponse, ServiceTag } from "../api/model";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/edit-listing/$listingId")({
@@ -45,9 +44,7 @@ export function EditListingPage() {
   const userId = user?.userId;
   const [listing, setListing] = useState<EditListingDetails | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [availableTags, setAvailableTags] = useState<EditListingServiceTag[]>(
-    [],
-  );
+  const [availableTags, setAvailableTags] = useState<ServiceTag[]>([]);
   const [tagsLoading, setTagsLoading] = useState(true);
 
   const refreshListing = useCallback(async (): Promise<EditListingDetails> => {

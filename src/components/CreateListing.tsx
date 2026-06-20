@@ -7,13 +7,7 @@ import { Label } from "./Label";
 import { Textarea } from "./Textarea";
 import { Slider } from "./Slider";
 import { MultiSelect } from "./MultiSelect";
-
-export interface ServiceTag {
-  tagId: string;
-  name: string;
-  isBarrierefrei: boolean;
-  isActive: boolean;
-}
+import type { ServiceTag } from "../api/model";
 
 export interface CreateListingFormValues {
   title: string;

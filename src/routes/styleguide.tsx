@@ -496,10 +496,10 @@ function Styleguide() {
               label={'Laptop & Wi-Fi setup'}
               description={'I help with Windows, macOS, printers, Wi-Fi, smart TVs and phone-to-laptop setups. Friendly with first-time users and seniors.'}
               tags={[
-                { tagId: '1', name: 'Wi-Fi',       isBarrierefrei: false },
-                { tagId: '2', name: 'Windows',      isBarrierefrei: false },
-                { tagId: '3', name: 'Printers',     isBarrierefrei: false },
-                { tagId: '4', name: 'Barrierefrei', isBarrierefrei: true  },
+                { tagId: '1', name: 'Wi-Fi',       isBarrierefrei: false, isActive: true },
+                { tagId: '2', name: 'Windows',      isBarrierefrei: false, isActive: true },
+                { tagId: '3', name: 'Printers',     isBarrierefrei: false, isActive: true },
+                { tagId: '4', name: 'Barrierefrei', isBarrierefrei: true,  isActive: true },
               ]}
               hourRate={20}
           />

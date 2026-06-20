@@ -2,11 +2,7 @@ import { Check, MessageCircle } from "lucide-react";
 import { AvatarIcon } from "./AvatarIcon";
 import { Badge } from "./Badge";
 import { Button } from "./Button";
-
-export interface ListingProviderCardTag {
-  tagId: string;
-  name: string;
-}
+import type { ServiceTag } from "../api/model";
 
 export interface ListingProviderCardProps {
   authorName: string;
@@ -14,7 +10,7 @@ export interface ListingProviderCardProps {
   price: number;
   city: string;
   availableToday?: boolean;
-  tags: ListingProviderCardTag[];
+  tags: ServiceTag[];
   onBookNow: () => void;
 }
 
@@ -75,7 +71,11 @@ export function ListingProviderCard({
         <p className="text-small font-semibold mb-2">Tags</p>
         <div className="flex flex-wrap gap-2">
           {tags.map((tag) => (
-            <Badge key={tag.tagId} text={tag.name} variant="primary" />
+            <Badge
+              key={tag.tagId}
+              text={tag.name}
+              variant={tag.isBarrierefrei ? "accent" : "primary"}
+            />
           ))}
         </div>
       </div>

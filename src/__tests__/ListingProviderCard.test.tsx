@@ -4,8 +4,8 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { ListingProviderCard } from '../components/ListingProviderCard'
 
 const tags = [
-  { tagId: 'tag-1', name: 'PC & Laptop' },
-  { tagId: 'tag-2', name: 'Wi-Fi' },
+  { tagId: 'tag-1', name: 'PC & Laptop', isBarrierefrei: false, isActive: true },
+  { tagId: 'tag-2', name: 'Wheelchair accessible', isBarrierefrei: true, isActive: true },
 ]
 
 describe('<ListingProviderCard />', () => {
@@ -24,7 +24,22 @@ describe('<ListingProviderCard />', () => {
     expect(screen.getByText('20€')).toBeInTheDocument()
     expect(screen.getByText('Berlin')).toBeInTheDocument()
     expect(screen.getByText('PC & Laptop')).toBeInTheDocument()
-    expect(screen.getByText('Wi-Fi')).toBeInTheDocument()
+    expect(screen.getByText('Wheelchair accessible')).toBeInTheDocument()
+  })
+
+  it('renders barrierefrei tags in accent and other tags in primary', () => {
+    render(
+      <ListingProviderCard
+        authorName="Klaus"
+        authorSurname="Mueller"
+        price={20}
+        city="Berlin"
+        tags={tags}
+        onBookNow={vi.fn()}
+      />,
+    )
+    expect(screen.getByText('PC & Laptop').parentElement).toHaveClass('bg-primary')
+    expect(screen.getByText('Wheelchair accessible').parentElement).toHaveClass('bg-accent')
   })
 
   it('shows a Verified badge', () => {

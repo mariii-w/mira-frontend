@@ -15,13 +15,7 @@ import { Slider } from "./Slider";
 import { MultiSelect } from "./MultiSelect";
 import { mediaUrl } from "../lib/mediaUrl";
 import type { PublicationStatus, VlmStatus } from "./MyListingCard";
-
-export interface EditListingServiceTag {
-  tagId: string;
-  name: string;
-  isBarrierefrei: boolean;
-  isActive: boolean;
-}
+import type { ServiceTag } from "../api/model";
 
 export interface EditListingImage {
   mediaId: string;
@@ -38,7 +32,7 @@ export interface EditListingDetails {
   easyDescriptionStatus?: VlmStatus;
   price: number;
   publicationStatus: PublicationStatus;
-  tags: EditListingServiceTag[];
+  tags: ServiceTag[];
   location: { city: string; postalCode: string; serviceRadiusKm: number };
   media?: EditListingImage[];
 }
@@ -63,7 +57,7 @@ export type EditListingStatusAction = "publish" | "pause" | "resume";
 interface EditListingProps {
   listing: EditListingDetails | null;
   loadError: string | null;
-  availableTags: EditListingServiceTag[];
+  availableTags: ServiceTag[];
   tagsLoading: boolean;
   onBack: () => void | Promise<void>;
   onSubmit: (values: EditListingFormValues) => Promise<void>;

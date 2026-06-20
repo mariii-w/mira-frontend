@@ -1,12 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Badge } from "./Badge"
 import { MapPin, Dot, ArrowRight } from 'lucide-react'
-
-export interface ServiceCardTag {
-  tagId: string
-  name: string
-  isBarrierefrei: boolean
-}
+import type { ServiceTag } from '../api/model'
 
 interface ServiceCardProps{
     link: string
@@ -17,7 +12,7 @@ interface ServiceCardProps{
     varified?: boolean
     label: string
     description?: string
-    tags: ServiceCardTag[]
+    tags: ServiceTag[]
     hourRate : number
 }
 
