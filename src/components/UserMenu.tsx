@@ -3,7 +3,7 @@ import { ChevronDown, LogOut, CalendarCheck, LayoutList, UserRound } from 'lucid
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from './Button'
 import { AvatarIcon } from './AvatarIcon'
-import { signOut } from '../stores/auth'
+import { logout } from '../stores/auth'
 
 interface UserMenuProps {
   userId: string
@@ -18,7 +18,7 @@ export function UserMenu({ userId, firstName, lastName, isProvider, pictureUrl }
   const displayName = lastName ? `${firstName} ${lastName[0]}.` : firstName
   const userProfileUrl = '/profile/' + userId
   async function handleLogout() {
-    await signOut()
+    await logout()
     navigate({ to: '/' })
   }
 
@@ -36,15 +36,14 @@ export function UserMenu({ userId, firstName, lastName, isProvider, pictureUrl }
 
       <Popover.Portal>
         <Popover.Content
-          aria-label="User menu"
           align="end"
           sideOffset={8}
           className="z-50 w-56 rounded-xl border border-border bg-surface p-2 shadow-lg"
         >
           <Row icon={<UserRound size={15} />} title="View Profile" to={userProfileUrl} />
-          <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/my-bookings" />
+          <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/" />
           {isProvider && (
-            <Row icon={<LayoutList size={15} />} title="My Services" to="/my-listings" />
+            <Row icon={<LayoutList size={15} />} title="Meine Anzeigen" to="/" />
           )}
           <div className="my-1 h-px bg-border/30" />
           <button
