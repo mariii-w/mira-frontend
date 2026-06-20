@@ -432,59 +432,68 @@ export function Home({ featuredListings }: HomeProps) {
               >
                 What are people booking today?
               </h2>
-              <div
-                className="flex gap-2 shrink-0 ml-4"
-                role="group"
-                aria-label="Scroll categories"
-              >
-                <button
-                  type="button"
-                  onClick={() => scroll(categoryRef, "left")}
-                  aria-label="Scroll categories left"
-                  aria-controls="categories-list"
-                  className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              {!tagsQuery.isError && (
+                <div
+                  className="flex gap-2 shrink-0 ml-4"
+                  role="group"
+                  aria-label="Scroll categories"
                 >
-                  <ChevronLeft size={18} aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scroll(categoryRef, "right")}
-                  aria-label="Scroll categories right"
-                  aria-controls="categories-list"
-                  className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
-                >
-                  <ChevronRight size={18} aria-hidden="true" />
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => scroll(categoryRef, "left")}
+                    aria-label="Scroll categories left"
+                    aria-controls="categories-list"
+                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                  >
+                    <ChevronLeft size={18} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scroll(categoryRef, "right")}
+                    aria-label="Scroll categories right"
+                    aria-controls="categories-list"
+                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                  >
+                    <ChevronRight size={18} aria-hidden="true" />
+                  </button>
+                </div>
+              )}
             </div>
             {tagsQuery.isLoading && (
               <p role="status" aria-live="polite" className="sr-only">
                 Loading categories…
               </p>
             )}
-            <ul
-              id="categories-list"
-              ref={categoryRef}
-              className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth list-none m-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
-              style={{ scrollbarWidth: "none" }}
-              tabIndex={0}
-              aria-label="Popular service categories"
-            >
-              {tagsQuery.isLoading
-                ? Array.from({ length: 6 }).map((_, i) => (
-                    <li key={i} className="snap-start shrink-0 w-48">
-                      <div
-                        aria-hidden="true"
-                        className="aspect-square w-full animate-pulse rounded-2xl border border-border bg-linen"
-                      />
-                    </li>
-                  ))
-                : categories.map((cat) => (
-                    <li key={cat.tagId} className="snap-start shrink-0 w-48">
-                      <CategoryCard name={cat.name} imageSrc={cat.imageSrc} />
-                    </li>
-                  ))}
-            </ul>
+            {tagsQuery.isError && (
+              <p role="alert" className="text-small text-red-600">
+                Categories could not be loaded.
+              </p>
+            )}
+            {!tagsQuery.isError && (
+              <ul
+                id="categories-list"
+                ref={categoryRef}
+                className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth list-none m-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+                style={{ scrollbarWidth: "none" }}
+                tabIndex={0}
+                aria-label="Popular service categories"
+              >
+                {tagsQuery.isLoading
+                  ? Array.from({ length: 6 }).map((_, i) => (
+                      <li key={i} className="snap-start shrink-0 w-48">
+                        <div
+                          aria-hidden="true"
+                          className="aspect-square w-full animate-pulse rounded-2xl border border-border bg-linen"
+                        />
+                      </li>
+                    ))
+                  : categories.map((cat) => (
+                      <li key={cat.tagId} className="snap-start shrink-0 w-48">
+                        <CategoryCard name={cat.name} imageSrc={cat.imageSrc} />
+                      </li>
+                    ))}
+              </ul>
+            )}
           </div>
         </section>
 
