@@ -14,6 +14,7 @@ import { CategoryCard } from "./CategoryCard";
 import { ServiceCard } from "./ServiceCard";
 import { Logo } from "./Logo";
 import { useAccessibilityStore } from "../stores/accessibility";
+import { useAuthStore } from "../stores/auth";
 import { getServiceTags, getPublicListings } from "../api/mira";
 import type { PublicListingSummary, ServiceTag } from "../api/model";
 
@@ -138,6 +139,7 @@ export function Home() {
   const categoryRef = useRef<HTMLUListElement>(null);
   const providerRef = useRef<HTMLUListElement>(null);
   const easyRead = useAccessibilityStore((state) => state.easyRead);
+  const isLoggedIn = useAuthStore((state) => !!state.user);
 
   const tagsQuery = useQuery({
     queryKey: ["service-tags"],
@@ -280,11 +282,17 @@ export function Home() {
                 trailingIcon={<ArrowRight />}
                 fullWidth
                 onClick={() => {
+                  if (isLoggedIn) return;
                   window.location.href = "http://localhost:8081/auth/login/google";
                 }}
               >
                 Get started
               </Button>
+              {isLoggedIn && (
+                <p className="text-small text-foreground/60 text-center -mt-1">
+                  You're already signed in.
+                </p>
+              )}
               <ul className="flex flex-col gap-1.5 list-none m-0 p-0">
                 {CAN_HELP_BULLETS.map((b) => (
                   <li
