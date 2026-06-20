@@ -13,13 +13,19 @@ import { CategoryCard } from "./CategoryCard";
 import { ProviderCard } from "./ProviderCard";
 import { Logo } from "./Logo";
 import { AvatarIcon } from "./AvatarIcon";
-import { getServiceTags } from "../api/mira";
+import { getServiceTags, getPublicListings } from "../api/mira";
 import type { PublicListingSummary, ServiceTag } from "../api/model";
 
 async function fetchServiceTags(): Promise<ServiceTag[]> {
   const response = await getServiceTags();
   if (response.status !== 200) throw new Error("Tags could not be loaded.");
   return response.data ?? [];
+}
+
+async function fetchFeaturedListings(): Promise<PublicListingSummary[]> {
+  const response = await getPublicListings({ limit: 8 });
+  if (response.status !== 200) throw new Error("Helpers could not be loaded.");
+  return response.data.items;
 }
 
 const NEED_HELP_BULLETS = [
@@ -109,10 +115,6 @@ const FOOTER_LINKS = [
   "Privacy Policy",
 ];
 
-interface HomeProps {
-  featuredListings: PublicListingSummary[];
-}
-
 function toProviderCards(listings: PublicListingSummary[]) {
   return listings.map((listing) => ({
     listingId: listing.listingId,
@@ -124,17 +126,23 @@ function toProviderCards(listings: PublicListingSummary[]) {
   }));
 }
 
-export function Home({ featuredListings }: HomeProps) {
+export function Home() {
   const [query, setQuery] = useState("");
   const categoryRef = useRef<HTMLUListElement>(null);
   const providerRef = useRef<HTMLUListElement>(null);
-  const providers = toProviderCards(featuredListings);
 
   const tagsQuery = useQuery({
     queryKey: ["service-tags"],
     queryFn: fetchServiceTags,
     staleTime: 1000 * 60 * 5,
   });
+
+  const featuredListingsQuery = useQuery({
+    queryKey: ["featured-listings"],
+    queryFn: fetchFeaturedListings,
+  });
+
+  const providers = toProviderCards(featuredListingsQuery.data ?? []);
 
   const categories = (tagsQuery.data ?? [])
     .filter((tag) => tag.isActive && tag.name in CATEGORY_IMAGES)
@@ -478,34 +486,44 @@ export function Home({ featuredListings }: HomeProps) {
               <p className="text-muted text-small">
                 Based on your location • Munich, 10km radius
               </p>
-              {providers.length > 0 && (
-                <div
-                  className="flex gap-2 shrink-0 ml-4"
-                  role="group"
-                  aria-label="Scroll providers"
-                >
-                  <button
-                    type="button"
-                    onClick={() => scroll(providerRef, "left")}
-                    aria-label="Scroll providers left"
-                    aria-controls="providers-list"
-                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              {!featuredListingsQuery.isError &&
+                (featuredListingsQuery.isLoading || providers.length > 0) && (
+                  <div
+                    className="flex gap-2 shrink-0 ml-4"
+                    role="group"
+                    aria-label="Scroll providers"
                   >
-                    <ChevronLeft size={18} aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => scroll(providerRef, "right")}
-                    aria-label="Scroll providers right"
-                    aria-controls="providers-list"
-                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
-                  >
-                    <ChevronRight size={18} aria-hidden="true" />
-                  </button>
-                </div>
-              )}
+                    <button
+                      type="button"
+                      onClick={() => scroll(providerRef, "left")}
+                      aria-label="Scroll providers left"
+                      aria-controls="providers-list"
+                      className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                    >
+                      <ChevronLeft size={18} aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scroll(providerRef, "right")}
+                      aria-label="Scroll providers right"
+                      aria-controls="providers-list"
+                      className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                    >
+                      <ChevronRight size={18} aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
             </div>
-            {providers.length === 0 ? (
+            {featuredListingsQuery.isLoading && (
+              <p role="status" aria-live="polite" className="sr-only">
+                Loading helpers…
+              </p>
+            )}
+            {featuredListingsQuery.isError ? (
+              <p role="alert" className="text-small text-red-600 py-8 text-center">
+                Helpers could not be loaded.
+              </p>
+            ) : !featuredListingsQuery.isLoading && providers.length === 0 ? (
               <p className="text-body text-muted py-8 text-center">
                 No helpers found near you yet.
               </p>
@@ -519,35 +537,46 @@ export function Home({ featuredListings }: HomeProps) {
                   tabIndex={0}
                   aria-label="Helpers near you"
                 >
-                  {providers.map((p) => (
-                    <li key={p.listingId} className="snap-start shrink-0 w-64">
-                      <ProviderCard
-                        variant="compact"
-                        firstName={p.firstName}
-                        lastName={p.lastName}
-                        avatar={
-                          <AvatarIcon
+                  {featuredListingsQuery.isLoading
+                    ? Array.from({ length: 4 }).map((_, i) => (
+                        <li key={i} className="snap-start shrink-0 w-64">
+                          <div
+                            aria-hidden="true"
+                            className="h-56 w-full animate-pulse rounded-2xl border border-border bg-linen"
+                          />
+                        </li>
+                      ))
+                    : providers.map((p) => (
+                        <li key={p.listingId} className="snap-start shrink-0 w-64">
+                          <ProviderCard
+                            variant="compact"
                             firstName={p.firstName}
                             lastName={p.lastName}
-                            picture=""
+                            avatar={
+                              <AvatarIcon
+                                firstName={p.firstName}
+                                lastName={p.lastName}
+                                picture=""
+                              />
+                            }
+                            distanceKm={p.distanceKm}
+                            bio={p.bio}
+                            pricePerHour={p.pricePerHour}
                           />
-                        }
-                        distanceKm={p.distanceKm}
-                        bio={p.bio}
-                        pricePerHour={p.pricePerHour}
-                      />
-                    </li>
-                  ))}
+                        </li>
+                      ))}
                 </ul>
-                <div className="mt-8 text-center">
-                  <a
-                    href="/"
-                    className="inline-flex items-center gap-2 text-primary font-medium no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
-                  >
-                    View all helpers near you{" "}
-                    <ArrowRight size={16} aria-hidden="true" />
-                  </a>
-                </div>
+                {!featuredListingsQuery.isLoading && (
+                  <div className="mt-8 text-center">
+                    <a
+                      href="/"
+                      className="inline-flex items-center gap-2 text-primary font-medium no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                    >
+                      View all helpers near you{" "}
+                      <ArrowRight size={16} aria-hidden="true" />
+                    </a>
+                  </div>
+                )}
               </>
             )}
           </div>
