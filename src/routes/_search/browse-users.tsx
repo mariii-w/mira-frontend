@@ -10,6 +10,7 @@ import { Breadcrumb } from '../../components/BreadCrumb'
 import { Pagination } from '../../components/Pagination'
 import { UserCard } from '../../components/UserCard'
 import { useAccessibilityStore } from '../../stores/accessibility'
+import { mediaUrl } from '../../lib/mediaUrl'
 import { getPublicProfilesCollection } from '../../api/mira'
 import type { GetPublicProfilesCollectionParams } from '../../api/model'
 
@@ -198,7 +199,7 @@ export function BrowseUsersPage() {
                         userType={profile.userType}
                         bio={(easyRead && profile.simplifiedBio ? profile.simplifiedBio : profile.bio) ?? undefined}
                         selfSummary={profile.selfSummary ?? undefined}
-                        profileMediaUrl={profile.profileMedia?.url}
+                        profileMediaUrl={profile.profileMedia ? mediaUrl(profile.profileMedia.url) : undefined}
                       />
                     </li>
                   ))}

@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import type { PrivateUserProfileResponse } from "../api/model";
 import { AvatarIcon } from "./AvatarIcon";
 import { Button } from "./Button";
+import { mediaUrl } from "../lib/mediaUrl";
 
 interface RegisterDoneProps {
   user: PrivateUserProfileResponse | null;
@@ -18,7 +19,7 @@ export function RegisterDone({ user, onFindServices }: RegisterDoneProps) {
     >
       {user?.profileMedia?.url ? (
         <img
-          src={user.profileMedia.url}
+          src={mediaUrl(user.profileMedia.url)}
           alt="Your profile photo"
           className="h-30 w-30 rounded-full object-cover border-2 border-border"
         />
