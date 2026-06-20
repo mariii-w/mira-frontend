@@ -6,6 +6,7 @@ interface AvatarIconProps {
   picture?: string
   alt?: string
   size?: number
+  bgColorClassName?: string
 }
 
 const BG_COLORS = [
@@ -29,6 +30,7 @@ export function AvatarIcon({
   picture,
   alt,
   size = 40,
+  bgColorClassName,
 }: AvatarIconProps) {
   const [imgFailed, setImgFailed] = useState(false)
   const fullName = `${firstName ?? ''} ${lastName ?? ''}`.trim()
@@ -48,7 +50,7 @@ export function AvatarIcon({
   const first = firstName?.[0]?.toUpperCase() ?? ''
   const last = lastName?.[0]?.toUpperCase() ?? ''
   const initials = first + last || '?'
-  const bgColor = nameToBgColor(fullName)
+  const bgColor = bgColorClassName ?? nameToBgColor(fullName)
   const fallbackLabel = alt ?? (fullName ? `${fullName} avatar` : 'User avatar')
 
   return (
