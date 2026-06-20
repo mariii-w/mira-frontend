@@ -1191,6 +1191,164 @@ paths:
                     status: 404
                     detail: Listing with the given identifier was not found
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31
+  "/v1/public-profiles/{userId}/listings":
+    parameters:
+      - "$ref": "#/components/parameters/UserIdPathParam"
+    get:
+      summary: List public listings for a public profile
+      operationId: getPublicProfileListings
+      description: Returns publicly visible listings owned by the public profile identified by userId. The profile must be publicly eligible, meaning registrationComplete is true and isPublic is true. Listings are returned only when publicationStatus is ACTIVE and moderationStatus is VISIBLE.
+      tags:
+        - Listings (Public)
+      parameters:
+        - name: tagIds
+          in: query
+          required: false
+          description: Filter listings by one or more predefined service tag UUIDs.
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+        - name: city
+          in: query
+          required: false
+          description: Filter listings by stored address city.
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          required: false
+          description: Minimum price, inclusive.
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - name: maxPrice
+          in: query
+          required: false
+          description: Maximum price, inclusive.
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - "$ref": "#/components/parameters/LimitQueryParam"
+        - "$ref": "#/components/parameters/FromQueryParam"
+        - name: q
+          in: query
+          required: false
+          description: Free-text search over listing title and description.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Listings retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PublicListingCollectionResponse"
+              examples:
+                default:
+                  summary: Example public profile listings
+                  value:
+                    items:
+                      - listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
+                        tags:
+                          - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                            name: Laptop support
+                            isBarrierefrei: false
+                            isActive: true
+                        title: Laptop setup and software installation
+                        description: I help with setting up laptops, installing software, and solving basic PC issues.
+                        price: 25.0
+                        author:
+                          userId: "22222222-3333-4444-5555-666666666666"
+                          name: Anna
+                          surname: Schmidt
+                        publishedAt: "2026-04-20T13:00:00Z"
+                        location:
+                          city: Berlin
+                          postalCode: "10115"
+                          serviceRadiusKm: 15
+                        primaryMedia:
+                          mediaId: "11111111-2222-3333-4444-555555555555"
+                          url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
+                          altText: Open laptop on a wooden desk
+                          altTextStatus: COMPLETED
+                    cursor:
+                      limit: 20
+                      next: null
+        "400":
+          description: Bad Request. One or more path or query parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No public profile exists for the given userId.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/public-profiles/{userId}/listings/{listingId}":
+    parameters:
+      - "$ref": "#/components/parameters/UserIdPathParam"
+      - "$ref": "#/components/parameters/ListingIdParam"
+    get:
+      summary: Get public profile listing details
+      operationId: getPublicProfileListing
+      description: Returns one publicly visible listing owned by the public profile identified by userId. The profile must be publicly eligible, and the listing must belong to that profile with publicationStatus ACTIVE and moderationStatus VISIBLE.
+      tags:
+        - Listings (Public)
+      responses:
+        "200":
+          description: Listing retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PublicListingDetails"
+              examples:
+                default:
+                  summary: Example public profile listing details
+                  value:
+                    listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
+                    tags:
+                      - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                        name: Laptop support
+                        isBarrierefrei: false
+                        isActive: true
+                    title: Laptop setup and software installation
+                    description: I help with setting up laptops, installing software, and solving basic PC issues.
+                    price: 25.0
+                    publicationStatus: ACTIVE
+                    author:
+                      userId: "22222222-3333-4444-5555-666666666666"
+                      name: Anna
+                      surname: Schmidt
+                    createdAt: "2026-04-20T12:00:00Z"
+                    updatedAt: "2026-04-20T13:00:00Z"
+                    publishedAt: "2026-04-20T13:00:00Z"
+                    location:
+                      city: Berlin
+                      postalCode: "10115"
+                      serviceRadiusKm: 15
+                    media:
+                      - mediaId: "11111111-2222-3333-4444-555555555555"
+                        position: 0
+                        url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
+                        altText: Open laptop on a wooden desk
+                        altTextStatus: COMPLETED
+                        mimeType: image/jpeg
+                        size: 248576
+                        width: 1280
+                        height: 720
+                        createdAt: "2026-04-20T16:10:00Z"
+        "404":
+          description: Not Found. No public profile listing exists for the given identifiers.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
   "/v1/listings/{listingId}":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
