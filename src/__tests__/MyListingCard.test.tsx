@@ -48,6 +48,18 @@ describe('<MyListingCard />', () => {
     expect(screen.getByRole('img', { name: baseListing.title })).toBeInTheDocument()
   })
 
+  it('resolves a relative media url against the API origin', () => {
+    const listing = {
+      ...baseListing,
+      primaryMedia: { mediaId: 'm1', url: '/v1/listing-media/m1/content', altText: 'A laptop', altTextStatus: 'COMPLETED' as const },
+    }
+    render(<MyListingCard listing={listing} onEdit={() => {}} />)
+    expect(screen.getByRole('img', { name: 'A laptop' })).toHaveAttribute(
+      'src',
+      'http://localhost:8081/v1/listing-media/m1/content',
+    )
+  })
+
   it('renders no image when primaryMedia is absent', () => {
     render(<MyListingCard listing={baseListing} onEdit={() => {}} />)
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
