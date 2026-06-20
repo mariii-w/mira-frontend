@@ -6,13 +6,21 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "./Navbar";
 import { Button } from "./Button";
 import { CategoryCard } from "./CategoryCard";
 import { ProviderCard } from "./ProviderCard";
 import { Logo } from "./Logo";
 import { AvatarIcon } from "./AvatarIcon";
-import type { PublicListingSummary } from "../api/model";
+import { getServiceTags } from "../api/mira";
+import type { PublicListingSummary, ServiceTag } from "../api/model";
+
+async function fetchServiceTags(): Promise<ServiceTag[]> {
+  const response = await getServiceTags();
+  if (response.status !== 200) throw new Error("Tags could not be loaded.");
+  return response.data ?? [];
+}
 
 const NEED_HELP_BULLETS = [
   "Browse by category, price, rating",
@@ -93,17 +101,6 @@ const CATEGORY_IMAGES: Record<string, string> = {
     "https://images.unsplash.com/photo-1723433892471-62f113c8c9a0?fm=jpg&q=60&w=800&auto=format&fit=crop",
 };
 
-const CATEGORIES = [
-  { name: "Assembly", seed: "assembly" },
-  { name: "PC Support", seed: "pc" },
-  { name: "Art Lessons", seed: "art" },
-  { name: "Music Lessons", seed: "music" },
-  { name: "Elder Help", seed: "elder" },
-  { name: "Tutoring", seed: "tutor" },
-  { name: "Cleaning", seed: "clean" },
-  { name: "Moving", seed: "moving" },
-];
-
 const PROVIDERS = [
   {
     firstName: "Patrick ",
@@ -164,6 +161,20 @@ export function Home({ featuredListings }: HomeProps) {
   const categoryRef = useRef<HTMLUListElement>(null);
   const providerRef = useRef<HTMLUListElement>(null);
   const providers = toProviderCards(featuredListings);
+
+  const tagsQuery = useQuery({
+    queryKey: ["service-tags"],
+    queryFn: fetchServiceTags,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const categories = (tagsQuery.data ?? [])
+    .filter((tag) => tag.isActive && tag.name in CATEGORY_IMAGES)
+    .map((tag) => ({
+      tagId: tag.tagId,
+      name: tag.name,
+      imageSrc: CATEGORY_IMAGES[tag.name],
+    }));
 
   function scroll(
     ref: React.RefObject<HTMLUListElement | null>,
@@ -454,12 +465,9 @@ export function Home({ featuredListings }: HomeProps) {
               tabIndex={0}
               aria-label="Popular service categories"
             >
-              {CATEGORIES.map((cat) => (
-                <li key={cat.seed} className="snap-start shrink-0 w-48">
-                  <CategoryCard
-                    name={cat.name}
-                    imageSrc={`https://picsum.photos/seed/${cat.seed}/400`}
-                  />
+              {categories.map((cat) => (
+                <li key={cat.tagId} className="snap-start shrink-0 w-48">
+                  <CategoryCard name={cat.name} imageSrc={cat.imageSrc} />
                 </li>
               ))}
             </ul>
