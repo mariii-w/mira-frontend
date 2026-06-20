@@ -138,7 +138,7 @@ export function MultiSelect({
             anchor="bottom start"
             aria-label={ariaLabel}
             aria-required={ariaRequired || undefined}
-            className="z-10 w-[var(--button-width)] max-h-56 overflow-y-auto rounded-xl border border-border bg-surface shadow-lg py-1 [--anchor-gap:4px] focus:outline-none"
+            className="z-10 w-[var(--button-width)] max-h-56 overflow-y-auto rounded-xl border border-border bg-surface shadow-lg py-1 [--anchor-gap:4px] [--anchor-max-height:14rem] focus:outline-none"
           >
             {options.map((opt) => (
               <ListboxOption
