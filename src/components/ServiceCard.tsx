@@ -53,9 +53,14 @@ export function ServiceCard(
                             <p>von</p>
                             <p className='font-bold'>{providerFirstName} {providerLastName}</p>
                         </div>
+                        
+                        {varified?<div>
+                            <Dot />
+                            <p className="text-primary font-bold">Verifiziert</p>
+                            
+                        </div> : <p></p>}
                         <Dot />
-                        {varified? <p className="text-primary font-bold">Verifiziert</p> : <p></p>}
-                        <Dot />
+                        
                         <p className='font-bold'>{location}</p>
                     </div>
                     <div>

@@ -7,7 +7,7 @@ import { AvatarIcon } from '../components/AvatarIcon'
 import { ServiceCardEdit, type ServiceCardEditProps } from '../components/ServiceCardEdit'
 import { ServiceCard, type ServiceCardProps } from '../components/ServiceCard'
 import { useAuthStore } from '../stores/auth'
-import { fetchUser } from '../lib/fetchUser'
+import { fetchPublicUser, fetchUser } from '../lib/fetchUser'
 import {useQuery} from '@tanstack/react-query'
 import { fetchUserPrivateListings, fetchUserPublicListings } from '../lib/fetchListings'
 
@@ -31,24 +31,32 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
     const [, setActiveTab] = useState('account')
     const currentUser = useAuthStore((s) => s.user)
     const isOwner = currentUser?.userId === userId
-    
+    console.log(currentUser?.userId, isOwner)
     const { data: user, isLoading, error } = useQuery({
         queryKey: ['user', userId],
-        queryFn: () => fetchUser(userId),
+        queryFn: () => {
+            if(isOwner) return fetchUser(userId)
+            else return fetchPublicUser(userId)
+        },
+        enabled: !!currentUser?.userId,
     })
 
+    const isProviderType = user?.userType === 'PROVIDER' 
+    isProvider = isProviderType
+    
     const { data: listingsResponse, isLoading: listingsLoading, error: listingsError } = useQuery({
         queryKey: ['listings', userId],
         queryFn: () => {
-                if(isOwner && isProvider) return fetchUserPrivateListings(userId)
-                if(isProvider) return fetchUserPublicListings(userId)
+                if(isOwner && isProviderType) return fetchUserPrivateListings(userId)
+                if(isProviderType) return fetchUserPublicListings(userId)
             },
-        enabled: isProvider,
+        enabled: isProviderType,
     })
 
     if (isLoading) return <p>Loading…</p>
     if (error) return <p>Failed to load profile.</p>
-    isProvider = user?.userType === 'PROVIDER'
+    
+    console.log(isProvider, isOwner)
     const userDescription = user?.selfSummary ?? 'Keine Beschreibung hinterlegt.'
     const userFirstName = user?.firstName ?? ''
     const userLastName = user?.lastName ?? ''
