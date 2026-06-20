@@ -384,7 +384,7 @@ function Styleguide() {
               variant="compact"
               firstName="Patrick"
               lastName='Smith'
-              distanceKm={1.2}
+              location="Munich"
               bio="Helps with Windows, printers, Wi-Fi setup and phone issues. Patient and friendly with first-time users and seniors."
               pricePerHour={25}
               avatar={<AvatarIcon firstName="Patrick" lastName="Smith" picture=''/*picture can be added here*/ />}
@@ -399,7 +399,7 @@ function Styleguide() {
               variant="full"
               firstName="Lena"
               lastName='Kross'
-              distanceKm={2.1}
+              location="Berlin"
               bio="Software engineer by day, helper by evening. I diagnose slow PCs, clean out junk, set up email and cloud backup."
               pricePerHour={18}
               services={[

@@ -347,7 +347,7 @@ const componentCases: Array<[string, ReactElement]> = [
     <ProviderCard
       firstName="Mira"
       lastName="Muster"
-      distanceKm={2}
+      location="Munich"
       bio="Friendly local support."
       pricePerHour={20}
       services={[{ name: "Shopping", price: 20 }]}
@@ -2272,7 +2272,7 @@ describe("component accessibility", () => {
         firstName="Mira"
         lastName="Muster"
         avatar={<AvatarIcon firstName="Mira" lastName="Muster" />}
-        distanceKm={2}
+        location="Munich"
         bio="Friendly local support."
         pricePerHour={20}
         services={[{ name: "Shopping", price: 20 }]}

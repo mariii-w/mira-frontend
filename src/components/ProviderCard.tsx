@@ -15,7 +15,7 @@ export interface ProviderCardProps {
   firstName: string
   lastName: string
   avatar?: ReactNode
-  distanceKm: number
+  location: string
   bio: string
   pricePerHour: number
   services?: ProviderService[]
@@ -30,7 +30,7 @@ export function ProviderCard({
   firstName,
   lastName,
   avatar = null,
-  distanceKm,
+  location,
   bio,
   pricePerHour,
   services = [],
@@ -59,7 +59,7 @@ export function ProviderCard({
           </span>
           <span className="inline-flex items-center gap-1 text-muted text-small">
             <MapPin size={12} strokeWidth={2} aria-hidden="true" className="shrink-0" />
-            {distanceKm} km away
+            {location}
           </span>
         </div>
       </div>

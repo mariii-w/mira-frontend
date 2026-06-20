@@ -121,7 +121,7 @@ function toProviderCards(listings: PublicListingSummary[], easyRead: boolean) {
     listingId: listing.listingId,
     firstName: listing.author.name,
     lastName: listing.author.surname,
-    distanceKm: listing.location.serviceRadiusKm,
+    location: listing.location.city,
     bio: easyRead && listing.easyDescription
       ? listing.easyDescription
       : listing.description,
@@ -488,7 +488,7 @@ export function Home() {
             </h2>
             <div className="flex items-end justify-between mb-6">
               <p className="text-muted text-small">
-                Based on your location • Munich, 10km radius
+                Some of the helpers currently active on Mira
               </p>
               {!featuredListingsQuery.isError &&
                 (featuredListingsQuery.isLoading || providers.length > 0) && (
@@ -563,7 +563,7 @@ export function Home() {
                                 picture=""
                               />
                             }
-                            distanceKm={p.distanceKm}
+                            location={p.location}
                             bio={p.bio}
                             pricePerHour={p.pricePerHour}
                           />
