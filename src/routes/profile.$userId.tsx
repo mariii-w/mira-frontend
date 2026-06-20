@@ -57,9 +57,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
 
     if (isLoading) return <p>Loading…</p>
     if (error) return <p>Failed to load profile.</p>
-    
-    console.log(isProvider, isOwner)
-
+    isProvider = user?.userType === 'PROVIDER'
     const userDescription = user?.selfSummary ?? 'Keine Beschreibung hinterlegt.'
     const userFirstName = user?.firstName ?? ''
     const userLastName = user?.lastName ?? ''
