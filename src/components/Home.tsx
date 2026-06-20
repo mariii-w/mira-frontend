@@ -72,6 +72,27 @@ const CAN_HELP_STEPS = [
   },
 ];
 
+// Curated photo per category tag name. Names must match the real ServiceTag
+// labels from the backend. Only tags present here are eligible to show up in "Popular Categories".
+const CATEGORY_IMAGES: Record<string, string> = {
+  Cleaning:
+    "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  Tutoring:
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  Childcare:
+    "https://images.unsplash.com/photo-1537655780520-1e392ead81f2?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  "IT & Smartphone Help":
+    "https://images.unsplash.com/photo-1544725121-be3bf52e2dc8?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  Gardening:
+    "https://images.unsplash.com/photo-1611843467160-25afb8df1074?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  "Small Repairs":
+    "https://images.unsplash.com/photo-1721332154191-ba5f1534266e?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  "Senior Support":
+    "https://images.unsplash.com/photo-1540778339538-067eae485e9f?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  "Disability Support":
+    "https://images.unsplash.com/photo-1723433892471-62f113c8c9a0?fm=jpg&q=60&w=800&auto=format&fit=crop",
+};
+
 const CATEGORIES = [
   { name: "Assembly", seed: "assembly" },
   { name: "PC Support", seed: "pc" },
