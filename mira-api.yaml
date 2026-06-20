@@ -5089,7 +5089,6 @@ components:
         - tags
         - title
         - description
-        - easyDescriptionStatus
         - price
         - author
         - publishedAt
@@ -5113,10 +5112,8 @@ components:
           type:
             - string
             - "null"
-          description: AI-generated simplified version of the listing description. Null until generation completes.
+          description: AI-generated simplified version of the listing description.
           example: I help you set up laptops. I install software. I help with simple computer problems.
-        easyDescriptionStatus:
-          "$ref": "#/components/schemas/AccessibilityGenerationStatus"
         price:
           type: number
           format: double
@@ -5139,7 +5136,6 @@ components:
         - tags
         - title
         - description
-        - easyDescriptionStatus
         - price
         - publicationStatus
         - author
@@ -5167,10 +5163,8 @@ components:
           type:
             - string
             - "null"
-          description: AI-generated simplified version of the listing description. Null until generation completes.
+          description: AI-generated simplified version of the listing description.
           example: I help you set up laptops. I install software. I help with simple computer problems.
-        easyDescriptionStatus:
-          "$ref": "#/components/schemas/AccessibilityGenerationStatus"
         price:
           type: number
           format: double
@@ -5250,7 +5244,6 @@ components:
         - tags
         - title
         - description
-        - easyDescriptionStatus
         - price
         - publicationStatus
         - moderationStatus
@@ -5279,10 +5272,8 @@ components:
           type:
             - string
             - "null"
-          description: AI-generated simplified version of the listing description. Null until generation completes.
+          description: AI-generated simplified version of the listing description.
           example: I help you set up laptops. I install software. I help with simple computer problems.
-        easyDescriptionStatus:
-          "$ref": "#/components/schemas/AccessibilityGenerationStatus"
         price:
           type: number
           format: double
