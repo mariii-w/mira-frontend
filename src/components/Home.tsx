@@ -13,6 +13,7 @@ import { CategoryCard } from "./CategoryCard";
 import { ProviderCard } from "./ProviderCard";
 import { Logo } from "./Logo";
 import { AvatarIcon } from "./AvatarIcon";
+import { useAccessibilityStore } from "../stores/accessibility";
 import { getServiceTags, getPublicListings } from "../api/mira";
 import type { PublicListingSummary, ServiceTag } from "../api/model";
 
@@ -115,13 +116,15 @@ const FOOTER_LINKS = [
   "Privacy Policy",
 ];
 
-function toProviderCards(listings: PublicListingSummary[]) {
+function toProviderCards(listings: PublicListingSummary[], easyRead: boolean) {
   return listings.map((listing) => ({
     listingId: listing.listingId,
     firstName: listing.author.name,
     lastName: listing.author.surname,
     distanceKm: listing.location.serviceRadiusKm,
-    bio: listing.title,
+    bio: easyRead && listing.easyDescription
+      ? listing.easyDescription
+      : listing.description,
     pricePerHour: listing.price,
   }));
 }
@@ -130,6 +133,7 @@ export function Home() {
   const [query, setQuery] = useState("");
   const categoryRef = useRef<HTMLUListElement>(null);
   const providerRef = useRef<HTMLUListElement>(null);
+  const easyRead = useAccessibilityStore((state) => state.easyRead);
 
   const tagsQuery = useQuery({
     queryKey: ["service-tags"],
@@ -142,7 +146,7 @@ export function Home() {
     queryFn: fetchFeaturedListings,
   });
 
-  const providers = toProviderCards(featuredListingsQuery.data ?? []);
+  const providers = toProviderCards(featuredListingsQuery.data ?? [], easyRead);
 
   const categories = (tagsQuery.data ?? [])
     .filter((tag) => tag.isActive && tag.name in CATEGORY_IMAGES)
