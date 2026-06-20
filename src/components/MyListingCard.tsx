@@ -1,5 +1,6 @@
 import { SquarePen } from 'lucide-react'
 import { Button } from './Button'
+import { mediaUrl } from '../lib/mediaUrl'
 import type {
   AccessibilityGenerationStatus,
   MyListingSummary,
@@ -41,7 +42,7 @@ export function MyListingCard({ listing, onEdit }: MyListingCardProps) {
       <div className="relative h-48 sm:h-auto sm:w-44 shrink-0 bg-linen">
         {listing.primaryMedia ? (
           <img
-            src={listing.primaryMedia.url}
+            src={mediaUrl(listing.primaryMedia.url)}
             alt={(listing.primaryMedia.altTextStatus == null || listing.primaryMedia.altTextStatus === 'COMPLETED') && listing.primaryMedia.altText ? listing.primaryMedia.altText : listing.title}
             className="w-full h-full object-cover"
           />

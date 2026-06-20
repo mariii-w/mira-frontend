@@ -13,6 +13,7 @@ import { Label } from "./Label";
 import { Textarea } from "./Textarea";
 import { Slider } from "./Slider";
 import { MultiSelect } from "./MultiSelect";
+import { mediaUrl } from "../lib/mediaUrl";
 import type { PublicationStatus, VlmStatus } from "./MyListingCard";
 
 export interface EditListingServiceTag {
@@ -528,7 +529,7 @@ export function EditListing({
                       className="relative w-36 h-36 rounded-xl overflow-hidden border border-border/30 shrink-0"
                     >
                       <img
-                        src={img.url}
+                        src={mediaUrl(img.url)}
                         alt={
                           (img.altTextStatus == null ||
                             img.altTextStatus === "COMPLETED") &&
