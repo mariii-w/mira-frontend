@@ -9,6 +9,9 @@ import {
 } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import axe from "axe-core";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { getPublicListings, getServiceTags } from "../api/mira";
+import type { PublicListingSummary } from "../api/model";
 import { AccessibilityPanel } from "../components/AccessibilityPanel";
 import { AvatarIcon } from "../components/AvatarIcon";
 import { Badge } from "../components/Badge";
@@ -80,6 +83,35 @@ vi.mock("@tanstack/react-router", () => ({
   ),
   useNavigate: () => vi.fn(),
 }));
+
+vi.mock("../api/mira", () => ({
+  getServiceTags: vi.fn(),
+  getPublicListings: vi.fn(),
+}));
+
+const mockGetServiceTags = vi.mocked(getServiceTags);
+const mockGetPublicListings = vi.mocked(getPublicListings);
+
+function renderHome(listings: PublicListingSummary[] = []) {
+  mockGetServiceTags.mockResolvedValue({
+    data: [],
+    status: 200,
+    headers: new Headers(),
+  } as never);
+  mockGetPublicListings.mockResolvedValue({
+    data: { items: listings, cursor: { limit: 8, next: null } },
+    status: 200,
+    headers: new Headers(),
+  } as never);
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <Home />
+    </QueryClientProvider>,
+  );
+}
 
 beforeEach(() => {
   vi.stubGlobal(
@@ -619,24 +651,23 @@ describe("component accessibility", () => {
   );
 
   it("Home has no automated accessibility violations", async () => {
-    const { container } = render(
-      <Home
-        featuredListings={[
-          {
-            listingId: "listing-1",
-            tags: serviceTags,
-            title: "Grocery pickup",
-            description: "Weekly pickup and drop-off support.",
-            easyDescriptionStatus: "COMPLETED",
-            price: 24,
-            author: { name: "Mira", surname: "Muster" },
-            publishedAt: "2026-06-01T12:00:00.000Z",
-            location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 5 },
-          },
-        ]}
-      />,
-    );
+    const { container } = renderHome([
+      {
+        listingId: "listing-1",
+        tags: serviceTags,
+        title: "Grocery pickup",
+        description: "Weekly pickup and drop-off support.",
+        easyDescriptionStatus: "COMPLETED",
+        price: 24,
+        author: { name: "Mira", surname: "Muster" },
+        publishedAt: "2026-06-01T12:00:00.000Z",
+        location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 5 },
+      } as PublicListingSummary,
+    ]);
 
+    await waitFor(() => {
+      expect(screen.getByText(/mira m\./i)).toBeInTheDocument();
+    });
     await expectNoAxeViolations(container);
   });
 
@@ -1949,7 +1980,7 @@ describe("component accessibility", () => {
       configurable: true,
       value: scrollBy,
     });
-    const { container } = render(<Home featuredListings={[]} />);
+    const { container } = renderHome();
 
     await act(async () => {
       fireEvent.change(screen.getByLabelText(/search for a service/i), {
@@ -2604,7 +2635,7 @@ describe("component accessibility", () => {
       configurable: true,
       value: scrollBy,
     });
-    const { container } = render(<Home featuredListings={[]} />);
+    const { container } = renderHome();
 
     await act(async () => {
       fireEvent.submit(screen.getByRole("search"));
