@@ -402,7 +402,7 @@ export function BrowseServicesPage() {
                       style={{ animationDelay: `${Math.min(index * 40, 300)}ms` }}
                     >
                       <ServiceCard
-                        link={`#`}
+                        link={`/listings/${listing.listingId}`}
                         pictureLink={listing.primaryMedia ? mediaUrl(listing.primaryMedia.url) : undefined}
                         location={listing.location.city}
                         providerFirstName={listing.author.name}

@@ -15,7 +15,7 @@ import type {
 } from "../../api/model";
 import { BookingPage } from "../../components/BookingPage";
 
-export const Route = createFileRoute("/listings/$listingId/book")({
+export const Route = createFileRoute("/listings/$listingId_/book")({
   component: BookingRoute,
 });
 
@@ -112,7 +112,9 @@ function BookingRoute() {
         setYear(nextYear);
         setMonth(nextMonth);
       }}
-      onBack={() => navigate({ to: "/" })}
+      onBack={() =>
+        navigate({ to: "/listings/$listingId", params: { listingId } })
+      }
       onCreateBooking={(booking) => bookingMutation.mutate(booking)}
     />
   );
