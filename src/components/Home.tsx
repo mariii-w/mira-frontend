@@ -590,6 +590,7 @@ export function Home() {
                   <div className="mt-8 text-center">
                     <Link
                       to="/browse-services"
+                      search={{ q: '', city: '', tagIds: [] }}
                       className="inline-flex items-center gap-2 text-primary font-medium no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
                     >
                       View all listings{" "}
