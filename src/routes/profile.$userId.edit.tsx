@@ -16,6 +16,7 @@ import {
   type RegisterPatchError,
   type UploadPhotoError,
 } from '../lib/patchUser'
+import { profileMediaUrl } from '../lib/media'
 
 export const Route = createFileRoute('/profile/$userId/edit')({
   component: EditProfilePage,
@@ -248,7 +249,7 @@ function EditProfilePage() {
                     size={112}
                     firstName={currentUser.firstName ?? ''}
                     lastName={currentUser.lastName ?? ''}
-                    picture={currentUser.profileMedia?.url ?? undefined}
+                    picture={profileMediaUrl(currentUser.profileMedia)}
                   />
                   <button
                     type="button"

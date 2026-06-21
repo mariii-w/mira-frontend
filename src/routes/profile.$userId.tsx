@@ -10,6 +10,7 @@ import { useAuthStore } from '../stores/auth'
 import { fetchPublicUser, fetchUser } from '../lib/fetchUser'
 import {useQuery} from '@tanstack/react-query'
 import { fetchUserPrivateListings, fetchUserPublicListings } from '../lib/fetchListings'
+import { profileMediaUrl } from '../lib/media'
 
 /* eslint-disable react-refresh/only-export-components */
 export const Route = createFileRoute('/profile/$userId')({
@@ -105,7 +106,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
                                     style='border border-cream border-4'
                                     firstName={userFirstName}
                                     lastName={userLastName}
-                                    picture={user?.profileMedia?.url ?? undefined}
+                                    picture={profileMediaUrl(user?.profileMedia)}
                                 />
                             </div>
                             <div className='pt-15 mt-4 flex flex-col gap-2'>
