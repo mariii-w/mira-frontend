@@ -99,7 +99,13 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
                     <div className="col-span-2">
                         <div className='flex flex-row items-center gap-4'>
                             <div>
-                                <AvatarIcon size={200} style='border border-cream border-4' />
+                                <AvatarIcon
+                                    size={200}
+                                    style='border border-cream border-4'
+                                    firstName={userFirstName}
+                                    lastName={userLastName}
+                                    picture={user?.profileMedia?.url ?? undefined}
+                                />
                             </div>
                             <div className='pt-15 mt-4 flex flex-col gap-2'>
                                 <div className='flex flex-row gap-4 items-center'>
