@@ -1,135 +1,114 @@
-import {
-  getPrivateUserProfile,
-  patchUserProfile,
-  uploadProfilePicture,
-} from "../api/mira";
-import type {
-  PatchUserProfileRequest,
-  ProblemDetailsResponse,
-} from "../api/model";
-import { useAuthStore, queryClient } from "../stores/auth";
+import { useAuthStore } from '../stores/auth'
+import { authFetch, queryClient } from './queryClient'
 
-export type UserType = "CUSTOMER" | "PROVIDER";
-export type AccessibilityPreference = "EASY_LANGUAGE" | "REDUCED_MOTION";
+export type UserType = 'CUSTOMER' | 'PROVIDER'
+export type AccessibilityPreference = 'EASY_LANGUAGE' | 'REDUCED_MOTION'
 
 export interface PatchAddressPayload {
-  street: string;
-  houseNumber: string;
-  city: string;
-  postalCode: string;
+  street: string
+  houseNumber: string
+  city: string
+  postalCode: string
 }
 
 export interface PatchUserPayload {
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  userType?: UserType;
-  privateAddress?: PatchAddressPayload;
-  bio?: string;
-  selfSummary?: string;
-  isPublic?: boolean;
-  accessibilityPreferences?: AccessibilityPreference[];
+  username?: string
+  firstName?: string
+  lastName?: string
+  userType?: UserType
+  privateAddress?: PatchAddressPayload
+  bio?: string
+  selfSummary?: string
+  isPublic?: boolean
+  accessibilityPreferences?: AccessibilityPreference[]
 }
 
 export interface RegisterPatchError {
-  field: "server" | "username";
-  message: string;
+  field: 'server' | 'username'
+  message: string
 }
 
 export interface UploadPhotoError {
-  field: "server" | "file";
-  message: string;
-}
-
-function getDetail(data: ProblemDetailsResponse | unknown): string | undefined {
-  return typeof data === "object" && data !== null && "detail" in data
-    ? String(data.detail)
-    : undefined;
+  field: 'server' | 'file'
+  message: string
 }
 
 export async function patchUser(payload: PatchUserPayload): Promise<void> {
-  const user = useAuthStore.getState().user;
+  const user = useAuthStore.getState().user
   if (!user) {
-    throw {
-      field: "server",
-      message: "Not logged in.",
-    } satisfies RegisterPatchError;
+    throw { field: 'server', message: 'Not logged in.' } satisfies RegisterPatchError
   }
 
-  const res = await patchUserProfile(
-    user.userId,
-    payload satisfies PatchUserProfileRequest,
-  );
+  const res = await authFetch(`/v1/users/${user.userId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
 
-  if (res.status !== 200) {
+  if (!res.ok) {
     if (res.status === 409) {
       throw {
-        field: "username",
-        message: "That username is already taken. Try another one.",
-      } satisfies RegisterPatchError;
+        field: 'username',
+        message: 'That username is already taken. Try another one.',
+      } satisfies RegisterPatchError
     }
-    const detail = getDetail(res.data);
+    const body = await res.json().catch(() => null)
     if (res.status === 400) {
       throw {
-        field: "server",
-        message: detail ?? "Some fields are invalid. Please check your input.",
-      } satisfies RegisterPatchError;
+        field: 'server',
+        message: body?.detail ?? 'Some fields are invalid. Please check your input.',
+      } satisfies RegisterPatchError
     }
     if (res.status === 503) {
       throw {
-        field: "server",
-        message: detail
-          ? `${detail}. Try again in a moment, or clear the bio field and continue.`
-          : "A backend service is temporarily unavailable. Try again later.",
-      } satisfies RegisterPatchError;
+        field: 'server',
+        message: body?.detail
+          ? `${body.detail}. Try again in a moment, or clear the bio field and continue.`
+          : 'A backend service is temporarily unavailable. Try again later.',
+      } satisfies RegisterPatchError
     }
     throw {
-      field: "server",
-      message: detail ?? `Unexpected error (${res.status}). Please try again.`,
-    } satisfies RegisterPatchError;
+      field: 'server',
+      message: body?.detail ?? `Unexpected error (${res.status}). Please try again.`,
+    } satisfies RegisterPatchError
   }
 
-  useAuthStore.getState().setUser(res.data);
+  const updated = await res.json()
+  useAuthStore.getState().setUser(updated)
   queryClient.invalidateQueries({ queryKey: ['user', user.userId] })
 }
 
 export async function uploadProfilePhoto(file: File): Promise<void> {
-  const user = useAuthStore.getState().user;
+  const user = useAuthStore.getState().user
   if (!user) {
-    throw {
-      field: "server",
-      message: "Not logged in.",
-    } satisfies UploadPhotoError;
+    throw { field: 'server', message: 'Not logged in.' } satisfies UploadPhotoError
   }
 
-  const res = await uploadProfilePicture(user.userId, { file });
+  const formData = new FormData()
+  formData.append('file', file)
 
-  if (res.status !== 200) {
-    const detail = getDetail(res.data);
+  const res = await authFetch(`/v1/users/${user.userId}/profile-picture`, {
+    method: 'PUT',
+    body: formData,
+  })
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => null)
+    const detail: string | undefined = body?.detail
 
     if (res.status === 413) {
-      throw {
-        field: "file",
-        message: detail ?? "Image is too large. Max 5 MB.",
-      } satisfies UploadPhotoError;
+      throw { field: 'file', message: detail ?? 'Image is too large. Max 5 MB.' } satisfies UploadPhotoError
     }
     if (res.status === 415) {
-      throw {
-        field: "file",
-        message: detail ?? "Unsupported image format. Use JPG or PNG.",
-      } satisfies UploadPhotoError;
+      throw { field: 'file', message: detail ?? 'Unsupported image format. Use JPG or PNG.' } satisfies UploadPhotoError
     }
     if (res.status === 422) {
-      throw {
-        field: "file",
-        message:
-          detail ?? "Image dimensions are too small. Min 200×200 pixels.",
-      } satisfies UploadPhotoError;
+      throw { field: 'file', message: detail ?? 'Image dimensions are too small. Min 200×200 pixels.' } satisfies UploadPhotoError
     }
     throw {
-      field: "server",
+      field: 'server',
       message: detail ?? `Upload failed (${res.status}). Please try again.`,
-    } satisfies UploadPhotoError;
+    } satisfies UploadPhotoError
   }
 
   const refresh = await authFetch(`/v1/users/${user.userId}`)
@@ -137,5 +116,4 @@ export async function uploadProfilePhoto(file: File): Promise<void> {
     const updatedUser = await refresh.json()
     useAuthStore.getState().setUser(updatedUser)
   }
-  queryClient.invalidateQueries({ queryKey: ['user', user.userId] })
 }
