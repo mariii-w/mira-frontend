@@ -9,6 +9,9 @@ import {
 } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import axe from "axe-core";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { getPublicListings, getServiceTags } from "../api/mira";
+import type { PublicListingSummary } from "../api/model";
 import { AccessibilityPanel } from "../components/AccessibilityPanel";
 import { AvatarIcon } from "../components/AvatarIcon";
 import { Badge } from "../components/Badge";
@@ -44,7 +47,6 @@ import { MyListings } from "../components/MyListings";
 import { Navbar } from "../components/Navbar";
 import { Pagination } from "../components/Pagination";
 import * as Popover from "../components/Popover";
-import { ProviderCard } from "../components/ProviderCard";
 import { RegisterAbout } from "../components/RegisterAbout";
 import { RegisterAddress } from "../components/RegisterAddress";
 import { RegisterDone } from "../components/RegisterDone";
@@ -81,6 +83,35 @@ vi.mock("@tanstack/react-router", () => ({
   ),
   useNavigate: () => vi.fn(),
 }));
+
+vi.mock("../api/mira", () => ({
+  getServiceTags: vi.fn(),
+  getPublicListings: vi.fn(),
+}));
+
+const mockGetServiceTags = vi.mocked(getServiceTags);
+const mockGetPublicListings = vi.mocked(getPublicListings);
+
+function renderHome(listings: PublicListingSummary[] = []) {
+  mockGetServiceTags.mockResolvedValue({
+    data: [],
+    status: 200,
+    headers: new Headers(),
+  } as never);
+  mockGetPublicListings.mockResolvedValue({
+    data: { items: listings, cursor: { limit: 8, next: null } },
+    status: 200,
+    headers: new Headers(),
+  } as never);
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <Home />
+    </QueryClientProvider>,
+  );
+}
 
 beforeEach(() => {
   vi.stubGlobal(
@@ -354,17 +385,6 @@ const componentCases: Array<[string, ReactElement]> = [
       </Popover.Portal>
     </Popover.Root>,
   ],
-  [
-    "ProviderCard",
-    <ProviderCard
-      firstName="Mira"
-      lastName="Muster"
-      distanceKm={2}
-      bio="Friendly local support."
-      pricePerHour={20}
-      services={[{ name: "Shopping", price: 20 }]}
-    />,
-  ],
   ["SearchBar", <SearchBar aria-label="Search services" city="Berlin" />],
   [
     "ServiceCard",
@@ -633,23 +653,23 @@ describe("component accessibility", () => {
   );
 
   it("Home has no automated accessibility violations", async () => {
-    const { container } = render(
-      <Home
-        featuredListings={[
-          {
-            listingId: "listing-1",
-            tags: serviceTags,
-            title: "Grocery pickup",
-            description: "Weekly pickup and drop-off support.",
-            price: 24,
-            author: { userId: "user-1", name: "Mira", surname: "Muster" },
-            publishedAt: "2026-06-01T12:00:00.000Z",
-            location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 5 },
-          },
-        ]}
-      />,
-    );
+    const { container } = renderHome([
+      {
+        listingId: "listing-1",
+        tags: serviceTags,
+        title: "Grocery pickup",
+        description: "Weekly pickup and drop-off support.",
+        easyDescriptionStatus: "COMPLETED",
+        price: 24,
+        author: { name: "Mira", surname: "Muster" },
+        publishedAt: "2026-06-01T12:00:00.000Z",
+        location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 5 },
+      } as PublicListingSummary,
+    ]);
 
+    await waitFor(() => {
+      expect(screen.getByText(/mira m\./i)).toBeInTheDocument();
+    });
     await expectNoAxeViolations(container);
   });
 
@@ -1962,14 +1982,14 @@ describe("component accessibility", () => {
       configurable: true,
       value: scrollBy,
     });
-    const { container } = render(<Home featuredListings={[]} />);
+    const { container } = renderHome();
 
     await act(async () => {
       fireEvent.change(screen.getByLabelText(/search for a service/i), {
         target: { value: "cleaning" },
       });
       fireEvent.click(screen.getByRole("button", { name: /scroll categories right/i }));
-      fireEvent.click(screen.getByRole("button", { name: /scroll providers left/i }));
+      fireEvent.click(screen.getByRole("button", { name: /scroll listings left/i }));
     });
 
     expect(scrollBy).toHaveBeenCalled();
@@ -2276,26 +2296,6 @@ describe("component accessibility", () => {
       screen.queryByRole("dialog", { name: /actions/i }),
     ).not.toBeInTheDocument();
     await expectNoAxeViolations(document.body);
-  });
-
-  it("ProviderCard full state has no automated accessibility violations", async () => {
-    const { container } = render(
-      <ProviderCard
-        variant="full"
-        firstName="Mira"
-        lastName="Muster"
-        avatar={<AvatarIcon firstName="Mira" lastName="Muster" />}
-        distanceKm={2}
-        bio="Friendly local support."
-        pricePerHour={20}
-        services={[{ name: "Shopping", price: 20 }]}
-        badges={<Badge text="Verified" />}
-        onMessage={vi.fn()}
-        onViewProfile={vi.fn()}
-      />,
-    );
-
-    await expectNoAxeViolations(container);
   });
 
   it("Slider disabled and controlled states have no automated accessibility violations", async () => {

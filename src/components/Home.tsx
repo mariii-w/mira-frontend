@@ -6,24 +6,40 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Navbar } from "./Navbar";
 import { Button } from "./Button";
 import { CategoryCard } from "./CategoryCard";
-import { ProviderCard } from "./ProviderCard";
+import { ServiceCard } from "./ServiceCard";
 import { Logo } from "./Logo";
-import { AvatarIcon } from "./AvatarIcon";
-import type { PublicListingSummary } from "../api/model";
+import { useAccessibilityStore } from "../stores/accessibility";
+import { useAuthStore } from "../stores/auth";
+import { getServiceTags, getPublicListings } from "../api/mira";
+import type { PublicListingSummary, ServiceTag } from "../api/model";
+
+async function fetchServiceTags(): Promise<ServiceTag[]> {
+  const response = await getServiceTags();
+  if (response.status !== 200) throw new Error("Tags could not be loaded.");
+  return response.data ?? [];
+}
+
+async function fetchFeaturedListings(): Promise<PublicListingSummary[]> {
+  const response = await getPublicListings({ limit: 8 });
+  if (response.status !== 200) throw new Error("Helpers could not be loaded.");
+  return response.data.items;
+}
 
 const NEED_HELP_BULLETS = [
-  "Browse by category, price, rating",
-  "Direct chat with providers",
-  "Secure Stripe Payments",
+  "Filter by category, price and location",
+  "See real bios before you book",
+  "Request a booking in a few clicks",
 ];
 
 const CAN_HELP_BULLETS = [
-  "Free to list, only pay on booking",
-  "Your schedule, your rates",
-  "Build reputation with reviews",
+  "List your services for free",
+  "Set your own price and schedule",
+  "Accept and manage booking requests",
 ];
 
 const NEED_HELP_STEPS = [
@@ -72,47 +88,26 @@ const CAN_HELP_STEPS = [
   },
 ];
 
-const CATEGORIES = [
-  { name: "Assembly", seed: "assembly" },
-  { name: "PC Support", seed: "pc" },
-  { name: "Art Lessons", seed: "art" },
-  { name: "Music Lessons", seed: "music" },
-  { name: "Elder Help", seed: "elder" },
-  { name: "Tutoring", seed: "tutor" },
-  { name: "Cleaning", seed: "clean" },
-  { name: "Moving", seed: "moving" },
-];
-
-const PROVIDERS = [
-  {
-    firstName: "Patrick ",
-    lastName: "Smith",
-    distanceKm: 1.2,
-    bio: "Helps with Windows, printers, Wi-Fi setup and phone issues. Patient and friendly with first-time users and seniors.",
-    pricePerHour: 25,
-  },
-  {
-    firstName: "Mira L.",
-    lastName: "Long",
-    distanceKm: 3.4,
-    bio: "Math tutor for high-school and first-year uni students. Exam preparation, homework help, flexible evening slots.",
-    pricePerHour: 20,
-  },
-  {
-    firstName: "Thomas R.",
-    lastName: "Richard",
-    distanceKm: 0.8,
-    bio: "Fast and reliable furniture assembly, IKEA & other brands. Also mounts TVs, shelves and blinds.",
-    pricePerHour: 28,
-  },
-  {
-    firstName: "Anna W.",
-    lastName: "Washington",
-    distanceKm: 2.2,
-    bio: "Professional cleaner with 5 years experience. Deep cleans, regular visits, and move-out cleaning available.",
-    pricePerHour: 22,
-  },
-];
+// Curated photo per category tag name. Names must match the real ServiceTag
+// labels from the backend. Only tags present here are eligible to show up in "Popular Categories".
+const CATEGORY_IMAGES: Record<string, string> = {
+  Cleaning:
+    "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  Tutoring:
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  Childcare:
+    "https://images.unsplash.com/photo-1537655780520-1e392ead81f2?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  "IT & Smartphone Help":
+    "https://images.unsplash.com/photo-1544725121-be3bf52e2dc8?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  Gardening:
+    "https://images.unsplash.com/photo-1611843467160-25afb8df1074?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  "Small Repairs":
+    "https://images.unsplash.com/photo-1721332154191-ba5f1534266e?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  "Senior Support":
+    "https://images.unsplash.com/photo-1540778339538-067eae485e9f?fm=jpg&q=60&w=800&auto=format&fit=crop",
+  "Disability Support":
+    "https://images.unsplash.com/photo-1723433892471-62f113c8c9a0?fm=jpg&q=60&w=800&auto=format&fit=crop",
+};
 
 const FOOTER_LINKS = [
   "About",
@@ -122,27 +117,50 @@ const FOOTER_LINKS = [
   "Privacy Policy",
 ];
 
-interface HomeProps {
-  featuredListings: PublicListingSummary[];
-}
-
-function toProviderCards(listings: PublicListingSummary[]) {
-  if (listings.length === 0) return PROVIDERS;
-
+function toListingCards(listings: PublicListingSummary[], easyRead: boolean) {
   return listings.map((listing) => ({
-    firstName: listing.author.name,
-    lastName: listing.author.surname,
-    distanceKm: listing.location.serviceRadiusKm,
-    bio: listing.title,
-    pricePerHour: listing.price,
+    listingId: listing.listingId,
+    label: listing.title,
+    providerFirstName: listing.author.name,
+    providerLastName: listing.author.surname,
+    location: listing.location.city,
+    description: easyRead && listing.easyDescription
+      ? listing.easyDescription
+      : listing.description,
+    tags: listing.tags,
+    hourRate: listing.price,
+    pictureLink: listing.primaryMedia?.url,
   }));
 }
 
-export function Home({ featuredListings }: HomeProps) {
+export function Home() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const categoryRef = useRef<HTMLUListElement>(null);
   const providerRef = useRef<HTMLUListElement>(null);
-  const providers = toProviderCards(featuredListings);
+  const easyRead = useAccessibilityStore((state) => state.easyRead);
+  const isLoggedIn = useAuthStore((state) => !!state.user);
+
+  const tagsQuery = useQuery({
+    queryKey: ["service-tags"],
+    queryFn: fetchServiceTags,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const featuredListingsQuery = useQuery({
+    queryKey: ["featured-listings"],
+    queryFn: fetchFeaturedListings,
+  });
+
+  const listingCards = toListingCards(featuredListingsQuery.data ?? [], easyRead);
+
+  const categories = (tagsQuery.data ?? [])
+    .filter((tag) => tag.isActive && tag.name in CATEGORY_IMAGES)
+    .map((tag) => ({
+      tagId: tag.tagId,
+      name: tag.name,
+      imageSrc: CATEGORY_IMAGES[tag.name],
+    }));
 
   function scroll(
     ref: React.RefObject<HTMLUListElement | null>,
@@ -198,7 +216,10 @@ export function Home({ featuredListings }: HomeProps) {
               <form
                 role="search"
                 className="flex gap-2"
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  navigate({ to: "/browse-services", search: { q: query, city: "", tagIds: [], from: undefined } });
+                }}
               >
                 <label htmlFor="hero-search" className="sr-only">
                   Search for a service
@@ -260,9 +281,18 @@ export function Home({ featuredListings }: HomeProps) {
                 size="lg"
                 trailingIcon={<ArrowRight />}
                 fullWidth
+                onClick={() => {
+                  if (isLoggedIn) return;
+                  window.location.href = "http://localhost:8081/auth/login/google";
+                }}
               >
                 Get started
               </Button>
+              {isLoggedIn && (
+                <p className="text-small text-foreground/60 text-center -mt-1">
+                  You're already signed in.
+                </p>
+              )}
               <ul className="flex flex-col gap-1.5 list-none m-0 p-0">
                 {CAN_HELP_BULLETS.map((b) => (
                   <li
@@ -320,10 +350,10 @@ export function Home({ featuredListings }: HomeProps) {
                   {NEED_HELP_STEPS.map((step) => (
                     <li
                       key={step.n}
-                      className="flex gap-4 py-4 first:pt-0 last:pb-0"
+                      className="flex items-center gap-4 py-4 first:pt-0 last:pb-0"
                     >
                       <span
-                        className="shrink-0 w-6 h-6 rounded-full bg-mint border border-primary/30 flex items-center justify-center text-label font-bold text-primary mt-0.5"
+                        className="shrink-0 w-9 h-9 rounded-full bg-mint border border-primary/30 flex items-center justify-center text-small font-bold text-primary"
                         aria-hidden="true"
                       >
                         {step.n}
@@ -359,10 +389,10 @@ export function Home({ featuredListings }: HomeProps) {
                   {CAN_HELP_STEPS.map((step) => (
                     <li
                       key={step.n}
-                      className="flex gap-4 py-4 first:pt-0 last:pb-0"
+                      className="flex items-center gap-4 py-4 first:pt-0 last:pb-0"
                     >
                       <span
-                        className="shrink-0 w-6 h-6 rounded-full bg-blush border border-accent/30 flex items-center justify-center text-label font-bold text-accent mt-0.5"
+                        className="shrink-0 w-9 h-9 rounded-full bg-blush border border-accent/30 flex items-center justify-center text-small font-bold text-accent"
                         aria-hidden="true"
                       >
                         {step.n}
@@ -400,129 +430,184 @@ export function Home({ featuredListings }: HomeProps) {
               >
                 What are people booking today?
               </h2>
-              <div
-                className="flex gap-2 shrink-0 ml-4"
-                role="group"
-                aria-label="Scroll categories"
-              >
-                <button
-                  type="button"
-                  onClick={() => scroll(categoryRef, "left")}
-                  aria-label="Scroll categories left"
-                  aria-controls="categories-list"
-                  className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              {!tagsQuery.isError && (
+                <div
+                  className="flex gap-2 shrink-0 ml-4"
+                  role="group"
+                  aria-label="Scroll categories"
                 >
-                  <ChevronLeft size={18} aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scroll(categoryRef, "right")}
-                  aria-label="Scroll categories right"
-                  aria-controls="categories-list"
-                  className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
-                >
-                  <ChevronRight size={18} aria-hidden="true" />
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => scroll(categoryRef, "left")}
+                    aria-label="Scroll categories left"
+                    aria-controls="categories-list"
+                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                  >
+                    <ChevronLeft size={18} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scroll(categoryRef, "right")}
+                    aria-label="Scroll categories right"
+                    aria-controls="categories-list"
+                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                  >
+                    <ChevronRight size={18} aria-hidden="true" />
+                  </button>
+                </div>
+              )}
             </div>
-            <ul
-              id="categories-list"
-              ref={categoryRef}
-              className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth list-none m-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
-              style={{ scrollbarWidth: "none" }}
-              tabIndex={0}
-              aria-label="Popular service categories"
-            >
-              {CATEGORIES.map((cat) => (
-                <li key={cat.seed} className="snap-start shrink-0 w-48">
-                  <CategoryCard
-                    name={cat.name}
-                    imageSrc={`https://picsum.photos/seed/${cat.seed}/400`}
-                  />
-                </li>
-              ))}
-            </ul>
+            {tagsQuery.isLoading && (
+              <p role="status" aria-live="polite" className="sr-only">
+                Loading categories…
+              </p>
+            )}
+            {tagsQuery.isError && (
+              <p role="alert" className="text-small text-red-600">
+                Categories could not be loaded.
+              </p>
+            )}
+            {!tagsQuery.isError && (
+              <ul
+                id="categories-list"
+                ref={categoryRef}
+                className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth list-none m-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+                style={{ scrollbarWidth: "none" }}
+                tabIndex={0}
+                aria-label="Popular service categories"
+              >
+                {tagsQuery.isLoading
+                  ? Array.from({ length: 6 }).map((_, i) => (
+                      <li key={i} className="snap-start shrink-0 w-48">
+                        <div
+                          aria-hidden="true"
+                          className="aspect-square w-full animate-pulse rounded-2xl border border-border bg-linen"
+                        />
+                      </li>
+                    ))
+                  : categories.map((cat) => (
+                      <li key={cat.tagId} className="snap-start shrink-0 w-48">
+                        <CategoryCard
+                          name={cat.name}
+                          imageSrc={cat.imageSrc}
+                          onClick={() =>
+                            navigate({
+                              to: "/browse-services",
+                              search: { q: "", city: "", tagIds: [cat.tagId], from: undefined },
+                            })
+                          }
+                        />
+                      </li>
+                    ))}
+              </ul>
+            )}
           </div>
         </section>
 
-        {/* ── Help near you ── */}
+        {/* ── Popular listings ── */}
         <section className="bg-linen py-20" aria-labelledby="nearby-heading">
           <div className="mx-auto max-w-4xl px-6">
             <h2
               id="nearby-heading"
               className="font-heading text-3xl font-bold text-foreground mb-1"
             >
-              Help near you
+              Popular listings
             </h2>
             <div className="flex items-end justify-between mb-6">
               <p className="text-muted text-small">
-                Based on your location • Munich, 10km radius
+                Some of the services currently listed on Mira
               </p>
-              <div
-                className="flex gap-2 shrink-0 ml-4"
-                role="group"
-                aria-label="Scroll providers"
-              >
-                <button
-                  type="button"
-                  onClick={() => scroll(providerRef, "left")}
-                  aria-label="Scroll providers left"
-                  aria-controls="providers-list"
-                  className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
-                >
-                  <ChevronLeft size={18} aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scroll(providerRef, "right")}
-                  aria-label="Scroll providers right"
-                  aria-controls="providers-list"
-                  className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
-                >
-                  <ChevronRight size={18} aria-hidden="true" />
-                </button>
-              </div>
+              {!featuredListingsQuery.isError &&
+                (featuredListingsQuery.isLoading || listingCards.length > 0) && (
+                  <div
+                    className="flex gap-2 shrink-0 ml-4"
+                    role="group"
+                    aria-label="Scroll listings"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => scroll(providerRef, "left")}
+                      aria-label="Scroll listings left"
+                      aria-controls="listings-list"
+                      className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                    >
+                      <ChevronLeft size={18} aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scroll(providerRef, "right")}
+                      aria-label="Scroll listings right"
+                      aria-controls="listings-list"
+                      className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                    >
+                      <ChevronRight size={18} aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
             </div>
-            <ul
-              id="providers-list"
-              ref={providerRef}
-              className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth list-none m-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
-              style={{ scrollbarWidth: "none" }}
-              tabIndex={0}
-              aria-label="Helpers near you"
-            >
-              {providers.map((p) => (
-                <li
-                  key={`${p.firstName}-${p.lastName}-${p.bio}`}
-                  className="snap-start shrink-0 w-64"
+            {featuredListingsQuery.isLoading && (
+              <p role="status" aria-live="polite" className="sr-only">
+                Loading listings…
+              </p>
+            )}
+            {featuredListingsQuery.isError ? (
+              <p role="alert" className="text-small text-red-600 py-8 text-center">
+                Listings could not be loaded.
+              </p>
+            ) : !featuredListingsQuery.isLoading && listingCards.length === 0 ? (
+              <p className="text-body text-muted py-8 text-center">
+                No listings found near you yet.
+              </p>
+            ) : (
+              <>
+                <ul
+                  id="listings-list"
+                  ref={providerRef}
+                  className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth list-none m-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+                  style={{ scrollbarWidth: "none" }}
+                  tabIndex={0}
+                  aria-label="Popular listings"
                 >
-                  <ProviderCard
-                    variant="compact"
-                    firstName={p.firstName}
-                    lastName={p.lastName}
-                    avatar={
-                      <AvatarIcon
-                        firstName={p.firstName}
-                        lastName={p.lastName}
-                        picture=""
-                      />
-                    }
-                    distanceKm={p.distanceKm}
-                    bio={p.bio}
-                    pricePerHour={p.pricePerHour}
-                  />
-                </li>
-              ))}
-            </ul>
-            <div className="mt-8 text-center">
-              <a
-                href="/"
-                className="inline-flex items-center gap-2 text-primary font-medium no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
-              >
-                View all helpers near you{" "}
-                <ArrowRight size={16} aria-hidden="true" />
-              </a>
-            </div>
+                  {featuredListingsQuery.isLoading
+                    ? Array.from({ length: 4 }).map((_, i) => (
+                        <li key={i} className="snap-start shrink-0 w-64">
+                          <div
+                            aria-hidden="true"
+                            className="h-56 w-full animate-pulse rounded-2xl border border-border bg-linen"
+                          />
+                        </li>
+                      ))
+                    : listingCards.map((listing) => (
+                        <li key={listing.listingId} className="snap-start shrink-0 w-64 flex">
+                          <ServiceCard
+                            variant="compact"
+                            link="#"
+                            label={listing.label}
+                            providerFirstName={listing.providerFirstName}
+                            providerLastName={listing.providerLastName}
+                            location={listing.location}
+                            description={listing.description}
+                            tags={listing.tags}
+                            hourRate={listing.hourRate}
+                            pictureLink={listing.pictureLink}
+                          />
+                        </li>
+                      ))}
+                </ul>
+                {!featuredListingsQuery.isLoading && (
+                  <div className="mt-8 text-center">
+                    <Link
+                      to="/browse-services"
+                      search={{ q: '', city: '', tagIds: [] }}
+                      className="inline-flex items-center gap-2 text-primary font-medium no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                    >
+                      View all listings{" "}
+                      <ArrowRight size={16} aria-hidden="true" />
+                    </Link>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </section>
       </main>
