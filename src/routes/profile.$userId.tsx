@@ -94,7 +94,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
                 <div className="bg-linear-to-r from-primary to-accent h-50 w-full"/>
             </section>
             <section>
-                <div className="container mx-auto -mt-20 p-4 grid grid-cols-3 gap-5 items-start">
+                <div className="container mx-auto max-w-6xl -mt-20 p-4 grid grid-cols-3 gap-5 items-start">
                     {/* User Info - row 1, left 2/3 */}
                     <div className="col-span-2">
                         <div className='flex flex-row items-center gap-4'>
@@ -122,27 +122,27 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
                     <div className="col-start-3 row-start-2 row-span-3 bg-linen border border-border rounded-2xl p-6">
                         <p className="text-h1 font-bold">Menü</p>
                         <div className="w-full mx-auto h-px bg-border m-5" />
-                        <div className="flex flex-col mx-auto w-70">
-                            <Button variant="primary" size="lg" leadingIcon={<Briefcase />} onClick={() => setActiveTab('account')}>
-                                <p className='text-lg font-bold'>Meine Anzeigen</p>
+                        <div className="flex flex-col w-full gap-3">
+                            <Button variant="primary" size="md" leadingIcon={<Briefcase />} onClick={() => setActiveTab('account')}>
+                                <p className='font-bold'>Meine Anzeigen</p>
                             </Button>
-                            <Button variant="accent" size="lg" leadingIcon={<Plus />} onClick={() => setActiveTab('listings')} className="mt-4">
-                                <p className='text-lg font-bold'>Anzeige erstellen</p>
+                            <Button variant="accent" size="md" leadingIcon={<Plus />} onClick={() => setActiveTab('listings')}>
+                                <p className='font-bold'>Anzeige erstellen</p>
                             </Button>
-                            <Button variant="secondary" size="lg" leadingIcon={<Calendar />} onClick={() => setActiveTab('listings')} className="mt-4">
-                                <p className='text-lg font-bold'>Kalender</p>
+                            <Button variant="secondary" size="md" leadingIcon={<Calendar />} onClick={() => setActiveTab('listings')}>
+                                <p className='font-bold'>Kalender</p>
                             </Button>
-                            <Button variant="secondary" size="lg" leadingIcon={<Mail />} onClick={() => setActiveTab('listings')} className="mt-4">
-                                <p className='text-lg font-bold'>Meine Buchungen</p>
+                            <Button variant="secondary" size="md" leadingIcon={<Mail />} onClick={() => setActiveTab('listings')}>
+                                <p className='font-bold'>Meine Buchungen</p>
                             </Button>
-                            <Button variant="secondary" size="lg" leadingIcon={<History />} onClick={() => setActiveTab('listings')} className="mt-4">
-                                <p className='text-lg font-bold'>Verlauf</p>
+                            <Button variant="secondary" size="md" leadingIcon={<History />} onClick={() => setActiveTab('listings')}>
+                                <p className='font-bold'>Verlauf</p>
                             </Button>
                         </div>
                         <div className="w-full mx-auto h-px bg-border m-5" />
-                        <div className="flex flex-col mx-auto w-60">
-                            <Button variant="primary" size="lg" leadingIcon={<Check />} onClick={() => setActiveTab('account')}>
-                                <p className='text-lg font-bold'>Verifizieren</p>
+                        <div className="flex flex-col w-full">
+                            <Button variant="primary" size="md" leadingIcon={<Check />} onClick={() => setActiveTab('account')}>
+                                <p className='font-bold'>Verifizieren</p>
                             </Button>
                         </div>
                     </div>
@@ -150,9 +150,9 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
                     <div className="col-start-3 row-start-2 row-span-3 bg-linen border border-border rounded-2xl p-6">
                         <p className="text-h1 font-bold">Menü</p>
                         <div className="w-full mx-auto h-px bg-border m-5" />
-                        <div className="flex flex-col mx-auto w-70 gap-4">
-                            <Button variant="primary" size="lg">
-                                <p className='text-lg font-bold'>Kontakieren</p>
+                        <div className="flex flex-col w-full gap-3">
+                            <Button variant="primary" size="md">
+                                <p className='font-bold'>Kontakieren</p>
                             </Button>
                         </div>
                     </div>
