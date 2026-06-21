@@ -1,5 +1,5 @@
 import { useAuthStore } from '../stores/auth'
-import { authFetch } from './queryClient'
+import { authFetch, queryClient } from './queryClient'
 
 export type UserType = 'CUSTOMER' | 'PROVIDER'
 export type AccessibilityPreference = 'EASY_LANGUAGE' | 'REDUCED_MOTION'
@@ -75,6 +75,7 @@ export async function patchUser(payload: PatchUserPayload): Promise<void> {
 
   const updated = await res.json()
   useAuthStore.getState().setUser(updated)
+  queryClient.invalidateQueries({ queryKey: ['user', user.userId] })
 }
 
 export async function uploadProfilePhoto(file: File): Promise<void> {
