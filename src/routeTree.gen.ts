@@ -14,6 +14,7 @@ import { Route as MyListingsRouteImport } from './routes/my-listings'
 import { Route as MyBookingsRouteImport } from './routes/my-bookings'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as RegisterRouteRouteImport } from './routes/register/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -52,6 +53,11 @@ const LoginRoute = LoginRouteImport.update({
 const CreateListingRoute = CreateListingRouteImport.update({
   id: '/create-listing',
   path: '/create-listing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendarRoute = CalendarRouteImport.update({
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/register': typeof RegisterRouteRouteWithChildren
   '/calendar': typeof CalendarRoute
+  '/chat': typeof ChatRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-bookings': typeof MyBookingsRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/chat': typeof ChatRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-bookings': typeof MyBookingsRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/register': typeof RegisterRouteRouteWithChildren
   '/calendar': typeof CalendarRoute
+  '/chat': typeof ChatRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-bookings': typeof MyBookingsRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/'
     | '/register'
     | '/calendar'
+    | '/chat'
     | '/create-listing'
     | '/login'
     | '/my-bookings'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/calendar'
+    | '/chat'
     | '/create-listing'
     | '/login'
     | '/my-bookings'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/'
     | '/register'
     | '/calendar'
+    | '/chat'
     | '/create-listing'
     | '/login'
     | '/my-bookings'
@@ -257,6 +269,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RegisterRouteRoute: typeof RegisterRouteRouteWithChildren
   CalendarRoute: typeof CalendarRoute
+  ChatRoute: typeof ChatRoute
   CreateListingRoute: typeof CreateListingRoute
   LoginRoute: typeof LoginRoute
   MyBookingsRoute: typeof MyBookingsRoute
@@ -303,6 +316,13 @@ declare module '@tanstack/react-router' {
       path: '/create-listing'
       fullPath: '/create-listing'
       preLoaderRoute: typeof CreateListingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calendar': {
@@ -434,6 +454,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegisterRouteRoute: RegisterRouteRouteWithChildren,
   CalendarRoute: CalendarRoute,
+  ChatRoute: ChatRoute,
   CreateListingRoute: CreateListingRoute,
   LoginRoute: LoginRoute,
   MyBookingsRoute: MyBookingsRoute,
