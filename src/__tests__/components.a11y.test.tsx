@@ -87,6 +87,7 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("../api/mira", () => ({
   getServiceTags: vi.fn(),
   getPublicListings: vi.fn(),
+  logout: vi.fn().mockResolvedValue({ status: 204, data: undefined }),
 }));
 
 const mockGetServiceTags = vi.mocked(getServiceTags);
@@ -661,7 +662,7 @@ describe("component accessibility", () => {
         description: "Weekly pickup and drop-off support.",
         easyDescriptionStatus: "COMPLETED",
         price: 24,
-        author: { name: "Mira", surname: "Muster" },
+        author: { userId: "user-1", name: "Mira", surname: "Muster" },
         publishedAt: "2026-06-01T12:00:00.000Z",
         location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 5 },
       } as PublicListingSummary,
@@ -2617,12 +2618,12 @@ describe("component accessibility", () => {
       configurable: true,
       value: scrollBy,
     });
-    const { container } = render(<Home featuredListings={[]} />);
+    const { container } = renderHome([]);
 
     await act(async () => {
       fireEvent.submit(screen.getByRole("search"));
       fireEvent.click(screen.getByRole("button", { name: /scroll categories left/i }));
-      fireEvent.click(screen.getByRole("button", { name: /scroll providers right/i }));
+      fireEvent.click(screen.getByRole("button", { name: /scroll listings right/i }));
     });
 
     expect(scrollBy).toHaveBeenCalled();
@@ -2702,9 +2703,15 @@ describe("component accessibility", () => {
           media: [
             {
               mediaId: "media-1",
+              position: 0,
               url: "/listing.jpg",
               altText: null,
               altTextStatus: "PROCESSING",
+              mimeType: "image/jpeg",
+              size: 1000,
+              width: 800,
+              height: 600,
+              createdAt: "2026-01-01T00:00:00Z",
             },
           ],
         }}
