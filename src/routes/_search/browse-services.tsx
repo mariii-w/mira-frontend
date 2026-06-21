@@ -12,6 +12,7 @@ import { Breadcrumb } from '../../components/BreadCrumb'
 import { Pagination } from '../../components/Pagination'
 import { FilterDrawer } from '../../components/FilterDrawer'
 import { useAccessibilityStore } from '../../stores/accessibility'
+import { mediaUrl } from '../../lib/mediaUrl'
 import { getPublicListings, getServiceTags } from '../../api/mira'
 import type {
   GetPublicListingsParams,
@@ -364,8 +365,10 @@ export function BrowseServicesPage() {
                       style={{ animationDelay: `${Math.min(index * 40, 300)}ms` }}
                     >
                       <ServiceCard
-                        link={`#`}
-                        pictureLink={listing.primaryMedia?.url ?? undefined}
+                        link={`/listings/${listing.listingId}`}
+                        pictureLink={listing.primaryMedia ? mediaUrl(listing.primaryMedia.url) : undefined}
+                        pictureAltText={listing.primaryMedia?.altText}
+                        pictureAltTextStatus={listing.primaryMedia?.altTextStatus}
                         location={listing.location.city}
                         providerFirstName={listing.author.name}
                         providerLastName={listing.author.surname}

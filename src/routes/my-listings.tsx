@@ -85,6 +85,7 @@ export function MyListingsRoute() {
       return response.data;
     },
     enabled: !!userId,
+    refetchOnMount: "always",
   });
 
   const { data: countsData } = useQuery({
@@ -108,6 +109,7 @@ export function MyListingsRoute() {
       return response.data;
     },
     enabled: !!userId,
+    refetchOnMount: "always",
   });
 
   const hasPrev = prevCursors.length > 0;

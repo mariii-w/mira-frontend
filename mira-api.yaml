@@ -347,9 +347,9 @@ paths:
         "200":
           description: Profile picture uploaded and linked successfully.
           content:
-            "application/json":
+            "application/hal+json":
               schema:
-                "$ref": "#/components/schemas/ProfileMediaResponse"
+                "$ref": "#/components/schemas/ProfileMediaEntityModel"
         "400":
           description: Bad Request. The uploaded file or path parameter is invalid.
           content:
@@ -952,6 +952,7 @@ paths:
                         title: Laptop setup and software installation
                         price: 25.0
                         author:
+                          userId: "22222222-3333-4444-5555-666666666666"
                           name: Anna
                           surname: Schmidt
                         publishedAt: "2026-04-20T13:00:00Z"
@@ -1059,6 +1060,7 @@ paths:
                     publicationStatus: DRAFT
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1123,8 +1125,8 @@ paths:
                       - field: location
                         message: the provided address could not be geocoded
         "503":
-          "$ref": "#/components/responses/GeocodingUnavailableError"
-          description: Service Unavailable. A required downstream service is temporarily unavailable.
+          "$ref": "#/components/responses/ExternalServiceUnavailableError"
+          description: Service Unavailable. A required downstream service, such as geocoding or easy-description generation, is temporarily unavailable. No listing is created.
   "/v1/public-listings/{listingId}":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
@@ -1156,6 +1158,7 @@ paths:
                     price: 25.0
                     publicationStatus: ACTIVE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1188,6 +1191,164 @@ paths:
                     status: 404
                     detail: Listing with the given identifier was not found
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31
+  "/v1/public-profiles/{userId}/listings":
+    parameters:
+      - "$ref": "#/components/parameters/UserIdPathParam"
+    get:
+      summary: List public listings for a public profile
+      operationId: getPublicProfileListings
+      description: Returns publicly visible listings owned by the public profile identified by userId. The profile must be publicly eligible, meaning registrationComplete is true and isPublic is true. Listings are returned only when publicationStatus is ACTIVE and moderationStatus is VISIBLE.
+      tags:
+        - Listings (Public)
+      parameters:
+        - name: tagIds
+          in: query
+          required: false
+          description: Filter listings by one or more predefined service tag UUIDs.
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+        - name: city
+          in: query
+          required: false
+          description: Filter listings by stored address city.
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          required: false
+          description: Minimum price, inclusive.
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - name: maxPrice
+          in: query
+          required: false
+          description: Maximum price, inclusive.
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - "$ref": "#/components/parameters/LimitQueryParam"
+        - "$ref": "#/components/parameters/FromQueryParam"
+        - name: q
+          in: query
+          required: false
+          description: Free-text search over listing title and description.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Listings retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PublicListingCollectionResponse"
+              examples:
+                default:
+                  summary: Example public profile listings
+                  value:
+                    items:
+                      - listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
+                        tags:
+                          - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                            name: Laptop support
+                            isBarrierefrei: false
+                            isActive: true
+                        title: Laptop setup and software installation
+                        description: I help with setting up laptops, installing software, and solving basic PC issues.
+                        price: 25.0
+                        author:
+                          userId: "22222222-3333-4444-5555-666666666666"
+                          name: Anna
+                          surname: Schmidt
+                        publishedAt: "2026-04-20T13:00:00Z"
+                        location:
+                          city: Berlin
+                          postalCode: "10115"
+                          serviceRadiusKm: 15
+                        primaryMedia:
+                          mediaId: "11111111-2222-3333-4444-555555555555"
+                          url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
+                          altText: Open laptop on a wooden desk
+                          altTextStatus: COMPLETED
+                    cursor:
+                      limit: 20
+                      next: null
+        "400":
+          description: Bad Request. One or more path or query parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No public profile exists for the given userId.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/public-profiles/{userId}/listings/{listingId}":
+    parameters:
+      - "$ref": "#/components/parameters/UserIdPathParam"
+      - "$ref": "#/components/parameters/ListingIdParam"
+    get:
+      summary: Get public profile listing details
+      operationId: getPublicProfileListing
+      description: Returns one publicly visible listing owned by the public profile identified by userId. The profile must be publicly eligible, and the listing must belong to that profile with publicationStatus ACTIVE and moderationStatus VISIBLE.
+      tags:
+        - Listings (Public)
+      responses:
+        "200":
+          description: Listing retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PublicListingDetails"
+              examples:
+                default:
+                  summary: Example public profile listing details
+                  value:
+                    listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
+                    tags:
+                      - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                        name: Laptop support
+                        isBarrierefrei: false
+                        isActive: true
+                    title: Laptop setup and software installation
+                    description: I help with setting up laptops, installing software, and solving basic PC issues.
+                    price: 25.0
+                    publicationStatus: ACTIVE
+                    author:
+                      userId: "22222222-3333-4444-5555-666666666666"
+                      name: Anna
+                      surname: Schmidt
+                    createdAt: "2026-04-20T12:00:00Z"
+                    updatedAt: "2026-04-20T13:00:00Z"
+                    publishedAt: "2026-04-20T13:00:00Z"
+                    location:
+                      city: Berlin
+                      postalCode: "10115"
+                      serviceRadiusKm: 15
+                    media:
+                      - mediaId: "11111111-2222-3333-4444-555555555555"
+                        position: 0
+                        url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
+                        altText: Open laptop on a wooden desk
+                        altTextStatus: COMPLETED
+                        mimeType: image/jpeg
+                        size: 248576
+                        width: 1280
+                        height: 720
+                        createdAt: "2026-04-20T16:10:00Z"
+        "404":
+          description: Not Found. No public profile listing exists for the given identifiers.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
   "/v1/listings/{listingId}":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
@@ -1240,6 +1401,7 @@ paths:
                     publicationStatus: DRAFT
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1330,8 +1492,8 @@ paths:
                       - field: location
                         message: the provided address could not be geocoded
         "503":
-          "$ref": "#/components/responses/GeocodingUnavailableError"
-          description: Service Unavailable. A required downstream service is temporarily unavailable.
+          "$ref": "#/components/responses/ExternalServiceUnavailableError"
+          description: Service Unavailable. A required downstream service, such as geocoding or easy-description generation, is temporarily unavailable. No listing changes are persisted.
     delete:
       summary: Delete listing
       operationId: deleteListing
@@ -1438,6 +1600,7 @@ paths:
                     publicationStatus: ACTIVE
                     moderationStatus: BLOCKED
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1471,6 +1634,7 @@ paths:
                     publicationStatus: ACTIVE
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1649,6 +1813,7 @@ paths:
                         publicationStatus: DRAFT
                         moderationStatus: VISIBLE
                         author:
+                          userId: "22222222-3333-4444-5555-666666666666"
                           name: Anna
                           surname: Schmidt
                         publishedAt: null
@@ -1718,6 +1883,7 @@ paths:
                     publicationStatus: PAUSED
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1787,6 +1953,7 @@ paths:
                     publicationStatus: ACTIVE
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1870,7 +2037,7 @@ paths:
                       - field: location
                         message: the provided address could not be geocoded
         "503":
-          "$ref": "#/components/responses/GeocodingUnavailableError"
+          "$ref": "#/components/responses/ExternalServiceUnavailableError"
           description: Service Unavailable. A required downstream service is temporarily unavailable.
   "/v1/listings/{listingId}/pause":
     parameters:
@@ -1906,6 +2073,7 @@ paths:
                     publicationStatus: PAUSED
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -2003,6 +2171,7 @@ paths:
                     publicationStatus: ACTIVE
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -2092,6 +2261,7 @@ paths:
                         publicationStatus: ACTIVE
                         moderationStatus: VISIBLE
                         author:
+                          userId: "22222222-3333-4444-5555-666666666666"
                           name: Anna
                           surname: Schmidt
                         publishedAt: "2026-04-20T16:00:00Z"
@@ -2250,10 +2420,56 @@ paths:
   "/v1/listings/{listingId}/media":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
+    get:
+      summary: List listing media
+      operationId: getListingMedia
+      description: Returns all media items attached to a listing owned by the authenticated user, ordered by ascending position.
+      tags:
+        - Listings (Media)
+      security:
+        - bearerHttpAuthentication: []
+      responses:
+        "200":
+          description: Listing media retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ListingMediaItem"
+              examples:
+                default:
+                  summary: Example listing media collection
+                  value:
+                    - mediaId: "11111111-2222-3333-4444-555555555555"
+                      position: 0
+                      url: "/v1/listing-media/11111111-2222-3333-4444-555555555555/content"
+                      altText: Open laptop on a wooden desk
+                      altTextStatus: COMPLETED
+                      mimeType: image/jpeg
+                      size: 248576
+                      width: 1280
+                      height: 720
+                      createdAt: "2026-04-20T16:10:00Z"
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+          description: Unauthorized. Authentication is required.
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No listing exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
     post:
       summary: Upload listing media
       operationId: uploadListingMedia
-      description: "Uploads one or more media files to a listing owned by the authenticated user. The request may partially succeed: valid files are uploaded, invalid files are reported in the failed collection. Upload is allowed for draft, active, and paused listings, but not for deleted listings. A listing can have at most 10 media items in total; if the upload would exceed the limit, only the allowed files are uploaded and the remaining files are returned in the failed collection."
+      description: "Uploads one or more media files to a listing owned by the authenticated user. Upload is all-or-nothing: validation, capacity, or storage failures abort the whole request. Upload is allowed for draft, active, and paused listings, but not for deleted listings. A listing can have at most 10 media items in total."
       tags:
         - Listings (Media)
       security:
@@ -2365,13 +2581,10 @@ paths:
                     errors:
                       - field: files
                         message: all files have unsupported media types
-  "/v1/listings/{listingId}/media/{mediaId}":
-    parameters:
-      - "$ref": "#/components/parameters/ListingIdParam"
-      - "$ref": "#/components/parameters/MediaIdParam"
     patch:
-      summary: Update listing media metadata
-      description: Partially updates media metadata of a listing owned by the authenticated user. Only altText can be changed.
+      summary: Reorder listing media
+      operationId: updateListingMedia
+      description: Reorders all media items attached to a listing owned by the authenticated user. The items array defines the complete desired order; it must contain exactly the media IDs currently attached to the listing.
       tags:
         - Listings (Media)
       security:
@@ -2384,12 +2597,93 @@ paths:
               "$ref": "#/components/schemas/UpdateListingMediaRequest"
             examples:
               default:
-                summary: Example media update request
+                summary: Example reorder request
                 value:
-                  altText: Laptop repair tools on a desk
+                  items:
+                    - mediaId: "11111111-2222-3333-4444-555555555555"
+                    - mediaId: "22222222-3333-4444-5555-666666666666"
       responses:
         "200":
-          description: Listing media updated successfully.
+          description: Listing media reordered successfully.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ListingMediaItem"
+              examples:
+                default:
+                  summary: Example reordered listing media
+                  value:
+                    - mediaId: "11111111-2222-3333-4444-555555555555"
+                      position: 0
+                      url: "/v1/listing-media/11111111-2222-3333-4444-555555555555/content"
+                      altText: Open laptop on a wooden desk
+                      altTextStatus: COMPLETED
+                      mimeType: image/jpeg
+                      size: 248576
+                      width: 1280
+                      height: 720
+                      createdAt: "2026-04-20T16:10:00Z"
+        "400":
+          description: Bad Request. The request payload is invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+          description: Unauthorized. Authentication is required.
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No listing exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "409":
+          description: Conflict. The request conflicts with the current resource state.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "422":
+          description: Unprocessable Entity. The provided order does not contain exactly the currently attached listing media IDs.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/listings/{listingId}/media/{mediaId}":
+    parameters:
+      - "$ref": "#/components/parameters/ListingIdParam"
+      - "$ref": "#/components/parameters/MediaIdParam"
+    put:
+      summary: Replace listing media file
+      operationId: replaceListingMedia
+      description: Replaces the underlying file for an existing listing media item owned by the authenticated user while keeping the same listing-media entry and position. Alt text generation is scheduled for the replacement file.
+      tags:
+        - Listings (Media)
+      security:
+        - bearerHttpAuthentication: []
+      requestBody:
+        required: true
+        content:
+          "multipart/form-data":
+            schema:
+              "$ref": "#/components/schemas/ReplaceListingMediaRequest"
+            examples:
+              default:
+                summary: Example media replacement request
+                value:
+                  file: listing-replacement.jpg
+      responses:
+        "200":
+          description: Listing media replaced successfully.
           content:
             "application/json":
               schema:
@@ -2399,8 +2693,10 @@ paths:
                   summary: Example updated media item
                   value:
                     mediaId: "11111111-2222-3333-4444-555555555555"
-                    url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
-                    altText: Laptop repair tools on a desk
+                    position: 0
+                    url: "/v1/listing-media/11111111-2222-3333-4444-555555555555/content"
+                    altText: null
+                    altTextStatus: PENDING
                     mimeType: image/jpeg
                     size: 248576
                     width: 1280
@@ -2421,8 +2717,8 @@ paths:
                     detail: Request body validation failed
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/media/11111111-2222-3333-4444-555555555555
                     errors:
-                      - field: altText
-                        message: must not be blank
+                      - field: file
+                        message: must be a supported image file
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -2466,25 +2762,26 @@ paths:
                     type: "https://api.mira.example/problems/resource-conflict"
                     title: Conflict
                     status: 409
-                    detail: Media of deleted listings cannot be updated
+                    detail: Operation not allowed on a deleted listing
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/media/11111111-2222-3333-4444-555555555555
-        "422":
-          description: Unprocessable Entity. The request is formally valid but violates one or more business rules.
+        "413":
+          description: Payload Too Large. The file exceeds the configured media size limit.
           content:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                invalidMetadata:
-                  value:
-                    type: "https://api.mira.example/problems/business-rule-violation"
-                    title: Unprocessable Entity
-                    status: 422
-                    detail: Business validation failed
-                    instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/media/11111111-2222-3333-4444-555555555555
-                    errors:
-                      - field: altText
-                        message: alt text contains unsupported content
+        "415":
+          description: Unsupported Media Type. The detected media type is not accepted.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "422":
+          description: Unprocessable Entity. Image dimensions cannot be determined or violate configured limits.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
     delete:
       summary: Delete listing media
       operationId: deleteListingMedia
@@ -2544,6 +2841,33 @@ paths:
                     status: 409
                     detail: Media of deleted listings cannot be deleted
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/media/11111111-2222-3333-4444-555555555555
+  "/v1/listing-media/{mediaId}/content":
+    parameters:
+      - "$ref": "#/components/parameters/MediaIdParam"
+    get:
+      summary: Get listing media content
+      operationId: getListingMediaContent
+      description: Streams the stored bytes for a listing media item.
+      tags:
+        - Listings (Media)
+      responses:
+        "200":
+          description: Listing media content retrieved successfully.
+          content:
+            "image/jpeg":
+              schema:
+                type: string
+                format: binary
+            "image/png":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not Found. The media item does not exist or its stored content is unavailable.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
   "/v1/listings/{listingId}/availability":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
@@ -4912,15 +5236,33 @@ components:
           items:
             type: string
             format: binary
+    ReplaceListingMediaRequest:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
     UpdateListingMediaRequest:
       type: object
-      minProperties: 1
+      required:
+        - items
       properties:
-        altText:
+        items:
+          type: array
+          description: Complete desired listing media order. The array index becomes the new zero-based position.
+          items:
+            "$ref": "#/components/schemas/ListingMediaOrderItem"
+    ListingMediaOrderItem:
+      type: object
+      required:
+        - mediaId
+      properties:
+        mediaId:
           type: string
-          minLength: 1
-          maxLength: 255
-          example: Laptop repair tools on a desk
+          format: uuid
+          example: "11111111-2222-3333-4444-555555555555"
     ListingMediaItem:
       type: object
       required:
@@ -5051,6 +5393,31 @@ components:
         createdAt:
           type: string
           format: date-time
+    ProfileMediaEntityModel:
+      allOf:
+        - "$ref": "#/components/schemas/ProfileMediaResponse"
+        - type: object
+          required:
+            - _links
+          properties:
+            _links:
+              type: object
+              required:
+                - self
+                - user
+              properties:
+                self:
+                  "$ref": "#/components/schemas/HalLink"
+                user:
+                  "$ref": "#/components/schemas/HalLink"
+    HalLink:
+      type: object
+      required:
+        - href
+      properties:
+        href:
+          type: string
+          format: uri-reference
     AdminReportedListingItem:
       allOf:
         - "$ref": "#/components/schemas/MyListingSummary"
@@ -5089,7 +5456,6 @@ components:
         - tags
         - title
         - description
-        - easyDescriptionStatus
         - price
         - author
         - publishedAt
@@ -5113,10 +5479,8 @@ components:
           type:
             - string
             - "null"
-          description: AI-generated simplified version of the listing description. Null until generation completes.
+          description: AI-generated simplified version of the listing description.
           example: I help you set up laptops. I install software. I help with simple computer problems.
-        easyDescriptionStatus:
-          "$ref": "#/components/schemas/AccessibilityGenerationStatus"
         price:
           type: number
           format: double
@@ -5139,7 +5503,6 @@ components:
         - tags
         - title
         - description
-        - easyDescriptionStatus
         - price
         - publicationStatus
         - author
@@ -5167,10 +5530,8 @@ components:
           type:
             - string
             - "null"
-          description: AI-generated simplified version of the listing description. Null until generation completes.
+          description: AI-generated simplified version of the listing description.
           example: I help you set up laptops. I install software. I help with simple computer problems.
-        easyDescriptionStatus:
-          "$ref": "#/components/schemas/AccessibilityGenerationStatus"
         price:
           type: number
           format: double
@@ -5250,7 +5611,6 @@ components:
         - tags
         - title
         - description
-        - easyDescriptionStatus
         - price
         - publicationStatus
         - moderationStatus
@@ -5279,10 +5639,8 @@ components:
           type:
             - string
             - "null"
-          description: AI-generated simplified version of the listing description. Null until generation completes.
+          description: AI-generated simplified version of the listing description.
           example: I help you set up laptops. I install software. I help with simple computer problems.
-        easyDescriptionStatus:
-          "$ref": "#/components/schemas/AccessibilityGenerationStatus"
         price:
           type: number
           format: double
@@ -5367,9 +5725,15 @@ components:
     ListingAuthor:
       type: object
       required:
+        - userId
         - name
         - surname
       properties:
+        userId:
+          type: string
+          format: uuid
+          description: Public identifier of the listing author.
+          example: "22222222-3333-4444-5555-666666666666"
         name:
           type: string
           minLength: 1
@@ -6018,17 +6382,17 @@ components:
                 status: 401
                 detail: Authentication is required
                 instance: /v1/listings/{listingId}
-    GeocodingUnavailableError:
+    ExternalServiceUnavailableError:
       description: Service Unavailable. A required downstream service is temporarily unavailable.
       content:
         "application/problem+json":
           schema:
             "$ref": "#/components/schemas/ProblemDetailsResponse"
           examples:
-            geocodingUnavailable:
+            externalServiceUnavailable:
               value:
-                type: "https://api.mira.example/problems/service-unavailable"
+                type: "https://api.mira.example/problems/external-service-unavailable"
                 title: Service Unavailable
                 status: 503
-                detail: Geocoding service is temporarily unavailable
+                detail: Geocoding service is unavailable
                 instance: /v1/listings/{listingId}

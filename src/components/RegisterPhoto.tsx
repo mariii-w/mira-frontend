@@ -9,6 +9,7 @@ import { ArrowLeft, ArrowRight, Upload } from "lucide-react";
 import type { PrivateUserProfileResponse } from "../api/model";
 import { AvatarIcon } from "./AvatarIcon";
 import { Button } from "./Button";
+import { mediaUrl } from "../lib/mediaUrl";
 
 export interface RegisterPhotoSubmitError {
   field: "server" | "file";
@@ -51,7 +52,8 @@ export function RegisterPhoto({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const previewUrl =
-    localPreviewUrl ?? initialValues?.profileMedia?.url ?? null;
+    localPreviewUrl ??
+    (initialValues?.profileMedia ? mediaUrl(initialValues.profileMedia.url) : null);
 
   useEffect(() => {
     return () => {

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
   PrivateUserProfileResponse,
-  ProfileMediaResponse,
+  ProfileMediaEntityModel,
 } from "../api/model";
 import {
   getPrivateUserProfile,
@@ -93,7 +93,7 @@ describe("patchUser", () => {
       user_id: "user-1",
       exp: Math.floor(Date.now() / 1000) + 60,
     });
-    const profileMedia: ProfileMediaResponse = {
+    const profileMedia: ProfileMediaEntityModel = {
       mediaId: "media-1",
       url: "/profile.jpg",
       altText: null,
@@ -103,6 +103,10 @@ describe("patchUser", () => {
       width: 200,
       height: 200,
       createdAt: "2026-06-14T12:00:00Z",
+      _links: {
+        self: { href: "/v1/users/user-1/profile-media" },
+        user: { href: "/v1/users/user-1" },
+      },
     };
     const updatedUser = makeUser({ profileMedia });
     const file = new File(["image"], "profile.jpg", { type: "image/jpeg" });

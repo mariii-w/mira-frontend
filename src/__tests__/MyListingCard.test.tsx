@@ -10,7 +10,7 @@ const baseListing: MyListingSummary = {
   price: 25,
   publicationStatus: 'ACTIVE',
   moderationStatus: 'VISIBLE',
-  author: { name: 'Klaus', surname: 'M' },
+  author: { userId: 'user-1', name: 'Klaus', surname: 'M' },
   publishedAt: '2024-01-01T00:00:00Z',
   location: { city: 'Berlin', postalCode: '10115', serviceRadiusKm: 15 },
   tags: [],
@@ -46,6 +46,18 @@ describe('<MyListingCard />', () => {
     }
     render(<MyListingCard listing={listing} onEdit={() => {}} />)
     expect(screen.getByRole('img', { name: baseListing.title })).toBeInTheDocument()
+  })
+
+  it('resolves a relative media url against the API origin', () => {
+    const listing = {
+      ...baseListing,
+      primaryMedia: { mediaId: 'm1', url: '/v1/listing-media/m1/content', altText: 'A laptop', altTextStatus: 'COMPLETED' as const },
+    }
+    render(<MyListingCard listing={listing} onEdit={() => {}} />)
+    expect(screen.getByRole('img', { name: 'A laptop' })).toHaveAttribute(
+      'src',
+      'http://localhost:8081/v1/listing-media/m1/content',
+    )
   })
 
   it('renders no image when primaryMedia is absent', () => {

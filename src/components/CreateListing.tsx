@@ -7,26 +7,14 @@ import { Label } from "./Label";
 import { Textarea } from "./Textarea";
 import { Slider } from "./Slider";
 import { MultiSelect } from "./MultiSelect";
-
-export interface ServiceTag {
-  tagId: string;
-  name: string;
-  isBarrierefrei: boolean;
-  isActive: boolean;
-}
+import type { ListingLocationRequest, ServiceTag } from "../api/model";
 
 export interface CreateListingFormValues {
   title: string;
   description: string;
   price: number;
   tagIds: string[];
-  location: {
-    street: string;
-    houseNumber: string;
-    postalCode: string;
-    city: string;
-    serviceRadiusKm: number;
-  };
+  location: ListingLocationRequest;
   imageFiles: File[];
 }
 
@@ -209,10 +197,6 @@ export function CreateListing({
                   Service is being saved…
                 </span>
               )}
-              {/* TODO: implement listing preview */}
-              <Button type="button" variant="secondary" size="md">
-                Preview
-              </Button>
               <Button
                 type="submit"
                 variant="primary"

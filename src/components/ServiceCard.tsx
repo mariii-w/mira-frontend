@@ -2,24 +2,21 @@ import { Link } from '@tanstack/react-router'
 import { Badge } from "./Badge"
 import { AvatarIcon } from "./AvatarIcon"
 import { MapPin, Dot, ArrowRight } from 'lucide-react'
-
-export interface ServiceCardTag {
-  tagId: string
-  name: string
-  isBarrierefrei: boolean
-}
+import type { AccessibilityGenerationStatus, ServiceTag } from '../api/model'
 
 interface ServiceCardProps{
     variant?: 'default' | 'compact'
     link: string
     pictureLink?: string
+    pictureAltText?: string | null
+    pictureAltTextStatus?: AccessibilityGenerationStatus
     location: string
     providerFirstName: string
     providerLastName: string
     varified?: boolean
     label: string
     description?: string
-    tags: ServiceCardTag[]
+    tags: ServiceTag[]
     hourRate : number
 }
 
@@ -27,6 +24,8 @@ export function ServiceCard(
     {variant = 'default',
         link,
         pictureLink,
+        pictureAltText,
+        pictureAltTextStatus,
         location,
         label,
         description,
@@ -76,7 +75,11 @@ export function ServiceCard(
             <div className='flex flex-col lg:flex-row gap-3'>
                 {pictureLink && (
                     <div className='shrink-0 lg:self-stretch'>
-                        <img src={pictureLink} className="w-full h-48 lg:w-48 lg:h-full rounded-lg object-cover" alt="" />
+                        <img
+                            src={pictureLink}
+                            alt={pictureAltTextStatus === 'COMPLETED' && pictureAltText ? pictureAltText : label}
+                            className="w-full h-48 lg:w-48 lg:h-full rounded-lg object-cover"
+                        />
                     </div>
                 )}
                 <div className='grid gap-2 flex-1 min-w-0'>

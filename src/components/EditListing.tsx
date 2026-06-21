@@ -13,63 +13,43 @@ import { Label } from "./Label";
 import { Textarea } from "./Textarea";
 import { Slider } from "./Slider";
 import { MultiSelect } from "./MultiSelect";
-import type { PublicationStatus, VlmStatus } from "./MyListingCard";
-
-export interface EditListingServiceTag {
-  tagId: string;
-  name: string;
-  isBarrierefrei: boolean;
-  isActive: boolean;
-}
-
-export interface EditListingImage {
-  mediaId: string;
-  url: string;
-  altText?: string | null;
-  altTextStatus?: VlmStatus;
-}
-
-export interface EditListingDetails {
-  listingId: string;
-  title: string;
-  description: string;
-  easyDescription?: string | null;
-  easyDescriptionStatus?: VlmStatus;
-  price: number;
-  publicationStatus: PublicationStatus;
-  tags: EditListingServiceTag[];
-  location: { city: string; postalCode: string; serviceRadiusKm: number };
-  media?: EditListingImage[];
-}
+import { ListingDetailPage } from "./ListingDetailPage";
+import { mediaUrl } from "../lib/mediaUrl";
+import { useAccessibilityStore } from "../stores/accessibility";
+import type { PublicationStatus } from "./MyListingCard";
+import type {
+  ListingDetails,
+  ListingLocationRequest,
+  ListingMediaPreview,
+  PublicListingSummary,
+  ServiceTag,
+} from "../api/model";
 
 export interface EditListingFormValues {
   title: string;
   description: string;
   price: number;
   tagIds: string[];
-  location?: {
-    street: string;
-    houseNumber: string;
-    postalCode: string;
-    city: string;
-    serviceRadiusKm: number;
-  };
+  location?: ListingLocationRequest;
   imageFiles: File[];
 }
 
 export type EditListingStatusAction = "publish" | "pause" | "resume";
 
 interface EditListingProps {
-  listing: EditListingDetails | null;
+  listing: ListingDetails | null;
   loadError: string | null;
-  availableTags: EditListingServiceTag[];
+  availableTags: ServiceTag[];
   tagsLoading: boolean;
+  availableToday?: boolean;
+  nextAvailableDate?: string;
+  otherListings?: PublicListingSummary[];
   onBack: () => void | Promise<void>;
   onSubmit: (values: EditListingFormValues) => Promise<void>;
   onDelete: () => Promise<void>;
   onRemoveImage: (mediaId: string) => Promise<void>;
   onStatusAction: (action: EditListingStatusAction) => Promise<void>;
-  onRefreshMedia: () => Promise<EditListingImage[]>;
+  onRefreshMedia: () => Promise<ListingMediaPreview[]>;
 }
 
 function validateTitle(v: string) {
@@ -123,6 +103,9 @@ export function EditListing({
   loadError,
   availableTags,
   tagsLoading,
+  availableToday,
+  nextAvailableDate,
+  otherListings = [],
   onBack,
   onSubmit,
   onDelete,
@@ -140,7 +123,7 @@ export function EditListing({
   const [radiusKm, setRadiusKm] = useState(20);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
-  const [existingImages, setExistingImages] = useState<EditListingImage[]>([]);
+  const [existingImages, setExistingImages] = useState<ListingMediaPreview[]>([]);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
 
@@ -157,8 +140,10 @@ export function EditListing({
   const [serverError, setServerError] = useState<string | null>(null);
   const [actionSubmitting, setActionSubmitting] = useState(false);
   const [deleteConfirming, setDeleteConfirming] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const easyRead = useAccessibilityStore((s) => s.easyRead);
 
   const hasVlmPending = existingImages.some(
     (img) =>
@@ -203,7 +188,7 @@ export function EditListing({
     setCity(listing.location.city);
     setRadiusKm(listing.location.serviceRadiusKm);
     setSelectedTagIds(listing.tags.map((t) => t.tagId));
-    setExistingImages(listing.media ?? []);
+    setExistingImages(listing.media);
   }, [listing]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -356,6 +341,42 @@ export function EditListing({
     );
   }
 
+  if (previewing && listing) {
+    return (
+      <ListingDetailPage
+        listing={listing}
+        loading={false}
+        error={null}
+        description={
+          easyRead && listing.easyDescription
+            ? listing.easyDescription
+            : listing.description
+        }
+        availableToday={availableToday}
+        nextAvailableDate={nextAvailableDate}
+        otherListings={otherListings.filter(
+          (item) => item.listingId !== listing.listingId,
+        )}
+        onBookNow={() => {}}
+        banner={
+          <div className="flex items-center justify-between gap-4 bg-primary/10 text-primary px-4 sm:px-6 py-2 border-b border-primary/20">
+            <span className="text-small font-medium">
+              Previewing — this is what customers will see
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setPreviewing(false)}
+            >
+              Back to editing
+            </Button>
+          </div>
+        }
+      />
+    );
+  }
+
   return (
     <>
       <Navbar />
@@ -390,19 +411,14 @@ export function EditListing({
               )}
             </div>
             <div className="flex items-center gap-3">
-              <span aria-live="polite" className="text-small text-muted">
-                {submitting ? "Saving…" : ""}
-              </span>
-              {isEditable && (
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="md"
-                  loading={submitting}
-                >
-                  Save
-                </Button>
-              )}
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                onClick={() => setPreviewing(true)}
+              >
+                Preview
+              </Button>
               {status === "DRAFT" && (
                 <Button
                   type="button"
@@ -528,7 +544,7 @@ export function EditListing({
                       className="relative w-36 h-36 rounded-xl overflow-hidden border border-border/30 shrink-0"
                     >
                       <img
-                        src={img.url}
+                        src={mediaUrl(img.url)}
                         alt={
                           (img.altTextStatus == null ||
                             img.altTextStatus === "COMPLETED") &&
@@ -744,18 +760,33 @@ export function EditListing({
             )}
           </div>
 
-          {/* Danger zone */}
+          {/* Save & danger zone */}
           {!isDeleted && (
             <div className="border-t border-border/30 pt-6">
               {!deleteConfirming ? (
-                <Button
-                  type="button"
-                  variant="accent"
-                  size="md"
-                  onClick={() => setDeleteConfirming(true)}
-                >
-                  Delete service
-                </Button>
+                <div className="flex items-center gap-3">
+                  {isEditable && (
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="md"
+                      loading={submitting}
+                    >
+                      Save
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="accent"
+                    size="md"
+                    onClick={() => setDeleteConfirming(true)}
+                  >
+                    Delete service
+                  </Button>
+                  <span aria-live="polite" className="text-small text-muted">
+                    {submitting ? "Saving…" : ""}
+                  </span>
+                </div>
               ) : (
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-in">
                   <p role="alert" className="text-small text-foreground">

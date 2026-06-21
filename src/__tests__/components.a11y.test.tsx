@@ -27,7 +27,8 @@ import { CalendarGrid } from "../components/CalendarGrid";
 import { CalendarPage } from "../components/CalendarPage";
 import { CategoryCard } from "../components/CategoryCard";
 import { CreateListing } from "../components/CreateListing";
-import { EditListing, type EditListingDetails } from "../components/EditListing";
+import { EditListing } from "../components/EditListing";
+import type { ListingDetails } from "../api/model";
 import { ExceptionModal } from "../components/ExceptionModal";
 import { FilterBar } from "../components/FilterBar";
 import { Home } from "../components/Home";
@@ -86,6 +87,7 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("../api/mira", () => ({
   getServiceTags: vi.fn(),
   getPublicListings: vi.fn(),
+  logout: vi.fn().mockResolvedValue({ status: 204, data: undefined }),
 }));
 
 const mockGetServiceTags = vi.mocked(getServiceTags);
@@ -148,7 +150,7 @@ const listing: MyListingSummary = {
   price: 24,
   publicationStatus: "ACTIVE",
   moderationStatus: "VISIBLE",
-  author: { name: "Mira", surname: "Muster" },
+  author: { userId: "user-1", name: "Mira", surname: "Muster" },
   publishedAt: "2026-06-01T12:00:00Z",
   location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 10 },
   primaryMedia: {
@@ -206,20 +208,31 @@ const serviceTags = [
   { tagId: "tag-2", name: "Accessible", isBarrierefrei: true, isActive: true },
 ];
 
-const editListing: EditListingDetails = {
+const editListing: ListingDetails = {
   listingId: "listing-1",
   title: "Grocery pickup",
   description: "Weekly pickup and drop-off support.",
   price: 24,
   publicationStatus: "ACTIVE",
+  moderationStatus: "VISIBLE",
+  author: { userId: "user-1", name: "Mira", surname: "Muster" },
+  publishedAt: "2026-01-01T00:00:00Z",
+  createdAt: "2026-01-01T00:00:00Z",
+  updatedAt: "2026-01-01T00:00:00Z",
   tags: serviceTags,
   location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 20 },
   media: [
     {
       mediaId: "media-1",
+      position: 0,
       url: "/listing.jpg",
       altText: "Shopping bags",
       altTextStatus: "COMPLETED",
+      mimeType: "image/jpeg",
+      size: 1000,
+      width: 800,
+      height: 600,
+      createdAt: "2026-01-01T00:00:00Z",
     },
   ],
 };
@@ -385,7 +398,9 @@ const componentCases: Array<[string, ReactElement]> = [
       varified
       label="Shopping help"
       description="Help with weekly shopping."
-      tags={[{ tagId: "errands", name: "Errands", isBarrierefrei: false }]}
+      tags={[
+        { tagId: "errands", name: "Errands", isBarrierefrei: false, isActive: true },
+      ]}
       hourRate={20}
     />,
   ],
@@ -647,7 +662,7 @@ describe("component accessibility", () => {
         description: "Weekly pickup and drop-off support.",
         easyDescriptionStatus: "COMPLETED",
         price: 24,
-        author: { name: "Mira", surname: "Muster" },
+        author: { userId: "user-1", name: "Mira", surname: "Muster" },
         publishedAt: "2026-06-01T12:00:00.000Z",
         location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 5 },
       } as PublicListingSummary,
@@ -2603,7 +2618,7 @@ describe("component accessibility", () => {
       configurable: true,
       value: scrollBy,
     });
-    const { container } = renderHome();
+    const { container } = renderHome([]);
 
     await act(async () => {
       fireEvent.submit(screen.getByRole("search"));
@@ -2688,9 +2703,15 @@ describe("component accessibility", () => {
           media: [
             {
               mediaId: "media-1",
+              position: 0,
               url: "/listing.jpg",
               altText: null,
               altTextStatus: "PROCESSING",
+              mimeType: "image/jpeg",
+              size: 1000,
+              width: 800,
+              height: 600,
+              createdAt: "2026-01-01T00:00:00Z",
             },
           ],
         }}

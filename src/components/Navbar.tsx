@@ -9,6 +9,7 @@ import { Button } from "./Button";
 import { AccessibilityPanel } from "./AccessibilityPanel";
 import { UserMenu } from "./UserMenu";
 import { useAuthStore } from "../stores/auth";
+import { mediaUrl } from "../lib/mediaUrl";
 
 const NAV_LINKS = [
   { label: 'Browse Services', to: '/browse-services' },
@@ -21,7 +22,7 @@ export function Navbar() {
   const firstName = user?.firstName ?? "";
   const lastName = user?.lastName ?? "";
   const isProvider = user?.userType === "PROVIDER";
-  const pictureUrl = user?.profileMedia?.url ?? undefined;
+  const pictureUrl = user?.profileMedia ? mediaUrl(user.profileMedia.url) : undefined;
 
   function handleGoogleLogin() {
     window.location.href = "http://localhost:8081/auth/login/google";

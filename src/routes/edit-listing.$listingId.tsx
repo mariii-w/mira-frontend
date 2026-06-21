@@ -2,10 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   EditListing,
-  type EditListingDetails,
   type EditListingFormValues,
-  type EditListingImage,
-  type EditListingServiceTag,
   type EditListingStatusAction,
 } from "../components/EditListing";
 import {
@@ -13,6 +10,8 @@ import {
   deleteListingMedia,
   getServiceTags,
   getAuthorListing,
+  getAvailability,
+  getPublicProfileListings,
   updateListing,
   uploadListingMedia,
   pauseListing,
@@ -20,7 +19,13 @@ import {
   resumeListing,
 } from "../api/mira";
 import { useAuthStore } from "../stores/auth";
-import type { ProblemDetailsResponse } from "../api/model";
+import type {
+  ListingDetails,
+  ListingMediaPreview,
+  ProblemDetailsResponse,
+  PublicListingSummary,
+  ServiceTag,
+} from "../api/model";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/edit-listing/$listingId")({
@@ -31,11 +36,15 @@ function getProblemDetail(data: unknown): string | undefined {
   return (data as Partial<ProblemDetailsResponse> | null)?.detail;
 }
 
-function toEditListingDetails(listing: EditListingDetails): EditListingDetails {
-  return {
-    ...listing,
-    media: listing.media ?? [],
-  };
+function toLocalDate(date: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`;
+}
+
+function addDays(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
 }
 
 export function EditListingPage() {
@@ -43,14 +52,15 @@ export function EditListingPage() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const userId = user?.userId;
-  const [listing, setListing] = useState<EditListingDetails | null>(null);
+  const [listing, setListing] = useState<ListingDetails | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [availableTags, setAvailableTags] = useState<EditListingServiceTag[]>(
-    [],
-  );
+  const [availableTags, setAvailableTags] = useState<ServiceTag[]>([]);
   const [tagsLoading, setTagsLoading] = useState(true);
+  const [nextAvailableDate, setNextAvailableDate] = useState<string | undefined>();
+  const [availableToday, setAvailableToday] = useState(false);
+  const [otherListings, setOtherListings] = useState<PublicListingSummary[]>([]);
 
-  const refreshListing = useCallback(async (): Promise<EditListingDetails> => {
+  const refreshListing = useCallback(async (): Promise<ListingDetails> => {
     if (!userId) throw new Error("You must be signed in to edit this listing.");
 
     const response = await getAuthorListing(
@@ -64,15 +74,15 @@ export function EditListingPage() {
       );
     }
 
-    return toEditListingDetails(response.data);
+    return response.data;
   }, [listingId, userId]);
 
   const handleRefreshMedia = useCallback(async (): Promise<
-    EditListingImage[]
+    ListingMediaPreview[]
   > => {
     const nextListing = await refreshListing();
     setListing(nextListing);
-    return nextListing.media ?? [];
+    return nextListing.media;
   }, [refreshListing]);
 
   useEffect(() => {
@@ -95,6 +105,59 @@ export function EditListingPage() {
       cancelled = true;
     };
   }, [refreshListing, userId]);
+
+  useEffect(() => {
+    if (!listing) return;
+    let cancelled = false;
+
+    async function loadAvailability() {
+      const today = toLocalDate(new Date());
+      const response = await getAvailability(listing!.listingId, {
+        from: today,
+        to: toLocalDate(addDays(new Date(), 29)),
+      });
+
+      if (cancelled || response.status !== 200) return;
+
+      const nextAvailableDay = [...response.data.days]
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .find((day) => day.freeWindows.length > 0);
+
+      setAvailableToday(nextAvailableDay?.date === today);
+      setNextAvailableDate(nextAvailableDay?.date);
+    }
+
+    void loadAvailability();
+
+    return () => {
+      cancelled = true;
+    };
+    // Depend only on listingId, not the whole `listing` object — it gets a
+    // new reference on every media-polling refresh, which would refetch
+    // availability needlessly.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listing?.listingId]);
+
+  useEffect(() => {
+    if (!listing) return;
+    let cancelled = false;
+
+    async function loadOtherListings() {
+      const response = await getPublicProfileListings(listing!.author.userId, {
+        limit: 5,
+      });
+
+      if (cancelled) return;
+      setOtherListings(response.status === 200 ? response.data.items : []);
+    }
+
+    void loadOtherListings();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listing?.listingId, listing?.author.userId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -208,6 +271,9 @@ export function EditListingPage() {
       loadError={loadError}
       availableTags={availableTags}
       tagsLoading={tagsLoading}
+      availableToday={availableToday}
+      nextAvailableDate={nextAvailableDate}
+      otherListings={otherListings}
       onBack={() => navigate({ to: "/my-listings" })}
       onSubmit={handleSubmit}
       onDelete={handleDelete}
