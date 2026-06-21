@@ -9,6 +9,7 @@ import { Button } from './Button'
 import { AccessibilityPanel } from './AccessibilityPanel'
 import { UserMenu } from './UserMenu'
 import { useAuthStore } from '../stores/auth'
+import { profileMediaUrl } from '../lib/media'
 
 const NAV_LINKS = [
   { label: 'Browse Services', to: '/' },
@@ -21,7 +22,7 @@ export function Navbar() {
   const firstName = user?.firstName ?? ''
   const lastName = user?.lastName ?? ''
   const isProvider = user?.userType === 'PROVIDER'
-  const pictureUrl = user?.profileMedia?.url ?? undefined
+  const pictureUrl = profileMediaUrl(user?.profileMedia)
 
   console.log('User ID:', user?.userId)
 
