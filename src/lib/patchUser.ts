@@ -132,8 +132,10 @@ export async function uploadProfilePhoto(file: File): Promise<void> {
     } satisfies UploadPhotoError;
   }
 
-  const refresh = await getPrivateUserProfile(user.userId);
-  if (refresh.status === 200) {
-    useAuthStore.getState().setUser(refresh.data);
+  const refresh = await authFetch(`/v1/users/${user.userId}`)
+  if (refresh.ok) {
+    const updatedUser = await refresh.json()
+    useAuthStore.getState().setUser(updatedUser)
   }
+  queryClient.invalidateQueries({ queryKey: ['user', user.userId] })
 }
