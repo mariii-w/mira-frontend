@@ -175,4 +175,31 @@ describe('<ListingDetailPage />', () => {
     )
     expect(screen.queryByText(/Other services from/)).not.toBeInTheDocument()
   })
+
+  it('renders the banner under the navbar when provided', () => {
+    render(
+      <ListingDetailPage
+        listing={baseListing}
+        loading={false}
+        otherListings={[]}
+        onBookNow={vi.fn()}
+        banner={<div>Previewing — this is what customers will see</div>}
+      />,
+    )
+    expect(
+      screen.getByText('Previewing — this is what customers will see'),
+    ).toBeInTheDocument()
+  })
+
+  it('does not render a banner by default', () => {
+    render(
+      <ListingDetailPage
+        listing={baseListing}
+        loading={false}
+        otherListings={[]}
+        onBookNow={vi.fn()}
+      />,
+    )
+    expect(screen.queryByText(/Previewing/)).not.toBeInTheDocument()
+  })
 })
