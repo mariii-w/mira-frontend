@@ -56,6 +56,7 @@ Pflegen Sie das Protokoll möglichst zeitnah, damit die Git-Historie die Entwick
 | 2026-05-19 | Marija Voloder | ChatGPT | Nach dem `onError`-Muster gefragt, um bei einem fehlerhaften Profilbild-URL auf Initialen zurückzufallen. | Muster übernommen und in die Avatar-Komponente eingebunden. |
 | 2026-05-19 | Marija Voloder | Claude | Gefragt, wie das Tagline-Feld nur für Anbieter angezeigt und als Pflichtfeld markiert wird, für Kunden aber ausgeblendet bleibt. | Logik als Referenz genutzt; im About-Schritt anhand des Benutzertyps aus dem Auth-Store eingebunden. |
 | 2026-05-19 | Marija Voloder | ChatGPT | Nach dem Muster für einen Live-Zeichenzähler in einem Textarea-Feld mit 2000-Zeichen-Limit gefragt. | Muster als Referenz genutzt; im Bio-Feld des About-Schritts eingebunden. |
+| 2026-06-21 | Marija Voloder | Claude | Als Sparringspartner beim Aufbau der Profil-bearbeiten-Seite genutzt: eigene Ideen zu den Feldern, dem Popup-Verhalten und der Layout-Skizze durchgesprochen, außerdem um Hilfe gebeten, um herauszufinden, warum die Seite nach dem Verknüpfen des Buttons nicht aufging. | Entscheidungen zu Feldauswahl und Layout selbst getroffen, die Seite über mehrere Durchgänge geschrieben und angepasst und nur übernommen, was meiner Vorstellung entsprach. Alles gegen die bestehenden Backend-Routen und Validierungsregeln geprüft, bevor es übernommen wurde. Ergebnis im Browser getestet und erst nach Korrektheit committet. |
 
 ## Optionale ergänzende Hinweise
 
