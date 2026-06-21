@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from '../../components/Button'
 import { AvatarIcon } from '../../components/AvatarIcon'
 import { useAuthStore } from '../../stores/auth'
+import { profileMediaUrl } from '../../lib/media'
 
 export const Route = createFileRoute('/register/done')({
   component: RegisterDone,
@@ -19,9 +20,9 @@ function RegisterDone() {
 
   return (
     <section className="flex flex-col items-center justify-center gap-6 py-12 text-center" aria-labelledby="register-step-heading">
-      {user?.profileMedia?.url ? (
+      {user?.profileMedia ? (
         <img
-          src={user.profileMedia.url}
+          src={profileMediaUrl(user.profileMedia)}
           alt="Your profile photo"
           className="h-[120px] w-[120px] rounded-full object-cover border-2 border-border"
         />
@@ -29,7 +30,6 @@ function RegisterDone() {
         <AvatarIcon
           firstName={user?.firstName ?? ''}
           lastName={user?.lastName ?? ''}
-          picture={user?.profileMedia?.url ?? undefined}
           size={120}
         />
       )}
