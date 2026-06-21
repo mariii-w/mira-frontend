@@ -116,4 +116,5 @@ export async function uploadProfilePhoto(file: File): Promise<void> {
     const updatedUser = await refresh.json()
     useAuthStore.getState().setUser(updatedUser)
   }
+  queryClient.invalidateQueries({ queryKey: ['user', user.userId] })
 }
