@@ -13,48 +13,11 @@ import { Pagination } from '../../components/Pagination'
 import { FilterDrawer } from '../../components/FilterDrawer'
 import { useAccessibilityStore } from '../../stores/accessibility'
 import { getPublicListings, getServiceTags } from '../../api/mira'
-import type { GetPublicListingsParams } from '../../api/model'
-
-// Types
-
-type ServiceTag = {
-  tagId: string
-  name: string
-  isBarrierefrei: boolean
-  isActive: boolean
-}
-
-type ListingMediaItem = {
-  mediaId: string
-  position: number
-  url: string
-  altText: string | null
-  altTextStatus: string
-  mimeType: string
-  size: number
-  width: number | null
-  height: number | null
-  createdAt: string
-}
-
-type PublicListingSummary = {
-  listingId: string
-  tags: ServiceTag[]
-  title: string
-  description: string | null
-  easyDescription: string | null
-  easyDescriptionStatus: string | null
-  price: number
-  author: { name: string; surname: string }
-  publishedAt: string | null
-  location: { city: string; postalCode: string; serviceRadiusKm: number }
-  primaryMedia: ListingMediaItem | null
-}
-
-type PublicListingCollectionResponse = {
-  items: PublicListingSummary[]
-  cursor: { limit: number; next: string | null }
-}
+import type {
+  GetPublicListingsParams,
+  PublicListingCollectionResponse,
+  ServiceTag,
+} from '../../api/model'
 
 // SearchParams
 
@@ -97,13 +60,13 @@ function toListingsParams(params: SearchParams): GetPublicListingsParams {
 async function fetchPublicListings(params: SearchParams): Promise<PublicListingCollectionResponse> {
   const response = await getPublicListings(toListingsParams(params))
   if (response.status !== 200) throw new Error('Listings could not be loaded.')
-  return response.data as unknown as PublicListingCollectionResponse
+  return response.data
 }
 
 async function fetchServiceTags(): Promise<ServiceTag[]> {
   const response = await getServiceTags()
   if (response.status !== 200) throw new Error('Tags could not be loaded.')
-  return (response.data ?? []) as unknown as ServiceTag[]
+  return response.data ?? []
 }
 
 // Search Page
@@ -133,7 +96,7 @@ export function BrowseServicesPage() {
   })
 
   const listings = listingsQuery.data?.items ?? []
-  const nextCursor = listingsQuery.data?.cursor.next ?? null
+  const nextCursor = listingsQuery.data?.cursor?.next ?? null
   const allTags: ServiceTagOption[] = (tagsQuery.data ?? [])
     .filter(tag => tag.isActive)
     .map(tag => ({ tagId: tag.tagId, name: tag.name }))

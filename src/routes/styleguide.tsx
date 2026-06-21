@@ -17,7 +17,6 @@ import { Input } from '../components/Input.tsx';
 import { Textarea } from '../components/Textarea.tsx';
 import { AccessibilityPanel } from '../components/AccessibilityPanel.tsx';
 import { CategoryCard } from '../components/CategoryCard.tsx';
-import { ProviderCard } from '../components/ProviderCard';
 import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
 import { AvatarIcon } from '../components/AvatarIcon.tsx';
@@ -374,44 +373,6 @@ function Styleguide() {
         </div>
       </section>
 
-     <section className="flex flex-col gap-6">
-        <h2>ProviderCard</h2>
-
-        <div className="flex flex-col gap-3">
-          <h3 className="text-small text-muted font-medium">Compact (Landing Page)</h3>
-          <div className="w-64">
-            <ProviderCard
-              variant="compact"
-              firstName="Patrick"
-              lastName='Smith'
-              distanceKm={1.2}
-              bio="Helps with Windows, printers, Wi-Fi setup and phone issues. Patient and friendly with first-time users and seniors."
-              pricePerHour={25}
-              avatar={<AvatarIcon firstName="Patrick" lastName="Smith" picture=''/*picture can be added here*/ />}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <h3 className="text-small text-muted font-medium">Full (Search Results)</h3>
-          <div className="w-96">
-            <ProviderCard
-              variant="full"
-              firstName="Lena"
-              lastName='Kross'
-              distanceKm={2.1}
-              bio="Software engineer by day, helper by evening. I diagnose slow PCs, clean out junk, set up email and cloud backup."
-              pricePerHour={18}
-              services={[
-                { name: 'Windows Help', price: 32 },
-                { name: 'Email Setup', price: 18 },
-                { name: 'Cloud Backup', price: 28 },
-              ]}
-              avatar={<AvatarIcon firstName="Lena" lastName="Kross" picture=''/*picture can be added here*//>}
-            />
-          </div>
-        </div>
-      </section>
 
       <section className="flex flex-col gap-3">
         <h2>Pagination</h2>
@@ -504,6 +465,28 @@ function Styleguide() {
               hourRate={20}
           />
         </div>
+
+        <h3 className="text-body font-bold">Service Card (compact)</h3>
+        <div className='w-64'>
+          <ServiceCard
+              variant='compact'
+              link='#'
+              pictureLink='./pic/ServiceExample1.png'
+              location={'München'}
+              providerFirstName={'Patrick'}
+              providerLastName={'Stock'}
+              varified={true}
+              label={'Laptop & Wi-Fi setup'}
+              description={'I help with Windows, macOS, printers, Wi-Fi, smart TVs and phone-to-laptop setups. Friendly with first-time users and seniors.'}
+              tags={[
+                { tagId: '1', name: 'Wi-Fi',       isBarrierefrei: false },
+                { tagId: '2', name: 'Windows',      isBarrierefrei: false },
+                { tagId: '3', name: 'Printers',     isBarrierefrei: false },
+                { tagId: '4', name: 'Barrierefrei', isBarrierefrei: true  },
+              ]}
+              hourRate={25}
+          />
+        </div>
       </section>
 
       <h2>Service User Toggle</h2>
@@ -593,4 +576,3 @@ function ValidatedInput({
     />
   )
 }
-
