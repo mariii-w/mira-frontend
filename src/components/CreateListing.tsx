@@ -197,10 +197,6 @@ export function CreateListing({
                   Service is being saved…
                 </span>
               )}
-              {/* TODO: implement listing preview */}
-              <Button type="button" variant="secondary" size="md">
-                Preview
-              </Button>
               <Button
                 type="submit"
                 variant="primary"
