@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
-import { Check, ClipboardPen, MapPin, Briefcase, Plus, Calendar, Mail, History } from 'lucide-react'
+import { Check, ClipboardPen, MapPin, Briefcase, Plus, Calendar, Mail } from 'lucide-react'
 import { useState } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
@@ -149,9 +149,6 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
                             </Button>
                             <Button variant="secondary" size="md" leadingIcon={<Mail />} onClick={() => setActiveTab('listings')}>
                                 <p className='font-bold'>Meine Buchungen</p>
-                            </Button>
-                            <Button variant="secondary" size="md" leadingIcon={<History />} onClick={() => setActiveTab('listings')}>
-                                <p className='font-bold'>Verlauf</p>
                             </Button>
                         </div>
                         <div className="w-full mx-auto h-px bg-border m-5" />
