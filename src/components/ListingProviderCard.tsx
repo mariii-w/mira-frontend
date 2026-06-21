@@ -1,7 +1,9 @@
+import type { CSSProperties } from "react";
 import { Check, MessageCircle } from "lucide-react";
 import { AvatarIcon } from "./AvatarIcon";
 import { Badge } from "./Badge";
 import { Button } from "./Button";
+import { cn } from "../lib/cn";
 import type { ServiceTag } from "../api/model";
 
 export interface ListingProviderCardProps {
@@ -10,8 +12,22 @@ export interface ListingProviderCardProps {
   price: number;
   city: string;
   availableToday?: boolean;
+  nextAvailableDate?: string;
   tags: ServiceTag[];
   onBookNow: () => void;
+  className?: string;
+  style?: CSSProperties;
+}
+
+function formatAvailability(availableToday?: boolean, nextAvailableDate?: string): string {
+  if (availableToday) return "Today";
+  if (!nextAvailableDate) return "See calendar";
+
+  return new Date(`${nextAvailableDate}T00:00:00`).toLocaleDateString("default", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
 }
 
 export function ListingProviderCard({
@@ -20,13 +36,22 @@ export function ListingProviderCard({
   price,
   city,
   availableToday,
+  nextAvailableDate,
   tags,
   onBookNow,
+  className,
+  style,
 }: ListingProviderCardProps) {
   const displayName = `${authorName} ${authorSurname.charAt(0)}.`;
 
   return (
-    <aside className="flex flex-col gap-5 bg-charcoal text-primary-foreground rounded-2xl p-6 h-fit">
+    <aside
+      className={cn(
+        "flex flex-col gap-5 bg-charcoal text-primary-foreground rounded-2xl p-6 h-fit",
+        className,
+      )}
+      style={style}
+    >
       <div className="flex flex-col items-center text-center gap-2">
         <AvatarIcon
           firstName={authorName}
@@ -68,7 +93,9 @@ export function ListingProviderCard({
         </div>
         <div className="flex justify-between">
           <dt className="text-primary-foreground/60">Availability</dt>
-          <dd className="font-medium">{availableToday ? "Today" : "See calendar"}</dd>
+          <dd className="font-medium">
+            {formatAvailability(availableToday, nextAvailableDate)}
+          </dd>
         </div>
       </dl>
 

@@ -1,11 +1,13 @@
 import { Link } from '@tanstack/react-router'
 import { Badge } from "./Badge"
 import { MapPin, Dot, ArrowRight } from 'lucide-react'
-import type { ServiceTag } from '../api/model'
+import type { AccessibilityGenerationStatus, ServiceTag } from '../api/model'
 
 interface ServiceCardProps{
     link: string
     pictureLink?: string
+    pictureAltText?: string | null
+    pictureAltTextStatus?: AccessibilityGenerationStatus
     location: string
     providerFirstName: string
     providerLastName: string
@@ -17,9 +19,11 @@ interface ServiceCardProps{
 }
 
 export function ServiceCard(
-    {link, 
-        pictureLink, 
-        location, 
+    {link,
+        pictureLink,
+        pictureAltText,
+        pictureAltTextStatus,
+        location,
         label, 
         description, 
         tags,
@@ -35,7 +39,11 @@ export function ServiceCard(
             <div className='flex flex-col lg:flex-row gap-3'>
                 {pictureLink && (
                     <div className='shrink-0 lg:self-stretch'>
-                        <img src={pictureLink} className="w-full h-48 lg:w-48 lg:h-full rounded-lg object-cover" alt="" />
+                        <img
+                            src={pictureLink}
+                            alt={pictureAltTextStatus === 'COMPLETED' && pictureAltText ? pictureAltText : label}
+                            className="w-full h-48 lg:w-48 lg:h-full rounded-lg object-cover"
+                        />
                     </div>
                 )}
                 <div className='grid gap-2 flex-1 min-w-0'>

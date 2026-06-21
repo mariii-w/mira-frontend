@@ -20,12 +20,20 @@ function toLocalDate(date: Date): string {
   return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`;
 }
 
+function addDays(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
 // eslint-disable-next-line react-refresh/only-export-components
 function ListingDetailRoute() {
   const { listingId } = Route.useParams();
   const navigate = useNavigate();
   const easyRead = useAccessibilityStore((s) => s.easyRead);
   const today = toLocalDate(new Date());
+  // 30-day lookahead, comfortably under the API's 31-day range limit.
+  const availabilityRangeEnd = toLocalDate(addDays(new Date(), 29));
 
   const {
     data: listing,
@@ -69,9 +77,15 @@ function ListingDetailRoute() {
   });
 
   const { data: availability } = useQuery({
-    queryKey: getGetAvailabilityQueryKey(listingId, { from: today, to: today }),
+    queryKey: getGetAvailabilityQueryKey(listingId, {
+      from: today,
+      to: availabilityRangeEnd,
+    }),
     queryFn: async () => {
-      const response = await getAvailability(listingId, { from: today, to: today });
+      const response = await getAvailability(listingId, {
+        from: today,
+        to: availabilityRangeEnd,
+      });
 
       if (response.status !== 200) {
         throw new Error(response.data.detail ?? "Failed to load availability.");
@@ -85,9 +99,11 @@ function ListingDetailRoute() {
     ? (easyRead && listing.easyDescription ? listing.easyDescription : listing.description)
     : undefined;
 
-  const availableToday = availability?.days.some(
-    (day) => day.date === today && day.freeWindows.length > 0,
-  );
+  const nextAvailableDay = [...(availability?.days ?? [])]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .find((day) => day.freeWindows.length > 0);
+  const availableToday = nextAvailableDay?.date === today;
+  const nextAvailableDate = nextAvailableDay?.date;
 
   const otherListings = (otherListingsData?.items ?? []).filter(
     (item) => item.listingId !== listingId,
@@ -100,6 +116,7 @@ function ListingDetailRoute() {
       error={error ? (error as Error).message : null}
       description={description ?? undefined}
       availableToday={availableToday}
+      nextAvailableDate={nextAvailableDate}
       otherListings={otherListings}
       onBookNow={() =>
         navigate({ to: "/listings/$listingId/book", params: { listingId } })

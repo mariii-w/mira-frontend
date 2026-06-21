@@ -404,6 +404,8 @@ export function BrowseServicesPage() {
                       <ServiceCard
                         link={`/listings/${listing.listingId}`}
                         pictureLink={listing.primaryMedia ? mediaUrl(listing.primaryMedia.url) : undefined}
+                        pictureAltText={listing.primaryMedia?.altText}
+                        pictureAltTextStatus={listing.primaryMedia?.altTextStatus}
                         location={listing.location.city}
                         providerFirstName={listing.author.name}
                         providerLastName={listing.author.surname}

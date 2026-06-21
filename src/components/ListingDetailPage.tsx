@@ -12,6 +12,7 @@ export interface ListingDetailPageProps {
   error?: string | null;
   description?: string;
   availableToday?: boolean;
+  nextAvailableDate?: string;
   otherListings: PublicListingSummary[];
   onBookNow: () => void;
 }
@@ -22,6 +23,7 @@ export function ListingDetailPage({
   error,
   description,
   availableToday,
+  nextAvailableDate,
   otherListings,
   onBookNow,
 }: ListingDetailPageProps) {
@@ -55,7 +57,7 @@ export function ListingDetailPage({
       <Navbar />
       <main id="main-content" className="max-w-7xl mx-auto px-6 py-8">
         <Breadcrumb
-          className="mb-4"
+          className="mb-4 animate-fade-in-up"
           links={[
             { name: "Home", href: "/" },
             { name: "Services", href: "/browse-services" },
@@ -63,22 +65,29 @@ export function ListingDetailPage({
           ]}
         />
 
-        <h1 className="text-h1 font-heading font-bold text-foreground mb-6">
+        <h1
+          className="text-h1 font-heading font-bold text-foreground mb-6 animate-fade-in-up"
+          style={{ animationDelay: "60ms" }}
+        >
           {listing.title}
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
-          <div className="flex flex-col gap-6 min-w-0">
+          <div
+            className="flex flex-col gap-6 min-w-0 animate-fade-in-up"
+            style={{ animationDelay: "120ms" }}
+          >
             {activeMedia && (
               <div className="flex flex-col gap-3">
                 <img
+                  key={activeMedia.mediaId}
                   src={mediaUrl(activeMedia.url)}
                   alt={
                     activeMedia.altTextStatus === "COMPLETED" && activeMedia.altText
                       ? activeMedia.altText
                       : listing.title
                   }
-                  className="w-full h-[28rem] object-cover rounded-2xl"
+                  className="w-full h-[28rem] object-cover rounded-2xl animate-fade-in"
                 />
                 {media.length > 1 && (
                   <div className="flex gap-3" role="list" aria-label="Listing photos">
@@ -90,7 +99,8 @@ export function ListingDetailPage({
                           aria-label={`Show photo ${index + 1}`}
                           aria-pressed={index === activeMediaIndex}
                           className={[
-                            "w-20 h-20 rounded-lg overflow-hidden shrink-0 border-2 transition-colors",
+                            "w-20 h-20 rounded-lg overflow-hidden shrink-0 border-2 transition-all duration-150",
+                            "hover:scale-105 active:scale-95",
                             index === activeMediaIndex
                               ? "border-primary"
                               : "border-transparent",
@@ -127,19 +137,25 @@ export function ListingDetailPage({
                   Other services from {listing.author.name}
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {otherListings.map((item) => (
+                  {otherListings.map((item, index) => (
                     <Link
                       key={item.listingId}
                       to="/listings/$listingId"
                       params={{ listingId: item.listingId }}
-                      className="flex flex-col gap-2"
+                      className="group flex flex-col gap-2 animate-fade-in-up"
+                      style={{ animationDelay: `${180 + Math.min(index * 40, 200)}ms` }}
                     >
                       <div className="aspect-square rounded-xl overflow-hidden bg-linen">
                         {item.primaryMedia && (
                           <img
                             src={mediaUrl(item.primaryMedia.url)}
-                            alt=""
-                            className="w-full h-full object-cover"
+                            alt={
+                              item.primaryMedia.altTextStatus === "COMPLETED" &&
+                              item.primaryMedia.altText
+                                ? item.primaryMedia.altText
+                                : item.title
+                            }
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                           />
                         )}
                       </div>
@@ -160,8 +176,11 @@ export function ListingDetailPage({
             price={listing.price}
             city={listing.location.city}
             availableToday={availableToday}
+            nextAvailableDate={nextAvailableDate}
             tags={listing.tags}
             onBookNow={onBookNow}
+            className="animate-fade-in-up"
+            style={{ animationDelay: "180ms" }}
           />
         </div>
       </main>
