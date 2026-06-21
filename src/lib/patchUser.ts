@@ -7,7 +7,7 @@ import type {
   PatchUserProfileRequest,
   ProblemDetailsResponse,
 } from "../api/model";
-import { useAuthStore } from "../stores/auth";
+import { useAuthStore, queryClient } from "../stores/auth";
 
 export type UserType = "CUSTOMER" | "PROVIDER";
 export type AccessibilityPreference = "EASY_LANGUAGE" | "REDUCED_MOTION";
@@ -90,6 +90,7 @@ export async function patchUser(payload: PatchUserPayload): Promise<void> {
   }
 
   useAuthStore.getState().setUser(res.data);
+  queryClient.invalidateQueries({ queryKey: ['user', user.userId] })
 }
 
 export async function uploadProfilePhoto(file: File): Promise<void> {
