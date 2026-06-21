@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Navbar } from "./Navbar";
 import { Breadcrumb } from "./BreadCrumb";
@@ -15,6 +15,7 @@ export interface ListingDetailPageProps {
   nextAvailableDate?: string;
   otherListings: PublicListingSummary[];
   onBookNow: () => void;
+  banner?: ReactNode;
 }
 
 export function ListingDetailPage({
@@ -26,6 +27,7 @@ export function ListingDetailPage({
   nextAvailableDate,
   otherListings,
   onBookNow,
+  banner,
 }: ListingDetailPageProps) {
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
 
@@ -33,6 +35,7 @@ export function ListingDetailPage({
     return (
       <div className="min-h-dvh bg-background">
         <Navbar />
+        {banner}
         <p className="max-w-7xl mx-auto px-6 py-16 text-muted">Loading…</p>
       </div>
     );
@@ -42,6 +45,7 @@ export function ListingDetailPage({
     return (
       <div className="min-h-dvh bg-background">
         <Navbar />
+        {banner}
         <p className="max-w-7xl mx-auto px-6 py-16 text-destructive" role="alert">
           {error ?? "Listing not found."}
         </p>
@@ -55,6 +59,7 @@ export function ListingDetailPage({
   return (
     <div className="min-h-dvh bg-background">
       <Navbar />
+      {banner}
       <main id="main-content" className="max-w-7xl mx-auto px-6 py-8">
         <Breadcrumb
           className="mb-4 animate-fade-in-up"

@@ -13,12 +13,15 @@ import { Label } from "./Label";
 import { Textarea } from "./Textarea";
 import { Slider } from "./Slider";
 import { MultiSelect } from "./MultiSelect";
+import { ListingDetailPage } from "./ListingDetailPage";
 import { mediaUrl } from "../lib/mediaUrl";
+import { useAccessibilityStore } from "../stores/accessibility";
 import type { PublicationStatus } from "./MyListingCard";
 import type {
   ListingDetails,
   ListingLocationRequest,
   ListingMediaPreview,
+  PublicListingSummary,
   ServiceTag,
 } from "../api/model";
 
@@ -38,6 +41,9 @@ interface EditListingProps {
   loadError: string | null;
   availableTags: ServiceTag[];
   tagsLoading: boolean;
+  availableToday?: boolean;
+  nextAvailableDate?: string;
+  otherListings?: PublicListingSummary[];
   onBack: () => void | Promise<void>;
   onSubmit: (values: EditListingFormValues) => Promise<void>;
   onDelete: () => Promise<void>;
@@ -97,6 +103,9 @@ export function EditListing({
   loadError,
   availableTags,
   tagsLoading,
+  availableToday,
+  nextAvailableDate,
+  otherListings = [],
   onBack,
   onSubmit,
   onDelete,
@@ -131,8 +140,10 @@ export function EditListing({
   const [serverError, setServerError] = useState<string | null>(null);
   const [actionSubmitting, setActionSubmitting] = useState(false);
   const [deleteConfirming, setDeleteConfirming] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const easyRead = useAccessibilityStore((s) => s.easyRead);
 
   const hasVlmPending = existingImages.some(
     (img) =>
@@ -330,6 +341,42 @@ export function EditListing({
     );
   }
 
+  if (previewing && listing) {
+    return (
+      <ListingDetailPage
+        listing={listing}
+        loading={false}
+        error={null}
+        description={
+          easyRead && listing.easyDescription
+            ? listing.easyDescription
+            : listing.description
+        }
+        availableToday={availableToday}
+        nextAvailableDate={nextAvailableDate}
+        otherListings={otherListings.filter(
+          (item) => item.listingId !== listing.listingId,
+        )}
+        onBookNow={() => {}}
+        banner={
+          <div className="flex items-center justify-between gap-4 bg-primary/10 text-primary px-4 sm:px-6 py-2 border-b border-primary/20">
+            <span className="text-small font-medium">
+              Previewing — this is what customers will see
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setPreviewing(false)}
+            >
+              Back to editing
+            </Button>
+          </div>
+        }
+      />
+    );
+  }
+
   return (
     <>
       <Navbar />
@@ -364,19 +411,14 @@ export function EditListing({
               )}
             </div>
             <div className="flex items-center gap-3">
-              <span aria-live="polite" className="text-small text-muted">
-                {submitting ? "Saving…" : ""}
-              </span>
-              {isEditable && (
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="md"
-                  loading={submitting}
-                >
-                  Save
-                </Button>
-              )}
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                onClick={() => setPreviewing(true)}
+              >
+                Preview
+              </Button>
               {status === "DRAFT" && (
                 <Button
                   type="button"
@@ -718,18 +760,33 @@ export function EditListing({
             )}
           </div>
 
-          {/* Danger zone */}
+          {/* Save & danger zone */}
           {!isDeleted && (
             <div className="border-t border-border/30 pt-6">
               {!deleteConfirming ? (
-                <Button
-                  type="button"
-                  variant="accent"
-                  size="md"
-                  onClick={() => setDeleteConfirming(true)}
-                >
-                  Delete service
-                </Button>
+                <div className="flex items-center gap-3">
+                  {isEditable && (
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="md"
+                      loading={submitting}
+                    >
+                      Save
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="accent"
+                    size="md"
+                    onClick={() => setDeleteConfirming(true)}
+                  >
+                    Delete service
+                  </Button>
+                  <span aria-live="polite" className="text-small text-muted">
+                    {submitting ? "Saving…" : ""}
+                  </span>
+                </div>
               ) : (
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-in">
                   <p role="alert" className="text-small text-foreground">
