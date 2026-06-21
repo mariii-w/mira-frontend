@@ -17,6 +17,7 @@ import { useAccessibilityStore } from "../stores/accessibility";
 import { useAuthStore } from "../stores/auth";
 import { getServiceTags, getPublicListings } from "../api/mira";
 import type { PublicListingSummary, ServiceTag } from "../api/model";
+import { mediaUrl } from "../lib/mediaUrl";
 
 async function fetchServiceTags(): Promise<ServiceTag[]> {
   const response = await getServiceTags();
@@ -129,7 +130,7 @@ function toListingCards(listings: PublicListingSummary[], easyRead: boolean) {
       : listing.description,
     tags: listing.tags,
     hourRate: listing.price,
-    pictureLink: listing.primaryMedia?.url,
+    pictureLink: listing.primaryMedia ? mediaUrl(listing.primaryMedia.url) : undefined,
   }));
 }
 

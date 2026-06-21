@@ -1,9 +1,11 @@
 import { Link } from '@tanstack/react-router'
 import { Badge } from "./Badge"
+import { AvatarIcon } from "./AvatarIcon"
 import { MapPin, Dot, ArrowRight } from 'lucide-react'
 import type { AccessibilityGenerationStatus, ServiceTag } from '../api/model'
 
 interface ServiceCardProps{
+    variant?: 'default' | 'compact'
     link: string
     pictureLink?: string
     pictureAltText?: string | null
@@ -19,21 +21,55 @@ interface ServiceCardProps{
 }
 
 export function ServiceCard(
-    {link,
+    {variant = 'default',
+        link,
         pictureLink,
         pictureAltText,
         pictureAltTextStatus,
         location,
-        label, 
-        description, 
+        label,
+        description,
         tags,
-        hourRate, 
+        hourRate,
         providerFirstName,
         providerLastName,
         varified
-    }: ServiceCardProps  
+    }: ServiceCardProps
 )
 {
+    if (variant === 'compact') {
+        return (
+            <div className="bg-linen rounded-2xl flex flex-col p-4 gap-3 border border-border w-full h-full">
+                <div className="flex items-center gap-3">
+                    <AvatarIcon firstName={providerFirstName} lastName={providerLastName} picture="" size={56} />
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-body font-bold text-foreground truncate">
+                            {providerFirstName} {providerLastName[0]}.
+                        </span>
+                        <span className="text-small text-muted truncate">
+                            {location}
+                            {varified && ' • Verified'}
+                        </span>
+                    </div>
+                </div>
+                <div className="border-t border-border" />
+                <h3 className="text-body font-bold text-foreground line-clamp-2">{label}</h3>
+                {description && (
+                    <p className="text-small text-foreground/80 line-clamp-3">{description}</p>
+                )}
+                <div className="mt-auto flex flex-col gap-2">
+                    <span className="self-end text-body font-bold text-primary">from {hourRate}€/hr</span>
+                    <Link
+                        to={link}
+                        className="relative inline-flex items-center justify-center font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 w-full px-4 text-body bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                    >
+                        View Listing
+                    </Link>
+                </div>
+            </div>
+        )
+    }
+
     return(
         <div className="bg-linen rounded-2xl flex flex-col p-3 gap-3 border border-border w-full">
             <div className='flex flex-col lg:flex-row gap-3'>
