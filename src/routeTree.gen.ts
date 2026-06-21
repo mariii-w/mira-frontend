@@ -21,6 +21,7 @@ import { Route as RegisterDoneRouteImport } from './routes/register/done'
 import { Route as RegisterAddressRouteImport } from './routes/register/address'
 import { Route as RegisterAboutRouteImport } from './routes/register/about'
 import { Route as ProfileUserIdRouteImport } from './routes/profile.$userId'
+import { Route as ProfileUserIdEditRouteImport } from './routes/profile.$userId.edit'
 
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
@@ -82,13 +83,18 @@ const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
   path: '/profile/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileUserIdEditRoute = ProfileUserIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => ProfileUserIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/register': typeof RegisterRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/styleguide': typeof StyleguideRoute
-  '/profile/$userId': typeof ProfileUserIdRoute
+  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -96,12 +102,13 @@ export interface FileRoutesByFullPath {
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
   '/register/': typeof RegisterIndexRoute
+  '/profile/$userId/edit': typeof ProfileUserIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/styleguide': typeof StyleguideRoute
-  '/profile/$userId': typeof ProfileUserIdRoute
+  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
   '/register': typeof RegisterIndexRoute
+  '/profile/$userId/edit': typeof ProfileUserIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,7 +124,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/styleguide': typeof StyleguideRoute
-  '/profile/$userId': typeof ProfileUserIdRoute
+  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
   '/register/': typeof RegisterIndexRoute
+  '/profile/$userId/edit': typeof ProfileUserIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/register/photo'
     | '/register/role'
     | '/register/'
+    | '/profile/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/register/photo'
     | '/register/role'
     | '/register'
+    | '/profile/$userId/edit'
   id:
     | '__root__'
     | '/'
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/register/photo'
     | '/register/role'
     | '/register/'
+    | '/profile/$userId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -174,7 +186,7 @@ export interface RootRouteChildren {
   RegisterRouteRoute: typeof RegisterRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   StyleguideRoute: typeof StyleguideRoute
-  ProfileUserIdRoute: typeof ProfileUserIdRoute
+  ProfileUserIdRoute: typeof ProfileUserIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -263,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/$userId/edit': {
+      id: '/profile/$userId/edit'
+      path: '/edit'
+      fullPath: '/profile/$userId/edit'
+      preLoaderRoute: typeof ProfileUserIdEditRouteImport
+      parentRoute: typeof ProfileUserIdRoute
+    }
   }
 }
 
@@ -290,12 +309,24 @@ const RegisterRouteRouteWithChildren = RegisterRouteRoute._addFileChildren(
   RegisterRouteRouteChildren,
 )
 
+interface ProfileUserIdRouteChildren {
+  ProfileUserIdEditRoute: typeof ProfileUserIdEditRoute
+}
+
+const ProfileUserIdRouteChildren: ProfileUserIdRouteChildren = {
+  ProfileUserIdEditRoute: ProfileUserIdEditRoute,
+}
+
+const ProfileUserIdRouteWithChildren = ProfileUserIdRoute._addFileChildren(
+  ProfileUserIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegisterRouteRoute: RegisterRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   StyleguideRoute: StyleguideRoute,
-  ProfileUserIdRoute: ProfileUserIdRoute,
+  ProfileUserIdRoute: ProfileUserIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
