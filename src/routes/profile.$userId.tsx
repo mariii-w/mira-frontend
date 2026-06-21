@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { Check, ClipboardPen, MapPin, Briefcase, Plus, Calendar, Mail, History } from 'lucide-react'
 import { useState } from 'react'
 import { Navbar } from '../components/Navbar'
@@ -29,6 +29,7 @@ function ProfilePage()  {
 
 function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
     const [, setActiveTab] = useState('account')
+    const navigate = useNavigate()
     const currentUser = useAuthStore((s) => s.user)
     const isOwner = currentUser?.userId === userId
     console.log(currentUser?.userId, isOwner)
@@ -111,7 +112,15 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
                                 <div className='flex flex-row gap-4 items-center'>
                                     <h1 className="text-3xl font-semibold">{userFirstName} {userLastName}</h1>
                                     {isProvider && isVerified? <p className="text-sm font-bold text-primary flex items-center gap-1"> <Check /> Verifiziert</p> : <p className="text-sm font-bold"></p>}
-                                    {isOwner && <Button size="md" trailingIcon={<ClipboardPen />}>Bearbeiten</Button>}
+                                    {isOwner && (
+                                        <Button
+                                            size="md"
+                                            trailingIcon={<ClipboardPen />}
+                                            onClick={() => navigate({ to: '/profile/$userId/edit', params: { userId } })}
+                                        >
+                                            Bearbeiten
+                                        </Button>
+                                    )}
                                 </div>
                                 <div>
                                     {isProvider? <p className="text-xl font-bold text-primary">Dienstleiter</p> : <p className="text-xl font-bold text-accent">Kunde</p>}
@@ -198,6 +207,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
                 </div>
             </section>
         </main>
-        </>     
+        <Outlet />
+        </>
     )
 }

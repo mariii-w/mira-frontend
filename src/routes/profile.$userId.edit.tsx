@@ -1,21 +1,15 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Camera, Check, X } from 'lucide-react'
 import * as Switch from '../components/Switch'
+import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { Label } from '../components/Label'
 import { Textarea } from '../components/Textarea'
 import { AvatarIcon } from '../components/AvatarIcon'
 import { useAuthStore } from '../stores/auth'
-import {
-  patchUser,
-  uploadProfilePhoto,
-  type PatchUserPayload,
-  type RegisterPatchError,
-  type UploadPhotoError,
-} from '../lib/patchUser'
-import { profileMediaUrl } from '../lib/media'
+import { patchUser, type PatchUserPayload, type RegisterPatchError } from '../lib/patchUser'
 
 export const Route = createFileRoute('/profile/$userId/edit')({
   component: EditProfilePage,
@@ -116,45 +110,6 @@ function EditProfilePage() {
   const [submitting, setSubmitting] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
 
-  const photoInputRef = useRef<HTMLInputElement>(null)
-  const [pendingPhoto, setPendingPhoto] = useState<{ file: File; previewUrl: string } | null>(null)
-  const [uploadingPhoto, setUploadingPhoto] = useState(false)
-  const [photoError, setPhotoError] = useState<string | null>(null)
-
-  function openPhotoPicker() {
-    photoInputRef.current?.click()
-  }
-
-  function handlePhotoSelected(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    e.target.value = '' // allow picking the same file again later
-    if (!file) return
-    setPhotoError(null)
-    setPendingPhoto({ file, previewUrl: URL.createObjectURL(file) })
-  }
-
-  function closePhotoPopup() {
-    if (uploadingPhoto) return
-    if (pendingPhoto) URL.revokeObjectURL(pendingPhoto.previewUrl)
-    setPendingPhoto(null)
-    setPhotoError(null)
-  }
-
-  async function handlePhotoSave() {
-    if (!pendingPhoto || uploadingPhoto) return
-    setUploadingPhoto(true)
-    setPhotoError(null)
-    try {
-      await uploadProfilePhoto(pendingPhoto.file)
-      URL.revokeObjectURL(pendingPhoto.previewUrl)
-      setPendingPhoto(null)
-    } catch (e) {
-      setPhotoError((e as UploadPhotoError).message)
-    } finally {
-      setUploadingPhoto(false)
-    }
-  }
-
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (submitting) return
@@ -218,6 +173,7 @@ function EditProfilePage() {
 
   return (
     <>
+      <Navbar />
       <main id="main-content">
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 p-4 overflow-y-auto"
@@ -247,23 +203,16 @@ function EditProfilePage() {
                     size={112}
                     firstName={currentUser.firstName ?? ''}
                     lastName={currentUser.lastName ?? ''}
-                    picture={profileMediaUrl(currentUser.profileMedia)}
+                    picture={currentUser.profileMedia?.url ?? undefined}
                   />
+                  {/* Click handler for photo upload lands in a follow-up commit */}
                   <button
                     type="button"
                     aria-label="Profilbild ändern"
-                    onClick={openPhotoPicker}
                     className="absolute -bottom-1 -right-3 inline-flex size-9 items-center justify-center rounded-full bg-charcoal text-cream border-2 border-linen"
                   >
                     <Camera size={18} />
                   </button>
-                  <input
-                    ref={photoInputRef}
-                    type="file"
-                    accept="image/png, image/jpeg"
-                    className="hidden"
-                    onChange={handlePhotoSelected}
-                  />
                 </div>
                 <span className="text-small font-medium text-foreground">bearbeiten</span>
               </div>
@@ -399,55 +348,6 @@ function EditProfilePage() {
           </form>
         </div>
       </main>
-
-      {pendingPhoto && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-charcoal/60 p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) closePhotoPopup()
-          }}
-        >
-          <div className="relative flex w-full max-w-sm flex-col gap-5 rounded-2xl bg-linen border border-border p-6 shadow-xl">
-            <button
-              type="button"
-              aria-label="Schließen"
-              onClick={closePhotoPopup}
-              disabled={uploadingPhoto}
-              className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-full text-foreground hover:bg-foreground/5 transition-colors duration-150 disabled:opacity-50"
-            >
-              <X size={20} />
-            </button>
-
-            <h2 className="font-heading text-xl font-bold text-foreground">Profilbild</h2>
-
-            <img
-              src={pendingPhoto.previewUrl}
-              alt="Vorschau des neuen Profilbilds"
-              className="size-48 self-center rounded-full object-cover border border-border"
-            />
-
-            {photoError && (
-              <p role="alert" className="text-small text-red-600">{photoError}</p>
-            )}
-
-            <div className="flex items-center justify-between pt-4 border-t border-border/30">
-              <Button type="button" variant="ghost" size="md" onClick={closePhotoPopup} disabled={uploadingPhoto}>
-                Abbrechen
-              </Button>
-              <Button
-                type="button"
-                variant="primary"
-                size="md"
-                loading={uploadingPhoto}
-                trailingIcon={<Check />}
-                onClick={handlePhotoSave}
-              >
-                Speichern
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   )
 }
