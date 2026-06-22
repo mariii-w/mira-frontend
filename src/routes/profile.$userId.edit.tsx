@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Camera, Check, X } from 'lucide-react'
 import * as Switch from '../components/Switch'
-import { Navbar } from '../components/Navbar'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { Label } from '../components/Label'
@@ -219,7 +218,6 @@ function EditProfilePage() {
 
   return (
     <>
-      <Navbar />
       <main id="main-content">
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 p-4 overflow-y-auto"

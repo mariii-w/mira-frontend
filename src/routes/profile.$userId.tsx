@@ -46,7 +46,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
     const isProviderType = user?.userType === 'PROVIDER' 
     isProvider = isProviderType
     
-    const { data: listingsResponse, isLoading: listingsLoading, error: listingsError } = useQuery({
+    const { data: listingsResponse} = useQuery({
         queryKey: ['listings', userId],
         queryFn: () => {
                 if(isOwner && isProviderType) return fetchUserPrivateListings(userId)
