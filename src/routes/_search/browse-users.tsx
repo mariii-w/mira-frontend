@@ -42,6 +42,7 @@ type BrowseUsersParams = z.infer<typeof browseUsersSchema>
 
 // Route
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute('/_search/browse-users')({
   validateSearch: browseUsersSchema,
   component: BrowseUsersPage,

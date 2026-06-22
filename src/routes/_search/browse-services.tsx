@@ -34,6 +34,7 @@ type SearchParams = z.infer<typeof searchSchema>
 
 // Route
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute('/_search/browse-services')({
   validateSearch: searchSchema,
   component: BrowseServicesPage,

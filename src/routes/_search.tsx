@@ -7,6 +7,7 @@ export const Route = createFileRoute('/_search')({
   component: SearchLayout,
 })
 
+// eslint-disable-next-line react-refresh/only-export-components
 function SearchLayout() {
   const navigate = useNavigate()
   const location = useRouterState({ select: (state) => state.location })
