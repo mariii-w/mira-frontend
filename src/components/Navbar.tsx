@@ -14,6 +14,7 @@ import { mediaUrl } from "../lib/mediaUrl";
 const COMMON_NAV_LINKS = [
   { label: 'Browse Services', to: '/browse-services' },
   { label: "Calendar", to: "/calendar" },
+  { label: "Chat", to: "/chat" },
 ] as const;
 
 export function Navbar() {
