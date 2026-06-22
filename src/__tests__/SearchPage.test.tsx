@@ -46,10 +46,6 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   }
 })
 
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
-
 // ─── Generated-client mock ───────────────────────────────────────────────────
 
 vi.mock('../api/mira', () => ({
