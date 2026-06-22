@@ -47,7 +47,7 @@ export function ServiceUserToggle({
       id={id}
       checked={checked}
       onCheckedChange={onCheckedChange}
-      className="relative inline-grid grid-cols-2 h-10 rounded-full bg-linen p-1 cursor-pointer"
+      className="relative inline-grid grid-cols-2 h-10 rounded-full bg-linen p-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
     >
       {/* Sliding pill */}
       <span

@@ -40,3 +40,12 @@ describe('<ServiceUserToggle /> entry slide', () => {
     expect(pill).toHaveClass('bg-primary')
   })
 })
+
+describe('<ServiceUserToggle /> focus styling', () => {
+  it('has a visible focus ring on the switch root', () => {
+    renderToggle(false)
+    const switchRoot = screen.getByRole('switch')
+    expect(switchRoot).toHaveClass('focus-visible:ring-2')
+    expect(switchRoot).toHaveClass('focus-visible:ring-primary')
+  })
+})
