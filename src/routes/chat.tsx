@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import {
   ArrowRight,
 } from 'lucide-react'
@@ -59,9 +59,36 @@ const DUMMY_MESSAGES: Record<string, ChatMessage[]> = {
 function Chat() {
     // First chat pre-selected
     const [selectedChatId, setSelectedChatId] = useState<string>(DUMMY_CHATS[0].id);
+    const [messagesByChat, setMessagesByChat] = useState<Record<string, ChatMessage[]>>(DUMMY_MESSAGES);
+    const [draft, setDraft] = useState("");
 
     const selectedChat = DUMMY_CHATS.find((c) => c.id === selectedChatId) ?? DUMMY_CHATS[0];
-    const messages = DUMMY_MESSAGES[selectedChatId] ?? [];
+    const messages = messagesByChat[selectedChatId] ?? [];
+
+    function handleSend() {
+        const text = draft.trim();
+        if (!text) return;
+
+        const newMessage: ChatMessage = {
+            id: `local-${Date.now()}`,
+            text,
+            self: true,
+            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
+
+        setMessagesByChat((prev) => ({
+            ...prev,
+            [selectedChatId]: [...(prev[selectedChatId] ?? []), newMessage],
+        }));
+        setDraft("");
+    }
+
+    function handleTextareaKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    }
 
     return (
         <>
@@ -101,8 +128,21 @@ function Chat() {
                                 </div>
                                 {/* Input Field */}
                                 <div className="flex flex-row w-auto h-30 mx-10 m-auto border-2 border-border rounded-3xl shadow-md bg-linen shadow-linen">
-                                    <Textarea className=" m-5 w-115 h-20 resize-none" placeholder="Send a message" aria-label="Type a message"/>
-                                    <Button className=" mt-auto mb-2 mx-auto">Send Message </Button>
+                                    <Textarea
+                                        className=" m-5 w-115 h-20 resize-none"
+                                        placeholder="Send a message"
+                                        aria-label="Type a message"
+                                        value={draft}
+                                        onChange={(e) => setDraft(e.target.value)}
+                                        onKeyDown={handleTextareaKeyDown}
+                                    />
+                                    <Button
+                                        className=" mt-auto mb-2 mx-auto"
+                                        onClick={handleSend}
+                                        disabled={!draft.trim()}
+                                    >
+                                        Send Message
+                                    </Button>
                                 </div>
                             </div>
                         </section>
