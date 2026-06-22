@@ -214,6 +214,48 @@ function Chat() {
         };
     }, []);
 
+    // Subscribe to the selected chat's topic; swap subscription on chat switch.
+    useEffect(() => {
+        let unsubscribe: (() => void) | undefined;
+        let cancelled = false;
+
+        subscribeToChat(selectedChatId, (incoming) => {
+            const newMessage: ChatMessage = {
+                id: `ws-${incoming.id}`,
+                text: extractMessageText(incoming.content),
+                self: incoming.sender.id === currentUserId,
+                timestamp: new Date(incoming.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            };
+
+            setMessagesByChat((prev) => ({
+                ...prev,
+                [incoming.cid]: [...(prev[incoming.cid] ?? []), newMessage],
+            }));
+        })
+            .then((unsub) => {
+                if (cancelled) {
+                    unsub();
+                } else {
+                    unsubscribe = unsub;
+                }
+            })
+            .catch((err) => {
+                console.error("Failed to subscribe to chat", selectedChatId, err);
+            });
+
+        return () => {
+            cancelled = true;
+            unsubscribe?.();
+        };
+    }, [selectedChatId, currentUserId]);
+
+    // Tear down the shared socket when leaving the chat page entirely.
+    useEffect(() => {
+        return () => {
+            disconnectChatSocket();
+        };
+    }, []);
+
     function handleSend() {
         const text = draft.trim();
         if (!text || !activeChatId) return;
