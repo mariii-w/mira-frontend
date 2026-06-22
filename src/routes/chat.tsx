@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import {
   ArrowRight,
 } from 'lucide-react'
@@ -11,6 +11,20 @@ import { Textarea } from "@headlessui/react";
 import { ServiceCardChat } from "../components/ServiceCardChat.tsx";
 import { ChatBubble, type ChatMessage } from "../components/ChatBubble.tsx";
 import { ChatInbox, type ChatPreview } from "../components/ChatInbox.tsx";
+import { disconnectChatSocket, publishChatText, subscribeToChat } from "../lib/chatSocket.ts";
+import { useAuthStore } from "../stores/auth";
+
+// content shape unconfirmed against a live backend response 
+function extractMessageText(content: unknown): string {
+    if (typeof content === "string") return content;
+    if (content && typeof content === "object") {
+        const obj = content as Record<string, unknown>;
+        if (typeof obj.content === "string") return obj.content;
+        const wrapped = obj.Text as Record<string, unknown> | undefined;
+        if (wrapped && typeof wrapped.content === "string") return wrapped.content;
+    }
+    return "[unsupported message type]";
+}
 
 export const Route = createFileRoute('/chat')({
     component: () => <Chat/>
@@ -63,24 +77,60 @@ function Chat() {
     const [messagesByChat, setMessagesByChat] = useState<Record<string, ChatMessage[]>>(DUMMY_MESSAGES);
     const [draft, setDraft] = useState("");
 
+    const currentUserId = useAuthStore((s) => s.user?.userId);
+
     const selectedChat = DUMMY_CHATS.find((c) => c.id === selectedChatId) ?? DUMMY_CHATS[0];
     const messages = messagesByChat[selectedChatId] ?? [];
+
+    // Subscribe to the selected chat's topic; swap subscription on chat switch.
+    useEffect(() => {
+        let unsubscribe: (() => void) | undefined;
+        let cancelled = false;
+
+        subscribeToChat(selectedChatId, (incoming) => {
+            const newMessage: ChatMessage = {
+                id: `ws-${incoming.id}`,
+                text: extractMessageText(incoming.content),
+                self: incoming.sender.id === currentUserId,
+                timestamp: new Date(incoming.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            };
+
+            setMessagesByChat((prev) => ({
+                ...prev,
+                [incoming.cid]: [...(prev[incoming.cid] ?? []), newMessage],
+            }));
+        })
+            .then((unsub) => {
+                if (cancelled) {
+                    unsub();
+                } else {
+                    unsubscribe = unsub;
+                }
+            })
+            .catch((err) => {
+                console.error("Failed to subscribe to chat", selectedChatId, err);
+            });
+
+        return () => {
+            cancelled = true;
+            unsubscribe?.();
+        };
+    }, [selectedChatId, currentUserId]);
+
+    // Tear down the shared socket when leaving the chat page entirely.
+    useEffect(() => {
+        return () => {
+            disconnectChatSocket();
+        };
+    }, []);
 
     function handleSend() {
         const text = draft.trim();
         if (!text) return;
 
-        const newMessage: ChatMessage = {
-            id: `local-${Date.now()}`,
-            text,
-            self: true,
-            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        };
-
-        setMessagesByChat((prev) => ({
-            ...prev,
-            [selectedChatId]: [...(prev[selectedChatId] ?? []), newMessage],
-        }));
+        publishChatText(selectedChatId, text).catch((err) => {
+            console.error("Failed to send message", err);
+        });
         setDraft("");
     }
 

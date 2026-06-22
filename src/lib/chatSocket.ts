@@ -66,7 +66,7 @@ export function disconnectChatSocket(): void {
   client = null;
 }
 
-// Returns an unsubscribe function -aha  call it on chat switch.
+// Returns an unsubscribe function; call it on chat switch.
 export async function subscribeToChat(
   cid: string,
   onMessage: (message: ChatTopicMessage) => void,
