@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { Badge } from "./Badge"
+import { Button } from "./Button"
 import { MapPin, Dot, ArrowRight } from 'lucide-react'
 
 export interface ServiceCardTag {
@@ -62,13 +63,23 @@ export function ServiceCardChat(
                     </div>
                     <div className="flex gap-2 flex-wrap items-center">
                         <div className='mx-auto shrink-0 flex items-center gap-3'>
-                            <Link
-                                to={link}
-                                className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-hover [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
-                            >
-                                Book a time
-                                <ArrowRight aria-hidden="true" />
-                            </Link>
+                            {link ? (
+                                <Link
+                                    to={link}
+                                    className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-hover [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                                >
+                                    Book a time
+                                    <ArrowRight aria-hidden="true" />
+                                </Link>
+                            ) : (
+                                <Button
+                                    disabled
+                                    trailingIcon={<ArrowRight />}
+                                    aria-label="Book a time (unavailable)"
+                                >
+                                    Book a time
+                                </Button>
+                            )}
                         </div>
                     </div>
 

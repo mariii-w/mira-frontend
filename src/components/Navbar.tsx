@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { label: 'Browse Services', to: '/browse-services' },
   { label: 'Find Users',      to: '/browse-users' },
   { label: "Calendar", to: "/calendar" },
+  { label: "Chat", to: "/chat" },
 ] as const;
 
 export function Navbar() {
