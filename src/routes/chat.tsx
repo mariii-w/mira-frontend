@@ -56,6 +56,7 @@ const DUMMY_MESSAGES: Record<string, ChatMessage[]> = {
     ],
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 function Chat() {
     // First chat pre-selected
     const [selectedChatId, setSelectedChatId] = useState<string>(DUMMY_CHATS[0].id);
@@ -95,16 +96,16 @@ function Chat() {
             <Navbar/>
             <main id="main-content">
                 <section className=" mt-30">
-                    <div className="container mx-auto -mt-20 h-200 bg bg-linen rounded-2xl border-2 border-border flex">
+                    <div className="container mx-auto -mt-20 lg:h-200 bg bg-linen rounded-2xl border-2 border-border flex flex-col lg:flex-row">
                         {/* Inbox */}
-                        <section className="w-1/4 border-r-2 border-border">
+                        <section className="w-full lg:w-1/4 border-b-2 lg:border-b-0 lg:border-r-2 border-border">
                             <div className="border-b-2 border-border">
                                 <h1 className="mt-10 mx-10">Inbox</h1>
                                 <div className="mx-9 mb-3 mt-5">
                                     <Input placeholder="Search Chat" aria-label="Search chats" size="lg" className="m-1 bg-cream"/>
                                 </div>
                             </div>
-                            <div>
+                            <div className="max-h-72 overflow-y-auto lg:max-h-none lg:overflow-visible">
                                 <ChatInbox
                                     chats={DUMMY_CHATS}
                                     selectedChatId={selectedChatId}
@@ -112,7 +113,7 @@ function Chat() {
                                 />
                             </div>
                         </section>
-                        <section className="w-2/4  bg-cream">
+                        <section className="w-full lg:w-2/4 bg-cream">
                             <div className="border-b-2 border-border flex flex-row bg-linen">
                                 <div className=" flex flex-row m-2 w-full">
                                     <AvatarIcon firstName={selectedChat.firstName} lastName={selectedChat.lastName} size={60}/>
@@ -121,15 +122,15 @@ function Chat() {
                             </div>
                             <div className="m-2">
                                 {/* Chat Field */}
-                                <div className="h-140 overflow-y-auto px-4 py-3 flex flex-col" role="log" aria-live="polite" aria-label="Conversation messages">
+                                <div className="h-96 lg:h-140 overflow-y-auto px-4 py-3 flex flex-col" role="log" aria-live="polite" aria-label="Conversation messages">
                                     {messages.map((msg) => (
                                         <ChatBubble key={msg.id} message={msg.text} self={msg.self} timestamp={msg.timestamp} />
                                     ))}
                                 </div>
                                 {/* Input Field */}
-                                <div className="flex flex-row w-auto h-30 mx-10 m-auto border-2 border-border rounded-3xl shadow-md bg-linen shadow-linen">
+                                <div className="flex flex-row w-auto h-30 mx-3 lg:mx-10 m-auto border-2 border-border rounded-3xl shadow-md bg-linen shadow-linen">
                                     <Textarea
-                                        className=" m-5 w-115 h-20 resize-none"
+                                        className=" m-5 flex-1 h-20 resize-none"
                                         placeholder="Send a message"
                                         aria-label="Type a message"
                                         value={draft}
@@ -137,7 +138,7 @@ function Chat() {
                                         onKeyDown={handleTextareaKeyDown}
                                     />
                                     <Button
-                                        className=" mt-auto mb-2 mx-auto"
+                                        className=" mt-auto mb-2 mx-auto shrink-0"
                                         onClick={handleSend}
                                         disabled={!draft.trim()}
                                     >
@@ -146,7 +147,7 @@ function Chat() {
                                 </div>
                             </div>
                         </section>
-                        <section className="w-1/4 border-l-2 border-border">
+                        <section className="hidden lg:block lg:w-1/4 border-l-2 border-border">
                             <p className="text-primary text-xl font-semibold-xl m-5">ABOUT THIS SERVICE</p>
                             <div className="m-4  border-border">
                                 <ServiceCardChat pictureLink="./pic/ServiceExample1.png" link="" label={"PC Support & Laptop Help"} tags={[]} hourRate={0} />
