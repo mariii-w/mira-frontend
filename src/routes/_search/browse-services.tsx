@@ -2,12 +2,10 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { X, Wrench, Users } from 'lucide-react'
-import { Navbar } from '../../components/Navbar'
+import { X } from 'lucide-react'
 import { SearchBar } from '../../components/SearchBar'
 import { FilterBar, type ServiceTagOption } from '../../components/FilterBar'
 import { ServiceCard } from '../../components/ServiceCard'
-import { ServiceUserToggle } from '../../components/ServiceUserToggle'
 import { Breadcrumb } from '../../components/BreadCrumb'
 import { Pagination } from '../../components/Pagination'
 import { FilterDrawer } from '../../components/FilterDrawer'
@@ -74,7 +72,6 @@ async function fetchServiceTags(): Promise<ServiceTag[]> {
 export function BrowseServicesPage() {
   const search = Route.useSearch()
   const navigate = useNavigate({ from: '/browse-services' })
-  const navigateToRoute = useNavigate()
   const easyRead = useAccessibilityStore(state => state.easyRead)
 
   // Pending filter state — committed to URL on "Apply" / "Search"
@@ -186,25 +183,10 @@ export function BrowseServicesPage() {
 
   return (
     <>
-      <Navbar />
-      <main id="main-content" className="min-h-[calc(100vh-4rem)] bg-background">
-
-        {/* ── Search bar row ── */}
-        <div className="bg-background px-6 py-3">
-          <div className="mx-auto max-w-6xl flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-20">
-            <div className="flex justify-center lg:block lg:shrink-0 lg:w-64">
-              <ServiceUserToggle
-                id="search-toggle"
-                labelLeft="Services"
-                labelRight="Users"
-                iconLeft={<Wrench />}
-                iconRight={<Users />}
-                checked={false}
-                onCheckedChange={(checked) => { if (checked) navigateToRoute({ to: '/browse-users', search: { q: search.q, from: undefined } }) }}
-              />
-            </div>
+      {/* ── Search bar row ── */}
+      <div className="bg-background px-6 py-3">
+        <div className="mx-auto max-w-6xl">
             <SearchBar
-              className="flex-1"
               placeholder="What are you looking for?"
               value={pendingQuery}
               onChange={(e) => setPendingQuery(e.target.value)}
@@ -215,8 +197,8 @@ export function BrowseServicesPage() {
               onSearch={commitSearch}
               onKeyDown={(e) => { if (e.key === 'Enter') commitSearch() }}
             />
-          </div>
         </div>
+      </div>
 
         {/* ── Breadcrumb + active filter chips row ── */}
         <div className="bg-background px-6 py-2">
@@ -395,7 +377,6 @@ export function BrowseServicesPage() {
           </div>
         </div>
         </div>
-      </main>
     </>
   )
 }

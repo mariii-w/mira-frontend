@@ -2,10 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Wrench, Users } from 'lucide-react'
-import { Navbar } from '../../components/Navbar'
 import { SearchBar } from '../../components/SearchBar'
-import { ServiceUserToggle } from '../../components/ServiceUserToggle'
 import { Breadcrumb } from '../../components/BreadCrumb'
 import { Pagination } from '../../components/Pagination'
 import { UserCard } from '../../components/UserCard'
@@ -72,7 +69,6 @@ async function fetchPublicProfiles(params: BrowseUsersParams): Promise<PublicPro
 export function BrowseUsersPage() {
   const search = Route.useSearch()
   const navigate = useNavigate({ from: '/browse-users' })
-  const navigateToRoute = useNavigate()
   const easyRead = useAccessibilityStore(state => state.easyRead)
 
   const [pendingQuery, setPendingQuery] = useState(search.q)
@@ -114,25 +110,10 @@ export function BrowseUsersPage() {
 
   return (
     <>
-      <Navbar />
-      <main id="main-content" className="min-h-[calc(100vh-4rem)] bg-background">
-
-        {/* ── Search bar row ── */}
-        <div className="bg-background px-6 py-3">
-          <div className="mx-auto max-w-6xl flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-20">
-            <div className="flex justify-center lg:block lg:shrink-0 lg:w-64">
-              <ServiceUserToggle
-                id="browse-toggle"
-                labelLeft="Services"
-                labelRight="Users"
-                iconLeft={<Wrench />}
-                iconRight={<Users />}
-                checked={true}
-                onCheckedChange={(checked) => { if (!checked) navigateToRoute({ to: '/browse-services', search: { q: search.q, city: '', tagIds: [], from: undefined } }) }}
-              />
-            </div>
+      {/* ── Search bar row ── */}
+      <div className="bg-background px-6 py-3">
+        <div className="mx-auto max-w-6xl">
             <SearchBar
-              className="flex-1"
               placeholder="Search by name or username…"
               showLocation={false}
               value={pendingQuery}
@@ -140,8 +121,8 @@ export function BrowseUsersPage() {
               onSearch={commitSearch}
               onKeyDown={(e) => { if (e.key === 'Enter') commitSearch() }}
             />
-          </div>
         </div>
+      </div>
 
         {/* ── Breadcrumb row ── */}
         <div className="bg-background px-6 py-2">
@@ -219,7 +200,6 @@ export function BrowseUsersPage() {
 
           </div>
         </div>
-      </main>
     </>
   )
 }
