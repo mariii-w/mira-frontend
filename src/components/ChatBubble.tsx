@@ -16,11 +16,10 @@ type ChatBubbleProps = {
 };
 export function ChatBubble({ message, self, timestamp }: ChatBubbleProps) {
     return (
-        <div 
+        <div
             className={`flex w-full mb-3 ${self ? "justify-end" : "justify-start"}`}
             role="article"
             aria-label={`${self ? "Your message" : "Their message"}: ${message}${timestamp ? ` at ${timestamp}` : ""}`}
-            tabIndex={0}
         >
             <div
                 className={`max-w-[70%] px-4 py-2 rounded-2xl shadow-sm ${self

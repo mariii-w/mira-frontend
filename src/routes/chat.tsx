@@ -74,7 +74,7 @@ function Chat() {
                             <div className="border-b-2 border-border">
                                 <h1 className="mt-10 mx-10">Inbox</h1>
                                 <div className="mx-9 mb-3 mt-5">
-                                    <Input placeholder="Search Chat" size="lg" className="m-1 bg-cream"/>
+                                    <Input placeholder="Search Chat" aria-label="Search chats" size="lg" className="m-1 bg-cream"/>
                                 </div>
                             </div>
                             <div>
@@ -94,14 +94,14 @@ function Chat() {
                             </div>
                             <div className="m-2">
                                 {/* Chat Field */}
-                                <div className="h-140 overflow-y-auto px-4 py-3 flex flex-col">
+                                <div className="h-140 overflow-y-auto px-4 py-3 flex flex-col" role="log" aria-live="polite" aria-label="Conversation messages">
                                     {messages.map((msg) => (
                                         <ChatBubble key={msg.id} message={msg.text} self={msg.self} timestamp={msg.timestamp} />
                                     ))}
                                 </div>
                                 {/* Input Field */}
                                 <div className="flex flex-row w-auto h-30 mx-10 m-auto border-2 border-border rounded-3xl shadow-md bg-linen shadow-linen">
-                                    <Textarea className=" m-5 w-115 h-20 resize-none disabled" placeholder="Send a message"/>
+                                    <Textarea className=" m-5 w-115 h-20 resize-none" placeholder="Send a message" aria-label="Type a message"/>
                                     <Button className=" mt-auto mb-2 mx-auto">Send Message </Button>
                                 </div>
                             </div>
