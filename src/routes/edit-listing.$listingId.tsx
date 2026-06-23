@@ -11,7 +11,7 @@ import {
   getServiceTags,
   getAuthorListing,
   getAvailability,
-  getPublicProfileListings,
+  getPublicListings,
   updateListing,
   uploadListingMedia,
   pauseListing,
@@ -143,9 +143,7 @@ export function EditListingPage() {
     let cancelled = false;
 
     async function loadOtherListings() {
-      const response = await getPublicProfileListings(listing!.author.userId, {
-        limit: 5,
-      });
+      const response = await getPublicListings({ userId, limit: 5 });
 
       if (cancelled) return;
       setOtherListings(response.status === 200 ? response.data.items : []);
@@ -157,7 +155,7 @@ export function EditListingPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listing?.listingId, listing?.author.userId]);
+  }, [listing?.listingId, userId]);
 
   useEffect(() => {
     let cancelled = false;
