@@ -7,6 +7,7 @@ import { signOut } from '../stores/auth'
 
 interface UserMenuProps {
   userId: string
+  userId: string
   firstName: string
   lastName: string
   isProvider?: boolean
@@ -14,8 +15,10 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ userId, firstName, lastName, isProvider, pictureUrl }: UserMenuProps) {
+export function UserMenu({ userId, firstName, lastName, isProvider, pictureUrl }: UserMenuProps) {
   const navigate = useNavigate()
   const displayName = lastName ? `${firstName} ${lastName[0]}.` : firstName
+  const userProfileUrl = '/profile/' + userId
   const userProfileUrl = '/profile/' + userId
   async function handleLogout() {
     await signOut()
