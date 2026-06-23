@@ -21,14 +21,14 @@ import { useState } from 'react';
 import { Pagination } from '../components/Pagination';
 import { AvatarIcon } from '../components/AvatarIcon.tsx';
 import { UserMenu } from '../components/UserMenu.tsx';
-import { SearchBar } from '../components/SearchBar.tsx';
+import { SearchBar } from '../components/search/SearchBar.tsx';
 import { Badge } from '../components/Badge.tsx';
 import { Breadcrumb } from '../components/BreadCrumb.tsx';
 import { FilterBar } from '../components/FilterBar.tsx';
 import { ServiceCard } from '../components/ServiceCard.tsx';
 import { BookingCard, type BookingSummary, type BookingDetails } from '../components/BookingCard.tsx';
 import { CalendarGrid } from '../components/CalendarGrid.tsx';
-import { ServiceUserToggle } from '../components/ServiceUserToggle.tsx';
+import { ServiceUserToggle } from '../components/search/ServiceUserToggle.tsx';
 
 
 

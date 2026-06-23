@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import { ServiceUserToggle } from '../components/ServiceUserToggle'
+import { ServiceUserToggle } from '../components/search/ServiceUserToggle.tsx'
 
 function renderToggle(checked: boolean) {
   return render(
