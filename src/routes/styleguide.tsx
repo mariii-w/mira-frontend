@@ -388,8 +388,8 @@ function Styleguide() {
       
       <div className="p-6 bg-surface border border-border rounded-lg">
         <AvatarIcon size={40} firstName='Lena' lastName='Kross'></AvatarIcon>
-        <UserMenu userId='' userId='' firstName='Lena' lastName='Kross'/>
-        <UserMenu userId ='' userId ='' firstName='Klaus' lastName='Merger' isProvider={true}/>
+        <UserMenu userId=''  firstName='Lena' lastName='Kross'/>
+        <UserMenu userId ='' firstName='Klaus' lastName='Merger' isProvider={true}/>
       </div>
     </section>
 
