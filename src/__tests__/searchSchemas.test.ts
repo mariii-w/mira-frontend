@@ -19,3 +19,17 @@ describe('search cursor validation', () => {
     expect(schema.parse({ from: '' }).from).toBeUndefined()
   })
 })
+
+describe('users role validation', () => {
+  it('defaults to everyone', () => {
+    expect(browseUsersSearchSchema.parse({}).role).toBe('everyone')
+  })
+
+  it.each(['providers', 'consumers'] as const)('accepts %s', (role) => {
+    expect(browseUsersSearchSchema.parse({ role }).role).toBe(role)
+  })
+
+  it('falls back to everyone for an invalid role', () => {
+    expect(browseUsersSearchSchema.parse({ role: 'admins' }).role).toBe('everyone')
+  })
+})

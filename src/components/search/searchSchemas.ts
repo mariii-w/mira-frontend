@@ -15,6 +15,8 @@ export type BrowseServicesSearch = z.infer<typeof browseServicesSearchSchema>
 export const browseUsersSearchSchema = z.object({
   q: z.string().catch(''),
   from: z.string().min(1).optional().catch(undefined),
+  role: z.enum(['everyone', 'providers', 'consumers']).catch('everyone'),
 })
 
 export type BrowseUsersSearch = z.infer<typeof browseUsersSearchSchema>
+export type UserRoleFilter = BrowseUsersSearch['role']

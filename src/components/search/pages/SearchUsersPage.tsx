@@ -5,11 +5,12 @@ import { SearchBar } from '../SearchBar.tsx'
 import { Breadcrumb } from '../../BreadCrumb.tsx'
 import { Pagination } from '../../Pagination.tsx'
 import { UserCard } from '../../UserCard.tsx'
+import { UserTypeFilter } from '../UserTypeFilter.tsx'
 import { useAccessibilityStore } from '../../../stores/accessibility.ts'
 import { mediaUrl } from '../../../lib/mediaUrl.ts'
 import { getPublicProfilesCollection } from '../../../api/mira.ts'
 import type { GetPublicProfilesCollectionParams } from '../../../api/model'
-import type { BrowseUsersSearch } from '../searchSchemas.ts'
+import type { BrowseUsersSearch, UserRoleFilter } from '../searchSchemas.ts'
 
 // Types
 
@@ -61,17 +62,28 @@ export function SearchUsersPage() {
   const [prevCursors, setPrevCursors] = useState<(string | undefined)[]>([])
 
   const profilesQuery = useQuery({
-    queryKey: ['public-profiles', search],
+    queryKey: ['public-profiles', { q: search.q, from: search.from }],
     queryFn: () => fetchPublicProfiles(search),
   })
 
   const profiles = profilesQuery.data?.items ?? []
+  const providers = profiles.filter(profile => profile.userType === 'PROVIDER')
+  const consumers = profiles.filter(profile => profile.userType !== 'PROVIDER')
+  const visibleProfiles = search.role === 'providers'
+    ? providers
+    : search.role === 'consumers'
+      ? consumers
+      : profiles
   const nextCursor = profilesQuery.data?.cursor.next ?? null
   const hasPrev = prevCursors.length > 0
 
   function commitSearch() {
     setPrevCursors([])
-    navigate({ search: { q: pendingQuery, from: undefined } })
+    navigate({ search: { q: pendingQuery, role: search.role, from: undefined } })
+  }
+
+  function handleRoleChange(role: UserRoleFilter) {
+    navigate({ search: { ...search, role } })
   }
 
   function handleNext() {
@@ -123,13 +135,19 @@ export function SearchUsersPage() {
         <div className="px-6">
           <div className="mx-auto max-w-6xl pt-1 pb-6 lg:py-6 flex flex-col gap-4">
 
-            {/* Results header */}
-            <div>
-              <h1 className="font-heading text-h1 font-bold text-foreground">
-                {search.q ? `Users matching "${search.q}"` : 'Users'}
-              </h1>
-              <p className="text-small text-muted mt-1">Showing public profiles</p>
-            </div>
+            {profilesQuery.isSuccess ? (
+              <UserTypeFilter
+                selected={search.role}
+                providerCount={providers.length}
+                consumerCount={consumers.length}
+                onChange={handleRoleChange}
+              />
+            ) : (
+              <div>
+                <h1 className="font-heading text-h1 font-bold text-foreground">Users</h1>
+                <p className="text-body text-foreground mt-1">Showing public profiles</p>
+              </div>
+            )}
 
             {/* Loading */}
             {profilesQuery.isLoading && (
@@ -152,11 +170,20 @@ export function SearchUsersPage() {
               </div>
             )}
 
+            {profilesQuery.isSuccess && profiles.length > 0 && visibleProfiles.length === 0 && (
+              <div className="py-16 text-center">
+                <p className="text-body text-muted">
+                  {search.role === 'providers'
+                    ? 'No providers on this page.'
+                    : 'No consumers on this page.'}
+                </p>
+              </div>
+            )}
+
             {/* Results list */}
-            {profilesQuery.isSuccess && profiles.length > 0 && (
-              <>
+            {profilesQuery.isSuccess && visibleProfiles.length > 0 && (
                 <ul role="list" aria-label="User results" className="grid grid-cols-1 lg:grid-cols-2 gap-4 list-none m-0 p-0">
-                  {profiles.map((profile) => (
+                  {visibleProfiles.map((profile) => (
                     <li key={profile.userId}>
                       <UserCard
                         userId={profile.userId}
@@ -171,17 +198,16 @@ export function SearchUsersPage() {
                     </li>
                   ))}
                 </ul>
+            )}
 
-                {(hasPrev || nextCursor) && (
-                  <Pagination
-                    onPrevious={handlePrev}
-                    onNext={handleNext}
-                    disablePrevious={!hasPrev}
-                    disableNext={!nextCursor}
-                    className="mt-2 flex justify-center"
-                  />
-                )}
-              </>
+            {profilesQuery.isSuccess && profiles.length > 0 && (hasPrev || nextCursor) && (
+              <Pagination
+                onPrevious={handlePrev}
+                onNext={handleNext}
+                disablePrevious={!hasPrev}
+                disableNext={!nextCursor}
+                className="mt-2 flex justify-center"
+              />
             )}
 
           </div>

@@ -57,6 +57,7 @@ import { RegisterRole } from "../components/RegisterRole";
 import { SearchBar } from "../components/search/SearchBar";
 import { ServiceCard } from "../components/ServiceCard";
 import { ServiceUserToggle } from "../components/search/ServiceUserToggle.tsx";
+import { UserTypeFilter } from "../components/search/UserTypeFilter.tsx";
 import { Slider } from "../components/Slider";
 import * as Switch from "../components/Switch";
 import { Textarea } from "../components/Textarea";
@@ -433,6 +434,15 @@ const componentCases: Array<[string, ReactElement]> = [
     </>,
   ],
   ["UserMenu", <UserMenu firstName="Mira" lastName="Muster" isProvider />],
+  [
+    "UserTypeFilter",
+    <UserTypeFilter
+      selected="everyone"
+      providerCount={4}
+      consumerCount={4}
+      onChange={vi.fn()}
+    />,
+  ],
 ];
 
 describe("component accessibility", () => {

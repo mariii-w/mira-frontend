@@ -11,7 +11,10 @@ export function SearchRootPage() {
 
   function handleToggleChange(nextChecked: boolean) {
     if (nextChecked) {
-      navigate({ to: '/browse-users', search: { q: currentQuery, from: undefined } })
+      navigate({
+        to: '/browse-users',
+        search: { q: currentQuery, role: 'everyone', from: undefined },
+      })
     } else {
       navigate({
         to: '/browse-services',
