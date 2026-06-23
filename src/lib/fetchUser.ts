@@ -1,5 +1,5 @@
-import { authFetch } from './queryClient'
-import type { User } from '../stores/auth'
+
+type { User } from '../stores/auth'
 
 export interface FetchUserError {
   field: 'server' | 'username'
