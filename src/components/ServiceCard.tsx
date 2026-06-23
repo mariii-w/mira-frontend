@@ -4,7 +4,7 @@ import { AvatarIcon } from "./AvatarIcon"
 import { MapPin, Dot, ArrowRight } from 'lucide-react'
 import type { AccessibilityGenerationStatus, ServiceTag } from '../api/model'
 
-interface ServiceCardProps{
+export interface ServiceCardProps{
     variant?: 'default' | 'compact'
     link: string
     pictureLink?: string

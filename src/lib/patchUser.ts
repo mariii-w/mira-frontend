@@ -7,7 +7,8 @@ import type {
   PatchUserProfileRequest,
   ProblemDetailsResponse,
 } from "../api/model";
-import { useAuthStore, queryClient } from "../stores/auth";
+import { useAuthStore } from "../stores/auth";
+import { queryClient } from "./queryClient";
 
 export type UserType = "CUSTOMER" | "PROVIDER";
 export type AccessibilityPreference = "EASY_LANGUAGE" | "REDUCED_MOTION";
@@ -132,10 +133,9 @@ export async function uploadProfilePhoto(file: File): Promise<void> {
     } satisfies UploadPhotoError;
   }
 
-  const refresh = await authFetch(`/v1/users/${user.userId}`)
-  if (refresh.ok) {
-    const updatedUser = await refresh.json()
-    useAuthStore.getState().setUser(updatedUser)
+  const refresh = await getPrivateUserProfile(user.userId)
+  if (refresh.status === 200) {
+    useAuthStore.getState().setUser(refresh.data)
   }
   queryClient.invalidateQueries({ queryKey: ['user', user.userId] })
 }
