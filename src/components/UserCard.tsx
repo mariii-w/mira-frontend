@@ -31,10 +31,11 @@ export function UserCard({
   const displayName = [firstName, lastName].filter(Boolean).join(' ') || username
   const initials = getInitials(firstName, lastName, username)
 
-  // Providers use the page's primary colour (violet on the users search, via
-  // the variant remap); plain users stay green.
-  const avatarBg = isProvider ? 'bg-primary' : 'bg-green-500'
-  const badgeBg = isProvider ? 'bg-primary text-primary-foreground' : 'bg-green-500 text-white'
+  const avatarBg = isProvider ? 'bg-accent' : 'bg-forest'
+  const badgeBg = isProvider ? 'bg-blush text-accent' : 'bg-mint text-forest'
+  const actionBg = isProvider
+    ? 'bg-accent text-accent-foreground hover:bg-accent-hover active:bg-accent-hover focus-visible:ring-accent'
+    : 'bg-forest text-cream hover:bg-forest/90 active:bg-forest/90 focus-visible:ring-forest'
 
   return (
     <div className="bg-linen rounded-2xl flex flex-col p-3 gap-3 border border-border w-full">
@@ -75,7 +76,7 @@ export function UserCard({
           <div className="flex items-center justify-end">
             <a
               href={`#profile-${userId}`}
-              className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-hover [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+              className={`relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${actionBg}`}
             >
               View profile
               <ArrowRight aria-hidden="true" />
