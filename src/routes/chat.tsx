@@ -12,19 +12,8 @@ import { ServiceCardChat } from "../components/ServiceCardChat.tsx";
 import { ChatBubble, type ChatMessage } from "../components/ChatBubble.tsx";
 import { ChatInbox, type ChatPreview } from "../components/ChatInbox.tsx";
 import { disconnectChatSocket, publishChatText, subscribeToChat } from "../lib/chatSocket.ts";
+import { describeMessageContent } from "../lib/chatContent.ts";
 import { useAuthStore } from "../stores/auth";
-
-// content shape unconfirmed against a live backend response 
-function extractMessageText(content: unknown): string {
-    if (typeof content === "string") return content;
-    if (content && typeof content === "object") {
-        const obj = content as Record<string, unknown>;
-        if (typeof obj.content === "string") return obj.content;
-        const wrapped = obj.Text as Record<string, unknown> | undefined;
-        if (wrapped && typeof wrapped.content === "string") return wrapped.content;
-    }
-    return "[unsupported message type]";
-}
 
 export const Route = createFileRoute('/chat')({
     component: () => <Chat/>
@@ -90,7 +79,7 @@ function Chat() {
         subscribeToChat(selectedChatId, (incoming) => {
             const newMessage: ChatMessage = {
                 id: `ws-${incoming.id}`,
-                text: extractMessageText(incoming.content),
+                text: describeMessageContent(incoming.content),
                 self: incoming.sender.id === currentUserId,
                 timestamp: new Date(incoming.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             };

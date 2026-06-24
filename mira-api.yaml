@@ -996,24 +996,39 @@ paths:
       requestBody:
         required: true
         content:
-          "application/json":
+          "multipart/form-data":
             schema:
-              "$ref": "#/components/schemas/CreateListingRequest"
+              type: object
+              required:
+                - listing
+              properties:
+                listing:
+                  "$ref": "#/components/schemas/CreateListingRequest"
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+            encoding:
+              listing:
+                contentType: application/json
             examples:
               default:
-                summary: Example listing creation request
+                summary: Example multipart listing creation request
                 value:
-                  tagIds:
-                    - dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
-                  title: Laptop setup and software installation
-                  description: I help with setting up laptops, installing software, and solving basic PC issues.
-                  price: 25.0
-                  location:
-                    street: "Hauptstraße"
-                    houseNumber: "10"
-                    city: Berlin
-                    postalCode: "10115"
-                    serviceRadiusKm: 15
+                  listing:
+                    tagIds:
+                      - dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                    title: Laptop setup and software installation
+                    description: I help with setting up laptops, installing software, and solving basic PC issues.
+                    price: 25.0
+                    location:
+                      street: "Hauptstraße"
+                      houseNumber: "10"
+                      city: Berlin
+                      postalCode: "10115"
+                      serviceRadiusKm: 15
+                  files: []
       responses:
         "201":
           description: Listing created successfully.
@@ -1654,7 +1669,7 @@ paths:
                     instance: /v1/admin/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/moderation
                     errors:
                       - field: moderationStatus
-                        message: must be either VISIBLE or BLOCKED
+                        message: must be one of VISIBLE, BLOCKED, or REPORTED
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -1716,7 +1731,7 @@ paths:
                     instance: /v1/admin/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/moderation
                     errors:
                       - field: moderationStatus
-                        message: must be either VISIBLE or BLOCKED
+                        message: must be one of VISIBLE, BLOCKED, or REPORTED
   "/v1/service-tags":
     get:
       summary: List service tags
@@ -1730,20 +1745,21 @@ paths:
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/ServiceTagCollectionResponse"
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ServiceTag"
               examples:
                 default:
                   summary: Example service tags
                   value:
-                    items:
-                      - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
-                        name: Laptop support
-                        isBarrierefrei: false
-                        isActive: true
-                      - tagId: "5f5b9e3a-0c7c-45f4-9d8d-59f1d15a2a77"
-                        name: Wheelchair accessible
-                        isBarrierefrei: true
-                        isActive: true
+                    - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                      name: Laptop support
+                      isBarrierefrei: false
+                      isActive: true
+                    - tagId: "5f5b9e3a-0c7c-45f4-9d8d-59f1d15a2a77"
+                      name: Wheelchair accessible
+                      isBarrierefrei: true
+                      isActive: true
   "/v1/users/{userId}/listings":
     parameters:
       - "$ref": "#/components/parameters/UserIdPathParam"
@@ -2466,28 +2482,26 @@ paths:
               "$ref": "#/components/schemas/UploadListingMediaRequest"
       responses:
         "200":
-          description: Media upload processed successfully, possibly with partial failures.
+          description: Media upload processed successfully.
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/BulkUploadListingMediaResponse"
+                "$ref": "#/components/schemas/ListingMediaUploadResponse"
               examples:
-                partialSuccess:
-                  summary: Example partial upload result
+                default:
+                  summary: Example upload result
                   value:
                     uploaded:
                       - mediaId: "11111111-2222-3333-4444-555555555555"
+                        position: 0
                         url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
                         altText: Open laptop on a wooden desk
+                        altTextStatus: COMPLETED
                         mimeType: image/jpeg
                         size: 248576
                         width: 1280
                         height: 720
                         createdAt: "2026-04-20T16:10:00Z"
-                    failed:
-                      - fileName: too-large.png
-                        errorCode: FILE_TOO_LARGE
-                        message: File exceeds the maximum allowed size
         "400":
           description: Bad Request. The request payload is invalid.
           content:
@@ -2644,6 +2658,83 @@ paths:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
+    patch:
+      summary: Reorder listing media
+      operationId: updateListingMedia
+      description: Reorders all media items attached to a listing owned by the authenticated user. The items array defines the complete desired order; it must contain exactly the media IDs currently attached to the listing.
+      tags:
+        - Listings (Media)
+      security:
+        - bearerHttpAuthentication: []
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/UpdateListingMediaRequest"
+            examples:
+              default:
+                summary: Example reorder request
+                value:
+                  items:
+                    - mediaId: "11111111-2222-3333-4444-555555555555"
+                    - mediaId: "22222222-3333-4444-5555-666666666666"
+      responses:
+        "200":
+          description: Listing media reordered successfully.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ListingMediaItem"
+              examples:
+                default:
+                  summary: Example reordered listing media
+                  value:
+                    - mediaId: "11111111-2222-3333-4444-555555555555"
+                      position: 0
+                      url: "/v1/listing-media/11111111-2222-3333-4444-555555555555/content"
+                      altText: Open laptop on a wooden desk
+                      altTextStatus: COMPLETED
+                      mimeType: image/jpeg
+                      size: 248576
+                      width: 1280
+                      height: 720
+                      createdAt: "2026-04-20T16:10:00Z"
+        "400":
+          description: Bad Request. The request payload is invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+          description: Unauthorized. Authentication is required.
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No listing exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "409":
+          description: Conflict. The request conflicts with the current resource state.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "422":
+          description: Unprocessable Entity. The provided order does not contain exactly the currently attached listing media IDs.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
   "/v1/listings/{listingId}/media/{mediaId}":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
@@ -2659,6 +2750,7 @@ paths:
       requestBody:
         required: true
         content:
+          "multipart/form-data":
           "multipart/form-data":
             schema:
               "$ref": "#/components/schemas/ReplaceListingMediaRequest"
@@ -3580,6 +3672,44 @@ paths:
                     status: 409
                     detail: Only pending bookings can be refused
                     instance: /v1/bookings/3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10/refuse
+  "/v1/bookings/{bookingId}/pay":
+    parameters:
+      - "$ref": "#/components/parameters/BookingIdParam"
+    post:
+      summary: Create a booking checkout session
+      operationId: createCheckoutSession
+      description: Creates a Stripe Checkout session for the authenticated consumer after the provider has accepted the booking.
+      tags:
+        - Payments
+      security:
+        - bearerHttpAuthentication: []
+      responses:
+        "200":
+          description: Checkout session created successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/CheckoutSessionResponse"
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+        "403":
+          description: Forbidden. Only the booking consumer can pay.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No booking exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "409":
+          description: Conflict. Only a confirmed booking can be paid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
   "/v1/bookings/{bookingId}/mark-delivered":
     parameters:
       - "$ref": "#/components/parameters/BookingIdParam"
@@ -4502,6 +4632,116 @@ paths:
                     status: 404
                     detail: Schedule exception with the given identifier was not found
                     instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions/aa000000-0000-0000-0000-000000000001
+  "/chats":
+    get:
+      tags:
+        - Chats
+      summary: List chats for a user
+      operationId: listChats
+      security:
+        - bearerHttpAuthentication: []
+      parameters:
+        - name: user
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: sortby
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - latest
+      responses:
+        "200":
+          description: Chats ordered by latest activity.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ChatOverviewResponse"
+        "400":
+          description: Invalid user or unsupported sort value.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+    post:
+      tags:
+        - Chats
+      summary: Start a chat about a listing
+      description: The requester is read from the access JWT, the owner is read from the listing, and the CID is generated by the server. Listing owners cannot initiate chats for their own listings.
+      operationId: createChat
+      security:
+        - bearerHttpAuthentication: []
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/CreateChatRequest"
+      responses:
+        "201":
+          description: Chat created.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ChatOverviewResponse"
+        "200":
+          description: The matching listing/requester chat already exists.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ChatOverviewResponse"
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+        "403":
+          description: The listing owner cannot initiate the chat.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: The listing or JWT requester does not exist.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/chats/{cid}/messages":
+    get:
+      tags:
+        - Chats
+      summary: Get chat message history
+      operationId: history
+      security:
+        - bearerHttpAuthentication: []
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: msgsBefore
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Chat messages in reverse chronological order.
+          content:
+            "application/hal+json":
+              schema:
+                "$ref": "#/components/schemas/ChatHistoryResponse"
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
 components:
   securitySchemes:
     bearerHttpAuthentication:
@@ -4594,6 +4834,155 @@ components:
         type: string
         format: uuid
   schemas:
+    CreateChatRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - listingId
+      properties:
+        listingId:
+          type: string
+          format: uuid
+    ChatParticipantResponse:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    ChatOverviewResponse:
+      type: object
+      required:
+        - cid
+        - listingId
+        - participant
+        - latestMessage
+        - latestMessageCreatedAt
+      properties:
+        cid:
+          type: string
+          format: uuid
+          readOnly: true
+        listingId:
+          type: string
+          format: uuid
+        participant:
+          "$ref": "#/components/schemas/ChatParticipantResponse"
+        latestMessage:
+          oneOf:
+            - "$ref": "#/components/schemas/ChatMessageContent"
+            - type: "null"
+        latestMessageCreatedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+    ChatMessageContent:
+      oneOf:
+        - "$ref": "#/components/schemas/ChatTextMessage"
+        - "$ref": "#/components/schemas/ChatImageMessage"
+        - "$ref": "#/components/schemas/ChatOfferMessage"
+        - "$ref": "#/components/schemas/ChatOfferUpdateMessage"
+    ChatTextMessage:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+    ChatImageMessage:
+      type: object
+      required:
+        - imgId
+      properties:
+        imgId:
+          type: string
+    ChatOfferMessage:
+      type: object
+      required:
+        - offerId
+        - price
+      properties:
+        offerId:
+          type: string
+        price:
+          type: number
+    ChatOfferUpdateMessage:
+      type: object
+      required:
+        - offerId
+        - price
+        - status
+      properties:
+        offerId:
+          type: string
+        price:
+          type: number
+        status:
+          type: string
+          enum:
+            - ACCEPTED
+            - DECLINED
+    ChatSender:
+      type: object
+      required:
+        - id
+        - username
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+    ChatMessageResponse:
+      type: object
+      required:
+        - id
+        - cid
+        - sender
+        - content
+        - createdAt
+      properties:
+        id:
+          type: integer
+          format: int64
+        cid:
+          type: string
+          format: uuid
+        sender:
+          "$ref": "#/components/schemas/ChatSender"
+        content:
+          "$ref": "#/components/schemas/ChatMessageContent"
+        createdAt:
+          type: string
+          format: date-time
+    ChatHistoryResponse:
+      type: object
+      required:
+        - items
+        - cursor
+        - _links
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ChatMessageResponse"
+        cursor:
+          "$ref": "#/components/schemas/Cursor"
+        _links:
+          type: object
+          additionalProperties:
+            type: object
+            required:
+              - href
+            properties:
+              href:
+                type: string
+
     UserId:
       type: string
       format: uuid
@@ -5101,22 +5490,12 @@ components:
           type: boolean
           description: Indicates whether this predefined tag can currently be selected for listings.
           example: true
-    ServiceTagCollectionResponse:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: array
-          items:
-            "$ref": "#/components/schemas/ServiceTag"
     CreateListingRequest:
       type: object
       required:
         - tagIds
         - title
         - description
-        - easyDescriptionStatus
         - price
         - location
       properties:
@@ -5263,6 +5642,7 @@ components:
       type: object
       required:
         - mediaId
+        - position
         - url
         - altTextStatus
         - mimeType
@@ -5275,6 +5655,11 @@ components:
           type: string
           format: uuid
           example: "11111111-2222-3333-4444-555555555555"
+        position:
+          type: integer
+          minimum: 0
+          description: Zero-based order of this media item within the listing.
+          example: 0
         url:
           type: string
           format: uri
@@ -5430,42 +5815,22 @@ components:
             "$ref": "#/components/schemas/AdminReportedListingItem"
         cursor:
           "$ref": "#/components/schemas/Cursor"
-    BulkUploadListingMediaResponse:
+    ListingMediaUploadResponse:
       type: object
       required:
         - uploaded
-        - failed
       properties:
         uploaded:
           type: array
           items:
             "$ref": "#/components/schemas/ListingMediaItem"
-        failed:
-          type: array
-          items:
-            "$ref": "#/components/schemas/BulkUploadListingMediaFailure"
-    BulkUploadListingMediaFailure:
-      type: object
-      required:
-        - fileName
-        - errorCode
-        - message
-      properties:
-        fileName:
-          type: string
-          example: too-large.png
-        errorCode:
-          type: string
-          example: FILE_TOO_LARGE
-        message:
-          type: string
-          example: File exceeds the maximum allowed size
     PublicListingSummary:
       type: object
       required:
         - listingId
         - tags
         - title
+        - description
         - price
         - author
         - publishedAt
@@ -5482,17 +5847,6 @@ components:
         title:
           type: string
           example: Laptop setup and software installation
-        description:
-          type: string
-          example: I help with setting up laptops, installing software, and solving basic PC issues.
-        easyDescription:
-          type:
-            - string
-            - "null"
-          description: AI-generated simplified version of the listing description. Null until generation completes.
-          example: I help you set up laptops. I install software. I help with simple computer problems.
-        easyDescriptionStatus:
-          "$ref": "#/components/schemas/AccessibilityGenerationStatus"
         price:
           type: number
           format: double
@@ -5522,6 +5876,7 @@ components:
         - location
         - createdAt
         - updatedAt
+        - media
       properties:
         listingId:
           type: string
@@ -5558,8 +5913,6 @@ components:
           format: date-time
         location:
           "$ref": "#/components/schemas/PublicListingLocation"
-        primaryMedia:
-          "$ref": "#/components/schemas/ListingMediaPreview"
         createdAt:
           type: string
           format: date-time
@@ -5632,6 +5985,7 @@ components:
         - location
         - createdAt
         - updatedAt
+        - media
       properties:
         listingId:
           type: string
@@ -5670,8 +6024,6 @@ components:
           format: date-time
         location:
           "$ref": "#/components/schemas/PublicListingLocation"
-        primaryMedia:
-          "$ref": "#/components/schemas/ListingMediaPreview"
         createdAt:
           type: string
           format: date-time
@@ -5792,6 +6144,7 @@ components:
       enum:
         - VISIBLE
         - BLOCKED
+        - REPORTED
     ProblemDetailsResponse:
       type: object
       required:
@@ -6079,6 +6432,16 @@ components:
                 type: string
                 description: HTTP method to use.
                 example: "POST"
+    CheckoutSessionResponse:
+      type: object
+      required:
+        - checkoutUrl
+      properties:
+        checkoutUrl:
+          type: string
+          format: uri
+          description: Stripe-hosted Checkout URL for the confirmed booking.
+          example: "https://checkout.stripe.com/c/pay/cs_test_example"
     BookingListingPreview:
       type: object
       required:
