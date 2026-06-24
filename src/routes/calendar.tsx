@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   createException,
@@ -41,6 +41,7 @@ function isSuccessStatus(status: number) {
 
 // eslint-disable-next-line react-refresh/only-export-components
 function CalendarRoute() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
   const userId = user?.userId;
@@ -224,6 +225,7 @@ function CalendarRoute() {
         updateExceptionMutation.mutate({ exceptionId, exception })
       }
       onDeleteException={(exceptionId) => deleteExceptionMutation.mutate(exceptionId)}
+      onCreateListing={() => navigate({ to: "/create-listing" })}
     />
   );
 }

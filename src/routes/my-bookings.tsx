@@ -4,19 +4,14 @@ import {
   getListMyBookingsQueryKey,
   getBooking,
   listMyBookings,
-  acceptBooking,
-  acknowledgeDelivery,
-  cancelBooking,
-  markDelivered,
-  refuseBooking,
 } from "../api/mira";
 import type {
-  BookingStatus,
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
 } from "../api/model";
 import { MyBookings } from "../components/MyBookings";
 import type { AllowedAction, BookingDetails } from "../components/BookingCard";
+import { executeBookingAction } from "../lib/bookingActions";
 import { useAuthStore } from "../stores/auth";
 
 export const Route = createFileRoute("/my-bookings")({
@@ -27,40 +22,6 @@ function getErrorDetail(
   data: ProblemDetailsResponse | UnauthorizedErrorResponse,
 ) {
   return "detail" in data ? data.detail : undefined;
-}
-
-function getUnknownErrorDetail(data: unknown): string | undefined {
-  return typeof data === "object" && data !== null && "detail" in data
-    ? String(data.detail)
-    : undefined;
-}
-
-function buildAllowedActions(
-  status: BookingStatus,
-  isProvider: boolean,
-): AllowedAction[] {
-  const actions: AllowedAction[] = [];
-
-  if (isProvider && status === "PENDING") {
-    actions.push(
-      { rel: "accept", href: "", method: "POST" },
-      { rel: "refuse", href: "", method: "POST" },
-    );
-  }
-
-  if (isProvider && status === "PAID") {
-    actions.push({ rel: "mark-delivered", href: "", method: "POST" });
-  }
-
-  if (!isProvider && status === "AWAITING_CONFIRMATION") {
-    actions.push({ rel: "acknowledge-delivery", href: "", method: "POST" });
-  }
-
-  if (!isProvider && ["PENDING", "CONFIRMED", "PAID"].includes(status)) {
-    actions.push({ rel: "cancel", href: "", method: "POST" });
-  }
-
-  return actions;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -101,36 +62,21 @@ function MyBookingsRoute() {
 
     if (response.status !== 200) return null;
 
-    return {
-      ...response.data,
-      paidAt: null,
-      allowedActions: buildAllowedActions(response.data.status, isProvider),
-    };
+    const allowedActions = response.data.allowedActions.flatMap((action) =>
+      action.rel && action.href && action.method
+        ? [{ rel: action.rel, href: action.href, method: action.method }]
+        : [],
+    );
+
+    return { ...response.data, allowedActions };
   }
 
   async function performBookingAction(
     bookingId: string,
     action: AllowedAction,
   ): Promise<string | null> {
-    const response =
-      action.rel === "cancel"
-        ? await cancelBooking(bookingId)
-        : action.rel === "accept"
-          ? await acceptBooking(bookingId)
-          : action.rel === "refuse"
-            ? await refuseBooking(bookingId)
-            : action.rel === "mark-delivered"
-              ? await markDelivered(bookingId)
-              : action.rel === "acknowledge-delivery"
-                ? await acknowledgeDelivery(bookingId)
-                : null;
-
-    if (!response) return "This booking action is not supported yet.";
-    if (response.status >= 200 && response.status < 300) return null;
-
-    return (
-      getUnknownErrorDetail(response.data) ??
-      "Something went wrong. Please try again."
+    return executeBookingAction(bookingId, action, (url) =>
+      window.location.assign(url),
     );
   }
 

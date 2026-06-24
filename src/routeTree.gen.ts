@@ -36,6 +36,8 @@ import { Route as SearchBrowseUsersRouteImport } from './routes/_search/browse-u
 import { Route as SearchBrowseServicesRouteImport } from './routes/_search/browse-services'
 import { Route as ListingsListingIdIndexRouteImport } from './routes/listings/$listingId.index'
 import { Route as ListingsListingIdBookRouteImport } from './routes/listings/$listingId_.book'
+import { Route as BookingsPaymentSuccessRouteImport } from './routes/bookings/payment/success'
+import { Route as BookingsPaymentCancelledRouteImport } from './routes/bookings/payment/cancelled'
 
 const TermsOfUseRoute = TermsOfUseRouteImport.update({
   id: '/terms-of-use',
@@ -171,6 +173,17 @@ const ListingsListingIdBookRoute = ListingsListingIdBookRouteImport.update({
   path: '/listings/$listingId/book',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookingsPaymentSuccessRoute = BookingsPaymentSuccessRouteImport.update({
+  id: '/bookings/payment/success',
+  path: '/bookings/payment/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookingsPaymentCancelledRoute =
+  BookingsPaymentCancelledRouteImport.update({
+    id: '/bookings/payment/cancelled',
+    path: '/bookings/payment/cancelled',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -197,6 +210,8 @@ export interface FileRoutesByFullPath {
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
   '/register/': typeof RegisterIndexRoute
+  '/bookings/payment/cancelled': typeof BookingsPaymentCancelledRoute
+  '/bookings/payment/success': typeof BookingsPaymentSuccessRoute
   '/listings/$listingId/book': typeof ListingsListingIdBookRoute
   '/listings/$listingId/': typeof ListingsListingIdIndexRoute
 }
@@ -224,6 +239,8 @@ export interface FileRoutesByTo {
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
   '/register': typeof RegisterIndexRoute
+  '/bookings/payment/cancelled': typeof BookingsPaymentCancelledRoute
+  '/bookings/payment/success': typeof BookingsPaymentSuccessRoute
   '/listings/$listingId/book': typeof ListingsListingIdBookRoute
   '/listings/$listingId': typeof ListingsListingIdIndexRoute
 }
@@ -254,6 +271,8 @@ export interface FileRoutesById {
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
   '/register/': typeof RegisterIndexRoute
+  '/bookings/payment/cancelled': typeof BookingsPaymentCancelledRoute
+  '/bookings/payment/success': typeof BookingsPaymentSuccessRoute
   '/listings/$listingId_/book': typeof ListingsListingIdBookRoute
   '/listings/$listingId/': typeof ListingsListingIdIndexRoute
 }
@@ -284,6 +303,8 @@ export interface FileRouteTypes {
     | '/register/photo'
     | '/register/role'
     | '/register/'
+    | '/bookings/payment/cancelled'
+    | '/bookings/payment/success'
     | '/listings/$listingId/book'
     | '/listings/$listingId/'
   fileRoutesByTo: FileRoutesByTo
@@ -311,6 +332,8 @@ export interface FileRouteTypes {
     | '/register/photo'
     | '/register/role'
     | '/register'
+    | '/bookings/payment/cancelled'
+    | '/bookings/payment/success'
     | '/listings/$listingId/book'
     | '/listings/$listingId'
   id:
@@ -340,6 +363,8 @@ export interface FileRouteTypes {
     | '/register/photo'
     | '/register/role'
     | '/register/'
+    | '/bookings/payment/cancelled'
+    | '/bookings/payment/success'
     | '/listings/$listingId_/book'
     | '/listings/$listingId/'
   fileRoutesById: FileRoutesById
@@ -361,6 +386,8 @@ export interface RootRouteChildren {
   StyleguideRoute: typeof StyleguideRoute
   TermsOfUseRoute: typeof TermsOfUseRoute
   EditListingListingIdRoute: typeof EditListingListingIdRoute
+  BookingsPaymentCancelledRoute: typeof BookingsPaymentCancelledRoute
+  BookingsPaymentSuccessRoute: typeof BookingsPaymentSuccessRoute
   ListingsListingIdBookRoute: typeof ListingsListingIdBookRoute
   ListingsListingIdIndexRoute: typeof ListingsListingIdIndexRoute
 }
@@ -556,6 +583,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListingsListingIdBookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bookings/payment/success': {
+      id: '/bookings/payment/success'
+      path: '/bookings/payment/success'
+      fullPath: '/bookings/payment/success'
+      preLoaderRoute: typeof BookingsPaymentSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookings/payment/cancelled': {
+      id: '/bookings/payment/cancelled'
+      path: '/bookings/payment/cancelled'
+      fullPath: '/bookings/payment/cancelled'
+      preLoaderRoute: typeof BookingsPaymentCancelledRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -614,6 +655,8 @@ const rootRouteChildren: RootRouteChildren = {
   StyleguideRoute: StyleguideRoute,
   TermsOfUseRoute: TermsOfUseRoute,
   EditListingListingIdRoute: EditListingListingIdRoute,
+  BookingsPaymentCancelledRoute: BookingsPaymentCancelledRoute,
+  BookingsPaymentSuccessRoute: BookingsPaymentSuccessRoute,
   ListingsListingIdBookRoute: ListingsListingIdBookRoute,
   ListingsListingIdIndexRoute: ListingsListingIdIndexRoute,
 }

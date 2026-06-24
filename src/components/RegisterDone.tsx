@@ -6,11 +6,12 @@ import { mediaUrl } from "../lib/mediaUrl";
 
 interface RegisterDoneProps {
   user: PrivateUserProfileResponse | null;
-  onFindServices: () => void;
+  onContinue: () => void;
 }
 
-export function RegisterDone({ user, onFindServices }: RegisterDoneProps) {
+export function RegisterDone({ user, onContinue }: RegisterDoneProps) {
   const firstName = user?.firstName ?? "there";
+  const isProvider = user?.userType === "PROVIDER";
 
   return (
     <section
@@ -40,7 +41,9 @@ export function RegisterDone({ user, onFindServices }: RegisterDoneProps) {
           You're all set, {firstName}!
         </h2>
         <p className="text-small text-muted">
-          Welcome to Mira. You can now browse services in your area.
+          {isProvider
+            ? "Welcome to Mira. Set your available hours before creating your first listing."
+            : "Welcome to Mira. You can now browse services in your area."}
         </p>
       </div>
 
@@ -48,9 +51,9 @@ export function RegisterDone({ user, onFindServices }: RegisterDoneProps) {
         variant="primary"
         size="lg"
         trailingIcon={<ArrowRight />}
-        onClick={onFindServices}
+        onClick={onContinue}
       >
-        Find services
+        {isProvider ? "Set availability" : "Find services"}
       </Button>
     </section>
   );

@@ -140,7 +140,8 @@ export function Home() {
   const categoryRef = useRef<HTMLUListElement>(null);
   const providerRef = useRef<HTMLUListElement>(null);
   const easyRead = useAccessibilityStore((state) => state.easyRead);
-  const isLoggedIn = useAuthStore((state) => !!state.user);
+  const user = useAuthStore((state) => state.user);
+  const isLoggedIn = !!user;
 
   const tagsQuery = useQuery({
     queryKey: ["service-tags"],
@@ -283,8 +284,22 @@ export function Home() {
                 trailingIcon={<ArrowRight />}
                 fullWidth
                 onClick={() => {
-                  if (isLoggedIn) return;
-                  window.location.href = "http://localhost:8081/auth/login/google";
+                  if (!user) {
+                    //TODO: replace
+                    window.location.href =
+                      "http://localhost:8081/auth/login/google";
+                    return;
+                  }
+
+                  if (user.userType === "PROVIDER") {
+                    navigate({ to: "/my-listings" });
+                    return;
+                  }
+
+                  navigate({
+                    to: "/browse-services",
+                    search: { q: "", city: "", tagIds: [], from: undefined },
+                  });
                 }}
               >
                 Get started

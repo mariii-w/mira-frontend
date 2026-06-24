@@ -689,7 +689,8 @@ describe("component accessibility", () => {
         availableTags={serviceTags}
         tagsLoading={false}
         onBack={vi.fn()}
-        onSubmit={vi.fn()}
+        onSave={vi.fn()}
+        onPublish={vi.fn()}
       />,
     );
 
@@ -959,6 +960,7 @@ describe("component accessibility", () => {
         onCreateException={vi.fn()}
         onUpdateException={vi.fn()}
         onDeleteException={vi.fn()}
+        onCreateListing={vi.fn()}
       />,
     );
 
@@ -1019,6 +1021,7 @@ describe("component accessibility", () => {
         onCreateException={onCreateException}
         onUpdateException={vi.fn()}
         onDeleteException={vi.fn()}
+        onCreateListing={vi.fn()}
       />,
     );
 
@@ -1382,7 +1385,7 @@ describe("component accessibility", () => {
     ],
     [
       "RegisterDone",
-      <RegisterDone user={user} onFindServices={vi.fn()} />,
+      <RegisterDone user={user} onContinue={vi.fn()} />,
     ],
   ] satisfies Array<[string, ReactElement]>)(
     "%s has no automated accessibility violations",
@@ -1563,13 +1566,14 @@ describe("component accessibility", () => {
     const revokeObjectURL = vi
       .spyOn(URL, "revokeObjectURL")
       .mockImplementation(() => {});
-    const onSubmit = vi.fn().mockRejectedValue(new Error("Create failed."));
+    const onSave = vi.fn().mockRejectedValue(new Error("Create failed."));
     const { container } = render(
       <CreateListing
         availableTags={serviceTags}
         tagsLoading={false}
         onBack={vi.fn()}
-        onSubmit={onSubmit}
+        onSave={onSave}
+        onPublish={vi.fn()}
       />,
     );
 
@@ -1646,7 +1650,8 @@ describe("component accessibility", () => {
         availableTags={serviceTags}
         tagsLoading
         onBack={onBack}
-        onSubmit={vi.fn()}
+        onSave={vi.fn()}
+        onPublish={vi.fn()}
       />,
     );
 
@@ -2856,7 +2861,8 @@ describe("component accessibility", () => {
         availableTags={serviceTags}
         tagsLoading={false}
         onBack={vi.fn()}
-        onSubmit={vi.fn()}
+        onSave={vi.fn()}
+        onPublish={vi.fn()}
       />,
     );
     const fileInput = container.querySelector(

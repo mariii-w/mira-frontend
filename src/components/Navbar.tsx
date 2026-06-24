@@ -11,9 +11,8 @@ import { UserMenu } from "./UserMenu";
 import { useAuthStore } from "../stores/auth";
 import { mediaUrl } from "../lib/mediaUrl";
 
-const NAV_LINKS = [
+const COMMON_NAV_LINKS = [
   { label: 'Browse Services', to: '/browse-services' },
-  { label: 'Find Users',      to: '/browse-users' },
   { label: "Calendar", to: "/calendar" },
 ] as const;
 
@@ -23,6 +22,13 @@ export function Navbar() {
   const lastName = user?.lastName ?? "";
   const isProvider = user?.userType === "PROVIDER";
   const pictureUrl = user?.profileMedia ? mediaUrl(user.profileMedia.url) : undefined;
+  const navLinks = [
+    COMMON_NAV_LINKS[0],
+    isProvider
+      ? { label: "My Services", to: "/my-listings" as const }
+      : { label: "Find Users", to: "/browse-users" as const },
+    COMMON_NAV_LINKS[1],
+  ];
 
   function handleGoogleLogin() {
     window.location.href = "http://localhost:8081/auth/login/google";
@@ -47,7 +53,7 @@ export function Navbar() {
 
           {/* Nav links */}
           <ul className="flex items-center gap-6 list-none m-0 p-0">
-            {NAV_LINKS.map(({ label, to }) => (
+            {navLinks.map(({ label, to }) => (
                 <li key={label}>
                   <Link
                       to={to}
@@ -61,12 +67,13 @@ export function Navbar() {
                 </li>
             ))}
             <li>
-              <a
-                  href="#how-it-works"
+              <Link
+                  to="/"
+                  hash="how-it-works"
                   className="text-cream/80 text-small font-medium no-underline hover:text-cream transition-colors duration-150"
               >
                 How it works
-              </a>
+              </Link>
             </li>
           </ul>
 

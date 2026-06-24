@@ -22,8 +22,11 @@ interface CreateListingProps {
   availableTags: ServiceTag[];
   tagsLoading: boolean;
   onBack: () => void;
-  onSubmit: (values: CreateListingFormValues) => Promise<void>;
+  onSave: (values: CreateListingFormValues) => Promise<void>;
+  onPublish: (values: CreateListingFormValues) => Promise<void>;
 }
+
+type SubmitAction = "save" | "publish";
 
 function validateTitle(v: string) {
   if (!v.trim()) return "Required.";
@@ -68,7 +71,8 @@ export function CreateListing({
   availableTags,
   tagsLoading,
   onBack,
-  onSubmit,
+  onSave,
+  onPublish,
 }: CreateListingProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -91,7 +95,7 @@ export function CreateListing({
   const [cityError, setCityError] = useState<string | null>(null);
   const [tagError, setTagError] = useState<string | null>(null);
 
-  const [submitting, setSubmitting] = useState(false);
+  const [activeAction, setActiveAction] = useState<SubmitAction | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -115,10 +119,7 @@ export function CreateListing({
     setImagePreviews((prev) => prev.filter((_, i) => i !== idx));
   }
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (submitting) return;
-
+  function validatedValues(): CreateListingFormValues | null {
     const tErr = validateTitle(title);
     const dErr = validateDescription(description);
     const pErr = validatePrice(price);
@@ -138,30 +139,46 @@ export function CreateListing({
     setCityError(cErr);
     setTagError(tagErr);
 
-    if (tErr || dErr || pErr || sErr || hErr || pcErr || cErr || tagErr) return;
+    if (tErr || dErr || pErr || sErr || hErr || pcErr || cErr || tagErr) {
+      return null;
+    }
 
-    setSubmitting(true);
+    return {
+      title: title.trim(),
+      description: description.trim(),
+      price: Number(price),
+      tagIds: selectedTagIds,
+      location: {
+        street: street.trim(),
+        houseNumber: houseNumber.trim(),
+        postalCode,
+        city: city.trim(),
+        serviceRadiusKm: radiusKm,
+      },
+      imageFiles,
+    };
+  }
+
+  async function submit(action: SubmitAction) {
+    if (activeAction) return;
+
+    const values = validatedValues();
+    if (!values) return;
+
+    setActiveAction(action);
     setServerError(null);
 
     try {
-      await onSubmit({
-        title: title.trim(),
-        description: description.trim(),
-        price: Number(price),
-        tagIds: selectedTagIds,
-        location: {
-          street: street.trim(),
-          houseNumber: houseNumber.trim(),
-          postalCode,
-          city: city.trim(),
-          serviceRadiusKm: radiusKm,
-        },
-        imageFiles,
-      });
+      await (action === "save" ? onSave(values) : onPublish(values));
     } catch (err) {
       setServerError((err as Error).message);
-      setSubmitting(false);
+      setActiveAction(null);
     }
+  }
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    void submit("save");
   }
 
   return (
@@ -177,35 +194,18 @@ export function CreateListing({
           className="mx-auto max-w-2xl flex flex-col gap-8 animate-fade-in-up"
         >
           {/* Header */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={onBack}
-                aria-label="Back to My Services"
-                className="inline-flex items-center justify-center w-9 h-9 rounded-full hover:bg-foreground/5 active:bg-foreground/10 transition-colors text-muted hover:text-foreground shrink-0"
-              >
-                <ArrowLeft size={20} aria-hidden="true" />
-              </button>
-              <h1 className="font-heading text-h1 font-bold text-foreground">
-                New Service
-              </h1>
-            </div>
-            <div className="flex items-center gap-3">
-              {submitting && (
-                <span aria-live="polite" className="text-small text-muted">
-                  Service is being saved…
-                </span>
-              )}
-              <Button
-                type="submit"
-                variant="primary"
-                size="md"
-                loading={submitting}
-              >
-                Save
-              </Button>
-            </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="Back to My Services"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-full hover:bg-foreground/5 active:bg-foreground/10 transition-colors text-muted hover:text-foreground shrink-0"
+            >
+              <ArrowLeft size={20} aria-hidden="true" />
+            </button>
+            <h1 className="font-heading text-h1 font-bold text-foreground">
+              New Service
+            </h1>
           </div>
 
           {serverError && (
@@ -451,7 +451,37 @@ export function CreateListing({
             )}
           </div>
 
-          <div className="pb-8" />
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 border-t border-border/40 pt-6 pb-8">
+            {activeAction && (
+              <span
+                aria-live="polite"
+                className="text-small text-muted sm:mr-auto"
+              >
+                Service is being {activeAction === "save" ? "saved" : "published"}…
+              </span>
+            )}
+            <Button
+              type="submit"
+              variant="secondary"
+              size="md"
+              loading={activeAction === "save"}
+              disabled={activeAction !== null}
+              aria-label="Save"
+            >
+              Save
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              loading={activeAction === "publish"}
+              disabled={activeAction !== null}
+              aria-label="Publish"
+              onClick={() => void submit("publish")}
+            >
+              Publish
+            </Button>
+          </div>
         </form>
       </main>
     </>

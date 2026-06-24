@@ -9,6 +9,16 @@ React + TypeScript frontend for the Mira platform. Built with Vite, Tailwind CSS
 <!-- Add Figma link here -->
 > Figma: https://www.figma.com/design/DDBQZwK4QjCup1GH4OblFu/Design?node-id=240-1053&t=Mxw89tVCKZcrnzMo-1
 
+Stripe testing info
+```
+Kartennummer: 4242 4242 4242 4242
+Ablaufdatum: 12/34
+CVC: 123
+PLZ: 12345
+Name: user name
+
+E-Mail: user@example.com
+```
 ---
 
 ## Tech Stack
