@@ -83,7 +83,7 @@ vi.mock("../api/mira", () => ({
   getAvailability: vi.fn(() =>
     Promise.resolve({ status: 200, data: { days: [] } }),
   ),
-  getPublicProfileListings: vi.fn(() =>
+  getPublicListings: vi.fn(() =>
     Promise.resolve({ status: 200, data: { items: [] } }),
   ),
 }));

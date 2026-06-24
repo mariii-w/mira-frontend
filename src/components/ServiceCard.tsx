@@ -39,9 +39,9 @@ export function ServiceCard(
 {
     if (variant === 'compact') {
         return (
-            <div className="bg-linen rounded-2xl flex flex-col p-4 gap-3 border border-border w-full h-full">
+            <div className="bg-surface rounded-2xl flex flex-col p-4 gap-3 w-full h-full">
                 <div className="flex items-center gap-3">
-                    <AvatarIcon firstName={providerFirstName} lastName={providerLastName} picture="" size={56} />
+                    <AvatarIcon firstName={providerFirstName} lastName={providerLastName} picture="" size={56} bgColorClassName="bg-forest" />
                     <div className="flex flex-col min-w-0">
                         <span className="text-body font-bold text-foreground truncate">
                             {providerFirstName} {providerLastName[0]}.
@@ -61,7 +61,7 @@ export function ServiceCard(
                     <span className="self-end text-body font-bold text-primary">from {hourRate}€/hr</span>
                     <Link
                         to={link}
-                        className="relative inline-flex items-center justify-center font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 w-full px-4 text-body bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                        className="relative inline-flex items-center justify-center font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 w-full px-4 text-body bg-primary text-primary-foreground no-underline hover:bg-primary-hover active:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                     >
                         View Listing
                     </Link>
@@ -118,7 +118,7 @@ export function ServiceCard(
                         <div className='ml-auto shrink-0 flex items-center gap-3'>
                             <Link
                                 to={link}
-                                className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-hover [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                                className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body bg-primary text-primary-foreground no-underline hover:bg-primary-hover active:bg-primary-hover [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                             >
                                 View service
                                 <ArrowRight aria-hidden="true" />

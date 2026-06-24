@@ -20,13 +20,11 @@ export function ServiceUserToggle({
   checked,
   onCheckedChange,
 }: ServiceUserToggleProps) {
-  // "Services" and "Users" live on separate routes, so this component is freshly
-  // mounted on every switch and never sees `checked` change on a live node — a
-  // CSS transition would have nothing to animate. Instead we play an entry slide:
-  // first paint renders the pill at the *previous* tab's position, then we move
-  // it to the active one. The double rAF guarantees the start frame is painted
-  // before the change, so the transition actually fires. Under reduced motion the
-  // global `transition-duration: 0.01ms` rule makes this an instant snap.
+  // On the initial route load, play an entry slide from the opposite side. Once
+  // mounted in the persistent search layout, later route switches update `checked`
+  // on this same DOM node and use the regular CSS transition. The double rAF
+  // guarantees the initial start frame is painted before the change. Under
+  // reduced motion the global duration rule makes this an instant snap.
   const [settled, setSettled] = useState(false);
   useEffect(() => {
     let raf2 = 0;
@@ -47,7 +45,7 @@ export function ServiceUserToggle({
       id={id}
       checked={checked}
       onCheckedChange={onCheckedChange}
-      className="relative inline-grid grid-cols-2 h-10 rounded-full bg-linen p-1 cursor-pointer"
+      className="relative inline-grid grid-cols-2 h-10 rounded-full bg-linen p-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
     >
       {/* Sliding pill */}
       <span

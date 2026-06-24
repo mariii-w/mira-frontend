@@ -4,7 +4,9 @@ import {
   getGetPublicListingQueryKey,
   getGetPublicProfileListingsQueryKey,
   getGetAvailabilityQueryKey,
+  getGetPublicProfileCredentialsQueryKey,
   getPublicListing,
+  getPublicProfileCredentials,
   getPublicProfileListings,
   getAvailability,
 } from "../../api/mira";
@@ -76,6 +78,24 @@ function ListingDetailRoute() {
     enabled: !!authorId,
   });
 
+  const { data: publicCredentialsData } = useQuery({
+    queryKey: getGetPublicProfileCredentialsQueryKey(queryAuthorId),
+    queryFn: async () => {
+      const response = await getPublicProfileCredentials(queryAuthorId);
+
+      if (response.status === 404) {
+        return { items: [] };
+      }
+
+      if (response.status !== 200) {
+        throw new Error(response.data.detail ?? "Failed to load provider credentials.");
+      }
+
+      return response.data;
+    },
+    enabled: !!authorId,
+  });
+
   const { data: availability } = useQuery({
     queryKey: getGetAvailabilityQueryKey(listingId, {
       from: today,
@@ -118,6 +138,7 @@ function ListingDetailRoute() {
       availableToday={availableToday}
       nextAvailableDate={nextAvailableDate}
       otherListings={otherListings}
+      publicVerifiedCredentials={publicCredentialsData?.items ?? []}
       onBookNow={() =>
         navigate({ to: "/listings/$listingId/book", params: { listingId } })
       }
