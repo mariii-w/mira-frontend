@@ -15,8 +15,12 @@ import { disconnectChatSocket, publishChatText, subscribeToChat } from "../lib/c
 import { describeMessageContent, toChatPreview } from "../lib/chatContent.ts";
 import { useAuthStore } from "../stores/auth";
 import { useGetPublicListing, useHistory, useListChats } from "../api/mira.ts";
+import { mediaUrl } from "../lib/mediaUrl";
 
 export const Route = createFileRoute('/chat')({
+    validateSearch: (search: Record<string, unknown>) => ({
+        cid: typeof search.cid === "string" ? search.cid : undefined,
+    }),
     component: () => <Chat/>
 })
 
@@ -25,6 +29,7 @@ export const Route = createFileRoute('/chat')({
 type LiveMessage = ChatMessage & { rawId: number };
 // eslint-disable-next-line react-refresh/only-export-components
 function Chat() {
+    const { cid: cidFromLink } = Route.useSearch();
     const [selectedChatId, setSelectedChatId] = useState<string>("");
     const [messagesByChat, setMessagesByChat] = useState<Record<string, LiveMessage[]>>({});
     const [draft, setDraft] = useState("");
@@ -47,8 +52,8 @@ function Chat() {
         : [];
     const chatIdsKey = chats.map((c) => c.id).join(",");
 
-    // Defaults to the first chat until the user picks one.
-    const activeChatId = selectedChatId || chats[0]?.id || "";
+    // Deep link (e.g. from a listing's "Message" button) wins, then manual pick, then the first chat.
+    const activeChatId = selectedChatId || cidFromLink || chats[0]?.id || "";
     const selectedChat = chats.find((c) => c.id === activeChatId);
 
     const { data: historyResponse, isLoading: historyLoading, isError: historyErrored } = useHistory(
@@ -76,7 +81,7 @@ function Chat() {
     const liveMessages = (messagesByChat[activeChatId] ?? []).filter((m) => !historyRawIds.has(m.rawId));
     const messages: ChatMessage[] = [...historyMessages, ...liveMessages];
 
-    const { data: listingResponse } = useGetPublicListing(
+    const { data: listingResponse, isError: listingIsError } = useGetPublicListing(
         selectedChat?.listingId ?? "",
         { query: { enabled: !!selectedChat?.listingId } },
     );
@@ -292,7 +297,7 @@ function Chat() {
                                         onKeyDown={handleTextareaKeyDown}
                                     />
                                     <Button
-                                        className=" mt-auto mb-2 mx-auto shrink-0"
+                                        className="my-auto mr-5 ml-2 shrink-0"
                                         onClick={handleSend}
                                         disabled={!draft.trim()}
                                     >
@@ -306,12 +311,14 @@ function Chat() {
                             <div className="m-4  border-border">
                                 {listing ? (
                                     <ServiceCardChat
-                                        pictureLink={listing.media[0]?.url}
+                                        pictureLink={listing.media[0] ? mediaUrl(listing.media[0].url) : undefined}
                                         link=""
                                         label={listing.title}
                                         tags={listing.tags}
                                         hourRate={listing.price}
                                     />
+                                ) : selectedChat?.listingId && !listingIsError ? (
+                                    <p className="text-black/60">Loading service…</p>
                                 ) : (
                                     <p className="text-black/60">No service linked to this conversation.</p>
                                 )}
