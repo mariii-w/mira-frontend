@@ -44,6 +44,7 @@ export function toChatPreview(overview: ChatOverviewResponse): ChatPreview {
 
     return {
         id: overview.cid,
+        listingId: overview.listingId,
         firstName,
         lastName,
         lastMessage: overview.latestMessage ? describeMessageContent(overview.latestMessage) : "No messages yet",
