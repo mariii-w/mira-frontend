@@ -14,9 +14,9 @@ tags:
   - name: Public Profiles
     description: Publicly visible user profile projections used for discovery and profile viewing.
   - name: Credentials
-    description: Private credential resources attached to user profiles. These routes expose authenticated credential representations used for submission, review, visibility, and deletion.
-  - name: Public Credentials
-    description: Publicly visible credential projections used for profile viewing.
+    description: Credential catalog and private credential resources attached to user profiles. These routes expose available credential types and authenticated credential representations used for submission, visibility, and deletion.
+  - name: Credential Verifications
+    description: Verification resources for asynchronous evaluation of submitted user credentials.
   - name: Listings (Public)
     description: Public listing discovery resources.
   - name: Listings (Author)
@@ -347,9 +347,9 @@ paths:
         "200":
           description: Profile picture uploaded and linked successfully.
           content:
-            "application/json":
+            "application/hal+json":
               schema:
-                "$ref": "#/components/schemas/ProfileMediaResponse"
+                "$ref": "#/components/schemas/ProfileMediaEntityModel"
         "400":
           description: Bad Request. The uploaded file or path parameter is invalid.
           content:
@@ -559,7 +559,7 @@ paths:
         - Public Profiles
       operationId: getPublicProfile
       summary: Get public profile
-      description: Returns the public profile identified by userId. A user profile is publicly eligible only when registrationComplete is true and isPublic is true. If the user profile does not exist, registration is incomplete, or public visibility is disabled, no public profile is returned. The response intentionally does not reveal which of these cases applies.
+      description: Returns the public profile identified by userId, including whether the profile has at least one visible approved credential. A user profile is publicly eligible only when registrationComplete is true and isPublic is true. If the user profile does not exist, registration is incomplete, or public visibility is disabled, no public profile is returned. The response intentionally does not reveal which of these cases applies.
       parameters:
         - "$ref": "#/components/parameters/UserIdPathParam"
       responses:
@@ -581,67 +581,53 @@ paths:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
-  "/v1/users/{userId}/public-credentials":
+  "/v1/public-profiles/{userId}/credentials":
     get:
       tags:
-        - Public Credentials
-      summary: List public credentials
-      description: "Returns the public credential projection for the user profile identified by userId. Public credentials are derived from the user's credentials. The parent user profile must be publicly eligible, meaning registrationComplete is true and isPublic is true. Only credentials with status ACTIVE and isVisible set to true are included."
+        - Public Profiles
+      operationId: getPublicProfileCredentials
+      summary: List public profile credentials
+      description: Returns public verified credential summaries for the public profile identified by userId. The parent user profile must be publicly eligible, meaning registrationComplete is true and isPublic is true. Only credentials with isVisible set to true, a completed approved verification, and no past expiration date are included. Evidence media, hidden credentials, pending credentials, denied credentials, failed verifications, and verification feedback are never exposed through this public projection.
       parameters:
         - "$ref": "#/components/parameters/UserIdPathParam"
       responses:
         "200":
-          description: Public credentials retrieved successfully.
+          description: Public profile credentials retrieved successfully.
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/PublicCredentialCollectionResponse"
+                "$ref": "#/components/schemas/PublicProfileCredentialCollectionResponse"
         "400":
-          description: Bad Request. One or more path or query parameters are invalid.
+          description: Bad Request. One or more path parameters are invalid.
           content:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
         "404":
-          description: Not Found. No resource exists for the given identifier.
+          description: Not Found. No public profile exists for the given userId. This response intentionally does not reveal whether the user is missing, incomplete, or not public.
           content:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
-  "/v1/users/{userId}/public-credentials/{credentialId}":
+  "/v1/credentials":
     get:
       tags:
-        - Public Credentials
-      summary: Get public credential
-      description: "Returns the public credential projection identified by credentialId for the user profile identified by userId. Public credentials are derived from the user's credentials. The parent user profile must be publicly eligible, meaning registrationComplete is true and isPublic is true. This route returns only credentials with status ACTIVE and isVisible set to true. If the user profile does not exist, is not publicly eligible, the credential does not belong to the user, or the credential is not part of the public projection, no public credential is returned."
-      parameters:
-        - "$ref": "#/components/parameters/UserIdPathParam"
-        - "$ref": "#/components/parameters/CredentialIdPathParam"
+        - Credentials
+      summary: List credential types
+      description: Returns the credential catalog available for provider credential submissions. Clients use this list to populate credential-type selection controls.
       responses:
         "200":
-          description: Public credential retrieved successfully.
+          description: Credential catalog retrieved successfully.
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/PublicCredentialResponse"
-        "400":
-          description: Bad Request. One or more path or query parameters are invalid.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-        "404":
-          description: Not Found. No resource exists for the given identifier.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
+                "$ref": "#/components/schemas/CredentialTypeCollectionResponse"
   "/v1/users/{userId}/credentials":
     get:
       tags:
         - Credentials
       summary: List credentials
-      description: Returns all credentials assigned to the user profile identified by userId. This includes pending, active, expired, denied, and hidden credentials. Access is allowed when the authenticated account owns the target user profile or is an admin account.
+      description: Returns all credential submissions attached to the user profile identified by userId. This includes hidden credentials and their latest verification summary when one exists. Access is allowed when the authenticated account owns the target user profile or is an admin account.
       security:
         - bearerHttpAuthentication: []
       parameters:
@@ -681,7 +667,7 @@ paths:
       tags:
         - Credentials
       summary: Submit credential
-      description: Submits one credential claim for the user profile identified by userId. Access is allowed only when the authenticated account owns the target user profile. The request references a preseeded credential type and one uploaded evidence media file. If accepted, the backend creates a credential with status PENDING and isVisible set to false.
+      description: Submits one credential claim for the user profile identified by userId. Access is allowed only when the authenticated account owns the target provider profile. The multipart request references a catalog credential type and one uploaded evidence file. If accepted, the backend creates a credential submission with isVisible set to false. Verification is represented by separate verification resources.
       security:
         - bearerHttpAuthentication: []
       parameters:
@@ -689,7 +675,7 @@ paths:
       requestBody:
         required: true
         content:
-          "application/json":
+          "multipart/form-data":
             schema:
               "$ref": "#/components/schemas/SubmitCredentialRequest"
       responses:
@@ -743,7 +729,7 @@ paths:
       tags:
         - Credentials
       summary: Get credential
-      description: Returns one credential assigned to the user profile identified by userId. Access is allowed when the authenticated account owns the target user profile or is an admin account.
+      description: Returns one credential submission attached to the user profile identified by userId, including its latest verification summary when one exists. Access is allowed when the authenticated account owns the target user profile or is an admin account.
       security:
         - bearerHttpAuthentication: []
       parameters:
@@ -784,7 +770,7 @@ paths:
       tags:
         - Credentials
       summary: Update credential
-      description: Partially updates a credential. Owners may update only isVisible. Admin accounts may additionally update status and expiresAt. The request body may include any allowed subset of these fields. If a request includes any field that the caller is not allowed to update, the request is rejected with 403 Forbidden.
+      description: Partially updates user-controlled credential submission metadata. Owners may update isVisible. Verification state is not updated through this route.
       security:
         - bearerHttpAuthentication: []
       parameters:
@@ -801,12 +787,6 @@ paths:
                 summary: Owner updates credential visibility
                 value:
                   isVisible: true
-              adminLifecycleUpdate:
-                summary: Admin updates all writable credential fields
-                value:
-                  isVisible: true
-                  status: ACTIVE
-                  expiresAt: "2027-12-31T23:59:59Z"
       responses:
         "200":
           description: Credential updated successfully.
@@ -848,7 +828,7 @@ paths:
       tags:
         - Credentials
       summary: Delete credential
-      description: "Deletes a credential assigned to the user profile identified by userId. Access is allowed only when the authenticated account owns the target user profile. Admin accounts cannot use this route to delete another user's credential. Deleting a credential removes it from the managed credentials collection and from the public credential projection if it was publicly visible."
+      description: Deletes a credential submission attached to the user profile identified by userId. Access is allowed only when the authenticated account owns the target user profile. Admin accounts cannot use this route to delete another user's credential. Deleting a credential removes its private evidence and verification resources and removes it from the derived public profile verification projection if it was publicly visible and approved.
       security:
         - bearerHttpAuthentication: []
       parameters:
@@ -859,6 +839,195 @@ paths:
           description: Credential deleted successfully. No response body is returned.
         "400":
           description: Bad Request. One or more path or query parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          description: Unauthorized. Authentication is required.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No resource exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/users/{userId}/credentials/{credentialId}/evidence-media/content":
+    get:
+      tags:
+        - Credentials
+      operationId: getCredentialEvidenceMediaContent
+      summary: Get credential evidence media content
+      description: Streams the private evidence media bytes for one credential submission. Access is allowed when the authenticated account owns the target user profile or is an admin account. The route never exposes the internal media storage path and is not part of the public profile projection.
+      security:
+        - bearerHttpAuthentication: []
+      parameters:
+        - "$ref": "#/components/parameters/UserIdPathParam"
+        - "$ref": "#/components/parameters/CredentialIdPathParam"
+      responses:
+        "200":
+          description: Credential evidence media content retrieved successfully.
+          content:
+            "image/jpeg":
+              schema:
+                type: string
+                format: binary
+            "image/png":
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad Request. One or more path parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          description: Unauthorized. Authentication is required.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. The credential or its evidence media does not exist for the given user.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/users/{userId}/credentials/{credentialId}/verifications":
+    get:
+      tags:
+        - Credential Verifications
+      summary: List credential verifications
+      description: Returns verification attempts for the credential submission identified by credentialId. Access is allowed when the authenticated account owns the target user profile or is an admin account.
+      security:
+        - bearerHttpAuthentication: []
+      parameters:
+        - "$ref": "#/components/parameters/UserIdPathParam"
+        - "$ref": "#/components/parameters/CredentialIdPathParam"
+      responses:
+        "200":
+          description: Credential verifications retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/CredentialVerificationCollectionResponse"
+        "400":
+          description: Bad Request. One or more path or query parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          description: Unauthorized. Authentication is required.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No resource exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+    post:
+      tags:
+        - Credential Verifications
+      summary: Create credential verification
+      description: Creates a verification attempt for the credential submission identified by credentialId. The backend accepts the verification resource and processes the Lisa VLM check asynchronously. If a verification for this credential is already queued or processing, the request conflicts with the current resource state.
+      security:
+        - bearerHttpAuthentication: []
+      parameters:
+        - "$ref": "#/components/parameters/UserIdPathParam"
+        - "$ref": "#/components/parameters/CredentialIdPathParam"
+      responses:
+        "202":
+          description: Credential verification accepted for asynchronous processing.
+          headers:
+            Location:
+              description: URI of the created verification resource.
+              required: true
+              schema:
+                type: string
+                format: uri-reference
+                examples:
+                  - /v1/users/223e4567-e89b-12d3-a456-426614174000/credentials/423e4567-e89b-12d3-a456-426614174000/verifications/523e4567-e89b-12d3-a456-426614174000
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/CredentialVerificationResponse"
+        "400":
+          description: Bad Request. One or more path parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          description: Unauthorized. Authentication is required.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No resource exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "409":
+          description: Conflict. The request conflicts with the current verification state.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/users/{userId}/credentials/{credentialId}/verifications/{verificationId}":
+    get:
+      tags:
+        - Credential Verifications
+      summary: Get credential verification
+      description: Returns one verification attempt for the credential submission identified by credentialId. Access is allowed when the authenticated account owns the target user profile or is an admin account.
+      security:
+        - bearerHttpAuthentication: []
+      parameters:
+        - "$ref": "#/components/parameters/UserIdPathParam"
+        - "$ref": "#/components/parameters/CredentialIdPathParam"
+        - "$ref": "#/components/parameters/VerificationIdPathParam"
+      responses:
+        "200":
+          description: Credential verification retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/CredentialVerificationResponse"
+        "400":
+          description: Bad Request. One or more path parameters are invalid.
           content:
             "application/problem+json":
               schema:
@@ -952,6 +1121,7 @@ paths:
                         title: Laptop setup and software installation
                         price: 25.0
                         author:
+                          userId: "22222222-3333-4444-5555-666666666666"
                           name: Anna
                           surname: Schmidt
                         publishedAt: "2026-04-20T13:00:00Z"
@@ -995,24 +1165,39 @@ paths:
       requestBody:
         required: true
         content:
-          "application/json":
+          "multipart/form-data":
             schema:
-              "$ref": "#/components/schemas/CreateListingRequest"
+              type: object
+              required:
+                - listing
+              properties:
+                listing:
+                  "$ref": "#/components/schemas/CreateListingRequest"
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+            encoding:
+              listing:
+                contentType: application/json
             examples:
               default:
-                summary: Example listing creation request
+                summary: Example multipart listing creation request
                 value:
-                  tagIds:
-                    - dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
-                  title: Laptop setup and software installation
-                  description: I help with setting up laptops, installing software, and solving basic PC issues.
-                  price: 25.0
-                  location:
-                    street: "Hauptstraße"
-                    houseNumber: "10"
-                    city: Berlin
-                    postalCode: "10115"
-                    serviceRadiusKm: 15
+                  listing:
+                    tagIds:
+                      - dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                    title: Laptop setup and software installation
+                    description: I help with setting up laptops, installing software, and solving basic PC issues.
+                    price: 25.0
+                    location:
+                      street: "Hauptstraße"
+                      houseNumber: "10"
+                      city: Berlin
+                      postalCode: "10115"
+                      serviceRadiusKm: 15
+                  files: []
       responses:
         "201":
           description: Listing created successfully.
@@ -1044,6 +1229,7 @@ paths:
                     publicationStatus: DRAFT
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1108,8 +1294,8 @@ paths:
                       - field: location
                         message: the provided address could not be geocoded
         "503":
-          "$ref": "#/components/responses/GeocodingUnavailableError"
-          description: Service Unavailable. A required downstream service is temporarily unavailable.
+          "$ref": "#/components/responses/ExternalServiceUnavailableError"
+          description: Service Unavailable. A required downstream service, such as geocoding or easy-description generation, is temporarily unavailable. No listing is created.
   "/v1/public-listings/{listingId}":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
@@ -1141,6 +1327,7 @@ paths:
                     price: 25.0
                     publicationStatus: ACTIVE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1173,6 +1360,164 @@ paths:
                     status: 404
                     detail: Listing with the given identifier was not found
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31
+  "/v1/public-profiles/{userId}/listings":
+    parameters:
+      - "$ref": "#/components/parameters/UserIdPathParam"
+    get:
+      summary: List public listings for a public profile
+      operationId: getPublicProfileListings
+      description: Returns publicly visible listings owned by the public profile identified by userId. The profile must be publicly eligible, meaning registrationComplete is true and isPublic is true. Listings are returned only when publicationStatus is ACTIVE and moderationStatus is VISIBLE.
+      tags:
+        - Listings (Public)
+      parameters:
+        - name: tagIds
+          in: query
+          required: false
+          description: Filter listings by one or more predefined service tag UUIDs.
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+        - name: city
+          in: query
+          required: false
+          description: Filter listings by stored address city.
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          required: false
+          description: Minimum price, inclusive.
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - name: maxPrice
+          in: query
+          required: false
+          description: Maximum price, inclusive.
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - "$ref": "#/components/parameters/LimitQueryParam"
+        - "$ref": "#/components/parameters/FromQueryParam"
+        - name: q
+          in: query
+          required: false
+          description: Free-text search over listing title and description.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Listings retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PublicListingCollectionResponse"
+              examples:
+                default:
+                  summary: Example public profile listings
+                  value:
+                    items:
+                      - listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
+                        tags:
+                          - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                            name: Laptop support
+                            isBarrierefrei: false
+                            isActive: true
+                        title: Laptop setup and software installation
+                        description: I help with setting up laptops, installing software, and solving basic PC issues.
+                        price: 25.0
+                        author:
+                          userId: "22222222-3333-4444-5555-666666666666"
+                          name: Anna
+                          surname: Schmidt
+                        publishedAt: "2026-04-20T13:00:00Z"
+                        location:
+                          city: Berlin
+                          postalCode: "10115"
+                          serviceRadiusKm: 15
+                        primaryMedia:
+                          mediaId: "11111111-2222-3333-4444-555555555555"
+                          url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
+                          altText: Open laptop on a wooden desk
+                          altTextStatus: COMPLETED
+                    cursor:
+                      limit: 20
+                      next: null
+        "400":
+          description: Bad Request. One or more path or query parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No public profile exists for the given userId.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/public-profiles/{userId}/listings/{listingId}":
+    parameters:
+      - "$ref": "#/components/parameters/UserIdPathParam"
+      - "$ref": "#/components/parameters/ListingIdParam"
+    get:
+      summary: Get public profile listing details
+      operationId: getPublicProfileListing
+      description: Returns one publicly visible listing owned by the public profile identified by userId. The profile must be publicly eligible, and the listing must belong to that profile with publicationStatus ACTIVE and moderationStatus VISIBLE.
+      tags:
+        - Listings (Public)
+      responses:
+        "200":
+          description: Listing retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PublicListingDetails"
+              examples:
+                default:
+                  summary: Example public profile listing details
+                  value:
+                    listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
+                    tags:
+                      - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                        name: Laptop support
+                        isBarrierefrei: false
+                        isActive: true
+                    title: Laptop setup and software installation
+                    description: I help with setting up laptops, installing software, and solving basic PC issues.
+                    price: 25.0
+                    publicationStatus: ACTIVE
+                    author:
+                      userId: "22222222-3333-4444-5555-666666666666"
+                      name: Anna
+                      surname: Schmidt
+                    createdAt: "2026-04-20T12:00:00Z"
+                    updatedAt: "2026-04-20T13:00:00Z"
+                    publishedAt: "2026-04-20T13:00:00Z"
+                    location:
+                      city: Berlin
+                      postalCode: "10115"
+                      serviceRadiusKm: 15
+                    media:
+                      - mediaId: "11111111-2222-3333-4444-555555555555"
+                        position: 0
+                        url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
+                        altText: Open laptop on a wooden desk
+                        altTextStatus: COMPLETED
+                        mimeType: image/jpeg
+                        size: 248576
+                        width: 1280
+                        height: 720
+                        createdAt: "2026-04-20T16:10:00Z"
+        "404":
+          description: Not Found. No public profile listing exists for the given identifiers.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
   "/v1/listings/{listingId}":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
@@ -1225,6 +1570,7 @@ paths:
                     publicationStatus: DRAFT
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1315,8 +1661,8 @@ paths:
                       - field: location
                         message: the provided address could not be geocoded
         "503":
-          "$ref": "#/components/responses/GeocodingUnavailableError"
-          description: Service Unavailable. A required downstream service is temporarily unavailable.
+          "$ref": "#/components/responses/ExternalServiceUnavailableError"
+          description: Service Unavailable. A required downstream service, such as geocoding or easy-description generation, is temporarily unavailable. No listing changes are persisted.
     delete:
       summary: Delete listing
       operationId: deleteListing
@@ -1423,6 +1769,7 @@ paths:
                     publicationStatus: ACTIVE
                     moderationStatus: BLOCKED
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1456,6 +1803,7 @@ paths:
                     publicationStatus: ACTIVE
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1490,7 +1838,7 @@ paths:
                     instance: /v1/admin/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/moderation
                     errors:
                       - field: moderationStatus
-                        message: must be either VISIBLE or BLOCKED
+                        message: must be one of VISIBLE, BLOCKED, or REPORTED
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -1552,7 +1900,7 @@ paths:
                     instance: /v1/admin/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/moderation
                     errors:
                       - field: moderationStatus
-                        message: must be either VISIBLE or BLOCKED
+                        message: must be one of VISIBLE, BLOCKED, or REPORTED
   "/v1/service-tags":
     get:
       summary: List service tags
@@ -1566,20 +1914,21 @@ paths:
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/ServiceTagCollectionResponse"
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ServiceTag"
               examples:
                 default:
                   summary: Example service tags
                   value:
-                    items:
-                      - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
-                        name: Laptop support
-                        isBarrierefrei: false
-                        isActive: true
-                      - tagId: "5f5b9e3a-0c7c-45f4-9d8d-59f1d15a2a77"
-                        name: Wheelchair accessible
-                        isBarrierefrei: true
-                        isActive: true
+                    - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                      name: Laptop support
+                      isBarrierefrei: false
+                      isActive: true
+                    - tagId: "5f5b9e3a-0c7c-45f4-9d8d-59f1d15a2a77"
+                      name: Wheelchair accessible
+                      isBarrierefrei: true
+                      isActive: true
   "/v1/users/{userId}/listings":
     parameters:
       - "$ref": "#/components/parameters/UserIdPathParam"
@@ -1633,6 +1982,7 @@ paths:
                         publicationStatus: DRAFT
                         moderationStatus: VISIBLE
                         author:
+                          userId: "22222222-3333-4444-5555-666666666666"
                           name: Anna
                           surname: Schmidt
                         publishedAt: null
@@ -1702,6 +2052,7 @@ paths:
                     publicationStatus: PAUSED
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1771,6 +2122,7 @@ paths:
                     publicationStatus: ACTIVE
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1854,7 +2206,7 @@ paths:
                       - field: location
                         message: the provided address could not be geocoded
         "503":
-          "$ref": "#/components/responses/GeocodingUnavailableError"
+          "$ref": "#/components/responses/ExternalServiceUnavailableError"
           description: Service Unavailable. A required downstream service is temporarily unavailable.
   "/v1/listings/{listingId}/pause":
     parameters:
@@ -1890,6 +2242,7 @@ paths:
                     publicationStatus: PAUSED
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -1987,6 +2340,7 @@ paths:
                     publicationStatus: ACTIVE
                     moderationStatus: VISIBLE
                     author:
+                      userId: "22222222-3333-4444-5555-666666666666"
                       name: Anna
                       surname: Schmidt
                     createdAt: "2026-04-20T12:00:00Z"
@@ -2076,6 +2430,7 @@ paths:
                         publicationStatus: ACTIVE
                         moderationStatus: VISIBLE
                         author:
+                          userId: "22222222-3333-4444-5555-666666666666"
                           name: Anna
                           surname: Schmidt
                         publishedAt: "2026-04-20T16:00:00Z"
@@ -2234,10 +2589,56 @@ paths:
   "/v1/listings/{listingId}/media":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
+    get:
+      summary: List listing media
+      operationId: getListingMedia
+      description: Returns all media items attached to a listing owned by the authenticated user, ordered by ascending position.
+      tags:
+        - Listings (Media)
+      security:
+        - bearerHttpAuthentication: []
+      responses:
+        "200":
+          description: Listing media retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ListingMediaItem"
+              examples:
+                default:
+                  summary: Example listing media collection
+                  value:
+                    - mediaId: "11111111-2222-3333-4444-555555555555"
+                      position: 0
+                      url: "/v1/listing-media/11111111-2222-3333-4444-555555555555/content"
+                      altText: Open laptop on a wooden desk
+                      altTextStatus: COMPLETED
+                      mimeType: image/jpeg
+                      size: 248576
+                      width: 1280
+                      height: 720
+                      createdAt: "2026-04-20T16:10:00Z"
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+          description: Unauthorized. Authentication is required.
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No listing exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
     post:
       summary: Upload listing media
       operationId: uploadListingMedia
-      description: "Uploads one or more media files to a listing owned by the authenticated user. The request may partially succeed: valid files are uploaded, invalid files are reported in the failed collection. Upload is allowed for draft, active, and paused listings, but not for deleted listings. A listing can have at most 10 media items in total; if the upload would exceed the limit, only the allowed files are uploaded and the remaining files are returned in the failed collection."
+      description: "Uploads one or more media files to a listing owned by the authenticated user. Upload is all-or-nothing: validation, capacity, or storage failures abort the whole request. Upload is allowed for draft, active, and paused listings, but not for deleted listings. A listing can have at most 10 media items in total."
       tags:
         - Listings (Media)
       security:
@@ -2250,28 +2651,26 @@ paths:
               "$ref": "#/components/schemas/UploadListingMediaRequest"
       responses:
         "200":
-          description: Media upload processed successfully, possibly with partial failures.
+          description: Media upload processed successfully.
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/BulkUploadListingMediaResponse"
+                "$ref": "#/components/schemas/ListingMediaUploadResponse"
               examples:
-                partialSuccess:
-                  summary: Example partial upload result
+                default:
+                  summary: Example upload result
                   value:
                     uploaded:
                       - mediaId: "11111111-2222-3333-4444-555555555555"
+                        position: 0
                         url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
                         altText: Open laptop on a wooden desk
+                        altTextStatus: COMPLETED
                         mimeType: image/jpeg
                         size: 248576
                         width: 1280
                         height: 720
                         createdAt: "2026-04-20T16:10:00Z"
-                    failed:
-                      - fileName: too-large.png
-                        errorCode: FILE_TOO_LARGE
-                        message: File exceeds the maximum allowed size
         "400":
           description: Bad Request. The request payload is invalid.
           content:
@@ -2351,13 +2750,10 @@ paths:
                     errors:
                       - field: files
                         message: all files have unsupported media types
-  "/v1/listings/{listingId}/media/{mediaId}":
-    parameters:
-      - "$ref": "#/components/parameters/ListingIdParam"
-      - "$ref": "#/components/parameters/MediaIdParam"
     patch:
-      summary: Update listing media metadata
-      description: Partially updates media metadata of a listing owned by the authenticated user. Only altText can be changed.
+      summary: Reorder listing media
+      operationId: updateListingMedia
+      description: Reorders all media items attached to a listing owned by the authenticated user. The items array defines the complete desired order; it must contain exactly the media IDs currently attached to the listing.
       tags:
         - Listings (Media)
       security:
@@ -2370,12 +2766,93 @@ paths:
               "$ref": "#/components/schemas/UpdateListingMediaRequest"
             examples:
               default:
-                summary: Example media update request
+                summary: Example reorder request
                 value:
-                  altText: Laptop repair tools on a desk
+                  items:
+                    - mediaId: "11111111-2222-3333-4444-555555555555"
+                    - mediaId: "22222222-3333-4444-5555-666666666666"
       responses:
         "200":
-          description: Listing media updated successfully.
+          description: Listing media reordered successfully.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ListingMediaItem"
+              examples:
+                default:
+                  summary: Example reordered listing media
+                  value:
+                    - mediaId: "11111111-2222-3333-4444-555555555555"
+                      position: 0
+                      url: "/v1/listing-media/11111111-2222-3333-4444-555555555555/content"
+                      altText: Open laptop on a wooden desk
+                      altTextStatus: COMPLETED
+                      mimeType: image/jpeg
+                      size: 248576
+                      width: 1280
+                      height: 720
+                      createdAt: "2026-04-20T16:10:00Z"
+        "400":
+          description: Bad Request. The request payload is invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+          description: Unauthorized. Authentication is required.
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No listing exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "409":
+          description: Conflict. The request conflicts with the current resource state.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "422":
+          description: Unprocessable Entity. The provided order does not contain exactly the currently attached listing media IDs.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/listings/{listingId}/media/{mediaId}":
+    parameters:
+      - "$ref": "#/components/parameters/ListingIdParam"
+      - "$ref": "#/components/parameters/MediaIdParam"
+    put:
+      summary: Replace listing media file
+      operationId: replaceListingMedia
+      description: Replaces the underlying file for an existing listing media item owned by the authenticated user while keeping the same listing-media entry and position. Alt text generation is scheduled for the replacement file.
+      tags:
+        - Listings (Media)
+      security:
+        - bearerHttpAuthentication: []
+      requestBody:
+        required: true
+        content:
+          "multipart/form-data":
+            schema:
+              "$ref": "#/components/schemas/ReplaceListingMediaRequest"
+            examples:
+              default:
+                summary: Example media replacement request
+                value:
+                  file: listing-replacement.jpg
+      responses:
+        "200":
+          description: Listing media replaced successfully.
           content:
             "application/json":
               schema:
@@ -2385,8 +2862,10 @@ paths:
                   summary: Example updated media item
                   value:
                     mediaId: "11111111-2222-3333-4444-555555555555"
-                    url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
-                    altText: Laptop repair tools on a desk
+                    position: 0
+                    url: "/v1/listing-media/11111111-2222-3333-4444-555555555555/content"
+                    altText: null
+                    altTextStatus: PENDING
                     mimeType: image/jpeg
                     size: 248576
                     width: 1280
@@ -2407,8 +2886,8 @@ paths:
                     detail: Request body validation failed
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/media/11111111-2222-3333-4444-555555555555
                     errors:
-                      - field: altText
-                        message: must not be blank
+                      - field: file
+                        message: must be a supported image file
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -2452,25 +2931,26 @@ paths:
                     type: "https://api.mira.example/problems/resource-conflict"
                     title: Conflict
                     status: 409
-                    detail: Media of deleted listings cannot be updated
+                    detail: Operation not allowed on a deleted listing
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/media/11111111-2222-3333-4444-555555555555
-        "422":
-          description: Unprocessable Entity. The request is formally valid but violates one or more business rules.
+        "413":
+          description: Payload Too Large. The file exceeds the configured media size limit.
           content:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                invalidMetadata:
-                  value:
-                    type: "https://api.mira.example/problems/business-rule-violation"
-                    title: Unprocessable Entity
-                    status: 422
-                    detail: Business validation failed
-                    instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/media/11111111-2222-3333-4444-555555555555
-                    errors:
-                      - field: altText
-                        message: alt text contains unsupported content
+        "415":
+          description: Unsupported Media Type. The detected media type is not accepted.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "422":
+          description: Unprocessable Entity. Image dimensions cannot be determined or violate configured limits.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
     delete:
       summary: Delete listing media
       operationId: deleteListingMedia
@@ -2530,6 +3010,33 @@ paths:
                     status: 409
                     detail: Media of deleted listings cannot be deleted
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/media/11111111-2222-3333-4444-555555555555
+  "/v1/listing-media/{mediaId}/content":
+    parameters:
+      - "$ref": "#/components/parameters/MediaIdParam"
+    get:
+      summary: Get listing media content
+      operationId: getListingMediaContent
+      description: Streams the stored bytes for a listing media item.
+      tags:
+        - Listings (Media)
+      responses:
+        "200":
+          description: Listing media content retrieved successfully.
+          content:
+            "image/jpeg":
+              schema:
+                type: string
+                format: binary
+            "image/png":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not Found. The media item does not exist or its stored content is unavailable.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
   "/v1/listings/{listingId}/availability":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
@@ -4212,6 +4719,13 @@ components:
       description: Credential UUID.
       schema:
         "$ref": "#/components/schemas/CredentialId"
+    VerificationIdPathParam:
+      name: verificationId
+      in: path
+      required: true
+      description: Credential verification UUID.
+      schema:
+        "$ref": "#/components/schemas/VerificationId"
     LimitQueryParam:
       name: limit
       in: query
@@ -4276,6 +4790,9 @@ components:
     CredentialId:
       type: string
       format: uuid
+    VerificationId:
+      type: string
+      format: uuid
     PatchUserProfileRequest:
       type: object
       description: Partial user profile update payload. Non-null fields update the corresponding profile value. Omitted fields and fields explicitly set to null are ignored.
@@ -4321,13 +4838,15 @@ components:
       type: object
       required:
         - credentialType
-        - evidenceMedia
+        - file
       additionalProperties: false
       properties:
         credentialType:
           "$ref": "#/components/schemas/CredentialType"
-        evidenceMedia:
-          "$ref": "#/components/schemas/ProfileMediaResponse"
+        file:
+          type: string
+          format: binary
+          description: Evidence file uploaded for the credential claim. Supported media types are defined by the credential-evidence media validation rules.
     UpdateCredentialRequest:
       type: object
       minProperties: 1
@@ -4335,15 +4854,36 @@ components:
       properties:
         isVisible:
           type: boolean
-          description: Whether the credential should be visible on the public profile when it is active. Owners and admin accounts may update this field.
-        status:
-          "$ref": "#/components/schemas/CredentialStatus"
-        expiresAt:
-          type:
-            - string
-            - "null"
-          format: date-time
-          description: Expiration date and time of the credential. Null if the credential does not expire. Admin accounts may update this field. Owners may not update this field through this route.
+          description: Whether the credential may appear in public profile verification badge data when it has an approved completed verification.
+    CredentialTypeCollectionResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Credential types available for submission.
+          items:
+            "$ref": "#/components/schemas/CredentialTypeResponse"
+    CredentialTypeResponse:
+      type: object
+      required:
+        - credentialType
+        - name
+        - description
+      properties:
+        credentialType:
+          "$ref": "#/components/schemas/CredentialType"
+        name:
+          type: string
+          readOnly: true
+          description: Human readable credential name.
+          example: Master plumber
+        description:
+          type: string
+          readOnly: true
+          description: Human readable explanation of the credential.
+          example: User holds a master plumber qualification.
     PublicProfileCollectionResponse:
       type: object
       required:
@@ -4370,16 +4910,6 @@ components:
             "$ref": "#/components/schemas/PrivateUserProfileResponse"
         cursor:
           "$ref": "#/components/schemas/Cursor"
-    PublicCredentialCollectionResponse:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: array
-          description: Public credential projections.
-          items:
-            "$ref": "#/components/schemas/PublicCredentialResponse"
     CredentialCollectionResponse:
       type: object
       required:
@@ -4390,6 +4920,16 @@ components:
           description: Credentials.
           items:
             "$ref": "#/components/schemas/CredentialResponse"
+    CredentialVerificationCollectionResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Credential verification attempts.
+          items:
+            "$ref": "#/components/schemas/CredentialVerificationResponse"
     BaseUserProfileResponse:
       type: object
       description: Base profile response fields. In private profile responses these fields are always present, but several values may be null while the user profile is still in an incomplete shell state.
@@ -4455,12 +4995,13 @@ components:
         - firstName
         - lastName
         - userType
-        - city
         - bio
         - simplifiedBio
         - selfSummary
         - accessibilityPreferences
         - profileMedia
+        - city
+        - verified
       properties:
         userId:
           type: string
@@ -4475,12 +5016,6 @@ components:
           "$ref": "#/components/schemas/LastName"
         userType:
           "$ref": "#/components/schemas/UserType"
-        city:
-          oneOf:
-            - type: string
-              maxLength: 100
-            - type: "null"
-          description: City from the user's private address. No other private-address fields are exposed.
         bio:
           oneOf:
             - "$ref": "#/components/schemas/Bio"
@@ -4502,6 +5037,26 @@ components:
             - type: "null"
           readOnly: true
           description: Current profile picture media. This field is output only and is managed through PUT/DELETE /v1/users/{userId}/profile-picture.
+        city:
+          oneOf:
+            - type: string
+              maxLength: 100
+            - type: "null"
+          description: City from the user's private address. No other private-address fields are exposed.
+        verified:
+          type: boolean
+          readOnly: true
+          description: Indicates whether the public profile has at least one visible credential with an approved completed verification.
+    PublicProfileCredentialCollectionResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Public verified credential summaries for a public profile.
+          items:
+            "$ref": "#/components/schemas/VerifiedCredentialResponse"
     PrivateUserProfileResponse:
       allOf:
         - "$ref": "#/components/schemas/BaseUserProfileResponse"
@@ -4525,20 +5080,23 @@ components:
     BaseCredentialResponse:
       type: object
       required:
+        - credentialType
         - name
         - description
         - expiresAt
       properties:
+        credentialType:
+          "$ref": "#/components/schemas/CredentialType"
         name:
           type: string
           readOnly: true
           description: Human readable credential name.
-          example: Student
+          example: Master plumber
         description:
           type: string
           readOnly: true
           description: Human readable explanation of the credential.
-          example: Proof that the user currently holds student status.
+          example: User holds a master plumber qualification.
         expiresAt:
           type:
             - string
@@ -4546,49 +5104,93 @@ components:
           format: date-time
           readOnly: true
           description: Date and time when the credential expires. Null if the credential does not expire.
-    PublicCredentialResponse:
+    VerifiedCredentialResponse:
       allOf:
         - "$ref": "#/components/schemas/BaseCredentialResponse"
         - type: object
           required:
-            - grantedAt
+            - verifiedAt
           properties:
-            grantedAt:
+            verifiedAt:
               type: string
               format: date-time
               readOnly: true
-              description: Date and time when the credential became active.
+              description: Date and time when the credential verification was approved.
     CredentialResponse:
       allOf:
         - "$ref": "#/components/schemas/BaseCredentialResponse"
         - type: object
           required:
             - credentialId
-            - status
             - isVisible
             - evidenceMedia
-            - grantedAt
+            - createdAt
+            - latestVerification
           properties:
             credentialId:
               type: string
               format: uuid
               readOnly: true
               description: Credential identifier.
-            status:
-              "$ref": "#/components/schemas/CredentialStatus"
             isVisible:
               type: boolean
-              description: Whether the credential is eligible to appear on the public profile when active.
+              description: Whether the credential may appear in public profile verification badge data when it has an approved completed verification.
             evidenceMedia:
               "$ref": "#/components/schemas/ProfileMediaResponse"
               readOnly: true
-            grantedAt:
-              type:
-                - string
-                - "null"
+            createdAt:
+              type: string
               format: date-time
               readOnly: true
-              description: Date and time when the credential became active. Null if the credential has not been granted yet.
+              description: Date and time when the credential submission was created.
+            latestVerification:
+              oneOf:
+                - "$ref": "#/components/schemas/CredentialVerificationResponse"
+                - type: "null"
+              readOnly: true
+              description: Latest verification attempt for this credential, or null when no verification exists yet.
+    CredentialVerificationResponse:
+      type: object
+      required:
+        - verificationId
+        - status
+        - result
+        - feedback
+        - createdAt
+        - completedAt
+      properties:
+        verificationId:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Credential verification identifier.
+        status:
+          "$ref": "#/components/schemas/CredentialVerificationStatus"
+        result:
+          oneOf:
+            - "$ref": "#/components/schemas/CredentialVerificationResult"
+            - type: "null"
+          readOnly: true
+          description: Verification result. Null while verification is queued or processing, and may remain null if verification fails before a decision is produced.
+        feedback:
+          type:
+            - string
+            - "null"
+          readOnly: true
+          description: Short verification feedback intended for the credential owner. Null until feedback is available.
+          example: The evidence appears to support this credential.
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Date and time when the verification resource was created.
+        completedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+          readOnly: true
+          description: Date and time when verification finished. Null while verification is queued or processing.
     Username:
       type: string
       minLength: 3
@@ -4739,17 +5341,22 @@ components:
       type: string
       description: Type of credential assigned to a user profile.
       enum:
-        - STUDENT
-        - ELECTRICIAN
-        - PLUMBER
-        - TUTOR
-    CredentialStatus:
+        - STUDENT_VERIFIED
+        - IDENTITY_VERIFIED
+        - MASTER_PLUMBER
+    CredentialVerificationStatus:
       type: string
-      description: Current status of a credential assigned to a user profile.
+      description: Processing status of a credential verification resource.
       enum:
-        - PENDING
-        - ACTIVE
-        - EXPIRED
+        - QUEUED
+        - PROCESSING
+        - COMPLETED
+        - FAILED
+    CredentialVerificationResult:
+      type: string
+      description: Decision produced by a completed credential verification.
+      enum:
+        - APPROVED
         - DENIED
     AccessibilityGenerationStatus:
       type: string
@@ -4784,22 +5391,12 @@ components:
           type: boolean
           description: Indicates whether this predefined tag can currently be selected for listings.
           example: true
-    ServiceTagCollectionResponse:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: array
-          items:
-            "$ref": "#/components/schemas/ServiceTag"
     CreateListingRequest:
       type: object
       required:
         - tagIds
         - title
         - description
-        - easyDescriptionStatus
         - price
         - location
       properties:
@@ -4915,19 +5512,38 @@ components:
           items:
             type: string
             format: binary
+    ReplaceListingMediaRequest:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
     UpdateListingMediaRequest:
       type: object
-      minProperties: 1
+      required:
+        - items
       properties:
-        altText:
+        items:
+          type: array
+          description: Complete desired listing media order. The array index becomes the new zero-based position.
+          items:
+            "$ref": "#/components/schemas/ListingMediaOrderItem"
+    ListingMediaOrderItem:
+      type: object
+      required:
+        - mediaId
+      properties:
+        mediaId:
           type: string
-          minLength: 1
-          maxLength: 255
-          example: Laptop repair tools on a desk
+          format: uuid
+          example: "11111111-2222-3333-4444-555555555555"
     ListingMediaItem:
       type: object
       required:
         - mediaId
+        - position
         - url
         - altTextStatus
         - mimeType
@@ -4940,6 +5556,11 @@ components:
           type: string
           format: uuid
           example: "11111111-2222-3333-4444-555555555555"
+        position:
+          type: integer
+          minimum: 0
+          description: Zero-based order of this media item within the listing.
+          example: 0
         url:
           type: string
           format: uri
@@ -5048,6 +5669,31 @@ components:
         createdAt:
           type: string
           format: date-time
+    ProfileMediaEntityModel:
+      allOf:
+        - "$ref": "#/components/schemas/ProfileMediaResponse"
+        - type: object
+          required:
+            - _links
+          properties:
+            _links:
+              type: object
+              required:
+                - self
+                - user
+              properties:
+                self:
+                  "$ref": "#/components/schemas/HalLink"
+                user:
+                  "$ref": "#/components/schemas/HalLink"
+    HalLink:
+      type: object
+      required:
+        - href
+      properties:
+        href:
+          type: string
+          format: uri-reference
     AdminReportedListingItem:
       allOf:
         - "$ref": "#/components/schemas/MyListingSummary"
@@ -5070,42 +5716,22 @@ components:
             "$ref": "#/components/schemas/AdminReportedListingItem"
         cursor:
           "$ref": "#/components/schemas/Cursor"
-    BulkUploadListingMediaResponse:
+    ListingMediaUploadResponse:
       type: object
       required:
         - uploaded
-        - failed
       properties:
         uploaded:
           type: array
           items:
             "$ref": "#/components/schemas/ListingMediaItem"
-        failed:
-          type: array
-          items:
-            "$ref": "#/components/schemas/BulkUploadListingMediaFailure"
-    BulkUploadListingMediaFailure:
-      type: object
-      required:
-        - fileName
-        - errorCode
-        - message
-      properties:
-        fileName:
-          type: string
-          example: too-large.png
-        errorCode:
-          type: string
-          example: FILE_TOO_LARGE
-        message:
-          type: string
-          example: File exceeds the maximum allowed size
     PublicListingSummary:
       type: object
       required:
         - listingId
         - tags
         - title
+        - description
         - price
         - author
         - publishedAt
@@ -5122,6 +5748,15 @@ components:
         title:
           type: string
           example: Laptop setup and software installation
+        description:
+          type: string
+          example: I help with setting up laptops, installing software, and solving basic PC issues.
+        easyDescription:
+          type:
+            - string
+            - "null"
+          description: AI-generated simplified version of the listing description.
+          example: I help you set up laptops. I install software. I help with simple computer problems.
         price:
           type: number
           format: double
@@ -5144,7 +5779,6 @@ components:
         - tags
         - title
         - description
-        - easyDescriptionStatus
         - price
         - publicationStatus
         - author
@@ -5152,6 +5786,7 @@ components:
         - location
         - createdAt
         - updatedAt
+        - media
       properties:
         listingId:
           type: string
@@ -5171,10 +5806,8 @@ components:
           type:
             - string
             - "null"
-          description: AI-generated simplified version of the listing description. Null until generation completes.
+          description: AI-generated simplified version of the listing description.
           example: I help you set up laptops. I install software. I help with simple computer problems.
-        easyDescriptionStatus:
-          "$ref": "#/components/schemas/AccessibilityGenerationStatus"
         price:
           type: number
           format: double
@@ -5190,8 +5823,6 @@ components:
           format: date-time
         location:
           "$ref": "#/components/schemas/PublicListingLocation"
-        primaryMedia:
-          "$ref": "#/components/schemas/ListingMediaPreview"
         createdAt:
           type: string
           format: date-time
@@ -5256,7 +5887,6 @@ components:
         - tags
         - title
         - description
-        - easyDescriptionStatus
         - price
         - publicationStatus
         - moderationStatus
@@ -5265,6 +5895,7 @@ components:
         - location
         - createdAt
         - updatedAt
+        - media
       properties:
         listingId:
           type: string
@@ -5284,10 +5915,8 @@ components:
           type:
             - string
             - "null"
-          description: AI-generated simplified version of the listing description. Null until generation completes.
+          description: AI-generated simplified version of the listing description.
           example: I help you set up laptops. I install software. I help with simple computer problems.
-        easyDescriptionStatus:
-          "$ref": "#/components/schemas/AccessibilityGenerationStatus"
         price:
           type: number
           format: double
@@ -5305,8 +5934,6 @@ components:
           format: date-time
         location:
           "$ref": "#/components/schemas/PublicListingLocation"
-        primaryMedia:
-          "$ref": "#/components/schemas/ListingMediaPreview"
         createdAt:
           type: string
           format: date-time
@@ -5374,9 +6001,15 @@ components:
     ListingAuthor:
       type: object
       required:
+        - userId
         - name
         - surname
       properties:
+        userId:
+          type: string
+          format: uuid
+          description: Public identifier of the listing author.
+          example: "22222222-3333-4444-5555-666666666666"
         name:
           type: string
           minLength: 1
@@ -5421,6 +6054,7 @@ components:
       enum:
         - VISIBLE
         - BLOCKED
+        - REPORTED
     ProblemDetailsResponse:
       type: object
       required:
@@ -6024,17 +6658,17 @@ components:
                 status: 401
                 detail: Authentication is required
                 instance: /v1/listings/{listingId}
-    GeocodingUnavailableError:
+    ExternalServiceUnavailableError:
       description: Service Unavailable. A required downstream service is temporarily unavailable.
       content:
         "application/problem+json":
           schema:
             "$ref": "#/components/schemas/ProblemDetailsResponse"
           examples:
-            geocodingUnavailable:
+            externalServiceUnavailable:
               value:
-                type: "https://api.mira.example/problems/service-unavailable"
+                type: "https://api.mira.example/problems/external-service-unavailable"
                 title: Service Unavailable
                 status: 503
-                detail: Geocoding service is temporarily unavailable
+                detail: Geocoding service is unavailable
                 instance: /v1/listings/{listingId}
