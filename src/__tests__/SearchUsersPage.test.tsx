@@ -156,7 +156,7 @@ describe('<SearchUsersPage /> role filtering', () => {
     renderPage()
     await screen.findByRole('heading', { name: '1 consumer' })
 
-    fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'Anna' } })
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search' }), { target: { value: 'Anna' } })
     fireEvent.click(screen.getByRole('button', { name: 'Search' }))
     expect(mockNavigate).toHaveBeenCalledWith({ search: { q: 'Anna', role: 'consumers', from: undefined } })
 

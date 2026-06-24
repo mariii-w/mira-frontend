@@ -36,9 +36,11 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
     <div className="relative w-full">
       <input
         ref={ref}
+        type="search"
+        autoComplete="off"
         aria-label="Search"
         className={cn(
-          'w-full h-15 px-4 text-body text-foreground',
+          'w-full h-15 px-4 text-body text-foreground appearance-none',
           'bg-white border border-border rounded-4xl',
           'placeholder:text-muted',
           'transition-colors duration-150',
@@ -55,7 +57,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
         <div className="p-2">
           <Popover.Root>
             <Popover.Trigger asChild>
-              <Button variant="ghost" leadingIcon={<MapPin />}>
+              <Button variant="ghost" leadingIcon={<MapPin className="text-orange-600" />}>
                 <span className="hidden lg:inline">{locationLabel}</span>
               </Button>
             </Popover.Trigger>
