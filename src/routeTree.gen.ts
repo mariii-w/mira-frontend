@@ -22,6 +22,7 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as RegisterRouteRouteImport } from './routes/register/route'
+import { Route as SearchRouteRouteImport } from './routes/_search/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegisterIndexRouteImport } from './routes/register/index'
 import { Route as RegisterRoleRouteImport } from './routes/register/role'
@@ -101,6 +102,10 @@ const RegisterRouteRoute = RegisterRouteRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRouteRoute = SearchRouteRouteImport.update({
+  id: '/_search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -147,14 +152,14 @@ const EditListingListingIdRoute = EditListingListingIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchBrowseUsersRoute = SearchBrowseUsersRouteImport.update({
-  id: '/_search/browse-users',
+  id: '/browse-users',
   path: '/browse-users',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => SearchRouteRoute,
 } as any)
 const SearchBrowseServicesRoute = SearchBrowseServicesRouteImport.update({
-  id: '/_search/browse-services',
+  id: '/browse-services',
   path: '/browse-services',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => SearchRouteRoute,
 } as any)
 const ListingsListingIdIndexRoute = ListingsListingIdIndexRouteImport.update({
   id: '/listings/$listingId/',
@@ -225,6 +230,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_search': typeof SearchRouteRouteWithChildren
   '/register': typeof RegisterRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
@@ -310,6 +316,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_search'
     | '/register'
     | '/about'
     | '/accessibility'
@@ -339,6 +346,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SearchRouteRoute: typeof SearchRouteRouteWithChildren
   RegisterRouteRoute: typeof RegisterRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   AccessibilityRoute: typeof AccessibilityRoute
@@ -352,8 +360,6 @@ export interface RootRouteChildren {
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   StyleguideRoute: typeof StyleguideRoute
   TermsOfUseRoute: typeof TermsOfUseRoute
-  SearchBrowseServicesRoute: typeof SearchBrowseServicesRoute
-  SearchBrowseUsersRoute: typeof SearchBrowseUsersRoute
   EditListingListingIdRoute: typeof EditListingListingIdRoute
   ListingsListingIdBookRoute: typeof ListingsListingIdBookRoute
   ListingsListingIdIndexRoute: typeof ListingsListingIdIndexRoute
@@ -452,6 +458,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_search': {
+      id: '/_search'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SearchRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -520,14 +533,14 @@ declare module '@tanstack/react-router' {
       path: '/browse-users'
       fullPath: '/browse-users'
       preLoaderRoute: typeof SearchBrowseUsersRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SearchRouteRoute
     }
     '/_search/browse-services': {
       id: '/_search/browse-services'
       path: '/browse-services'
       fullPath: '/browse-services'
       preLoaderRoute: typeof SearchBrowseServicesRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SearchRouteRoute
     }
     '/listings/$listingId/': {
       id: '/listings/$listingId/'
@@ -545,6 +558,20 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface SearchRouteRouteChildren {
+  SearchBrowseServicesRoute: typeof SearchBrowseServicesRoute
+  SearchBrowseUsersRoute: typeof SearchBrowseUsersRoute
+}
+
+const SearchRouteRouteChildren: SearchRouteRouteChildren = {
+  SearchBrowseServicesRoute: SearchBrowseServicesRoute,
+  SearchBrowseUsersRoute: SearchBrowseUsersRoute,
+}
+
+const SearchRouteRouteWithChildren = SearchRouteRoute._addFileChildren(
+  SearchRouteRouteChildren,
+)
 
 interface RegisterRouteRouteChildren {
   RegisterAboutRoute: typeof RegisterAboutRoute
@@ -572,6 +599,7 @@ const RegisterRouteRouteWithChildren = RegisterRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SearchRouteRoute: SearchRouteRouteWithChildren,
   RegisterRouteRoute: RegisterRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   AccessibilityRoute: AccessibilityRoute,
@@ -585,8 +613,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   StyleguideRoute: StyleguideRoute,
   TermsOfUseRoute: TermsOfUseRoute,
-  SearchBrowseServicesRoute: SearchBrowseServicesRoute,
-  SearchBrowseUsersRoute: SearchBrowseUsersRoute,
   EditListingListingIdRoute: EditListingListingIdRoute,
   ListingsListingIdBookRoute: ListingsListingIdBookRoute,
   ListingsListingIdIndexRoute: ListingsListingIdIndexRoute,
