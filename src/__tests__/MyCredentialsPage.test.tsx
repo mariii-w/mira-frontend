@@ -398,6 +398,30 @@ describe('<MyCredentialsPage />', () => {
     )
   })
 
+  it('shows an error when credential visibility update fails', async () => {
+    mockCredentialsSuccess([makeCredential({ isVisible: true })])
+    mockPatch.mockResolvedValue({
+      status: 400,
+      data: {
+        type: 'about:blank',
+        title: 'Bad Request',
+        status: 400,
+        detail: 'Expired credentials cannot be made public.',
+        instance: '/v1/users/user-1/credentials/cred-1',
+      },
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof patchV1UsersUserIdCredentialsCredentialId>>)
+
+    renderRoute()
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('switch', { name: 'Visible' }))
+
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent('Expired credentials cannot be made public.'),
+    )
+  })
+
   it('deletes a credential after confirmation', async () => {
     mockCredentialsSuccess([makeCredential()])
     mockDelete.mockResolvedValue({ status: 204, data: undefined, headers: new Headers() } as Awaited<

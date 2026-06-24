@@ -65,6 +65,7 @@ export function MyCredentialsRoute() {
   >(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [submissionStatus, setSubmissionStatus] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [activeVerification, setActiveVerification] = useState<{
     credentialId: string;
     verificationId: string;
@@ -211,13 +212,21 @@ export function MyCredentialsRoute() {
       patchV1UsersUserIdCredentialsCredentialId(userId ?? "", credentialId, {
         isVisible,
       }),
-    onMutate: ({ credentialId }) => setUpdatingVisibilityId(credentialId),
+    onMutate: ({ credentialId }) => {
+      setActionError(null);
+      setUpdatingVisibilityId(credentialId);
+    },
     onSettled: () => setUpdatingVisibilityId(null),
     onSuccess: (response) => {
       if (isSuccessStatus(response.status)) {
         queryClient.invalidateQueries({ queryKey: credentialsQueryKey });
+      } else {
+        setActionError(
+          getErrorDetail(response.data) ?? "Failed to update credential visibility.",
+        );
       }
     },
+    onError: () => setActionError("Failed to update credential visibility."),
   });
 
   const deleteMutation = useMutation({
@@ -251,6 +260,7 @@ export function MyCredentialsRoute() {
         loading={loading}
         error={queryError ? (queryError as Error).message : null}
         submissionStatus={submissionStatus}
+        actionError={actionError}
         updatingVisibilityId={updatingVisibilityId}
         deletingId={deletingId}
         onAddCredential={() => setSubmitOpen(true)}

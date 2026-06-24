@@ -10,6 +10,7 @@ interface CredentialsProps {
   loading: boolean
   error: string | null
   submissionStatus: string | null
+  actionError: string | null
   updatingVisibilityId: string | null
   deletingId: string | null
   onAddCredential: () => void
@@ -45,6 +46,7 @@ export function Credentials({
   loading,
   error,
   submissionStatus,
+  actionError,
   updatingVisibilityId,
   deletingId,
   onAddCredential,
@@ -76,6 +78,12 @@ export function Credentials({
               className="mb-4 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 text-small font-medium text-accent"
             >
               {submissionStatus}
+            </p>
+          )}
+
+          {actionError && (
+            <p role="alert" className="mb-4 text-small text-red-600">
+              {actionError}
             </p>
           )}
 

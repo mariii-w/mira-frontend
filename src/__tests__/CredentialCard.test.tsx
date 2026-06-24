@@ -75,6 +75,17 @@ describe('<CredentialCard />', () => {
     expect(screen.queryByRole('switch')).not.toBeInTheDocument()
   })
 
+  it('does not show the Visible toggle for an expired approved credential', () => {
+    render(
+      <CredentialCard
+        {...defaultProps}
+        credential={makeCredential({ expiresAt: '2025-01-01T00:00:00Z' })}
+      />,
+    )
+    expect(screen.getByText('Expired')).toBeInTheDocument()
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument()
+  })
+
   it('shows "Pending" while verification is queued or processing', () => {
     render(
       <CredentialCard

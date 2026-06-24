@@ -7,19 +7,25 @@ import type { CredentialResponse } from '../api/model'
 
 export type { CredentialResponse } from '../api/model'
 
-type StatusKind = 'verified' | 'verified-muted' | 'pending' | 'denied'
+type StatusKind = 'verified' | 'verified-muted' | 'pending' | 'denied' | 'expired'
 
 const STATUS_STYLE: Record<StatusKind, { bar: string; text: string }> = {
   verified: { bar: 'bg-forest', text: 'text-forest font-semibold' },
   'verified-muted': { bar: 'bg-grey-olive', text: 'text-muted' },
   pending: { bar: 'bg-amber-500', text: 'text-amber-600 font-medium' },
   denied: { bar: 'bg-red-600', text: 'text-red-600 font-semibold' },
+  expired: { bar: 'bg-grey-olive', text: 'text-muted font-medium' },
+}
+
+function isExpired(expiresAt: string | null | undefined): boolean {
+  return !!expiresAt && new Date(expiresAt).getTime() <= Date.now()
 }
 
 function getStatus(credential: CredentialResponse): { kind: StatusKind; label: string } {
   const verification = credential.latestVerification
 
   if (verification?.status === 'COMPLETED' && verification.result === 'APPROVED') {
+    if (isExpired(credential.expiresAt)) return { kind: 'expired', label: 'Expired' }
     return { kind: credential.isVisible ? 'verified' : 'verified-muted', label: 'Verified' }
   }
   if (verification?.status === 'COMPLETED' && verification.result === 'DENIED') {
