@@ -12,8 +12,9 @@ import { ServiceCardChat } from "../components/ServiceCardChat.tsx";
 import { ChatBubble, type ChatMessage } from "../components/ChatBubble.tsx";
 import { ChatInbox, type ChatPreview } from "../components/ChatInbox.tsx";
 import { disconnectChatSocket, publishChatText, subscribeToChat } from "../lib/chatSocket.ts";
-import { describeMessageContent } from "../lib/chatContent.ts";
+import { describeMessageContent, toChatPreview } from "../lib/chatContent.ts";
 import { useAuthStore } from "../stores/auth";
+import { useListChats } from "../api/mira.ts";
 
 export const Route = createFileRoute('/chat')({
     component: () => <Chat/>
@@ -22,13 +23,6 @@ export const Route = createFileRoute('/chat')({
 // ---------------------------------------------------------------------------
 // Dummy data — swap for real API data later
 // ---------------------------------------------------------------------------
-
-const DUMMY_CHATS: ChatPreview[] = [
-    { id: "1", firstName: "Rudi", lastName: "Kerol", lastMessage: "Sure, I can fix that for you tomorrow.", timestamp: "10:24", unread: true },
-    { id: "2", firstName: "Mara", lastName: "Voss", lastMessage: "Thanks, talk soon!", timestamp: "Yesterday" },
-    { id: "3", firstName: "Tobi", lastName: "Lang", lastMessage: "Can you send the invoice?", timestamp: "Mon" },
-    { id: "4", firstName: "Elena", lastName: "Brandt", lastMessage: "Looks great, approved.", timestamp: "Sun" },
-];
 
 const DUMMY_MESSAGES: Record<string, ChatMessage[]> = {
     "1": [
@@ -61,22 +55,32 @@ const DUMMY_MESSAGES: Record<string, ChatMessage[]> = {
 
 // eslint-disable-next-line react-refresh/only-export-components
 function Chat() {
-    // First chat pre-selected
-    const [selectedChatId, setSelectedChatId] = useState<string>(DUMMY_CHATS[0].id);
+    const [selectedChatId, setSelectedChatId] = useState<string>("");
     const [messagesByChat, setMessagesByChat] = useState<Record<string, ChatMessage[]>>(DUMMY_MESSAGES);
     const [draft, setDraft] = useState("");
 
     const currentUserId = useAuthStore((s) => s.user?.userId);
 
-    const selectedChat = DUMMY_CHATS.find((c) => c.id === selectedChatId) ?? DUMMY_CHATS[0];
-    const messages = messagesByChat[selectedChatId] ?? [];
+    const { data: chatsResponse, isLoading: chatsLoading, isError: chatsErrored } = useListChats(
+        { user: currentUserId ?? "", sortby: "latest" },
+        { query: { enabled: !!currentUserId } },
+    );
+    const chats: ChatPreview[] = chatsResponse?.status === 200 ? chatsResponse.data.map(toChatPreview) : [];
+
+    // Derived during render, not synced via an effect: fall back to the first chat until the
+    // user explicitly picks one. No external system to synchronize with here, so no effect needed.
+    const activeChatId = selectedChatId || chats[0]?.id || "";
+    const selectedChat = chats.find((c) => c.id === activeChatId);
+    const messages = messagesByChat[activeChatId] ?? [];
 
     // Subscribe to the selected chat's topic; swap subscription on chat switch.
     useEffect(() => {
+        if (!activeChatId) return;
+
         let unsubscribe: (() => void) | undefined;
         let cancelled = false;
 
-        subscribeToChat(selectedChatId, (incoming) => {
+        subscribeToChat(activeChatId, (incoming) => {
             const newMessage: ChatMessage = {
                 id: `ws-${incoming.id}`,
                 text: describeMessageContent(incoming.content),
@@ -97,14 +101,14 @@ function Chat() {
                 }
             })
             .catch((err) => {
-                console.error("Failed to subscribe to chat", selectedChatId, err);
+                console.error("Failed to subscribe to chat", activeChatId, err);
             });
 
         return () => {
             cancelled = true;
             unsubscribe?.();
         };
-    }, [selectedChatId, currentUserId]);
+    }, [activeChatId, currentUserId]);
 
     // Tear down the shared socket when leaving the chat page entirely.
     useEffect(() => {
@@ -115,9 +119,9 @@ function Chat() {
 
     function handleSend() {
         const text = draft.trim();
-        if (!text) return;
+        if (!text || !activeChatId) return;
 
-        publishChatText(selectedChatId, text).catch((err) => {
+        publishChatText(activeChatId, text).catch((err) => {
             console.error("Failed to send message", err);
         });
         setDraft("");
@@ -145,18 +149,25 @@ function Chat() {
                                 </div>
                             </div>
                             <div className="max-h-72 overflow-y-auto lg:max-h-none lg:overflow-visible">
-                                <ChatInbox
-                                    chats={DUMMY_CHATS}
-                                    selectedChatId={selectedChatId}
-                                    onSelectChat={setSelectedChatId}
-                                />
+                                {chatsLoading && <p className="m-5 text-black/60">Loading chats…</p>}
+                                {chatsErrored && <p className="m-5 text-red-600">Couldn't load chats. Try again later.</p>}
+                                {!chatsLoading && !chatsErrored && chats.length === 0 && (
+                                    <p className="m-5 text-black/60">No conversations yet.</p>
+                                )}
+                                {!chatsLoading && !chatsErrored && chats.length > 0 && (
+                                    <ChatInbox
+                                        chats={chats}
+                                        selectedChatId={activeChatId}
+                                        onSelectChat={setSelectedChatId}
+                                    />
+                                )}
                             </div>
                         </section>
                         <section className="w-full lg:w-2/4 bg-cream">
                             <div className="border-b-2 border-border flex flex-row bg-linen">
                                 <div className=" flex flex-row m-2 w-full">
-                                    <AvatarIcon firstName={selectedChat.firstName} lastName={selectedChat.lastName} size={60}/>
-                                    <p className="text-2xl font-bold my-auto ml-2">{selectedChat.firstName} {selectedChat.lastName}</p>
+                                    <AvatarIcon firstName={selectedChat?.firstName} lastName={selectedChat?.lastName} size={60}/>
+                                    <p className="text-2xl font-bold my-auto ml-2">{selectedChat ? `${selectedChat.firstName} ${selectedChat.lastName}` : "Select a chat"}</p>
                                 </div>
                             </div>
                             <div className="m-2">
@@ -193,7 +204,7 @@ function Chat() {
                             </div>
                             <div className="border-t-2 border-border">
                                 <div className="m-4">
-                                    <p className="text-primary font-bold"> About {selectedChat.firstName}</p>
+                                    <p className="text-primary font-bold"> About {selectedChat?.firstName ?? "this contact"}</p>
                                     <div className="mt-3">
                                         <Button variant ='secondary' trailingIcon={<ArrowRight/>}>View Full Profile </Button>
                                     </div>

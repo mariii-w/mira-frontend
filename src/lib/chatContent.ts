@@ -1,3 +1,6 @@
+import type { ChatOverviewResponse } from "../api/model";
+import type { ChatPreview } from "../components/ChatInbox.tsx";
+
 // ChatMessageContent has no discriminant field; variants are told apart by which fields exist.
 export function describeMessageContent(content: unknown): string {
     if (!content || typeof content !== "object") return "[unsupported message type]";
@@ -23,4 +26,27 @@ export function splitDisplayName(fullName: string): { firstName: string; lastNam
 
     const [firstName, ...rest] = trimmed.split(/\s+/);
     return { firstName, lastName: rest.join(" ") };
+}
+
+// Today -> time only, otherwise a short date. Good enough for inbox previews.
+export function formatChatTimestamp(iso: string): string {
+    const date = new Date(iso);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+
+    return isToday
+        ? date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        : date.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+export function toChatPreview(overview: ChatOverviewResponse): ChatPreview {
+    const { firstName, lastName } = splitDisplayName(overview.participant.name);
+
+    return {
+        id: overview.cid,
+        firstName,
+        lastName,
+        lastMessage: overview.latestMessage ? describeMessageContent(overview.latestMessage) : "No messages yet",
+        timestamp: overview.latestMessageCreatedAt ? formatChatTimestamp(overview.latestMessageCreatedAt) : "",
+    };
 }
