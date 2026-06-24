@@ -301,7 +301,7 @@ function Chat() {
         subscribeToChat(selectedChatId, (incoming) => {
             const newMessage: ChatMessage = {
                 id: `ws-${incoming.id}`,
-                text: extractMessageText(incoming.content),
+                text: describeMessageContent(incoming.content),
                 self: incoming.sender.id === currentUserId,
                 timestamp: new Date(incoming.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             };
