@@ -20,6 +20,10 @@ export interface ListingDetailPageProps {
   otherListings: PublicListingSummary[];
   publicVerifiedCredentials?: VerifiedCredentialResponse[];
   onBookNow: () => void;
+  onMessage?: () => void;
+  canMessage?: boolean;
+  messagePending?: boolean;
+  messageError?: string | null;
   banner?: ReactNode;
 }
 
@@ -33,6 +37,10 @@ export function ListingDetailPage({
   otherListings,
   publicVerifiedCredentials = [],
   onBookNow,
+  onMessage,
+  canMessage,
+  messagePending,
+  messageError,
   banner,
 }: ListingDetailPageProps) {
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
@@ -191,6 +199,10 @@ export function ListingDetailPage({
             tags={listing.tags}
             publicVerifiedCredentials={publicVerifiedCredentials}
             onBookNow={onBookNow}
+            onMessage={onMessage}
+            canMessage={canMessage}
+            messagePending={messagePending}
+            messageError={messageError}
             className="animate-fade-in-up"
             style={{ animationDelay: "180ms" }}
           />
