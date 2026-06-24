@@ -3594,6 +3594,44 @@ paths:
                     status: 409
                     detail: Only pending bookings can be refused
                     instance: /v1/bookings/3f2a1c8e-2b4d-4f6a-9c1e-7d8b2a5e3f10/refuse
+  "/v1/bookings/{bookingId}/pay":
+    parameters:
+      - "$ref": "#/components/parameters/BookingIdParam"
+    post:
+      summary: Create a booking checkout session
+      operationId: createCheckoutSession
+      description: Creates a Stripe Checkout session for the authenticated consumer after the provider has accepted the booking.
+      tags:
+        - Payments
+      security:
+        - bearerHttpAuthentication: []
+      responses:
+        "200":
+          description: Checkout session created successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/CheckoutSessionResponse"
+        "401":
+          "$ref": "#/components/responses/UnauthorizedError"
+        "403":
+          description: Forbidden. Only the booking consumer can pay.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No booking exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "409":
+          description: Conflict. Only a confirmed booking can be paid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
   "/v1/bookings/{bookingId}/mark-delivered":
     parameters:
       - "$ref": "#/components/parameters/BookingIdParam"
@@ -6066,6 +6104,16 @@ components:
                 type: string
                 description: HTTP method to use.
                 example: "POST"
+    CheckoutSessionResponse:
+      type: object
+      required:
+        - checkoutUrl
+      properties:
+        checkoutUrl:
+          type: string
+          format: uri
+          description: Stripe-hosted Checkout URL for the confirmed booking.
+          example: "https://checkout.stripe.com/c/pay/cs_test_example"
     BookingListingPreview:
       type: object
       required:

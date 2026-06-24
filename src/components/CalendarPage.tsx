@@ -61,6 +61,7 @@ export interface CalendarPageProps {
     exception: UpdateScheduleExceptionInput,
   ) => void;
   onDeleteException: (exceptionId: string) => void;
+  onCreateListing: () => void;
 }
 
 function toLocalDate(date: Date): string {
@@ -200,6 +201,7 @@ export function CalendarPage({
   onCreateException,
   onUpdateException,
   onDeleteException,
+  onCreateListing,
 }: CalendarPageProps) {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [exceptionOpen, setExceptionOpen] = useState(false);
@@ -234,6 +236,16 @@ export function CalendarPage({
 
           {isProvider && (
             <div className="flex items-center gap-3">
+              {scheduleEntries.length > 0 && (
+                <Button
+                  variant="primary"
+                  size="md"
+                  leadingIcon={<Plus size={16} />}
+                  onClick={onCreateListing}
+                >
+                  Create listing
+                </Button>
+              )}
               <Button
                 variant="secondary"
                 size="md"

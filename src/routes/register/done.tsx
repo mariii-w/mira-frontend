@@ -47,7 +47,11 @@ function RegisterDoneRoute() {
   return (
     <RegisterDone
       user={data ?? user}
-      onFindServices={() => navigate({ to: "/" })}
+      onContinue={() =>
+        navigate({
+          to: (data ?? user)?.userType === "PROVIDER" ? "/calendar" : "/browse-services",
+        })
+      }
     />
   );
 }
