@@ -14,8 +14,8 @@ const options: Array<{
   dotClassName?: string
 }> = [
   { role: 'everyone', label: 'Everyone', singular: 'user' },
-  { role: 'providers', label: 'Providers', singular: 'provider', dotClassName: 'bg-accent' },
-  { role: 'consumers', label: 'Consumers', singular: 'consumer', dotClassName: 'bg-forest' },
+  { role: 'providers', label: 'Providers', singular: 'provider', dotClassName: 'bg-forest' },
+  { role: 'consumers', label: 'Consumers', singular: 'consumer', dotClassName: 'bg-accent' },
 ]
 
 export function UserTypeFilter({

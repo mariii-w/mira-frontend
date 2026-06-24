@@ -46,11 +46,11 @@ export function UserCard({ profile, easyRead, providerSummary }: UserCardProps) 
     hasServices ? servicesId : null,
   ].filter(Boolean).join(' ')
 
-  const roleDotBg = isProvider ? 'bg-accent' : 'bg-forest'
-  const badgeBg = isProvider ? 'bg-blush text-accent' : 'bg-mint text-forest'
+  const roleDotBg = isProvider ? 'bg-forest' : 'bg-accent'
+  const badgeBg = isProvider ? 'bg-mint text-forest' : 'bg-blush text-accent'
   const actionBg = isProvider
-    ? 'bg-accent text-accent-foreground hover:bg-accent-hover active:bg-accent-hover focus-visible:ring-accent'
-    : 'bg-forest text-cream hover:bg-forest/90 active:bg-forest/90 focus-visible:ring-forest'
+    ? 'bg-forest text-cream hover:bg-forest/90 active:bg-forest/90 focus-visible:ring-forest'
+    : 'bg-accent text-accent-foreground hover:bg-accent-hover active:bg-accent-hover focus-visible:ring-accent'
 
   return (
     <div
@@ -67,7 +67,7 @@ export function UserCard({ profile, easyRead, providerSummary }: UserCardProps) 
             lastName={profile.lastName}
             picture={profile.profileMedia ? mediaUrl(profile.profileMedia.url) : undefined}
             size={64}
-            bgColorClassName={isProvider ? 'bg-accent' : 'bg-forest'}
+            bgColorClassName={isProvider ? 'bg-forest' : 'bg-accent'}
           />
           {verified && (
             <span

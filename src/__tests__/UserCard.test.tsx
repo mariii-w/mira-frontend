@@ -43,14 +43,14 @@ const providerSummary: ProviderServiceSummary = {
 }
 
 describe('<UserCard /> role palettes', () => {
-  it('uses the violet palette for providers', () => {
+  it('uses the green palette for providers', () => {
     render(<UserCard profile={profile({ userType: 'PROVIDER' })} easyRead={false} />)
-    expect(screen.getByRole('link', { name: /view profile/i })).toHaveClass('bg-accent')
+    expect(screen.getByRole('link', { name: /view profile/i })).toHaveClass('bg-forest')
   })
 
-  it('uses the green palette for consumers', () => {
+  it('uses the violet palette for consumers', () => {
     render(<UserCard profile={profile({ userType: 'CUSTOMER' })} easyRead={false} />)
-    expect(screen.getByRole('link', { name: /view profile/i })).toHaveClass('bg-forest')
+    expect(screen.getByRole('link', { name: /view profile/i })).toHaveClass('bg-accent')
   })
 })
 
