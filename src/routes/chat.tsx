@@ -293,6 +293,36 @@ function Chat() {
         };
     }, []);
 
+    const { data: historyResponse, isLoading: historyLoading, isError: historyErrored } = useHistory(
+        activeChatId,
+        undefined,
+        { query: { enabled: !!activeChatId } },
+    );
+
+    // Seed the active chat's bubble list once history loads. Backend returns newest-first
+    // (it's built for "load older messages" pagination), so reverse for top-to-bottom display.
+    useEffect(() => {
+        if (!activeChatId || historyResponse?.status !== 200) return;
+
+        const fetched: ChatMessage[] = historyResponse.data.items
+            .slice()
+            .reverse()
+            .map((m) => ({
+                id: `h-${m.id}`,
+                text: describeMessageContent(m.content),
+                self: m.sender.id === currentUserId,
+                timestamp: new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            }));
+
+        setMessagesByChat((prev) => ({ ...prev, [activeChatId]: fetched }));
+    }, [activeChatId, historyResponse, currentUserId]);
+
+    const { data: listingResponse } = useGetPublicListing(
+        selectedChat?.listingId ?? "",
+        { query: { enabled: !!selectedChat?.listingId } },
+    );
+    const listing = listingResponse?.status === 200 ? listingResponse.data : undefined;
+
     // Subscribe to the selected chat's topic; swap subscription on chat switch.
     useEffect(() => {
         if (!activeChatId) return;
