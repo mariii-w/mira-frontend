@@ -15,16 +15,26 @@ describe('<InfoPage />', () => {
     expect(
       screen.getByRole('heading', { name: 'Accessibility at Mira' }),
     ).toBeInTheDocument()
-    expect(screen.getByText(/accessibility settings from the navigation bar/i)).toBeInTheDocument()
-    expect(screen.getByText(/easy-language alternatives/i)).toBeInTheDocument()
-    expect(screen.getByText(/reduced-motion preferences/i)).toBeInTheDocument()
+    expect(screen.getByText(/Accessibility is part of the way the project is built/i)).toBeInTheDocument()
+    expect(screen.getByText(/How Mira supports accessibility/i)).toBeInTheDocument()
+    expect(screen.getByText('Easy Language')).toBeInTheDocument()
+    expect(screen.getByText('Reduced Motion')).toBeInTheDocument()
+    expect(screen.getByText('Image descriptions')).toBeInTheDocument()
+    expect(screen.getByText('Accessibility panel')).toBeInTheDocument()
+    expect(screen.getByText(/accessibility panel directly in the navigation bar/i)).toBeInTheDocument()
+    expect(screen.getByText(/service descriptions and user bios can be shown in Easy Language/i)).toBeInTheDocument()
+    expect(screen.getByText(/you can use Reduced Motion/i)).toBeInTheDocument()
     expect(
-      screen.getByText(/vision-language model to generate alternative text descriptions/i),
+      screen.getByText(/AI-supported alternative text descriptions/i),
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'mira.accessibility@gmail.com' })).toHaveAttribute(
       'href',
       'mailto:mira.accessibility@gmail.com',
     )
+    expect(
+      screen.getByText('Accessibility panel').compareDocumentPosition(screen.getByText('Easy Language')) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
     expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument()
   })
 
