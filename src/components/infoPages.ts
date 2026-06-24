@@ -85,80 +85,43 @@ export const INFO_PAGES = {
   accessibility: {
     title: "Accessibility at Mira",
     intro:
-      "At Mira, accessibility is not an afterthought. It is part of how the product is designed, built, tested, and improved. We want Mira to be useful for people with different needs, devices, abilities, and ways of interacting with digital services.",
+      "Mira is designed to be easy to use for as many people as possible. Accessibility is part of the way the project is built, not something that is added only at the end. This page explains how Mira supports you when you use the platform and what options are available to make the experience clearer and more comfortable.",
     sections: [
       {
-        title: "Our goal",
+        title: "How Mira supports accessibility",
         body: [
-          "Our goal is simple: users should be able to discover services, understand information, complete bookings, and manage their experience with as little friction as possible.",
+          "When you use Mira, you should be able to understand the content, move through the interface, and complete important actions without unnecessary barriers. For this reason, Mira supports different ways of interaction, including keyboard navigation, screen readers, pointer devices, and touch input. Important forms, dialogs, menus, filters, and booking steps are designed with clear labels, helpful error messages, and predictable focus handling. Accessibility tests are also used for important flows to help keep these parts of the platform reliable.",
         ],
       },
       {
-        title: "Accessibility built into the product",
+        title: "Accessibility panel",
         body: [
-          "Mira is designed to support different ways of using the platform. Users should be able to navigate with a keyboard, screen reader, pointer device, or touch input. Important controls are designed to have clear names, visible focus states, predictable navigation order, and meaningful error messages.",
-          "This helps users understand where they are, what they can do next, and how to recover if something goes wrong. Accessibility is treated as part of product quality, not as a separate layer added after the interface is finished.",
+          "You can find the accessibility panel directly in the navigation bar. From there, you can turn on Easy Language and Reduced Motion without searching through a separate settings page. These settings are placed in the main interface because accessibility options should be easy to find when you need them.",
         ],
       },
       {
-        title: "Clear and understandable content",
+        title: "Easy Language",
         body: [
-          "Good accessibility is not only about technical support. It is also about making information easier to understand.",
-          "Mira aims to use clear, direct, and practical language across the product. Service descriptions, actions, forms, and messages should be written in a way that helps users make decisions confidently.",
-          "Where suitable, Mira supports easy-language alternatives. This gives users the option to switch to simpler descriptions when they prefer clearer wording or need additional support to understand content.",
+          "Mira also gives you options to adjust how information is presented. Some service descriptions and user bios can be shown in Easy Language. This means that you can switch to simpler wording when you want content to be easier to read and understand.",
         ],
       },
       {
-        title: "Flexible interaction for different users",
+        title: "Reduced Motion",
         body: [
-          "People use digital products in different ways. Some users rely on a keyboard. Some use assistive technologies such as screen readers. Others use touch input, a mouse, or a combination of several methods.",
-          "Mira is designed with this flexibility in mind. Interactive elements should be reachable, understandable, and usable across different input methods. This makes the platform more reliable not only for users with disabilities, but also for anyone using Mira in different environments or on different devices.",
+          "If motion makes the interface distracting or uncomfortable for you, you can use Reduced Motion. This setting reduces unnecessary animations and helps create a calmer experience while keeping the platform fully usable.",
         ],
       },
       {
-        title: "Reduced motion for a calmer experience",
+        title: "Image descriptions",
         body: [
-          "Motion can make an interface feel dynamic, but it should never be required to understand or use a product.",
-          "Mira supports reduced-motion preferences for users who prefer a calmer experience or who may be sensitive to animation. When reduced motion is enabled, unnecessary movement and animation are limited, while the product remains fully usable.",
-        ],
-      },
-      {
-        title: "Accessibility settings where users can find them",
-        body: [
-          "One of Mira's key accessibility features is direct access to accessibility settings from the navigation bar.",
-          "Instead of hiding important preferences deep inside a separate settings page, Mira makes them available from the main interface. This gives users faster access to options that can make the product easier and more comfortable to use.",
-          "This approach reflects our belief that accessibility should be visible, practical, and easy to control.",
-        ],
-      },
-      {
-        title: "AI-supported alternative text for service images",
-        body: [
-          "Services on Mira often include visual content. To make this content more accessible, Mira uses a vision-language model to generate alternative text descriptions for service images.",
-          "These descriptions help users who cannot directly view or interpret images understand what is shown. This makes service content more inclusive and gives users more context when comparing options or making a booking decision.",
-          "AI-generated descriptions support accessibility at scale, especially when many services contain images. They are part of Mira's broader effort to make visual information available to more users.",
-        ],
-      },
-      {
-        title: "Accessibility tested across key flows",
-        body: [
-          "Accessibility is also included in Mira's testing process. Automated tests cover accessibility behavior in many important parts of the platform, including dialogs, forms, menus, filters, and booking flows.",
-          "These tests help us identify issues earlier and keep accessibility more consistent as the product grows. By testing accessibility as part of development, Mira reduces the risk of important features becoming harder to use after updates.",
-        ],
-      },
-      {
-        title: "Continuous improvement",
-        body: [
-          "Accessibility is an ongoing process. Mira is designed to improve over time as we learn from users, test new features, and refine existing interactions.",
-          "We know that accessibility needs can be different from person to person. Feedback helps us understand real barriers and make practical improvements that matter.",
+          "Images are also part of the accessibility concept. Service images can receive AI-supported alternative text descriptions. These descriptions help screen readers explain what is shown in an image, so visual service content becomes easier to access if you cannot view or interpret the image directly.",
         ],
       },
       {
         title: "Accessibility contact",
         body: [
           { text: "Accessibility Contact Person:", email: "mira.accessibility@gmail.com" },
-          "If something blocks you, feels confusing, or does not work well with your assistive technology, please contact the accessibility contact person.",
-          "When reporting an issue, please include the page, the action you were trying to complete, and the device or assistive technology you were using. This helps us understand the problem and improve Mira more effectively.",
-          "We appreciate feedback that helps make Mira more accessible, reliable, and comfortable for everyone.",
+          "If something is hard to use, confusing, or does not work well with your assistive technology, please contact us. You can help us understand the issue better by including the page where it happened, what you were trying to do, your device or browser, and the assistive technology you used.",
         ],
       },
     ],

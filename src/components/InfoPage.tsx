@@ -1,3 +1,4 @@
+import { Accessibility } from "lucide-react";
 import { Navbar } from "./Navbar";
 import type { InfoPageContent } from "./infoPages";
 
@@ -23,8 +24,11 @@ export function InfoPage({ page }: { page: InfoPageContent }) {
             <section key={section.title} aria-labelledby={sectionId(section.title)}>
               <h2
                 id={sectionId(section.title)}
-                className="text-h2 font-heading font-semibold text-foreground"
+                className="flex items-center gap-2 text-h2 font-heading font-semibold text-foreground"
               >
+                {section.title === "Accessibility panel" && (
+                  <Accessibility size={24} aria-hidden="true" className="shrink-0" />
+                )}
                 {section.title}
               </h2>
               <div className="mt-3 flex flex-col gap-3">
