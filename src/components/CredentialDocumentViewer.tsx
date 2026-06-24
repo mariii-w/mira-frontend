@@ -20,6 +20,15 @@ export function CredentialDocumentViewer({
 }: CredentialDocumentViewerProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [wasOpen, setWasOpen] = useState(open)
+
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) {
+      setImageUrl(null)
+      setError(null)
+    }
+  }
 
   useEffect(() => {
     if (!open) return
