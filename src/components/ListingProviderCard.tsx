@@ -1,10 +1,10 @@
-import type { CSSProperties } from "react";
+import { useId, useState, type CSSProperties } from "react";
 import { Check, MessageCircle } from "lucide-react";
 import { AvatarIcon } from "./AvatarIcon";
 import { Badge } from "./Badge";
 import { Button } from "./Button";
 import { cn } from "../lib/cn";
-import type { ServiceTag } from "../api/model";
+import type { ServiceTag, VerifiedCredentialResponse } from "../api/model";
 
 export interface ListingProviderCardProps {
   authorName: string;
@@ -14,7 +14,7 @@ export interface ListingProviderCardProps {
   availableToday?: boolean;
   nextAvailableDate?: string;
   tags: ServiceTag[];
-  hasPublicVerifiedCredentials?: boolean;
+  publicVerifiedCredentials?: VerifiedCredentialResponse[];
   onBookNow: () => void;
   className?: string;
   style?: CSSProperties;
@@ -39,12 +39,15 @@ export function ListingProviderCard({
   availableToday,
   nextAvailableDate,
   tags,
-  hasPublicVerifiedCredentials = false,
+  publicVerifiedCredentials = [],
   onBookNow,
   className,
   style,
 }: ListingProviderCardProps) {
   const displayName = `${authorName} ${authorSurname.charAt(0)}.`;
+  const [showVerifiedDetails, setShowVerifiedDetails] = useState(false);
+  const verifiedDetailsId = useId();
+  const hasPublicVerifiedCredentials = publicVerifiedCredentials.length > 0;
 
   return (
     <aside
@@ -63,9 +66,31 @@ export function ListingProviderCard({
         />
         <p className="font-semibold">{displayName}</p>
         {hasPublicVerifiedCredentials && (
-          <span className="inline-flex items-center gap-1 h-7 px-3 rounded-full text-small font-medium bg-primary text-primary-foreground">
-            <Check size={14} aria-hidden="true" />
-            Verified
+          <span className="relative inline-flex">
+            <span
+              tabIndex={0}
+              aria-describedby={showVerifiedDetails ? verifiedDetailsId : undefined}
+              onMouseEnter={() => setShowVerifiedDetails(true)}
+              onMouseLeave={() => setShowVerifiedDetails(false)}
+              onFocus={() => setShowVerifiedDetails(true)}
+              onBlur={() => setShowVerifiedDetails(false)}
+              className="inline-flex items-center gap-1 h-7 px-3 rounded-full text-small font-medium bg-primary text-primary-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/80"
+            >
+              <Check size={14} aria-hidden="true" />
+              Verified
+            </span>
+            {showVerifiedDetails && (
+              <span
+                id={verifiedDetailsId}
+                role="tooltip"
+                className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 rounded-lg bg-background px-3 py-2 text-left text-small text-foreground shadow-lg ring-1 ring-border"
+              >
+                <span className="block font-semibold">Verified credentials</span>
+                <span className="mt-1 block">
+                  {publicVerifiedCredentials.map((credential) => credential.name).join(", ")}
+                </span>
+              </span>
+            )}
           </span>
         )}
       </div>

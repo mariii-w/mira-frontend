@@ -2,10 +2,28 @@ import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ListingProviderCard } from '../components/ListingProviderCard'
+import type { VerifiedCredentialResponse } from '../api/model'
 
 const tags = [
   { tagId: 'tag-1', name: 'PC & Laptop', isBarrierefrei: false, isActive: true },
   { tagId: 'tag-2', name: 'Wheelchair accessible', isBarrierefrei: true, isActive: true },
+]
+
+const publicCredentials: VerifiedCredentialResponse[] = [
+  {
+    credentialType: 'IDENTITY_VERIFIED',
+    name: 'Identity verified',
+    description: 'Identity has been checked.',
+    expiresAt: null,
+    verifiedAt: '2026-06-24T10:00:00Z',
+  },
+  {
+    credentialType: 'MASTER_PLUMBER',
+    name: 'Master plumber',
+    description: 'Trade qualification has been checked.',
+    expiresAt: null,
+    verifiedAt: '2026-06-24T10:00:00Z',
+  },
 ]
 
 describe('<ListingProviderCard />', () => {
@@ -50,7 +68,7 @@ describe('<ListingProviderCard />', () => {
         price={20}
         city="Berlin"
         tags={tags}
-        hasPublicVerifiedCredentials={false}
+        publicVerifiedCredentials={[]}
         onBookNow={vi.fn()}
       />,
     )
@@ -63,11 +81,30 @@ describe('<ListingProviderCard />', () => {
         price={20}
         city="Berlin"
         tags={tags}
-        hasPublicVerifiedCredentials
+        publicVerifiedCredentials={publicCredentials}
         onBookNow={vi.fn()}
       />,
     )
     expect(screen.getByText('Verified')).toBeInTheDocument()
+  })
+
+  it('shows which credentials are verified when the badge is focused', () => {
+    render(
+      <ListingProviderCard
+        authorName="Klaus"
+        authorSurname="Mueller"
+        price={20}
+        city="Berlin"
+        tags={tags}
+        publicVerifiedCredentials={publicCredentials}
+        onBookNow={vi.fn()}
+      />,
+    )
+
+    fireEvent.focus(screen.getByText('Verified'))
+
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Identity verified')
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Master plumber')
   })
 
   it('shows "Today" when available today, otherwise "See calendar"', () => {

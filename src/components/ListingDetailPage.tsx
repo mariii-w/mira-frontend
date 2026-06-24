@@ -4,7 +4,11 @@ import { Navbar } from "./Navbar";
 import { Breadcrumb } from "./BreadCrumb";
 import { ListingProviderCard } from "./ListingProviderCard";
 import { mediaUrl } from "../lib/mediaUrl";
-import type { PublicListingDetails, PublicListingSummary } from "../api/model";
+import type {
+  PublicListingDetails,
+  PublicListingSummary,
+  VerifiedCredentialResponse,
+} from "../api/model";
 
 export interface ListingDetailPageProps {
   listing?: PublicListingDetails;
@@ -14,7 +18,7 @@ export interface ListingDetailPageProps {
   availableToday?: boolean;
   nextAvailableDate?: string;
   otherListings: PublicListingSummary[];
-  hasPublicVerifiedCredentials?: boolean;
+  publicVerifiedCredentials?: VerifiedCredentialResponse[];
   onBookNow: () => void;
   banner?: ReactNode;
 }
@@ -27,7 +31,7 @@ export function ListingDetailPage({
   availableToday,
   nextAvailableDate,
   otherListings,
-  hasPublicVerifiedCredentials = false,
+  publicVerifiedCredentials = [],
   onBookNow,
   banner,
 }: ListingDetailPageProps) {
@@ -185,7 +189,7 @@ export function ListingDetailPage({
             availableToday={availableToday}
             nextAvailableDate={nextAvailableDate}
             tags={listing.tags}
-            hasPublicVerifiedCredentials={hasPublicVerifiedCredentials}
+            publicVerifiedCredentials={publicVerifiedCredentials}
             onBookNow={onBookNow}
             className="animate-fade-in-up"
             style={{ animationDelay: "180ms" }}

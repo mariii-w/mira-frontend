@@ -2,7 +2,11 @@ import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ListingDetailPage } from '../components/ListingDetailPage'
-import type { PublicListingDetails, PublicListingSummary } from '../api/model'
+import type {
+  PublicListingDetails,
+  PublicListingSummary,
+  VerifiedCredentialResponse,
+} from '../api/model'
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tanstack/react-router')>()
@@ -72,6 +76,16 @@ const otherListing: PublicListingSummary = {
   location: { city: 'Berlin', postalCode: '10115', serviceRadiusKm: 15 },
 }
 
+const publicCredentials: VerifiedCredentialResponse[] = [
+  {
+    credentialType: 'IDENTITY_VERIFIED',
+    name: 'Identity verified',
+    description: 'Identity has been checked.',
+    expiresAt: null,
+    verifiedAt: '2026-06-24T10:00:00Z',
+  },
+]
+
 describe('<ListingDetailPage />', () => {
   it('shows a loading state', () => {
     render(<ListingDetailPage loading otherListings={[]} onBookNow={vi.fn()} />)
@@ -107,13 +121,13 @@ describe('<ListingDetailPage />', () => {
     expect(screen.getByText('Seniors')).toBeInTheDocument()
   })
 
-  it('passes the public credential status to the provider card', () => {
+  it('passes the public credentials to the provider card', () => {
     const { rerender } = render(
       <ListingDetailPage
         listing={baseListing}
         loading={false}
         otherListings={[]}
-        hasPublicVerifiedCredentials={false}
+        publicVerifiedCredentials={[]}
         onBookNow={vi.fn()}
       />,
     )
@@ -124,11 +138,13 @@ describe('<ListingDetailPage />', () => {
         listing={baseListing}
         loading={false}
         otherListings={[]}
-        hasPublicVerifiedCredentials
+        publicVerifiedCredentials={publicCredentials}
         onBookNow={vi.fn()}
       />,
     )
     expect(screen.getByText('Verified')).toBeInTheDocument()
+    fireEvent.focus(screen.getByText('Verified'))
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Identity verified')
   })
 
   it('renders the resolved description text', () => {

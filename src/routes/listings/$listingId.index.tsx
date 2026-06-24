@@ -138,7 +138,7 @@ function ListingDetailRoute() {
       availableToday={availableToday}
       nextAvailableDate={nextAvailableDate}
       otherListings={otherListings}
-      hasPublicVerifiedCredentials={(publicCredentialsData?.items ?? []).length > 0}
+      publicVerifiedCredentials={publicCredentialsData?.items ?? []}
       onBookNow={() =>
         navigate({ to: "/listings/$listingId/book", params: { listingId } })
       }
