@@ -1,5 +1,5 @@
 import * as Popover from './Popover'
-import { ChevronDown, LogOut, CalendarCheck, LayoutList, UserRound } from 'lucide-react'
+import { ChevronDown, LogOut, CalendarCheck, LayoutList, UserRound, BadgeCheck } from 'lucide-react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from './Button'
 import { AvatarIcon } from './AvatarIcon'
@@ -44,6 +44,9 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
           <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/my-bookings" />
           {isProvider && (
             <Row icon={<LayoutList size={15} />} title="My Services" to="/my-listings" />
+          )}
+          {isProvider && (
+            <Row icon={<BadgeCheck size={15} />} title="My Credentials" to="/my-credentials" />
           )}
           <div className="my-1 h-px bg-border/30" />
           <button

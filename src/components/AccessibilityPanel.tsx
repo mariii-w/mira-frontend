@@ -32,8 +32,8 @@ export function AccessibilityPanel() {
         >
           <Row
             id="a11y-easy-read"
-            title="Leichte Sprache"
-            description="Switch to easy-to-read German"
+            title="Easy language"
+            description="Switch to simpler, easier-to-read text"
             checked={easyRead}
             onCheckedChange={setEasyRead}
           />

@@ -42,7 +42,7 @@ function addAuthorizationHeader(
   };
 }
 
-async function getRequestInit(
+export async function getRequestInit(
   input: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<RequestInit | undefined> {

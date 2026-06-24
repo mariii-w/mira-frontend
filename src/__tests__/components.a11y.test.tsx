@@ -2088,6 +2088,8 @@ describe("component accessibility", () => {
         screen.getByRole("dialog", { name: /accessibility settings/i }),
       ).toBeInTheDocument();
     });
+    expect(screen.getByLabelText(/easy language/i)).toBeInTheDocument();
+    expect(screen.queryByText(/german/i)).not.toBeInTheDocument();
     await expectNoAxeViolations(document.body);
   });
 
