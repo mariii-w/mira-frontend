@@ -61,12 +61,13 @@ export function Navbar() {
                 </li>
             ))}
             <li>
-              <a
-                  href="#how-it-works"
+              <Link
+                  to="/"
+                  hash="how-it-works"
                   className="text-cream/80 text-small font-medium no-underline hover:text-cream transition-colors duration-150"
               >
                 How it works
-              </a>
+              </Link>
             </li>
           </ul>
 
