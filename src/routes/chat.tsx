@@ -14,49 +14,16 @@ import { ChatInbox, type ChatPreview } from "../components/ChatInbox.tsx";
 import { disconnectChatSocket, publishChatText, subscribeToChat } from "../lib/chatSocket.ts";
 import { describeMessageContent, toChatPreview } from "../lib/chatContent.ts";
 import { useAuthStore } from "../stores/auth";
-import { useListChats } from "../api/mira.ts";
+import { useGetPublicListing, useHistory, useListChats } from "../api/mira.ts";
 
 export const Route = createFileRoute('/chat')({
     component: () => <Chat/>
 })
 
-// ---------------------------------------------------------------------------
-// Dummy data — swap for real API data later
-// ---------------------------------------------------------------------------
-
-const DUMMY_MESSAGES: Record<string, ChatMessage[]> = {
-    "1": [
-        { id: "m1", text: "Hi! I saw your listing for PC support, is the slot tomorrow still free?", self: true, timestamp: "10:01" },
-        { id: "m2", text: "Hey! Yes it is, what time works for you?", self: false, timestamp: "10:03" },
-        { id: "m3", text: "10am would be perfect.", self: true, timestamp: "10:05" },
-        { id: "m4", text: "Sure, I can fix that for you tomorrow.", self: false, timestamp: "10:24" },
-        { id: "m5", text: "Great! Should I bring anything specific?", self: true, timestamp: "10:26" },
-        { id: "m6", text: "Just bring your laptop and any external drives if you have them.", self: false, timestamp: "10:28" },
-        { id: "m7", text: "Perfect, will do. See you tomorrow!", self: true, timestamp: "10:30" },
-        { id: "m8", text: "See you then! Looking forward to it.", self: false, timestamp: "10:31" },
-        { id: "m9", text: "One more thing - do you accept card payments?", self: true, timestamp: "10:33" },
-        { id: "m10", text: "Yes, I accept all major cards and also cash if that works better for you.", self: false, timestamp: "10:35" },
-        { id: "m11", text: "Card is fine, thanks!", self: true, timestamp: "10:36" },
-    ],
-    "2": [
-        { id: "m1", text: "The laptop is running again, thank you so much!", self: true, timestamp: "Yesterday" },
-        { id: "m2", text: "Glad to hear it. Let me know if anything else comes up.", self: false, timestamp: "Yesterday" },
-        { id: "m3", text: "Thanks, talk soon!", self: true, timestamp: "Yesterday" },
-    ],
-    "3": [
-        { id: "m1", text: "Job's done, everything is set up on your end.", self: false, timestamp: "Mon" },
-        { id: "m2", text: "Can you send the invoice?", self: true, timestamp: "Mon" },
-    ],
-    "4": [
-        { id: "m1", text: "Here is the revised draft, let me know what you think.", self: false, timestamp: "Sun" },
-        { id: "m2", text: "Looks great, approved.", self: true, timestamp: "Sun" },
-    ],
-};
-
 // eslint-disable-next-line react-refresh/only-export-components
 function Chat() {
     const [selectedChatId, setSelectedChatId] = useState<string>("");
-    const [messagesByChat, setMessagesByChat] = useState<Record<string, ChatMessage[]>>(DUMMY_MESSAGES);
+    const [messagesByChat, setMessagesByChat] = useState<Record<string, ChatMessage[]>>({});
     const [draft, setDraft] = useState("");
 
     const currentUserId = useAuthStore((s) => s.user?.userId);
@@ -72,6 +39,36 @@ function Chat() {
     const activeChatId = selectedChatId || chats[0]?.id || "";
     const selectedChat = chats.find((c) => c.id === activeChatId);
     const messages = messagesByChat[activeChatId] ?? [];
+
+    const { data: historyResponse, isLoading: historyLoading, isError: historyErrored } = useHistory(
+        activeChatId,
+        undefined,
+        { query: { enabled: !!activeChatId } },
+    );
+
+    // Seed the active chat's bubble list once history loads. Backend returns newest-first
+    // (it's built for "load older messages" pagination), so reverse for top-to-bottom display.
+    useEffect(() => {
+        if (!activeChatId || historyResponse?.status !== 200) return;
+
+        const fetched: ChatMessage[] = historyResponse.data.items
+            .slice()
+            .reverse()
+            .map((m) => ({
+                id: `h-${m.id}`,
+                text: describeMessageContent(m.content),
+                self: m.sender.id === currentUserId,
+                timestamp: new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            }));
+
+        setMessagesByChat((prev) => ({ ...prev, [activeChatId]: fetched }));
+    }, [activeChatId, historyResponse, currentUserId]);
+
+    const { data: listingResponse } = useGetPublicListing(
+        selectedChat?.listingId ?? "",
+        { query: { enabled: !!selectedChat?.listingId } },
+    );
+    const listing = listingResponse?.status === 200 ? listingResponse.data : undefined;
 
     // Subscribe to the selected chat's topic; swap subscription on chat switch.
     useEffect(() => {
@@ -150,7 +147,9 @@ function Chat() {
                             </div>
                             <div className="max-h-72 overflow-y-auto lg:max-h-none lg:overflow-visible">
                                 {chatsLoading && <p className="m-5 text-black/60">Loading chats…</p>}
-                                {chatsErrored && <p className="m-5 text-red-600">Couldn't load chats. Try again later.</p>}
+                                {chatsErrored && (
+                                    <p className="m-5 text-black/60">Couldn't reach the chat server. Make sure the backend is running, then try again.</p>
+                                )}
                                 {!chatsLoading && !chatsErrored && chats.length === 0 && (
                                     <p className="m-5 text-black/60">No conversations yet.</p>
                                 )}
@@ -165,14 +164,24 @@ function Chat() {
                         </section>
                         <section className="w-full lg:w-2/4 bg-cream">
                             <div className="border-b-2 border-border flex flex-row bg-linen">
-                                <div className=" flex flex-row m-2 w-full">
-                                    <AvatarIcon firstName={selectedChat?.firstName} lastName={selectedChat?.lastName} size={60}/>
-                                    <p className="text-2xl font-bold my-auto ml-2">{selectedChat ? `${selectedChat.firstName} ${selectedChat.lastName}` : "Select a chat"}</p>
+                                <div className=" flex flex-row items-center m-2 w-full">
+                                    {selectedChat ? (
+                                        <>
+                                            <AvatarIcon firstName={selectedChat.firstName} lastName={selectedChat.lastName} size={60}/>
+                                            <p className="text-2xl font-bold ml-2">{selectedChat.firstName} {selectedChat.lastName}</p>
+                                        </>
+                                    ) : (
+                                        <p className="text-2xl font-bold ml-2 text-black/60">
+                                            {chatsLoading ? "Loading…" : chatsErrored ? "Chat unavailable" : "No conversations yet"}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                             <div className="m-2">
                                 {/* Chat Field */}
                                 <div className="h-96 lg:h-140 overflow-y-auto px-4 py-3 flex flex-col" role="log" aria-live="polite" aria-label="Conversation messages">
+                                    {activeChatId && historyLoading && <p className="text-black/60">Loading messages…</p>}
+                                    {activeChatId && historyErrored && <p className="text-black/60">Couldn't load this conversation's messages.</p>}
                                     {messages.map((msg) => (
                                         <ChatBubble key={msg.id} message={msg.text} self={msg.self} timestamp={msg.timestamp} />
                                     ))}
@@ -200,7 +209,17 @@ function Chat() {
                         <section className="hidden lg:block lg:w-1/4 border-l-2 border-border">
                             <p className="text-primary text-xl font-semibold-xl m-5">ABOUT THIS SERVICE</p>
                             <div className="m-4  border-border">
-                                <ServiceCardChat pictureLink="./pic/ServiceExample1.png" link="" label={"PC Support & Laptop Help"} tags={[]} hourRate={0} />
+                                {listing ? (
+                                    <ServiceCardChat
+                                        pictureLink={listing.media[0]?.url}
+                                        link=""
+                                        label={listing.title}
+                                        tags={listing.tags}
+                                        hourRate={listing.price}
+                                    />
+                                ) : (
+                                    <p className="text-black/60">No service linked to this conversation.</p>
+                                )}
                             </div>
                             <div className="border-t-2 border-border">
                                 <div className="m-4">
