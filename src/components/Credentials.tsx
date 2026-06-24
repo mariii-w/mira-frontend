@@ -9,6 +9,7 @@ interface CredentialsProps {
   credentials: CredentialResponse[]
   loading: boolean
   error: string | null
+  submissionStatus: string | null
   updatingVisibilityId: string | null
   deletingId: string | null
   onAddCredential: () => void
@@ -43,6 +44,7 @@ export function Credentials({
   credentials,
   loading,
   error,
+  submissionStatus,
   updatingVisibilityId,
   deletingId,
   onAddCredential,
@@ -65,6 +67,17 @@ export function Credentials({
             </div>
             <AddCredentialButton onClick={onAddCredential} />
           </div>
+
+          {submissionStatus && (
+            <p
+              role="status"
+              aria-label="credential-submission-status"
+              aria-live="polite"
+              className="mb-4 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 text-small font-medium text-accent"
+            >
+              {submissionStatus}
+            </p>
+          )}
 
           {loading && (
             <div role="status" aria-live="polite" className="flex justify-center py-16">

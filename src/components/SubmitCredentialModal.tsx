@@ -109,14 +109,14 @@ export function SubmitCredentialModal({
               ref={fileInputRef}
               id="credential-evidence-input"
               type="file"
-              accept="image/jpeg,image/png"
+              accept="image/jpeg,image/png,application/pdf"
               aria-label="Choose file"
               className="sr-only"
               onChange={handleFileChange}
             />
             {file && <p className="text-small text-muted truncate">{file.name}</p>}
           </div>
-          <p className="text-small text-muted">JPG or PNG.</p>
+          <p className="text-small text-muted">JPG, PNG, or PDF.</p>
         </div>
 
         {errorMessage && (

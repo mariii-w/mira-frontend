@@ -1,11 +1,13 @@
 import '@testing-library/jest-dom/vitest'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   getV1UsersUserIdCredentials,
   getV1Credentials,
   postV1UsersUserIdCredentials,
+  postV1UsersUserIdCredentialsCredentialIdVerifications,
+  getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId,
   patchV1UsersUserIdCredentialsCredentialId,
   deleteV1UsersUserIdCredentialsCredentialId,
 } from '../api/mira'
@@ -30,6 +32,8 @@ vi.mock('../api/mira', () => ({
   getV1UsersUserIdCredentials: vi.fn(),
   getV1Credentials: vi.fn(),
   postV1UsersUserIdCredentials: vi.fn(),
+  postV1UsersUserIdCredentialsCredentialIdVerifications: vi.fn(),
+  getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId: vi.fn(),
   patchV1UsersUserIdCredentialsCredentialId: vi.fn(),
   deleteV1UsersUserIdCredentialsCredentialId: vi.fn(),
 }))
@@ -45,6 +49,8 @@ vi.mock('../components/CredentialDocumentViewer', () => ({
 const mockGetCredentials = vi.mocked(getV1UsersUserIdCredentials)
 const mockGetCatalog = vi.mocked(getV1Credentials)
 const mockPost = vi.mocked(postV1UsersUserIdCredentials)
+const mockStartVerification = vi.mocked(postV1UsersUserIdCredentialsCredentialIdVerifications)
+const mockGetVerification = vi.mocked(getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId)
 const mockPatch = vi.mocked(patchV1UsersUserIdCredentialsCredentialId)
 const mockDelete = vi.mocked(deleteV1UsersUserIdCredentialsCredentialId)
 
@@ -108,6 +114,22 @@ beforeEach(() => {
   mockGetCatalog.mockResolvedValue({ status: 200, data: { items: catalog }, headers: new Headers() } as Awaited<
     ReturnType<typeof getV1Credentials>
   >)
+  mockGetVerification.mockResolvedValue({
+    status: 200,
+    data: {
+      verificationId: 'v-1',
+      status: 'PROCESSING',
+      result: null,
+      feedback: null,
+      createdAt: '2026-01-01T00:00:00Z',
+      completedAt: null,
+    },
+    headers: new Headers(),
+  } as Awaited<ReturnType<typeof getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId>>)
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 describe('<MyCredentialsPage />', () => {
@@ -172,13 +194,25 @@ describe('<MyCredentialsPage />', () => {
     expect(await screen.findByRole('button', { name: /master plumber/i })).toBeInTheDocument()
   })
 
-  it('submits a new credential and refreshes the list on success', async () => {
+  it('submits a new credential, starts verification, and refreshes the list', async () => {
     mockCredentialsSuccess([makeCredential()])
     mockPost.mockResolvedValue({
       status: 201,
-      data: makeCredential(),
+      data: makeCredential({ credentialId: 'cred-new', latestVerification: null }),
       headers: new Headers(),
     } as Awaited<ReturnType<typeof postV1UsersUserIdCredentials>>)
+    mockStartVerification.mockResolvedValue({
+      status: 202,
+      data: {
+        verificationId: 'v-new',
+        status: 'QUEUED',
+        result: null,
+        feedback: null,
+        createdAt: '2026-01-01T00:00:00Z',
+        completedAt: null,
+      },
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof postV1UsersUserIdCredentialsCredentialIdVerifications>>)
 
     renderRoute()
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
@@ -194,7 +228,156 @@ describe('<MyCredentialsPage />', () => {
     await waitFor(() =>
       expect(mockPost).toHaveBeenCalledWith('user-1', { credentialType: 'MASTER_PLUMBER', file }),
     )
+    await waitFor(() => expect(mockStartVerification).toHaveBeenCalledWith('user-1', 'cred-new'))
+    expect(screen.getByRole('status', { name: 'credential-submission-status' })).toHaveTextContent(
+      'Verification started.',
+    )
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
+
+  it('polls the started verification until it completes and refreshes credentials', async () => {
+    mockCredentialsSuccess([makeCredential()])
+    mockPost.mockResolvedValue({
+      status: 201,
+      data: makeCredential({ credentialId: 'cred-new', latestVerification: null }),
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof postV1UsersUserIdCredentials>>)
+    mockStartVerification.mockResolvedValue({
+      status: 202,
+      data: {
+        verificationId: 'v-new',
+        status: 'QUEUED',
+        result: null,
+        feedback: null,
+        createdAt: '2026-01-01T00:00:00Z',
+        completedAt: null,
+      },
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof postV1UsersUserIdCredentialsCredentialIdVerifications>>)
+    mockGetVerification.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        verificationId: 'v-new',
+        status: 'COMPLETED',
+        result: 'APPROVED',
+        feedback: null,
+        createdAt: '2026-01-01T00:00:00Z',
+        completedAt: '2026-01-01T00:01:00Z',
+      },
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId>>)
+
+    renderRoute()
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: /add credential/i }))
+    fireEvent.click(await screen.findByRole('button', { name: /master plumber/i }))
+    const file = new File(['evidence'], 'evidence.pdf', { type: 'application/pdf' })
+    fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
+    mockCredentialsSuccess([makeCredential({ credentialId: 'cred-new' })])
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+    await waitFor(() =>
+      expect(mockGetVerification).toHaveBeenCalledWith('user-1', 'cred-new', 'v-new'),
+    )
+    await waitFor(() => expect(mockGetCredentials).toHaveBeenCalledTimes(2))
+    vi.useRealTimers()
+  })
+
+  it('refreshes the credential list automatically while verification is in progress', async () => {
+    mockGetCredentials
+      .mockResolvedValueOnce({
+        status: 200,
+        data: { items: [makeCredential()] },
+        headers: new Headers(),
+      } as Awaited<ReturnType<typeof getV1UsersUserIdCredentials>>)
+      .mockResolvedValueOnce({
+        status: 200,
+        data: {
+          items: [
+            makeCredential({
+              credentialId: 'cred-new',
+              isVisible: false,
+              latestVerification: {
+                verificationId: 'v-new',
+                status: 'PROCESSING',
+                result: null,
+                feedback: null,
+                createdAt: '2026-01-01T00:00:00Z',
+                completedAt: null,
+              },
+            }),
+          ],
+        },
+        headers: new Headers(),
+      } as Awaited<ReturnType<typeof getV1UsersUserIdCredentials>>)
+      .mockResolvedValueOnce({
+        status: 200,
+        data: {
+          items: [
+            makeCredential({
+              credentialId: 'cred-new',
+              isVisible: false,
+              latestVerification: {
+                verificationId: 'v-new',
+                status: 'COMPLETED',
+                result: 'APPROVED',
+                feedback: null,
+                createdAt: '2026-01-01T00:00:00Z',
+                completedAt: '2026-01-01T00:01:00Z',
+              },
+            }),
+          ],
+        },
+        headers: new Headers(),
+      } as Awaited<ReturnType<typeof getV1UsersUserIdCredentials>>)
+    mockPost.mockResolvedValue({
+      status: 201,
+      data: makeCredential({ credentialId: 'cred-new', latestVerification: null }),
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof postV1UsersUserIdCredentials>>)
+    mockStartVerification.mockResolvedValue({
+      status: 202,
+      data: {
+        verificationId: 'v-new',
+        status: 'QUEUED',
+        result: null,
+        feedback: null,
+        createdAt: '2026-01-01T00:00:00Z',
+        completedAt: null,
+      },
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof postV1UsersUserIdCredentialsCredentialIdVerifications>>)
+    mockGetVerification.mockResolvedValue({
+      status: 200,
+      data: {
+        verificationId: 'v-new',
+        status: 'PROCESSING',
+        result: null,
+        feedback: null,
+        createdAt: '2026-01-01T00:00:00Z',
+        completedAt: null,
+      },
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId>>)
+
+    renderRoute()
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: /add credential/i }))
+    fireEvent.click(await screen.findByRole('button', { name: /master plumber/i }))
+    const file = new File(['evidence'], 'evidence.pdf', { type: 'application/pdf' })
+    fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+    await waitFor(() => expect(mockGetCredentials).toHaveBeenCalledTimes(2))
+
+    await waitFor(() => expect(mockGetCredentials).toHaveBeenCalledTimes(3), { timeout: 3500 })
+    await waitFor(() =>
+      expect(screen.getByRole('status', { name: 'credential-submission-status' })).toHaveTextContent(
+        'Credential approved.',
+      ),
+    )
   })
 
   it('toggles credential visibility', async () => {

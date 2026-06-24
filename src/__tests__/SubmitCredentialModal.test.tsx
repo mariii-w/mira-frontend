@@ -57,6 +57,15 @@ describe('<SubmitCredentialModal />', () => {
     expect(screen.getByRole('button', { name: 'Submit' })).toBeEnabled()
   })
 
+  it('accepts jpg, png, and pdf evidence files', () => {
+    render(<SubmitCredentialModal {...defaultProps} />)
+    expect(screen.getByLabelText('Choose file')).toHaveAttribute(
+      'accept',
+      'image/jpeg,image/png,application/pdf',
+    )
+    expect(screen.getByText('JPG, PNG, or PDF.')).toBeInTheDocument()
+  })
+
   it('marks the selected type as pressed', () => {
     render(<SubmitCredentialModal {...defaultProps} />)
     const studentButton = screen.getByRole('button', { name: /student status/i })
