@@ -262,7 +262,10 @@ export function BookingCard({
       aria-labelledby={headingId}
       className={`bg-surface rounded-2xl border shadow-sm overflow-hidden ${CARD_BORDER[booking.status]}`}
     >
-      <div className="flex items-start gap-4 p-4 sm:p-5">
+      <div
+        onClick={handleToggle}
+        className="flex cursor-pointer items-start gap-4 p-4 sm:p-5"
+      >
         <div className="flex flex-col items-center justify-center min-w-[3rem] text-center select-none self-center">
           <span className="sr-only">{`${month} ${day} at ${time}`}</span>
           <span
@@ -315,7 +318,6 @@ export function BookingCard({
             aria-label={
               expanded ? "Collapse booking details" : "Expand booking details"
             }
-            onClick={handleToggle}
             className={`transition-colors ${expanded ? TOGGLE_COLOR[booking.status] : "text-muted hover:text-foreground"}`}
           >
             {expanded ? (
