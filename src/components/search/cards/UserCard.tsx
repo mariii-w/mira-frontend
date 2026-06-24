@@ -17,15 +17,11 @@ function getDisplayName(profile: PublicProfileResponse): string {
   return [profile.firstName, profile.lastName].filter(Boolean).join(' ') || profile.username
 }
 
-function isProfileVerified(_profile: PublicProfileResponse): boolean {
-  return true
-}
-
 export function UserCard({ profile, easyRead, providerSummary }: UserCardProps) {
   const isProvider = profile.userType === 'PROVIDER'
   const displayName = getDisplayName(profile)
   const bio = (easyRead && profile.simplifiedBio) || profile.bio
-  const verified = isProfileVerified(profile)
+  const verified = profile.verified
   const hasPrice = isProvider && providerSummary?.startingPrice != null
   const hasServices = isProvider && providerSummary != null
 

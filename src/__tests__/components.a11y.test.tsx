@@ -459,6 +459,7 @@ const componentCases: Array<[string, ReactElement]> = [
         selfSummary: null,
         accessibilityPreferences: [],
         profileMedia: null,
+        verified: true,
       }}
       easyRead={false}
     />,
@@ -478,6 +479,7 @@ const componentCases: Array<[string, ReactElement]> = [
         selfSummary: null,
         accessibilityPreferences: [],
         profileMedia: null,
+        verified: true,
       }}
       easyRead={false}
     />,
@@ -497,6 +499,7 @@ const componentCases: Array<[string, ReactElement]> = [
         selfSummary: null,
         accessibilityPreferences: [],
         profileMedia: null,
+        verified: true,
       }}
       easyRead={false}
       providerSummary={{

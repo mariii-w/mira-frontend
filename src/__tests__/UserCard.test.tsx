@@ -30,6 +30,7 @@ function profile(overrides: Partial<PublicProfileResponse> = {}): PublicProfileR
     selfSummary: 'Five years of experience.',
     accessibilityPreferences: [],
     profileMedia: null,
+    verified: false,
     ...overrides,
   }
 }
@@ -102,9 +103,14 @@ describe('<UserCard /> links', () => {
 })
 
 describe('<UserCard /> verification', () => {
-  it('exposes an accessible "Verified profile" indicator', () => {
-    render(<UserCard profile={profile()} easyRead={false} />)
+  it('exposes an accessible "Verified profile" indicator when the profile is verified', () => {
+    render(<UserCard profile={profile({ verified: true })} easyRead={false} />)
     expect(screen.getByRole('img', { name: 'Verified profile' })).toBeInTheDocument()
+  })
+
+  it('omits the "Verified profile" indicator when the profile is not verified', () => {
+    render(<UserCard profile={profile({ verified: false })} easyRead={false} />)
+    expect(screen.queryByRole('img', { name: 'Verified profile' })).not.toBeInTheDocument()
   })
 })
 
@@ -166,7 +172,7 @@ describe('<UserCard /> accessible focus group', () => {
   it('describes role, price, city, bio, verification, and services for an enriched provider card', () => {
     render(
       <UserCard
-        profile={profile({ userType: 'PROVIDER', city: 'Berlin', bio: 'Friendly help.' })}
+        profile={profile({ userType: 'PROVIDER', city: 'Berlin', bio: 'Friendly help.', verified: true })}
         easyRead={false}
         providerSummary={providerSummary}
       />,
