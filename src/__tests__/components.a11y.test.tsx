@@ -62,6 +62,7 @@ import { Slider } from "../components/Slider";
 import * as Switch from "../components/Switch";
 import { Textarea } from "../components/Textarea";
 import { UserMenu } from "../components/UserMenu";
+import { UserCard } from "../components/search/cards/UserCard";
 import { WeeklyScheduleModal } from "../components/WeeklyScheduleModal";
 import { useAuthStore, type User } from "../stores/auth";
 
@@ -441,6 +442,71 @@ const componentCases: Array<[string, ReactElement]> = [
       providerCount={4}
       consumerCount={4}
       onChange={vi.fn()}
+    />,
+  ],
+  [
+    "UserCard (consumer)",
+    <UserCard
+      profile={{
+        userId: "user-1",
+        username: "anna.w",
+        firstName: "Anna",
+        lastName: "Weber",
+        userType: "CUSTOMER",
+        city: "Berlin",
+        bio: "I use Mira to find friendly help with my laptop and phone.",
+        simplifiedBio: null,
+        selfSummary: null,
+        accessibilityPreferences: [],
+        profileMedia: null,
+      }}
+      easyRead={false}
+    />,
+  ],
+  [
+    "UserCard (provider, base)",
+    <UserCard
+      profile={{
+        userId: "user-2",
+        username: "patrick.s",
+        firstName: "Patrick",
+        lastName: "Smith",
+        userType: "PROVIDER",
+        city: "Berlin",
+        bio: "Five years helping friends and neighbours with everyday tech.",
+        simplifiedBio: null,
+        selfSummary: null,
+        accessibilityPreferences: [],
+        profileMedia: null,
+      }}
+      easyRead={false}
+    />,
+  ],
+  [
+    "UserCard (provider, enriched)",
+    <UserCard
+      profile={{
+        userId: "user-2",
+        username: "patrick.s",
+        firstName: "Patrick",
+        lastName: "Smith",
+        userType: "PROVIDER",
+        city: "Berlin",
+        bio: "Five years helping friends and neighbours with everyday tech.",
+        simplifiedBio: null,
+        selfSummary: null,
+        accessibilityPreferences: [],
+        profileMedia: null,
+      }}
+      easyRead={false}
+      providerSummary={{
+        serviceCount: 4,
+        startingPrice: 20,
+        topTags: [
+          { tagId: "wifi", name: "Laptop & Wi-Fi Setup", usageCount: 2, isBarrierefrei: false, minPrice: 22 },
+          { tagId: "a11y", name: "Accessible tech help", usageCount: 1, isBarrierefrei: true, minPrice: 28 },
+        ],
+      }}
     />,
   ],
 ];

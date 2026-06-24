@@ -1,38 +1,20 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import { SearchBar } from '../SearchBar.tsx'
 import { Breadcrumb } from '../../BreadCrumb.tsx'
 import { Pagination } from '../../Pagination.tsx'
-import { UserCard } from '../../UserCard.tsx'
+import { UserCard } from '../cards/UserCard.tsx'
 import { UserTypeFilter } from '../UserTypeFilter.tsx'
 import { useAccessibilityStore } from '../../../stores/accessibility.ts'
-import { mediaUrl } from '../../../lib/mediaUrl.ts'
-import { getPublicProfilesCollection } from '../../../api/mira.ts'
-import type { GetPublicProfilesCollectionParams } from '../../../api/model'
+import { getPublicListings, getPublicProfilesCollection } from '../../../api/mira.ts'
+import { summarizeProviderServices } from '../../../lib/providerServiceSummary.ts'
+import type { GetPublicProfilesCollectionParams, PublicListingSummary, PublicProfileCollectionResponse } from '../../../api/model'
+import type { ProviderServiceSummary } from '../../../lib/providerServiceSummary.ts'
 import type { BrowseUsersSearch, UserRoleFilter } from '../searchSchemas.ts'
 
-// Types
-
-type PublicProfileSummary = {
-  userId: string
-  username: string
-  firstName: string | null
-  lastName: string | null
-  userType: string | null
-  bio: string | null
-  simplifiedBio: string | null
-  selfSummary: string | null
-  accessibilityPreferences: string[]
-  profileMedia: { url: string } | null
-}
-
-type PublicProfileCollectionResponse = {
-  items: PublicProfileSummary[]
-  cursor: { limit: number; next: string | null }
-}
-
 const routeApi = getRouteApi('/_search/browse-users')
+const LISTINGS_PAGE_SIZE = 500
 
 // Helpers — the profiles endpoint supports only free-text + cursor pagination.
 
@@ -48,7 +30,28 @@ function toProfilesParams(params: BrowseUsersSearch): GetPublicProfilesCollectio
 async function fetchPublicProfiles(params: BrowseUsersSearch): Promise<PublicProfileCollectionResponse> {
   const response = await getPublicProfilesCollection(toProfilesParams(params))
   if (response.status !== 200) throw new Error('Users could not be loaded.')
-  return response.data as unknown as PublicProfileCollectionResponse
+  return response.data
+}
+
+async function fetchAllProviderListings(userId: string): Promise<PublicListingSummary[]> {
+  const items: PublicListingSummary[] = []
+  // Guards against infinite loops if the backend ever returns a repeated cursor.next value (e.g., a cycle).
+  const seenCursors = new Set<string>()
+  let from: string | undefined
+
+  for (;;) {
+    const response = await getPublicListings({ userId, limit: LISTINGS_PAGE_SIZE, ...(from ? { from } : {}) })
+    if (response.status !== 200) throw new Error('Provider services could not be loaded.')
+
+    items.push(...response.data.items)
+    const next = response.data.cursor?.next ?? null
+    if (!next || seenCursors.has(next)) break
+
+    seenCursors.add(next)
+    from = next
+  }
+
+  return items
 }
 
 // Browse Users Page
@@ -76,6 +79,25 @@ export function SearchUsersPage() {
       : profiles
   const nextCursor = profilesQuery.data?.cursor.next ?? null
   const hasPrev = prevCursors.length > 0
+
+  // Enrichment is fetched for every provider on the current page, regardless of the
+  // selected role tab — switching tabs is a client-side filter with no refetch, so
+  // prefetching everyone up front keeps tab switching instant with no loading state.
+  const enrichmentQueries = useQueries({
+    queries: providers.map(provider => ({
+      queryKey: ['provider-listings', provider.userId],
+      queryFn: () => fetchAllProviderListings(provider.userId),
+    })),
+  })
+  const enrichmentPending = enrichmentQueries.some(query => query.isPending)
+  const cardsLoading = profilesQuery.isLoading || (profilesQuery.isSuccess && enrichmentPending)
+  const resultsReady = profilesQuery.isSuccess && !enrichmentPending
+
+  const providerSummaries = new Map<string, ProviderServiceSummary>()
+  providers.forEach((provider, index) => {
+    const listings = enrichmentQueries[index].data
+    if (listings) providerSummaries.set(provider.userId, summarizeProviderServices(listings))
+  })
 
   function commitSearch() {
     setPrevCursors([])
@@ -150,7 +172,7 @@ export function SearchUsersPage() {
             )}
 
             {/* Loading */}
-            {profilesQuery.isLoading && (
+            {cardsLoading && (
               <div role="status" aria-live="polite" className="flex justify-center py-16">
                 <p className="text-small text-muted">Loading…</p>
               </div>
@@ -164,13 +186,13 @@ export function SearchUsersPage() {
             )}
 
             {/* Empty */}
-            {profilesQuery.isSuccess && profiles.length === 0 && (
+            {resultsReady && profiles.length === 0 && (
               <div className="flex flex-col items-center gap-2 py-16 text-center">
                 <p className="text-body text-muted">No users found.</p>
               </div>
             )}
 
-            {profilesQuery.isSuccess && profiles.length > 0 && visibleProfiles.length === 0 && (
+            {resultsReady && profiles.length > 0 && visibleProfiles.length === 0 && (
               <div className="py-16 text-center">
                 <p className="text-body text-muted">
                   {search.role === 'providers'
@@ -181,26 +203,21 @@ export function SearchUsersPage() {
             )}
 
             {/* Results list */}
-            {profilesQuery.isSuccess && visibleProfiles.length > 0 && (
+            {resultsReady && visibleProfiles.length > 0 && (
                 <ul role="list" aria-label="User results" className="grid grid-cols-1 lg:grid-cols-2 gap-4 list-none m-0 p-0">
-                  {visibleProfiles.map((profile) => (
-                    <li key={profile.userId}>
-                      <UserCard
-                        userId={profile.userId}
-                        username={profile.username}
-                        firstName={profile.firstName}
-                        lastName={profile.lastName}
-                        userType={profile.userType}
-                        bio={(easyRead && profile.simplifiedBio ? profile.simplifiedBio : profile.bio) ?? undefined}
-                        selfSummary={profile.selfSummary ?? undefined}
-                        profileMediaUrl={profile.profileMedia ? mediaUrl(profile.profileMedia.url) : undefined}
-                      />
+                  {visibleProfiles.map((profile, index) => (
+                    <li
+                      key={profile.userId}
+                      className="animate-fade-in-up"
+                      style={{ animationDelay: `${Math.min(index * 40, 300)}ms` }}
+                    >
+                      <UserCard profile={profile} easyRead={easyRead} providerSummary={providerSummaries.get(profile.userId)} />
                     </li>
                   ))}
                 </ul>
             )}
 
-            {profilesQuery.isSuccess && profiles.length > 0 && (hasPrev || nextCursor) && (
+            {resultsReady && profiles.length > 0 && (hasPrev || nextCursor) && (
               <Pagination
                 onPrevious={handlePrev}
                 onNext={handleNext}
