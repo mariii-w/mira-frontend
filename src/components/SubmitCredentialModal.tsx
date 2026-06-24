@@ -1,5 +1,6 @@
 import { useRef, useState, type ChangeEvent } from 'react'
-import { Upload } from 'lucide-react'
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
+import { Check, ChevronDown, Upload } from 'lucide-react'
 import { Modal } from './Modal'
 import { Button } from './Button'
 import type { CredentialType, CredentialTypeResponse } from '../api/model'
@@ -61,6 +62,9 @@ export function SubmitCredentialModal({
     resetForm()
   }
 
+  const sortedTypes = [...credentialTypes].sort((a, b) => a.name.localeCompare(b.name))
+  const selectedTypeInfo = sortedTypes.find((type) => type.credentialType === selectedType)
+
   return (
     <Modal
       open={open}
@@ -76,32 +80,47 @@ export function SubmitCredentialModal({
         {catalogLoading ? (
           <p className="text-small text-muted">Loading credential types…</p>
         ) : (
-          <div className="flex flex-col gap-2 -mt-2 max-h-56 overflow-y-auto">
-            {credentialTypes.map((type) => (
-              <button
-                key={type.credentialType}
-                type="button"
-                onClick={() => setSelectedType(type.credentialType)}
-                aria-pressed={selectedType === type.credentialType}
-                className={[
-                  'w-full text-left rounded-xl border px-4 py-3 transition-colors',
-                  selectedType === type.credentialType
-                    ? 'border-accent bg-accent/10'
-                    : 'border-border bg-background hover:bg-foreground/5',
-                ].join(' ')}
+          <Listbox value={selectedType} onChange={setSelectedType}>
+            <div className="relative">
+              <ListboxButton
+                aria-label="Credential type"
+                className="flex w-full items-center justify-between gap-2 rounded-xl border border-border bg-background px-4 py-3 text-left transition-colors hover:border-primary data-[open]:border-primary"
               >
-                <p
-                  className={[
-                    'text-sm font-semibold',
-                    selectedType === type.credentialType ? 'text-accent' : 'text-foreground',
-                  ].join(' ')}
-                >
-                  {type.name}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">{type.description}</p>
-              </button>
-            ))}
-          </div>
+                <span className={selectedTypeInfo ? 'text-sm font-semibold text-foreground' : 'text-sm text-muted'}>
+                  {selectedTypeInfo ? selectedTypeInfo.name : 'Select a credential type'}
+                </span>
+                <ChevronDown
+                  size={16}
+                  aria-hidden="true"
+                  className="shrink-0 text-muted transition-transform ui-open:rotate-180"
+                />
+              </ListboxButton>
+
+              <ListboxOptions
+                className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-border bg-surface shadow-lg py-1 focus:outline-none"
+              >
+                {sortedTypes.map((type) => (
+                  <ListboxOption
+                    key={type.credentialType}
+                    value={type.credentialType}
+                    className="flex items-center justify-between gap-3 px-4 py-2.5 cursor-pointer select-none transition-colors data-[focus]:bg-primary/10"
+                  >
+                    <span>
+                      <p className="text-sm font-semibold text-foreground">{type.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{type.description}</p>
+                    </span>
+                    {selectedType === type.credentialType && (
+                      <Check size={14} aria-hidden="true" className="shrink-0 text-primary" />
+                    )}
+                  </ListboxOption>
+                ))}
+              </ListboxOptions>
+            </div>
+          </Listbox>
+        )}
+
+        {selectedTypeInfo && (
+          <p className="-mt-2 text-xs text-muted-foreground">{selectedTypeInfo.description}</p>
         )}
 
         <div className="flex flex-col gap-1.5">
@@ -138,7 +157,7 @@ export function SubmitCredentialModal({
           </p>
         )}
 
-        <div className="flex justify-end gap-3 mt-1">
+        <div className="flex justify-center gap-3 mt-1">
           <Button variant="secondary" size="md" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </Button>

@@ -1,9 +1,18 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import type { ReactNode } from 'react'
+import { act, type ReactNode } from 'react'
 import { SubmitCredentialModal } from '../components/SubmitCredentialModal'
 import type { CredentialTypeResponse } from '../api/model'
+
+// Headless UI's Listbox uses ResizeObserver to position the options popover, which jsdom doesn't implement.
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+}
 
 vi.mock('../components/Modal', () => ({
   Modal: ({ open, children, title }: { open: boolean; children: ReactNode; title: string }) =>
@@ -14,6 +23,18 @@ const credentialTypes: CredentialTypeResponse[] = [
   { credentialType: 'STUDENT_VERIFIED', name: 'Student Status', description: 'Proof of enrollment' },
   { credentialType: 'MASTER_PLUMBER', name: 'Master Plumber', description: 'Trade certification' },
 ]
+
+async function openTypeDropdown() {
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'Credential type' }))
+  })
+}
+
+async function selectTypeOption(name: RegExp) {
+  await act(async () => {
+    fireEvent.click(screen.getByRole('option', { name }))
+  })
+}
 
 const defaultProps = {
   open: true,
@@ -33,23 +54,28 @@ describe('<SubmitCredentialModal />', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('lists the credential types from the catalog', () => {
+  it('lists the credential types from the catalog, sorted alphabetically', async () => {
     render(<SubmitCredentialModal {...defaultProps} />)
-    expect(screen.getByRole('button', { name: /student status/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /master plumber/i })).toBeInTheDocument()
+    await openTypeDropdown()
+    const options = screen.getAllByRole('option')
+    expect(options.map((o) => o.textContent)).toEqual([
+      expect.stringContaining('Master Plumber'),
+      expect.stringContaining('Student Status'),
+    ])
   })
 
   it('shows a loading message instead of the catalog while it loads', () => {
     render(<SubmitCredentialModal {...defaultProps} catalogLoading credentialTypes={[]} />)
     expect(screen.getByText('Loading credential types…')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /student status/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Credential type' })).not.toBeInTheDocument()
   })
 
-  it('disables Submit until a type and a file are chosen', () => {
+  it('disables Submit until a type and a file are chosen', async () => {
     render(<SubmitCredentialModal {...defaultProps} />)
     expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
 
-    fireEvent.click(screen.getByRole('button', { name: /student status/i }))
+    await openTypeDropdown()
+    await selectTypeOption(/student status/i)
     expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
 
     const file = new File(['evidence'], 'evidence.png', { type: 'image/png' })
@@ -66,31 +92,37 @@ describe('<SubmitCredentialModal />', () => {
     expect(screen.getByText('JPG, PNG, or PDF.')).toBeInTheDocument()
   })
 
-  it('marks the selected type as pressed', () => {
+  it('marks the selected type as selected and shows it on the trigger', async () => {
     render(<SubmitCredentialModal {...defaultProps} />)
-    const studentButton = screen.getByRole('button', { name: /student status/i })
-    fireEvent.click(studentButton)
-    expect(studentButton).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: /master plumber/i })).toHaveAttribute('aria-pressed', 'false')
+    await openTypeDropdown()
+    await selectTypeOption(/student status/i)
+
+    expect(screen.getByRole('button', { name: 'Credential type' })).toHaveTextContent('Student Status')
+
+    await openTypeDropdown()
+    expect(screen.getByRole('option', { name: /student status/i })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('option', { name: /master plumber/i })).toHaveAttribute('aria-selected', 'false')
   })
 
-  it('calls onSubmit with the selected type and file', () => {
+  it('calls onSubmit with the selected type and file', async () => {
     const onSubmit = vi.fn()
     const file = new File(['evidence'], 'evidence.png', { type: 'image/png' })
     render(<SubmitCredentialModal {...defaultProps} onSubmit={onSubmit} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /master plumber/i }))
+    await openTypeDropdown()
+    await selectTypeOption(/master plumber/i)
     fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
 
     expect(onSubmit).toHaveBeenCalledWith('MASTER_PLUMBER', file)
   })
 
-  it('rejects unsupported evidence file types before submit', () => {
+  it('rejects unsupported evidence file types before submit', async () => {
     const onSubmit = vi.fn()
     render(<SubmitCredentialModal {...defaultProps} onSubmit={onSubmit} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /master plumber/i }))
+    await openTypeDropdown()
+    await selectTypeOption(/master plumber/i)
     const file = new File(['evidence'], 'evidence.gif', { type: 'image/gif' })
     fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
 
