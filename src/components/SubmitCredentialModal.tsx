@@ -4,6 +4,8 @@ import { Modal } from './Modal'
 import { Button } from './Button'
 import type { CredentialType, CredentialTypeResponse } from '../api/model'
 
+const ALLOWED_EVIDENCE_TYPES = ['image/jpeg', 'image/png', 'application/pdf']
+
 interface SubmitCredentialModalProps {
   open: boolean
   onClose: () => void
@@ -26,10 +28,12 @@ export function SubmitCredentialModal({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedType, setSelectedType] = useState<CredentialType | null>(null)
   const [file, setFile] = useState<File | null>(null)
+  const [fileError, setFileError] = useState<string | null>(null)
 
   function resetForm() {
     setSelectedType(null)
     setFile(null)
+    setFileError(null)
   }
 
   function handleClose() {
@@ -39,7 +43,16 @@ export function SubmitCredentialModal({
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0]
-    if (picked) setFile(picked)
+    if (!picked) return
+
+    if (!ALLOWED_EVIDENCE_TYPES.includes(picked.type)) {
+      setFile(null)
+      setFileError('Choose a JPG, PNG, or PDF file.')
+      return
+    }
+
+    setFileError(null)
+    setFile(picked)
   }
 
   function handleSubmit() {
@@ -119,9 +132,9 @@ export function SubmitCredentialModal({
           <p className="text-small text-muted">JPG, PNG, or PDF.</p>
         </div>
 
-        {errorMessage && (
+        {(fileError || errorMessage) && (
           <p role="alert" className="text-sm text-red-600">
-            {errorMessage}
+            {fileError ?? errorMessage}
           </p>
         )}
 
@@ -134,7 +147,7 @@ export function SubmitCredentialModal({
             size="md"
             onClick={handleSubmit}
             loading={isSubmitting}
-            disabled={isSubmitting || !selectedType || !file}
+            disabled={isSubmitting || !selectedType || !file || !!fileError}
           >
             Submit
           </Button>

@@ -86,6 +86,20 @@ describe('<SubmitCredentialModal />', () => {
     expect(onSubmit).toHaveBeenCalledWith('MASTER_PLUMBER', file)
   })
 
+  it('rejects unsupported evidence file types before submit', () => {
+    const onSubmit = vi.fn()
+    render(<SubmitCredentialModal {...defaultProps} onSubmit={onSubmit} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /master plumber/i }))
+    const file = new File(['evidence'], 'evidence.gif', { type: 'image/gif' })
+    fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Choose a JPG, PNG, or PDF file.')
+    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
   it('calls onClose when Cancel is clicked', () => {
     const onClose = vi.fn()
     render(<SubmitCredentialModal {...defaultProps} onClose={onClose} />)
