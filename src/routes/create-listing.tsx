@@ -4,9 +4,18 @@ import {
   CreateListing,
   type CreateListingFormValues,
 } from "../components/CreateListing";
-import { getServiceTags, getCreateListingUrl } from "../api/mira";
-import { authFetch } from "../lib/authFetch";
-import type { ServiceTag } from "../api/model";
+import {
+  getServiceTags,
+  getCreateListingUrl,
+  publishListing,
+} from "../api/mira";
+import { authFetch, type FetchResponse } from "../lib/authFetch";
+import { createListingActions } from "../lib/createListingActions";
+import type {
+  ListingDetails,
+  ProblemDetailsResponse,
+  ServiceTag,
+} from "../api/model";
 
 export const Route = createFileRoute("/create-listing")({
   component: CreateListingPage,
@@ -17,6 +26,15 @@ function CreateListingPage() {
   const navigate = useNavigate();
   const [availableTags, setAvailableTags] = useState<ServiceTag[]>([]);
   const [tagsLoading, setTagsLoading] = useState(true);
+  const [actions] = useState(() =>
+    createListingActions<CreateListingFormValues>({
+      createDraft,
+      publishDraft,
+      onComplete: async () => {
+        await navigate({ to: "/my-listings" });
+      },
+    }),
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -41,7 +59,7 @@ function CreateListingPage() {
     };
   }, []);
 
-  async function handleSubmit(values: CreateListingFormValues) {
+  async function createDraft(values: CreateListingFormValues): Promise<string> {
     // POST /v1/listings is multipart: a JSON `listing` part + `files`.
     // The generated createListing serialises the listing part as text/plain,
     // which the backend's @RequestPart rejects, so we build the FormData here
@@ -68,19 +86,29 @@ function CreateListingPage() {
       formData.append("files", file);
     }
 
-    const response = await authFetch<{ status: number; data: { detail?: string } }>(
-      getCreateListingUrl(),
-      { method: "POST", body: formData },
-    );
+    const response = await authFetch<
+      FetchResponse<ListingDetails | ProblemDetailsResponse>
+    >(getCreateListingUrl(), { method: "POST", body: formData });
 
     if (response.status !== 201) {
       throw new Error(
-        response.data.detail ??
+        problemDetail(response.data) ??
           `Failed to create listing (${response.status}).`,
       );
     }
 
-    await navigate({ to: "/my-listings" });
+    return (response.data as ListingDetails).listingId;
+  }
+
+  async function publishDraft(listingId: string): Promise<void> {
+    const response = await publishListing(listingId);
+
+    if (response.status !== 200) {
+      throw new Error(
+        problemDetail(response.data) ??
+          `Failed to publish listing (${response.status}).`,
+      );
+    }
   }
 
   return (
@@ -88,7 +116,12 @@ function CreateListingPage() {
       availableTags={availableTags}
       tagsLoading={tagsLoading}
       onBack={() => navigate({ to: "/my-listings" })}
-      onSubmit={handleSubmit}
+      onSave={actions.save}
+      onPublish={actions.publish}
     />
   );
+}
+
+function problemDetail(data: unknown): string | undefined {
+  return (data as Partial<ProblemDetailsResponse> | null)?.detail;
 }
