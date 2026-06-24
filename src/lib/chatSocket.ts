@@ -1,4 +1,4 @@
-// STOMP-over-SockJS client for chat. Connects to /chats/ws, JWT goes on the CONNECT frame.
+// STOMP-over-SockJS client for chat. Connects to /v1/chats/ws, JWT goes on the CONNECT frame.
 
 import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -22,7 +22,7 @@ let connectPromise: Promise<Client> | null = null;
 
 function createClient(token: string): Client {
   return new Client({
-    webSocketFactory: () => new SockJS(`${API_BASE_URL}/chats/ws`),
+    webSocketFactory: () => new SockJS(`${API_BASE_URL}/v1/chats/ws`),
     connectHeaders: {
       Authorization: `Bearer ${token}`,
     },

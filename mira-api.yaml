@@ -4554,7 +4554,7 @@ paths:
                     status: 404
                     detail: Schedule exception with the given identifier was not found
                     instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions/aa000000-0000-0000-0000-000000000001
-  "/chats":
+  "/v1/chats":
     get:
       tags:
         - Chats
@@ -4634,7 +4634,7 @@ paths:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
-  "/chats/{cid}/messages":
+  "/v1/chats/{cid}/messages":
     get:
       tags:
         - Chats
@@ -5541,34 +5541,11 @@ components:
         file:
           type: string
           format: binary
-            type: string
-            format: binary
-    ReplaceListingMediaRequest:
-      type: object
-      required:
-        - file
-      properties:
-        file:
-          type: string
-          format: binary
     UpdateListingMediaRequest:
       type: object
       required:
         - items
-      required:
-        - items
       properties:
-        items:
-          type: array
-          description: Complete desired listing media order. The array index becomes the new zero-based position.
-          items:
-            "$ref": "#/components/schemas/ListingMediaOrderItem"
-    ListingMediaOrderItem:
-      type: object
-      required:
-        - mediaId
-      properties:
-        mediaId:
         items:
           type: array
           description: Complete desired listing media order. The array index becomes the new zero-based position.
