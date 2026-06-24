@@ -14,9 +14,9 @@ tags:
   - name: Public Profiles
     description: Publicly visible user profile projections used for discovery and profile viewing.
   - name: Credentials
-    description: Private credential resources attached to user profiles. These routes expose authenticated credential representations used for submission, review, visibility, and deletion.
-  - name: Public Credentials
-    description: Publicly visible credential projections used for profile viewing.
+    description: Credential catalog and private credential resources attached to user profiles. These routes expose available credential types and authenticated credential representations used for submission, visibility, and deletion.
+  - name: Credential Verifications
+    description: Verification resources for asynchronous evaluation of submitted user credentials.
   - name: Listings (Public)
     description: Public listing discovery resources.
   - name: Listings (Author)
@@ -559,7 +559,7 @@ paths:
         - Public Profiles
       operationId: getPublicProfile
       summary: Get public profile
-      description: Returns the public profile identified by userId. A user profile is publicly eligible only when registrationComplete is true and isPublic is true. If the user profile does not exist, registration is incomplete, or public visibility is disabled, no public profile is returned. The response intentionally does not reveal which of these cases applies.
+      description: Returns the public profile identified by userId, including whether the profile has at least one visible approved credential. A user profile is publicly eligible only when registrationComplete is true and isPublic is true. If the user profile does not exist, registration is incomplete, or public visibility is disabled, no public profile is returned. The response intentionally does not reveal which of these cases applies.
       parameters:
         - "$ref": "#/components/parameters/UserIdPathParam"
       responses:
@@ -581,67 +581,53 @@ paths:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
-  "/v1/users/{userId}/public-credentials":
+  "/v1/public-profiles/{userId}/credentials":
     get:
       tags:
-        - Public Credentials
-      summary: List public credentials
-      description: "Returns the public credential projection for the user profile identified by userId. Public credentials are derived from the user's credentials. The parent user profile must be publicly eligible, meaning registrationComplete is true and isPublic is true. Only credentials with status ACTIVE and isVisible set to true are included."
+        - Public Profiles
+      operationId: getPublicProfileCredentials
+      summary: List public profile credentials
+      description: Returns public verified credential summaries for the public profile identified by userId. The parent user profile must be publicly eligible, meaning registrationComplete is true and isPublic is true. Only credentials with isVisible set to true, a completed approved verification, and no past expiration date are included. Evidence media, hidden credentials, pending credentials, denied credentials, failed verifications, and verification feedback are never exposed through this public projection.
       parameters:
         - "$ref": "#/components/parameters/UserIdPathParam"
       responses:
         "200":
-          description: Public credentials retrieved successfully.
+          description: Public profile credentials retrieved successfully.
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/PublicCredentialCollectionResponse"
+                "$ref": "#/components/schemas/PublicProfileCredentialCollectionResponse"
         "400":
-          description: Bad Request. One or more path or query parameters are invalid.
+          description: Bad Request. One or more path parameters are invalid.
           content:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
         "404":
-          description: Not Found. No resource exists for the given identifier.
+          description: Not Found. No public profile exists for the given userId. This response intentionally does not reveal whether the user is missing, incomplete, or not public.
           content:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
-  "/v1/users/{userId}/public-credentials/{credentialId}":
+  "/v1/credentials":
     get:
       tags:
-        - Public Credentials
-      summary: Get public credential
-      description: "Returns the public credential projection identified by credentialId for the user profile identified by userId. Public credentials are derived from the user's credentials. The parent user profile must be publicly eligible, meaning registrationComplete is true and isPublic is true. This route returns only credentials with status ACTIVE and isVisible set to true. If the user profile does not exist, is not publicly eligible, the credential does not belong to the user, or the credential is not part of the public projection, no public credential is returned."
-      parameters:
-        - "$ref": "#/components/parameters/UserIdPathParam"
-        - "$ref": "#/components/parameters/CredentialIdPathParam"
+        - Credentials
+      summary: List credential types
+      description: Returns the credential catalog available for provider credential submissions. Clients use this list to populate credential-type selection controls.
       responses:
         "200":
-          description: Public credential retrieved successfully.
+          description: Credential catalog retrieved successfully.
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/PublicCredentialResponse"
-        "400":
-          description: Bad Request. One or more path or query parameters are invalid.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-        "404":
-          description: Not Found. No resource exists for the given identifier.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
+                "$ref": "#/components/schemas/CredentialTypeCollectionResponse"
   "/v1/users/{userId}/credentials":
     get:
       tags:
         - Credentials
       summary: List credentials
-      description: Returns all credentials assigned to the user profile identified by userId. This includes pending, active, expired, denied, and hidden credentials. Access is allowed when the authenticated account owns the target user profile or is an admin account.
+      description: Returns all credential submissions attached to the user profile identified by userId. This includes hidden credentials and their latest verification summary when one exists. Access is allowed when the authenticated account owns the target user profile or is an admin account.
       security:
         - bearerHttpAuthentication: []
       parameters:
@@ -681,7 +667,7 @@ paths:
       tags:
         - Credentials
       summary: Submit credential
-      description: Submits one credential claim for the user profile identified by userId. Access is allowed only when the authenticated account owns the target user profile. The request references a preseeded credential type and one uploaded evidence media file. If accepted, the backend creates a credential with status PENDING and isVisible set to false.
+      description: Submits one credential claim for the user profile identified by userId. Access is allowed only when the authenticated account owns the target provider profile. The multipart request references a catalog credential type and one uploaded evidence file. If accepted, the backend creates a credential submission with isVisible set to false. Verification is represented by separate verification resources.
       security:
         - bearerHttpAuthentication: []
       parameters:
@@ -689,7 +675,7 @@ paths:
       requestBody:
         required: true
         content:
-          "application/json":
+          "multipart/form-data":
             schema:
               "$ref": "#/components/schemas/SubmitCredentialRequest"
       responses:
@@ -743,7 +729,7 @@ paths:
       tags:
         - Credentials
       summary: Get credential
-      description: Returns one credential assigned to the user profile identified by userId. Access is allowed when the authenticated account owns the target user profile or is an admin account.
+      description: Returns one credential submission attached to the user profile identified by userId, including its latest verification summary when one exists. Access is allowed when the authenticated account owns the target user profile or is an admin account.
       security:
         - bearerHttpAuthentication: []
       parameters:
@@ -784,7 +770,7 @@ paths:
       tags:
         - Credentials
       summary: Update credential
-      description: Partially updates a credential. Owners may update only isVisible. Admin accounts may additionally update status and expiresAt. The request body may include any allowed subset of these fields. If a request includes any field that the caller is not allowed to update, the request is rejected with 403 Forbidden.
+      description: Partially updates user-controlled credential submission metadata. Owners may update isVisible. Verification state is not updated through this route.
       security:
         - bearerHttpAuthentication: []
       parameters:
@@ -801,12 +787,6 @@ paths:
                 summary: Owner updates credential visibility
                 value:
                   isVisible: true
-              adminLifecycleUpdate:
-                summary: Admin updates all writable credential fields
-                value:
-                  isVisible: true
-                  status: ACTIVE
-                  expiresAt: "2027-12-31T23:59:59Z"
       responses:
         "200":
           description: Credential updated successfully.
@@ -848,7 +828,7 @@ paths:
       tags:
         - Credentials
       summary: Delete credential
-      description: "Deletes a credential assigned to the user profile identified by userId. Access is allowed only when the authenticated account owns the target user profile. Admin accounts cannot use this route to delete another user's credential. Deleting a credential removes it from the managed credentials collection and from the public credential projection if it was publicly visible."
+      description: Deletes a credential submission attached to the user profile identified by userId. Access is allowed only when the authenticated account owns the target user profile. Admin accounts cannot use this route to delete another user's credential. Deleting a credential removes its private evidence and verification resources and removes it from the derived public profile verification projection if it was publicly visible and approved.
       security:
         - bearerHttpAuthentication: []
       parameters:
@@ -859,6 +839,195 @@ paths:
           description: Credential deleted successfully. No response body is returned.
         "400":
           description: Bad Request. One or more path or query parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          description: Unauthorized. Authentication is required.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No resource exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/users/{userId}/credentials/{credentialId}/evidence-media/content":
+    get:
+      tags:
+        - Credentials
+      operationId: getCredentialEvidenceMediaContent
+      summary: Get credential evidence media content
+      description: Streams the private evidence media bytes for one credential submission. Access is allowed when the authenticated account owns the target user profile or is an admin account. The route never exposes the internal media storage path and is not part of the public profile projection.
+      security:
+        - bearerHttpAuthentication: []
+      parameters:
+        - "$ref": "#/components/parameters/UserIdPathParam"
+        - "$ref": "#/components/parameters/CredentialIdPathParam"
+      responses:
+        "200":
+          description: Credential evidence media content retrieved successfully.
+          content:
+            "image/jpeg":
+              schema:
+                type: string
+                format: binary
+            "image/png":
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad Request. One or more path parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          description: Unauthorized. Authentication is required.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. The credential or its evidence media does not exist for the given user.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/users/{userId}/credentials/{credentialId}/verifications":
+    get:
+      tags:
+        - Credential Verifications
+      summary: List credential verifications
+      description: Returns verification attempts for the credential submission identified by credentialId. Access is allowed when the authenticated account owns the target user profile or is an admin account.
+      security:
+        - bearerHttpAuthentication: []
+      parameters:
+        - "$ref": "#/components/parameters/UserIdPathParam"
+        - "$ref": "#/components/parameters/CredentialIdPathParam"
+      responses:
+        "200":
+          description: Credential verifications retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/CredentialVerificationCollectionResponse"
+        "400":
+          description: Bad Request. One or more path or query parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          description: Unauthorized. Authentication is required.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No resource exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+    post:
+      tags:
+        - Credential Verifications
+      summary: Create credential verification
+      description: Creates a verification attempt for the credential submission identified by credentialId. The backend accepts the verification resource and processes the Lisa VLM check asynchronously. If a verification for this credential is already queued or processing, the request conflicts with the current resource state.
+      security:
+        - bearerHttpAuthentication: []
+      parameters:
+        - "$ref": "#/components/parameters/UserIdPathParam"
+        - "$ref": "#/components/parameters/CredentialIdPathParam"
+      responses:
+        "202":
+          description: Credential verification accepted for asynchronous processing.
+          headers:
+            Location:
+              description: URI of the created verification resource.
+              required: true
+              schema:
+                type: string
+                format: uri-reference
+                examples:
+                  - /v1/users/223e4567-e89b-12d3-a456-426614174000/credentials/423e4567-e89b-12d3-a456-426614174000/verifications/523e4567-e89b-12d3-a456-426614174000
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/CredentialVerificationResponse"
+        "400":
+          description: Bad Request. One or more path parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          description: Unauthorized. Authentication is required.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "403":
+          description: Forbidden. The authenticated account is not allowed to access this resource.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "404":
+          description: Not Found. No resource exists for the given identifier.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "409":
+          description: Conflict. The request conflicts with the current verification state.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/users/{userId}/credentials/{credentialId}/verifications/{verificationId}":
+    get:
+      tags:
+        - Credential Verifications
+      summary: Get credential verification
+      description: Returns one verification attempt for the credential submission identified by credentialId. Access is allowed when the authenticated account owns the target user profile or is an admin account.
+      security:
+        - bearerHttpAuthentication: []
+      parameters:
+        - "$ref": "#/components/parameters/UserIdPathParam"
+        - "$ref": "#/components/parameters/CredentialIdPathParam"
+        - "$ref": "#/components/parameters/VerificationIdPathParam"
+      responses:
+        "200":
+          description: Credential verification retrieved successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/CredentialVerificationResponse"
+        "400":
+          description: Bad Request. One or more path parameters are invalid.
           content:
             "application/problem+json":
               schema:
@@ -4550,6 +4719,13 @@ components:
       description: Credential UUID.
       schema:
         "$ref": "#/components/schemas/CredentialId"
+    VerificationIdPathParam:
+      name: verificationId
+      in: path
+      required: true
+      description: Credential verification UUID.
+      schema:
+        "$ref": "#/components/schemas/VerificationId"
     LimitQueryParam:
       name: limit
       in: query
@@ -4614,6 +4790,9 @@ components:
     CredentialId:
       type: string
       format: uuid
+    VerificationId:
+      type: string
+      format: uuid
     PatchUserProfileRequest:
       type: object
       description: Partial user profile update payload. Non-null fields update the corresponding profile value. Omitted fields and fields explicitly set to null are ignored.
@@ -4659,13 +4838,15 @@ components:
       type: object
       required:
         - credentialType
-        - evidenceMedia
+        - file
       additionalProperties: false
       properties:
         credentialType:
           "$ref": "#/components/schemas/CredentialType"
-        evidenceMedia:
-          "$ref": "#/components/schemas/ProfileMediaResponse"
+        file:
+          type: string
+          format: binary
+          description: Evidence file uploaded for the credential claim. Supported media types are defined by the credential-evidence media validation rules.
     UpdateCredentialRequest:
       type: object
       minProperties: 1
@@ -4673,15 +4854,36 @@ components:
       properties:
         isVisible:
           type: boolean
-          description: Whether the credential should be visible on the public profile when it is active. Owners and admin accounts may update this field.
-        status:
-          "$ref": "#/components/schemas/CredentialStatus"
-        expiresAt:
-          type:
-            - string
-            - "null"
-          format: date-time
-          description: Expiration date and time of the credential. Null if the credential does not expire. Admin accounts may update this field. Owners may not update this field through this route.
+          description: Whether the credential may appear in public profile verification badge data when it has an approved completed verification.
+    CredentialTypeCollectionResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Credential types available for submission.
+          items:
+            "$ref": "#/components/schemas/CredentialTypeResponse"
+    CredentialTypeResponse:
+      type: object
+      required:
+        - credentialType
+        - name
+        - description
+      properties:
+        credentialType:
+          "$ref": "#/components/schemas/CredentialType"
+        name:
+          type: string
+          readOnly: true
+          description: Human readable credential name.
+          example: Master plumber
+        description:
+          type: string
+          readOnly: true
+          description: Human readable explanation of the credential.
+          example: User holds a master plumber qualification.
     PublicProfileCollectionResponse:
       type: object
       required:
@@ -4708,16 +4910,6 @@ components:
             "$ref": "#/components/schemas/PrivateUserProfileResponse"
         cursor:
           "$ref": "#/components/schemas/Cursor"
-    PublicCredentialCollectionResponse:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: array
-          description: Public credential projections.
-          items:
-            "$ref": "#/components/schemas/PublicCredentialResponse"
     CredentialCollectionResponse:
       type: object
       required:
@@ -4728,6 +4920,16 @@ components:
           description: Credentials.
           items:
             "$ref": "#/components/schemas/CredentialResponse"
+    CredentialVerificationCollectionResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Credential verification attempts.
+          items:
+            "$ref": "#/components/schemas/CredentialVerificationResponse"
     BaseUserProfileResponse:
       type: object
       description: Base profile response fields. In private profile responses these fields are always present, but several values may be null while the user profile is still in an incomplete shell state.
@@ -4798,6 +5000,7 @@ components:
         - selfSummary
         - accessibilityPreferences
         - profileMedia
+        - verified
       properties:
         userId:
           type: string
@@ -4833,6 +5036,20 @@ components:
             - type: "null"
           readOnly: true
           description: Current profile picture media. This field is output only and is managed through PUT/DELETE /v1/users/{userId}/profile-picture.
+        verified:
+          type: boolean
+          readOnly: true
+          description: Indicates whether the public profile has at least one visible credential with an approved completed verification.
+    PublicProfileCredentialCollectionResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Public verified credential summaries for a public profile.
+          items:
+            "$ref": "#/components/schemas/VerifiedCredentialResponse"
     PrivateUserProfileResponse:
       allOf:
         - "$ref": "#/components/schemas/BaseUserProfileResponse"
@@ -4856,20 +5073,23 @@ components:
     BaseCredentialResponse:
       type: object
       required:
+        - credentialType
         - name
         - description
         - expiresAt
       properties:
+        credentialType:
+          "$ref": "#/components/schemas/CredentialType"
         name:
           type: string
           readOnly: true
           description: Human readable credential name.
-          example: Student
+          example: Master plumber
         description:
           type: string
           readOnly: true
           description: Human readable explanation of the credential.
-          example: Proof that the user currently holds student status.
+          example: User holds a master plumber qualification.
         expiresAt:
           type:
             - string
@@ -4877,49 +5097,93 @@ components:
           format: date-time
           readOnly: true
           description: Date and time when the credential expires. Null if the credential does not expire.
-    PublicCredentialResponse:
+    VerifiedCredentialResponse:
       allOf:
         - "$ref": "#/components/schemas/BaseCredentialResponse"
         - type: object
           required:
-            - grantedAt
+            - verifiedAt
           properties:
-            grantedAt:
+            verifiedAt:
               type: string
               format: date-time
               readOnly: true
-              description: Date and time when the credential became active.
+              description: Date and time when the credential verification was approved.
     CredentialResponse:
       allOf:
         - "$ref": "#/components/schemas/BaseCredentialResponse"
         - type: object
           required:
             - credentialId
-            - status
             - isVisible
             - evidenceMedia
-            - grantedAt
+            - createdAt
+            - latestVerification
           properties:
             credentialId:
               type: string
               format: uuid
               readOnly: true
               description: Credential identifier.
-            status:
-              "$ref": "#/components/schemas/CredentialStatus"
             isVisible:
               type: boolean
-              description: Whether the credential is eligible to appear on the public profile when active.
+              description: Whether the credential may appear in public profile verification badge data when it has an approved completed verification.
             evidenceMedia:
               "$ref": "#/components/schemas/ProfileMediaResponse"
               readOnly: true
-            grantedAt:
-              type:
-                - string
-                - "null"
+            createdAt:
+              type: string
               format: date-time
               readOnly: true
-              description: Date and time when the credential became active. Null if the credential has not been granted yet.
+              description: Date and time when the credential submission was created.
+            latestVerification:
+              oneOf:
+                - "$ref": "#/components/schemas/CredentialVerificationResponse"
+                - type: "null"
+              readOnly: true
+              description: Latest verification attempt for this credential, or null when no verification exists yet.
+    CredentialVerificationResponse:
+      type: object
+      required:
+        - verificationId
+        - status
+        - result
+        - feedback
+        - createdAt
+        - completedAt
+      properties:
+        verificationId:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Credential verification identifier.
+        status:
+          "$ref": "#/components/schemas/CredentialVerificationStatus"
+        result:
+          oneOf:
+            - "$ref": "#/components/schemas/CredentialVerificationResult"
+            - type: "null"
+          readOnly: true
+          description: Verification result. Null while verification is queued or processing, and may remain null if verification fails before a decision is produced.
+        feedback:
+          type:
+            - string
+            - "null"
+          readOnly: true
+          description: Short verification feedback intended for the credential owner. Null until feedback is available.
+          example: The evidence appears to support this credential.
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Date and time when the verification resource was created.
+        completedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+          readOnly: true
+          description: Date and time when verification finished. Null while verification is queued or processing.
     Username:
       type: string
       minLength: 3
@@ -5070,17 +5334,22 @@ components:
       type: string
       description: Type of credential assigned to a user profile.
       enum:
-        - STUDENT
-        - ELECTRICIAN
-        - PLUMBER
-        - TUTOR
-    CredentialStatus:
+        - STUDENT_VERIFIED
+        - IDENTITY_VERIFIED
+        - MASTER_PLUMBER
+    CredentialVerificationStatus:
       type: string
-      description: Current status of a credential assigned to a user profile.
+      description: Processing status of a credential verification resource.
       enum:
-        - PENDING
-        - ACTIVE
-        - EXPIRED
+        - QUEUED
+        - PROCESSING
+        - COMPLETED
+        - FAILED
+    CredentialVerificationResult:
+      type: string
+      description: Decision produced by a completed credential verification.
+      enum:
+        - APPROVED
         - DENIED
     AccessibilityGenerationStatus:
       type: string
