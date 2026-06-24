@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as RegisterRouteRouteImport } from './routes/register/route'
+import { Route as SearchRouteRouteImport } from './routes/_search/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegisterIndexRouteImport } from './routes/register/index'
 import { Route as RegisterRoleRouteImport } from './routes/register/role'
@@ -65,6 +66,10 @@ const RegisterRouteRoute = RegisterRouteRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRouteRoute = SearchRouteRouteImport.update({
+  id: '/_search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -111,14 +116,14 @@ const EditListingListingIdRoute = EditListingListingIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchBrowseUsersRoute = SearchBrowseUsersRouteImport.update({
-  id: '/_search/browse-users',
+  id: '/browse-users',
   path: '/browse-users',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => SearchRouteRoute,
 } as any)
 const SearchBrowseServicesRoute = SearchBrowseServicesRouteImport.update({
-  id: '/_search/browse-services',
+  id: '/browse-services',
   path: '/browse-services',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => SearchRouteRoute,
 } as any)
 const ListingsListingIdIndexRoute = ListingsListingIdIndexRouteImport.update({
   id: '/listings/$listingId/',
@@ -177,6 +182,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_search': typeof SearchRouteRouteWithChildren
   '/register': typeof RegisterRouteRouteWithChildren
   '/calendar': typeof CalendarRoute
   '/create-listing': typeof CreateListingRoute
@@ -244,6 +250,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_search'
     | '/register'
     | '/calendar'
     | '/create-listing'
@@ -267,6 +274,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SearchRouteRoute: typeof SearchRouteRouteWithChildren
   RegisterRouteRoute: typeof RegisterRouteRouteWithChildren
   CalendarRoute: typeof CalendarRoute
   CreateListingRoute: typeof CreateListingRoute
@@ -274,8 +282,6 @@ export interface RootRouteChildren {
   MyBookingsRoute: typeof MyBookingsRoute
   MyListingsRoute: typeof MyListingsRoute
   StyleguideRoute: typeof StyleguideRoute
-  SearchBrowseServicesRoute: typeof SearchBrowseServicesRoute
-  SearchBrowseUsersRoute: typeof SearchBrowseUsersRoute
   EditListingListingIdRoute: typeof EditListingListingIdRoute
   ListingsListingIdBookRoute: typeof ListingsListingIdBookRoute
   ListingsListingIdIndexRoute: typeof ListingsListingIdIndexRoute
@@ -330,6 +336,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_search': {
+      id: '/_search'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SearchRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -400,14 +413,14 @@ declare module '@tanstack/react-router' {
       path: '/browse-users'
       fullPath: '/browse-users'
       preLoaderRoute: typeof SearchBrowseUsersRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SearchRouteRoute
     }
     '/_search/browse-services': {
       id: '/_search/browse-services'
       path: '/browse-services'
       fullPath: '/browse-services'
       preLoaderRoute: typeof SearchBrowseServicesRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SearchRouteRoute
     }
     '/listings/$listingId/': {
       id: '/listings/$listingId/'
@@ -425,6 +438,20 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface SearchRouteRouteChildren {
+  SearchBrowseServicesRoute: typeof SearchBrowseServicesRoute
+  SearchBrowseUsersRoute: typeof SearchBrowseUsersRoute
+}
+
+const SearchRouteRouteChildren: SearchRouteRouteChildren = {
+  SearchBrowseServicesRoute: SearchBrowseServicesRoute,
+  SearchBrowseUsersRoute: SearchBrowseUsersRoute,
+}
+
+const SearchRouteRouteWithChildren = SearchRouteRoute._addFileChildren(
+  SearchRouteRouteChildren,
+)
 
 interface RegisterRouteRouteChildren {
   RegisterAboutRoute: typeof RegisterAboutRoute
@@ -452,6 +479,7 @@ const RegisterRouteRouteWithChildren = RegisterRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SearchRouteRoute: SearchRouteRouteWithChildren,
   RegisterRouteRoute: RegisterRouteRouteWithChildren,
   CalendarRoute: CalendarRoute,
   CreateListingRoute: CreateListingRoute,
@@ -459,8 +487,6 @@ const rootRouteChildren: RootRouteChildren = {
   MyBookingsRoute: MyBookingsRoute,
   MyListingsRoute: MyListingsRoute,
   StyleguideRoute: StyleguideRoute,
-  SearchBrowseServicesRoute: SearchBrowseServicesRoute,
-  SearchBrowseUsersRoute: SearchBrowseUsersRoute,
   EditListingListingIdRoute: EditListingListingIdRoute,
   ListingsListingIdBookRoute: ListingsListingIdBookRoute,
   ListingsListingIdIndexRoute: ListingsListingIdIndexRoute,

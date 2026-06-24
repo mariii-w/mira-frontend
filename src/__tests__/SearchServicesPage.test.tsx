@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
-import { BrowseServicesPage } from '../routes/_search/browse-services'
+import { SearchServicesPage } from '../components/search/pages/SearchServicesPage.tsx'
 import { getPublicListings, getServiceTags } from '../api/mira'
 
 // ─── Search params state ───────────────────────────────────────────────────────
@@ -39,16 +39,13 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
       ...(config as object),
       useSearch: () => mockSearchParams,
     }),
+    getRouteApi: () => ({ useSearch: () => mockSearchParams }),
     useNavigate: () => mockNavigate,
     Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
       <a href={String(to)}>{children}</a>
     ),
   }
 })
-
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
 
 // ─── Generated-client mock ───────────────────────────────────────────────────
 
@@ -85,7 +82,7 @@ function mockApiSuccess({
   tags = [] as object[],
 } = {}) {
   mockGetPublicListings.mockResolvedValue({
-    data: { items, cursor: { limit: 20, next } },
+    data: { items, cursor: { limit: 10, next } },
     status: 200,
     headers: new Headers(),
   } as never)
@@ -107,7 +104,7 @@ function renderPage() {
   })
   return render(
     <QueryClientProvider client={queryClient}>
-      <BrowseServicesPage />
+      <SearchServicesPage />
     </QueryClientProvider>
   )
 }
@@ -119,7 +116,7 @@ beforeEach(() => {
   mockSearchParams = { ...DEFAULT_PARAMS }
 })
 
-describe('<BrowseServicesPage />', () => {
+describe('<SearchServicesPage />', () => {
 
   describe('loading / error / empty states', () => {
     it('shows loading state while fetching', () => {
@@ -232,11 +229,11 @@ describe('<BrowseServicesPage />', () => {
   })
 
   describe('API parameters', () => {
-    it('calls getPublicListings with limit=20', async () => {
+    it('calls getPublicListings with limit=10', async () => {
       mockApiSuccess()
       renderPage()
       await waitFor(() => expect(mockGetPublicListings).toHaveBeenCalled())
-      expect(listingsParams().limit).toBe(20)
+      expect(listingsParams().limit).toBe(10)
     })
 
     it('does not send radiusKm or city when city is empty', async () => {
@@ -300,6 +297,18 @@ describe('<BrowseServicesPage />', () => {
       await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
       expect(screen.getByRole('button', { name: /next/i })).toBeEnabled()
       expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled()
+    })
+
+    it('navigates with the opaque cursor when Next is clicked', async () => {
+      mockApiSuccess({ next: 'cursor-abc' })
+      renderPage()
+      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+
+      fireEvent.click(screen.getByRole('button', { name: /next/i }))
+
+      expect(mockNavigate).toHaveBeenCalledWith({
+        search: { ...DEFAULT_PARAMS, from: 'cursor-abc' },
+      })
     })
   })
 
