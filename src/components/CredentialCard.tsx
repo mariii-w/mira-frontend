@@ -3,6 +3,7 @@ import { FileText, Trash2 } from 'lucide-react'
 import * as Switch from './Switch'
 import { Button } from './Button'
 import { CredentialDocumentViewer } from './CredentialDocumentViewer'
+import { Modal } from './Modal'
 import type { CredentialResponse } from '../api/model'
 
 export type { CredentialResponse } from '../api/model'
@@ -55,6 +56,7 @@ export function CredentialCard({
   onDelete,
 }: CredentialCardProps) {
   const [viewerOpen, setViewerOpen] = useState(false)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const headingId = useId()
   const visibilityToggleId = useId()
@@ -62,6 +64,7 @@ export function CredentialCard({
   const status = getStatus(credential)
   const style = STATUS_STYLE[status.kind]
   const canToggleVisibility = status.kind === 'verified' || status.kind === 'verified-muted'
+  const rejectionReason = status.kind === 'denied' ? credential.latestVerification?.feedback : null
 
   return (
     <article aria-labelledby={headingId} className="bg-surface rounded-2xl overflow-hidden shadow-sm border border-border/20 flex">
@@ -82,7 +85,18 @@ export function CredentialCard({
           <h2 id={headingId} className="font-heading text-h2 font-bold text-foreground leading-snug">
             {credential.name}
           </h2>
-          <p className={`text-small ${style.text}`}>{status.label}</p>
+          {rejectionReason ? (
+            <button
+              type="button"
+              onClick={() => setFeedbackOpen(true)}
+              aria-label={`View rejection reason for "${credential.name}"`}
+              className={`text-small ${style.text} text-left underline-offset-2 hover:underline`}
+            >
+              {status.label}
+            </button>
+          ) : (
+            <p className={`text-small ${style.text}`}>{status.label}</p>
+          )}
         </div>
 
         {!confirmDelete ? (
@@ -143,6 +157,17 @@ export function CredentialCard({
         credentialId={credential.credentialId}
         credentialName={credential.name}
       />
+
+      {rejectionReason && (
+        <Modal
+          open={feedbackOpen}
+          onClose={() => setFeedbackOpen(false)}
+          title="Rejection reason"
+          description={credential.name}
+        >
+          <p className="text-body text-foreground">{rejectionReason}</p>
+        </Modal>
+      )}
     </article>
   )
 }

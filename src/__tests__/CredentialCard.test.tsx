@@ -144,6 +144,49 @@ describe('<CredentialCard />', () => {
     expect(screen.queryByRole('switch')).not.toBeInTheDocument()
   })
 
+  it('opens a modal with the rejection reason when a denied status is clicked', () => {
+    render(
+      <CredentialCard
+        {...defaultProps}
+        credential={makeCredential({
+          latestVerification: {
+            verificationId: 'v-1',
+            status: 'COMPLETED',
+            result: 'DENIED',
+            feedback: 'Document unreadable.',
+            createdAt: '2026-01-01T00:00:00Z',
+            completedAt: '2026-01-02T00:00:00Z',
+          },
+        })}
+      />,
+    )
+    expect(screen.queryByText('Document unreadable.')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /view rejection reason/i }))
+    expect(screen.getByRole('dialog', { name: 'Rejection reason' })).toBeInTheDocument()
+    expect(screen.getByText('Document unreadable.')).toBeInTheDocument()
+  })
+
+  it('does not make the status clickable when there is no feedback', () => {
+    render(
+      <CredentialCard
+        {...defaultProps}
+        credential={makeCredential({
+          latestVerification: {
+            verificationId: 'v-1',
+            status: 'COMPLETED',
+            result: 'DENIED',
+            feedback: null,
+            createdAt: '2026-01-01T00:00:00Z',
+            completedAt: '2026-01-02T00:00:00Z',
+          },
+        })}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: /view rejection reason/i })).not.toBeInTheDocument()
+    expect(screen.getByText('Not approved').tagName).toBe('P')
+  })
+
   it('calls onVisibilityChange with the credentialId and new value when the toggle is clicked', () => {
     const onVisibilityChange = vi.fn()
     render(
