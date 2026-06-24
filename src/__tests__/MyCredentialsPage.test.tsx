@@ -203,6 +203,21 @@ describe('<MyCredentialsPage />', () => {
     await waitFor(() => expect(screen.getByText('1 active credential')).toBeInTheDocument())
   })
 
+  it('does not count expired approved credentials as active', async () => {
+    mockCredentialsSuccess([
+      makeCredential({
+        credentialId: 'cred-expired',
+        expiresAt: '2025-01-01T00:00:00Z',
+      }),
+      makeCredential({
+        credentialId: 'cred-active',
+        expiresAt: '2027-01-01T00:00:00Z',
+      }),
+    ])
+    renderRoute()
+    await waitFor(() => expect(screen.getByText('1 active credential')).toBeInTheDocument())
+  })
+
   it('opens the Add credential modal listing the fetched catalog', async () => {
     mockCredentialsSuccess([makeCredential()])
     renderRoute()
