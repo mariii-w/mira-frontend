@@ -295,10 +295,12 @@ function Chat() {
 
     // Subscribe to the selected chat's topic; swap subscription on chat switch.
     useEffect(() => {
+        if (!activeChatId) return;
+
         let unsubscribe: (() => void) | undefined;
         let cancelled = false;
 
-        subscribeToChat(selectedChatId, (incoming) => {
+        subscribeToChat(activeChatId, (incoming) => {
             const newMessage: ChatMessage = {
                 id: `ws-${incoming.id}`,
                 text: describeMessageContent(incoming.content),
@@ -319,14 +321,14 @@ function Chat() {
                 }
             })
             .catch((err) => {
-                console.error("Failed to subscribe to chat", selectedChatId, err);
+                console.error("Failed to subscribe to chat", activeChatId, err);
             });
 
         return () => {
             cancelled = true;
             unsubscribe?.();
         };
-    }, [selectedChatId, currentUserId]);
+    }, [activeChatId, currentUserId]);
 
     // Tear down the shared socket when leaving the chat page entirely.
     useEffect(() => {
