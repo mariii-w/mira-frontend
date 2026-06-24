@@ -123,6 +123,7 @@ function makeProps(overrides: Partial<CalendarPageProps> = {}): CalendarPageProp
     onCreateException: vi.fn(),
     onUpdateException: vi.fn(),
     onDeleteException: vi.fn(),
+    onCreateListing: vi.fn(),
     ...overrides,
   }
 }
