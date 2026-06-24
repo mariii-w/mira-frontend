@@ -20,10 +20,13 @@ export const Route = createFileRoute('/chat')({
     component: () => <Chat/>
 })
 
+
+// Websocket message, with raw id for de-duping against history.
+type LiveMessage = ChatMessage & { rawId: number };
 // eslint-disable-next-line react-refresh/only-export-components
 function Chat() {
     const [selectedChatId, setSelectedChatId] = useState<string>("");
-    const [messagesByChat, setMessagesByChat] = useState<Record<string, ChatMessage[]>>({});
+    const [messagesByChat, setMessagesByChat] = useState<Record<string, LiveMessage[]>>({});
     const [draft, setDraft] = useState("");
 
     const currentUserId = useAuthStore((s) => s.user?.userId);
@@ -32,13 +35,21 @@ function Chat() {
         { user: currentUserId ?? "", sortby: "latest" },
         { query: { enabled: !!currentUserId } },
     );
-    const chats: ChatPreview[] = chatsResponse?.status === 200 ? chatsResponse.data.map(toChatPreview) : [];
+    // Live message overrides the inbox preview line.
+    const chats: ChatPreview[] = chatsResponse?.status === 200
+        ? chatsResponse.data.map(toChatPreview).map((preview) => {
+            const live = messagesByChat[preview.id];
+            const latestLive = live?.[live.length - 1];
+            return latestLive
+                ? { ...preview, lastMessage: latestLive.text, timestamp: latestLive.timestamp }
+                : preview;
+        })
+        : [];
+    const chatIdsKey = chats.map((c) => c.id).join(",");
 
-    // Derived during render, not synced via an effect: fall back to the first chat until the
-    // user explicitly picks one. No external system to synchronize with here, so no effect needed.
+    // Defaults to the first chat until the user picks one.
     const activeChatId = selectedChatId || chats[0]?.id || "";
     const selectedChat = chats.find((c) => c.id === activeChatId);
-    const messages = messagesByChat[activeChatId] ?? [];
 
     const { data: historyResponse, isLoading: historyLoading, isError: historyErrored } = useHistory(
         activeChatId,
@@ -46,12 +57,9 @@ function Chat() {
         { query: { enabled: !!activeChatId } },
     );
 
-    // Seed the active chat's bubble list once history loads. Backend returns newest-first
-    // (it's built for "load older messages" pagination), so reverse for top-to-bottom display.
-    useEffect(() => {
-        if (!activeChatId || historyResponse?.status !== 200) return;
-
-        const fetched: ChatMessage[] = historyResponse.data.items
+    // Backend returns newest-first; reverse for display.
+    const historyMessages: ChatMessage[] = historyResponse?.status === 200
+        ? historyResponse.data.items
             .slice()
             .reverse()
             .map((m) => ({
@@ -59,10 +67,14 @@ function Chat() {
                 text: describeMessageContent(m.content),
                 self: m.sender.id === currentUserId,
                 timestamp: new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            }));
-
-        setMessagesByChat((prev) => ({ ...prev, [activeChatId]: fetched }));
-    }, [activeChatId, historyResponse, currentUserId]);
+            }))
+        : [];
+    const historyRawIds = new Set(
+        historyResponse?.status === 200 ? historyResponse.data.items.map((m) => m.id) : [],
+    );
+    // Drop live messages already covered by history (avoids dupes on refetch).
+    const liveMessages = (messagesByChat[activeChatId] ?? []).filter((m) => !historyRawIds.has(m.rawId));
+    const messages: ChatMessage[] = [...historyMessages, ...liveMessages];
 
     const { data: listingResponse } = useGetPublicListing(
         selectedChat?.listingId ?? "",
@@ -70,42 +82,46 @@ function Chat() {
     );
     const listing = listingResponse?.status === 200 ? listingResponse.data : undefined;
 
-    // Subscribe to the selected chat's topic; swap subscription on chat switch.
+    // Subscribe to every chat's topic, not just the open one.
     useEffect(() => {
-        if (!activeChatId) return;
+        if (!chatIdsKey) return;
 
-        let unsubscribe: (() => void) | undefined;
+        const ids = chatIdsKey.split(",");
         let cancelled = false;
+        const unsubscribes: Array<() => void> = [];
 
-        subscribeToChat(activeChatId, (incoming) => {
-            const newMessage: ChatMessage = {
-                id: `ws-${incoming.id}`,
-                text: describeMessageContent(incoming.content),
-                self: incoming.sender.id === currentUserId,
-                timestamp: new Date(incoming.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            };
+        ids.forEach((cid) => {
+            subscribeToChat(cid, (incoming) => {
+                const newMessage: LiveMessage = {
+                    id: `ws-${incoming.id}`,
+                    rawId: incoming.id,
+                    text: describeMessageContent(incoming.content),
+                    self: incoming.sender.id === currentUserId,
+                    timestamp: new Date(incoming.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                };
 
-            setMessagesByChat((prev) => ({
-                ...prev,
-                [incoming.cid]: [...(prev[incoming.cid] ?? []), newMessage],
-            }));
-        })
-            .then((unsub) => {
-                if (cancelled) {
-                    unsub();
-                } else {
-                    unsubscribe = unsub;
-                }
+                setMessagesByChat((prev) => ({
+                    ...prev,
+                    [incoming.cid]: [...(prev[incoming.cid] ?? []), newMessage],
+                }));
             })
-            .catch((err) => {
-                console.error("Failed to subscribe to chat", activeChatId, err);
-            });
+                .then((unsub) => {
+                    if (cancelled) {
+                        unsub();
+                    } else {
+                        unsubscribes.push(unsub);
+                    }
+                })
+                .catch((err) => {
+                    console.error("Failed to subscribe to chat", cid, err);
+                });
+        });
 
         return () => {
             cancelled = true;
-            unsubscribe?.();
+            unsubscribes.forEach((unsub) => unsub());
         };
-    }, [activeChatId, currentUserId]);
+    }, [chatIdsKey, currentUserId]);
 
     // Tear down the shared socket when leaving the chat page entirely.
     useEffect(() => {
