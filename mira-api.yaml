@@ -4734,7 +4734,7 @@ components:
       schema:
         type: integer
         minimum: 1
-        maximum: 100
+        maximum: 500
         default: 20
     FromQueryParam:
       name: from
@@ -5000,6 +5000,7 @@ components:
         - selfSummary
         - accessibilityPreferences
         - profileMedia
+        - city
         - verified
       properties:
         userId:
@@ -5036,6 +5037,12 @@ components:
             - type: "null"
           readOnly: true
           description: Current profile picture media. This field is output only and is managed through PUT/DELETE /v1/users/{userId}/profile-picture.
+        city:
+          oneOf:
+            - type: string
+              maxLength: 100
+            - type: "null"
+          description: City from the user's private address. No other private-address fields are exposed.
         verified:
           type: boolean
           readOnly: true
@@ -5309,7 +5316,7 @@ components:
         limit:
           type: integer
           minimum: 1
-          maximum: 100
+          maximum: 500
           readOnly: true
           description: Maximum number of items returned.
           example: 20
