@@ -13,6 +13,15 @@ import {
 } from '../api/mira'
 import type { CredentialResponse, CredentialTypeResponse } from '../api/model'
 
+// Headless UI's Listbox uses ResizeObserver to position the options popover, which jsdom doesn't implement.
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+}
+
 vi.mock('@tanstack/react-router', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tanstack/react-router')>()
   return {
@@ -107,6 +116,15 @@ function renderRoute() {
   )
 }
 
+function openCredentialTypeDropdown() {
+  fireEvent.click(screen.getByRole('button', { name: 'Credential type' }))
+}
+
+async function selectCredentialType(name: RegExp) {
+  openCredentialTypeDropdown()
+  fireEvent.click(await screen.findByRole('option', { name }))
+}
+
 import { MyCredentialsRoute } from '../routes/my-credentials'
 
 beforeEach(() => {
@@ -191,7 +209,8 @@ describe('<MyCredentialsPage />', () => {
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
 
     fireEvent.click(screen.getByRole('button', { name: /add credential/i }))
-    expect(await screen.findByRole('button', { name: /master plumber/i })).toBeInTheDocument()
+    openCredentialTypeDropdown()
+    expect(await screen.findByRole('option', { name: /master plumber/i })).toBeInTheDocument()
   })
 
   it('submits a new credential, starts verification, and refreshes the list', async () => {
@@ -218,7 +237,7 @@ describe('<MyCredentialsPage />', () => {
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
 
     fireEvent.click(screen.getByRole('button', { name: /add credential/i }))
-    fireEvent.click(await screen.findByRole('button', { name: /master plumber/i }))
+    await selectCredentialType(/master plumber/i)
     const file = new File(['evidence'], 'evidence.png', { type: 'image/png' })
     fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
 
@@ -271,7 +290,7 @@ describe('<MyCredentialsPage />', () => {
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
 
     fireEvent.click(screen.getByRole('button', { name: /add credential/i }))
-    fireEvent.click(await screen.findByRole('button', { name: /master plumber/i }))
+    await selectCredentialType(/master plumber/i)
     const file = new File(['evidence'], 'evidence.pdf', { type: 'application/pdf' })
     fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
     mockCredentialsSuccess([makeCredential({ credentialId: 'cred-new' })])
@@ -365,7 +384,7 @@ describe('<MyCredentialsPage />', () => {
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
 
     fireEvent.click(screen.getByRole('button', { name: /add credential/i }))
-    fireEvent.click(await screen.findByRole('button', { name: /master plumber/i }))
+    await selectCredentialType(/master plumber/i)
     const file = new File(['evidence'], 'evidence.pdf', { type: 'application/pdf' })
     fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }))

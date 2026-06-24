@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   deleteV1UsersUserIdCredentialsCredentialId,
   getGetV1CredentialsQueryKey,
@@ -71,9 +71,12 @@ export function MyCredentialsRoute() {
     verificationId: string;
   } | null>(null);
 
-  const credentialsQueryKey = userId
-    ? getGetV1UsersUserIdCredentialsQueryKey(userId)
-    : ["my-credentials"];
+  const credentialsQueryKey = useMemo(
+    () => userId
+      ? getGetV1UsersUserIdCredentialsQueryKey(userId)
+      : ["my-credentials"],
+    [userId],
+  );
 
   const {
     data,
@@ -183,6 +186,8 @@ export function MyCredentialsRoute() {
     const verification = verificationQuery.data;
     if (!verification || !isTerminalVerification(verification)) return;
 
+    // Verification is resolved by async polling, so the route stores the user-facing result once.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSubmissionStatus(getVerificationStatusMessage(verification));
     setActiveVerification(null);
     queryClient.invalidateQueries({ queryKey: credentialsQueryKey });
@@ -197,6 +202,8 @@ export function MyCredentialsRoute() {
     );
     if (!verification || !isTerminalVerification(verification)) return;
 
+    // The credentials list can finish before the polling request, so mirror the terminal result.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSubmissionStatus(getVerificationStatusMessage(verification));
     setActiveVerification(null);
   }, [activeVerification, data?.items]);
