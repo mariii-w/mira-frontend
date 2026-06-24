@@ -15,6 +15,10 @@ export interface ListingProviderCardProps {
   nextAvailableDate?: string;
   tags: ServiceTag[];
   onBookNow: () => void;
+  onMessage?: () => void;
+  canMessage?: boolean;
+  messagePending?: boolean;
+  messageError?: string | null;
   className?: string;
   style?: CSSProperties;
 }
@@ -39,6 +43,10 @@ export function ListingProviderCard({
   nextAvailableDate,
   tags,
   onBookNow,
+  onMessage,
+  canMessage = true,
+  messagePending = false,
+  messageError,
   className,
   style,
 }: ListingProviderCardProps) {
@@ -81,10 +89,25 @@ export function ListingProviderCard({
       >
         Book Now
       </Button>
-      {/* Messaging isn't built yet — button is intentionally inert for now. */}
-      <Button variant="primary" size="lg" fullWidth leadingIcon={<MessageCircle />}>
-        Message {authorName}
-      </Button>
+      {canMessage && (
+        <>
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            leadingIcon={<MessageCircle />}
+            onClick={onMessage}
+            loading={messagePending}
+          >
+            Message {authorName}
+          </Button>
+          {messageError && (
+            <p className="text-small text-destructive" role="alert">
+              {messageError}
+            </p>
+          )}
+        </>
+      )}
 
       <dl className="flex flex-col gap-2 text-small border-t border-primary-foreground/20 pt-4">
         <div className="flex justify-between">

@@ -15,6 +15,10 @@ export interface ListingDetailPageProps {
   nextAvailableDate?: string;
   otherListings: PublicListingSummary[];
   onBookNow: () => void;
+  onMessage?: () => void;
+  canMessage?: boolean;
+  messagePending?: boolean;
+  messageError?: string | null;
   banner?: ReactNode;
 }
 
@@ -27,6 +31,10 @@ export function ListingDetailPage({
   nextAvailableDate,
   otherListings,
   onBookNow,
+  onMessage,
+  canMessage,
+  messagePending,
+  messageError,
   banner,
 }: ListingDetailPageProps) {
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
@@ -184,6 +192,10 @@ export function ListingDetailPage({
             nextAvailableDate={nextAvailableDate}
             tags={listing.tags}
             onBookNow={onBookNow}
+            onMessage={onMessage}
+            canMessage={canMessage}
+            messagePending={messagePending}
+            messageError={messageError}
             className="animate-fade-in-up"
             style={{ animationDelay: "180ms" }}
           />

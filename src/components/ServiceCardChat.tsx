@@ -32,7 +32,7 @@ export function ServiceCardChat(
         <div className="bg-cream rounded-2xl flex flex-col gap-3 border border-border w-full">
             <div className='flex flex-col lg:flex-col gap-3'>
                 {pictureLink && (
-                    <div className='w-full'>
+                    <div className='w-full border-b border-border'>
                         <img src={pictureLink} className="w-full h-32 rounded-t-2xl object-cover" alt="" />
                     </div>
                 )}
@@ -43,7 +43,7 @@ export function ServiceCardChat(
 
                         
                     </div>
-                    <div className='border-b-2 w-full'>
+                    <div className='flex flex-wrap gap-2 pb-2'>
                         {tags.map((tag) => (
                             <Badge key={tag.tagId} text={tag.name} variant={tag.isBarrierefrei ? 'accent' : 'primary'} />
                         ))}
