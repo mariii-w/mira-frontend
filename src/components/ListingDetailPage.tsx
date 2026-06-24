@@ -14,6 +14,7 @@ export interface ListingDetailPageProps {
   availableToday?: boolean;
   nextAvailableDate?: string;
   otherListings: PublicListingSummary[];
+  hasPublicVerifiedCredentials?: boolean;
   onBookNow: () => void;
   banner?: ReactNode;
 }
@@ -26,6 +27,7 @@ export function ListingDetailPage({
   availableToday,
   nextAvailableDate,
   otherListings,
+  hasPublicVerifiedCredentials = false,
   onBookNow,
   banner,
 }: ListingDetailPageProps) {
@@ -183,6 +185,7 @@ export function ListingDetailPage({
             availableToday={availableToday}
             nextAvailableDate={nextAvailableDate}
             tags={listing.tags}
+            hasPublicVerifiedCredentials={hasPublicVerifiedCredentials}
             onBookNow={onBookNow}
             className="animate-fade-in-up"
             style={{ animationDelay: "180ms" }}

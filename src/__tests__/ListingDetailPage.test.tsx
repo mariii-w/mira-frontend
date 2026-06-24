@@ -107,6 +107,30 @@ describe('<ListingDetailPage />', () => {
     expect(screen.getByText('Seniors')).toBeInTheDocument()
   })
 
+  it('passes the public credential status to the provider card', () => {
+    const { rerender } = render(
+      <ListingDetailPage
+        listing={baseListing}
+        loading={false}
+        otherListings={[]}
+        hasPublicVerifiedCredentials={false}
+        onBookNow={vi.fn()}
+      />,
+    )
+    expect(screen.queryByText('Verified')).not.toBeInTheDocument()
+
+    rerender(
+      <ListingDetailPage
+        listing={baseListing}
+        loading={false}
+        otherListings={[]}
+        hasPublicVerifiedCredentials
+        onBookNow={vi.fn()}
+      />,
+    )
+    expect(screen.getByText('Verified')).toBeInTheDocument()
+  })
+
   it('renders the resolved description text', () => {
     render(
       <ListingDetailPage

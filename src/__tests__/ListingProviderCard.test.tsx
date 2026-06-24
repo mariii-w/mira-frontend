@@ -42,14 +42,28 @@ describe('<ListingProviderCard />', () => {
     expect(screen.getByText('Wheelchair accessible').parentElement).toHaveClass('bg-accent')
   })
 
-  it('shows a Verified badge', () => {
-    render(
+  it('shows a Verified badge only when the provider has public verified credentials', () => {
+    const { rerender } = render(
       <ListingProviderCard
         authorName="Klaus"
         authorSurname="Mueller"
         price={20}
         city="Berlin"
         tags={tags}
+        hasPublicVerifiedCredentials={false}
+        onBookNow={vi.fn()}
+      />,
+    )
+    expect(screen.queryByText('Verified')).not.toBeInTheDocument()
+
+    rerender(
+      <ListingProviderCard
+        authorName="Klaus"
+        authorSurname="Mueller"
+        price={20}
+        city="Berlin"
+        tags={tags}
+        hasPublicVerifiedCredentials
         onBookNow={vi.fn()}
       />,
     )

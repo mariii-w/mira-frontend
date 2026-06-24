@@ -14,6 +14,7 @@ export interface ListingProviderCardProps {
   availableToday?: boolean;
   nextAvailableDate?: string;
   tags: ServiceTag[];
+  hasPublicVerifiedCredentials?: boolean;
   onBookNow: () => void;
   className?: string;
   style?: CSSProperties;
@@ -38,6 +39,7 @@ export function ListingProviderCard({
   availableToday,
   nextAvailableDate,
   tags,
+  hasPublicVerifiedCredentials = false,
   onBookNow,
   className,
   style,
@@ -60,11 +62,12 @@ export function ListingProviderCard({
           className="ring-2 ring-primary-foreground/70"
         />
         <p className="font-semibold">{displayName}</p>
-        {/* Always shown for now — tie to real verification status once credentials gating ships. */}
-        <span className="inline-flex items-center gap-1 h-7 px-3 rounded-full text-small font-medium bg-primary text-primary-foreground">
-          <Check size={14} aria-hidden="true" />
-          Verified
-        </span>
+        {hasPublicVerifiedCredentials && (
+          <span className="inline-flex items-center gap-1 h-7 px-3 rounded-full text-small font-medium bg-primary text-primary-foreground">
+            <Check size={14} aria-hidden="true" />
+            Verified
+          </span>
+        )}
       </div>
 
       <div>
