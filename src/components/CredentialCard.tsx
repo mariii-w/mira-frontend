@@ -114,20 +114,24 @@ export function CredentialCard({
             </Button>
           </div>
         ) : (
-          <div role="alert" className="flex items-center gap-3 shrink-0 rounded-xl bg-red-50 px-3 py-2">
-            <p className="text-small font-medium text-red-700">Delete this credential?</p>
-            <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)} disabled={isDeleting}>
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              loading={isDeleting}
-              onClick={() => onDelete(credential.credentialId)}
-              className="bg-red-600 hover:bg-red-700 active:bg-red-700"
-            >
-              Delete
-            </Button>
+          <div
+            role="alert"
+            className="flex w-full flex-col gap-3 rounded-xl bg-linen px-3 py-3 sm:w-auto sm:shrink-0 sm:flex-row sm:items-center sm:py-2"
+          >
+            <p className="text-small font-medium text-foreground">Delete this credential?</p>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)} disabled={isDeleting}>
+                Cancel
+              </Button>
+              <Button
+                variant="accent"
+                size="sm"
+                loading={isDeleting}
+                onClick={() => onDelete(credential.credentialId)}
+              >
+                Delete
+              </Button>
+            </div>
           </div>
         )}
       </div>
