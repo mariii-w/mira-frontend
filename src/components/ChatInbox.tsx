@@ -2,6 +2,7 @@ import { AvatarIcon } from "./AvatarIcon";
 
 export type ChatPreview = {
     id: string;
+    listingId: string;
     firstName: string;
     lastName: string;
     lastMessage: string;
