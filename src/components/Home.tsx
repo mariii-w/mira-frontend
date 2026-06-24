@@ -111,12 +111,12 @@ const CATEGORY_IMAGES: Record<string, string> = {
 };
 
 const FOOTER_LINKS = [
-  "About",
-  "Contact Us",
-  "Accessibility",
-  "Terms of Use",
-  "Privacy Policy",
-];
+  { label: "About", to: "/about" },
+  { label: "Contact Us", to: "/contact-us" },
+  { label: "Accessibility", to: "/accessibility" },
+  { label: "Terms of Use", to: "/terms-of-use" },
+  { label: "Privacy Policy", to: "/privacy-policy" },
+] as const;
 
 function toListingCards(listings: PublicListingSummary[], easyRead: boolean) {
   return listings.map((listing) => ({
@@ -626,7 +626,7 @@ export function Home() {
           <nav aria-label="Footer">
             <ul className="flex flex-wrap gap-x-4 gap-y-2 list-none m-0 p-0 justify-end">
               {FOOTER_LINKS.map((link, i) => (
-                <li key={link} className="flex items-center gap-4">
+                <li key={link.label} className="flex items-center gap-4">
                   {i > 0 && (
                     <span
                       className="text-cream/30 select-none"
@@ -636,12 +636,12 @@ export function Home() {
                     </span>
                   )}
 
-                  <a
-                    href={`/${link.toLowerCase().replace(/ /g, "-")}`}
+                  <Link
+                    to={link.to}
                     className="text-small text-cream/70 no-underline hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream rounded transition-colors"
                   >
-                    {link}
-                  </a>
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>

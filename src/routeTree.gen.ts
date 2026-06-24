@@ -9,13 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsOfUseRouteImport } from './routes/terms-of-use'
 import { Route as StyleguideRouteImport } from './routes/styleguide'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as MyListingsRouteImport } from './routes/my-listings'
 import { Route as MyCredentialsRouteImport } from './routes/my-credentials'
 import { Route as MyBookingsRouteImport } from './routes/my-bookings'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
+import { Route as ContactUsRouteImport } from './routes/contact-us'
 import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as AccessibilityRouteImport } from './routes/accessibility'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as RegisterRouteRouteImport } from './routes/register/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegisterIndexRouteImport } from './routes/register/index'
@@ -31,9 +36,19 @@ import { Route as SearchBrowseServicesRouteImport } from './routes/_search/brows
 import { Route as ListingsListingIdIndexRouteImport } from './routes/listings/$listingId.index'
 import { Route as ListingsListingIdBookRouteImport } from './routes/listings/$listingId_.book'
 
+const TermsOfUseRoute = TermsOfUseRouteImport.update({
+  id: '/terms-of-use',
+  path: '/terms-of-use',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
   path: '/styleguide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MyListingsRoute = MyListingsRouteImport.update({
@@ -61,9 +76,24 @@ const CreateListingRoute = CreateListingRouteImport.update({
   path: '/create-listing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactUsRoute = ContactUsRouteImport.update({
+  id: '/contact-us',
+  path: '/contact-us',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccessibilityRoute = AccessibilityRouteImport.update({
+  id: '/accessibility',
+  path: '/accessibility',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRouteRoute = RegisterRouteRouteImport.update({
@@ -140,13 +170,18 @@ const ListingsListingIdBookRoute = ListingsListingIdBookRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/register': typeof RegisterRouteRouteWithChildren
+  '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
   '/calendar': typeof CalendarRoute
+  '/contact-us': typeof ContactUsRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-bookings': typeof MyBookingsRoute
   '/my-credentials': typeof MyCredentialsRoute
   '/my-listings': typeof MyListingsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/styleguide': typeof StyleguideRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/browse-services': typeof SearchBrowseServicesRoute
   '/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
@@ -162,13 +197,18 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
   '/calendar': typeof CalendarRoute
+  '/contact-us': typeof ContactUsRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-bookings': typeof MyBookingsRoute
   '/my-credentials': typeof MyCredentialsRoute
   '/my-listings': typeof MyListingsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/styleguide': typeof StyleguideRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/browse-services': typeof SearchBrowseServicesRoute
   '/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
@@ -186,13 +226,18 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/register': typeof RegisterRouteRouteWithChildren
+  '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
   '/calendar': typeof CalendarRoute
+  '/contact-us': typeof ContactUsRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-bookings': typeof MyBookingsRoute
   '/my-credentials': typeof MyCredentialsRoute
   '/my-listings': typeof MyListingsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/styleguide': typeof StyleguideRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/_search/browse-services': typeof SearchBrowseServicesRoute
   '/_search/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
@@ -211,13 +256,18 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/register'
+    | '/about'
+    | '/accessibility'
     | '/calendar'
+    | '/contact-us'
     | '/create-listing'
     | '/login'
     | '/my-bookings'
     | '/my-credentials'
     | '/my-listings'
+    | '/privacy-policy'
     | '/styleguide'
+    | '/terms-of-use'
     | '/browse-services'
     | '/browse-users'
     | '/edit-listing/$listingId'
@@ -233,13 +283,18 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
+    | '/accessibility'
     | '/calendar'
+    | '/contact-us'
     | '/create-listing'
     | '/login'
     | '/my-bookings'
     | '/my-credentials'
     | '/my-listings'
+    | '/privacy-policy'
     | '/styleguide'
+    | '/terms-of-use'
     | '/browse-services'
     | '/browse-users'
     | '/edit-listing/$listingId'
@@ -256,13 +311,18 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/register'
+    | '/about'
+    | '/accessibility'
     | '/calendar'
+    | '/contact-us'
     | '/create-listing'
     | '/login'
     | '/my-bookings'
     | '/my-credentials'
     | '/my-listings'
+    | '/privacy-policy'
     | '/styleguide'
+    | '/terms-of-use'
     | '/_search/browse-services'
     | '/_search/browse-users'
     | '/edit-listing/$listingId'
@@ -280,13 +340,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RegisterRouteRoute: typeof RegisterRouteRouteWithChildren
+  AboutRoute: typeof AboutRoute
+  AccessibilityRoute: typeof AccessibilityRoute
   CalendarRoute: typeof CalendarRoute
+  ContactUsRoute: typeof ContactUsRoute
   CreateListingRoute: typeof CreateListingRoute
   LoginRoute: typeof LoginRoute
   MyBookingsRoute: typeof MyBookingsRoute
   MyCredentialsRoute: typeof MyCredentialsRoute
   MyListingsRoute: typeof MyListingsRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   StyleguideRoute: typeof StyleguideRoute
+  TermsOfUseRoute: typeof TermsOfUseRoute
   SearchBrowseServicesRoute: typeof SearchBrowseServicesRoute
   SearchBrowseUsersRoute: typeof SearchBrowseUsersRoute
   EditListingListingIdRoute: typeof EditListingListingIdRoute
@@ -296,11 +361,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms-of-use': {
+      id: '/terms-of-use'
+      path: '/terms-of-use'
+      fullPath: '/terms-of-use'
+      preLoaderRoute: typeof TermsOfUseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/styleguide': {
       id: '/styleguide'
       path: '/styleguide'
       fullPath: '/styleguide'
       preLoaderRoute: typeof StyleguideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/my-listings': {
@@ -338,11 +417,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreateListingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact-us': {
+      id: '/contact-us'
+      path: '/contact-us'
+      fullPath: '/contact-us'
+      preLoaderRoute: typeof ContactUsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendar': {
       id: '/calendar'
       path: '/calendar'
       fullPath: '/calendar'
       preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accessibility': {
+      id: '/accessibility'
+      path: '/accessibility'
+      fullPath: '/accessibility'
+      preLoaderRoute: typeof AccessibilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -473,13 +573,18 @@ const RegisterRouteRouteWithChildren = RegisterRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegisterRouteRoute: RegisterRouteRouteWithChildren,
+  AboutRoute: AboutRoute,
+  AccessibilityRoute: AccessibilityRoute,
   CalendarRoute: CalendarRoute,
+  ContactUsRoute: ContactUsRoute,
   CreateListingRoute: CreateListingRoute,
   LoginRoute: LoginRoute,
   MyBookingsRoute: MyBookingsRoute,
   MyCredentialsRoute: MyCredentialsRoute,
   MyListingsRoute: MyListingsRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
   StyleguideRoute: StyleguideRoute,
+  TermsOfUseRoute: TermsOfUseRoute,
   SearchBrowseServicesRoute: SearchBrowseServicesRoute,
   SearchBrowseUsersRoute: SearchBrowseUsersRoute,
   EditListingListingIdRoute: EditListingListingIdRoute,
