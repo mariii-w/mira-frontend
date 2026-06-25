@@ -13,8 +13,10 @@ import { MyBookings } from "../components/MyBookings";
 import type { AllowedAction, BookingDetails } from "../components/BookingCard";
 import { executeBookingAction } from "../lib/bookingActions";
 import { useAuthStore } from "../stores/auth";
+import { requireAuth } from "../lib/requireAuth";
 
 export const Route = createFileRoute("/my-bookings")({
+  beforeLoad: requireAuth,
   component: MyBookingsRoute,
 });
 

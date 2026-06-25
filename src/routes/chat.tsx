@@ -6,9 +6,11 @@ import { ChatPageView } from "../components/ChatPageView.tsx";
 import { disconnectChatSocket, publishChatText, subscribeToChat } from "../lib/chatSocket.ts";
 import { describeMessageContent, toChatPreview } from "../lib/chatContent.ts";
 import { useAuthStore } from "../stores/auth";
+import { requireAuth } from "../lib/requireAuth";
 import { useGetPublicListing, useHistory, useListChats } from "../api/mira.ts";
 
 export const Route = createFileRoute('/chat')({
+    beforeLoad: requireAuth,
     validateSearch: (search: Record<string, unknown>) => ({
         cid: typeof search.cid === "string" ? search.cid : undefined,
     }),
@@ -89,6 +91,12 @@ function Chat() {
     // Drop live messages already covered by history (avoids dupes on refetch).
     const liveMessages = (messagesByChat[activeChatId] ?? []).filter((m) => !historyRawIds.has(m.rawId));
     const messages: ChatMessage[] = [...historyMessages, ...liveMessages];
+
+    // Keep the conversation pinned to the latest message.
+    useEffect(() => {
+        const el = conversationRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
+    }, [activeChatId, messages.length]);
 
     const { data: listingResponse, isError: listingIsError } = useGetPublicListing(
         selectedChat?.listingId ?? "",

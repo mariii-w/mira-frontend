@@ -33,7 +33,7 @@ function RootComponent() {
     if (!user) return
 
     if (user.registrationComplete) {
-      // Only bounce from required steps — let about/photo/done stay reachable.
+      // Only bounce from required steps - let about/photo/done stay reachable.
       if (isRequiredRegistrationStep(location.pathname)) {
         navigate({ to: '/' })
       }
