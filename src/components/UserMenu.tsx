@@ -3,7 +3,7 @@ import { ChevronDown, LogOut, CalendarCheck, LayoutList, UserRound, BadgeCheck }
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from './Button'
 import { AvatarIcon } from './AvatarIcon'
-import { signOut } from '../stores/auth'
+import { signOut, useAuthStore } from '../stores/auth'
 
 interface UserMenuProps {
   firstName: string
@@ -15,6 +15,10 @@ interface UserMenuProps {
 export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMenuProps) {
   const navigate = useNavigate()
   const displayName = lastName ? `${firstName} ${lastName[0]}.` : firstName
+
+  const user = useAuthStore((s) => s.user);
+  const userId = user?.userId;
+  const profilePath = '/profile/' + userId
 
   async function handleLogout() {
     await signOut()
@@ -40,7 +44,7 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
           sideOffset={8}
           className="z-50 w-56 rounded-xl border border-border bg-surface p-2 shadow-lg"
         >
-          <Row icon={<UserRound size={15} />} title="View Profile" to="/" />
+          <Row icon={<UserRound size={15} />} title="View Profile" to={profilePath} />
           <Row icon={<CalendarCheck size={15} />} title="My Bookings" to="/my-bookings" />
           {isProvider && (
             <Row icon={<LayoutList size={15} />} title="My Services" to="/my-listings" />
