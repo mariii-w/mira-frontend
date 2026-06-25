@@ -85,7 +85,10 @@ import { Textarea } from "../components/Textarea";
 import { UserMenu } from "../components/UserMenu";
 import { UserCard } from "../components/search/cards/UserCard";
 import { WeeklyScheduleModal } from "../components/WeeklyScheduleModal";
+import { PrivateProfilePage } from "../components/PrivateProfilePage";
+import { PublicProfilePage } from "../components/PublicProfilePage";
 import { useAuthStore, type User } from "../stores/auth";
+import type { VerifiedCredentialResponse } from "../api/model";
 
 const routerMocks = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -3949,6 +3952,109 @@ describe("component accessibility", () => {
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /previous/i }));
     });
+    await expectNoAxeViolations(container);
+  });
+
+  it("PrivateProfilePage provider state has no automated accessibility violations", async () => {
+    const providerListing: MyListingSummary = {
+      listingId: "profile-listing-1",
+      title: "Home Cleaning",
+      description: "Thorough cleaning for kitchens and bathrooms.",
+      price: 25,
+      publicationStatus: "ACTIVE",
+      moderationStatus: "VISIBLE",
+      author: { userId: "user-1", name: "Mira", surname: "Hofer" },
+      publishedAt: "2026-01-01T00:00:00Z",
+      location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 10 },
+      tags: [],
+    };
+    const { container } = render(
+      <PrivateProfilePage
+        userFirstName="Mira"
+        userLastName="Hofer"
+        selfSummary="I help people with everyday tasks."
+        bio="Experienced in household support and errands across Berlin."
+        city="Berlin"
+        isProvider={true}
+        ownerListings={[providerListing]}
+        onEditClick={vi.fn()}
+        onEditListing={vi.fn()}
+      />
+    );
+    await expectNoAxeViolations(container);
+  });
+
+  it("PrivateProfilePage consumer state has no automated accessibility violations", async () => {
+    const { container } = render(
+      <PrivateProfilePage
+        userFirstName="Anna"
+        userLastName="Weber"
+        selfSummary=""
+        bio={null}
+        city="Munich"
+        isProvider={false}
+        ownerListings={[]}
+        onEditClick={vi.fn()}
+        onEditListing={vi.fn()}
+      />
+    );
+    await expectNoAxeViolations(container);
+  });
+
+  it("PublicProfilePage provider with verified badge has no automated accessibility violations", async () => {
+    const verifiedCredentials: VerifiedCredentialResponse[] = [
+      {
+        credentialType: "IDENTITY_VERIFIED",
+        name: "Identity verified",
+        description: "Government ID has been checked.",
+        expiresAt: null,
+        verifiedAt: "2026-01-01T00:00:00Z",
+      },
+    ];
+    const { container } = render(
+      <PublicProfilePage
+        userFirstName="Klaus"
+        userLastName="Mueller"
+        username="klausm"
+        selfSummary="Retired IT professional offering PC support."
+        bio="Over 30 years of experience in IT support."
+        simplifiedBio={null}
+        city="Berlin"
+        isProvider={true}
+        verified={true}
+        credentials={verifiedCredentials}
+        publicServiceListings={[
+          {
+            link: "/listings/listing-1",
+            label: "PC Support",
+            hourRate: 20,
+            location: "Berlin",
+            providerFirstName: "Klaus",
+            providerLastName: "Mueller",
+            tags: [],
+          },
+        ]}
+      />
+    );
+    await expectNoAxeViolations(container);
+  });
+
+  it("PublicProfilePage consumer state has no automated accessibility violations", async () => {
+    const { container } = render(
+      <PublicProfilePage
+        userFirstName="Lena"
+        userLastName="Schmidt"
+        username="lenas"
+        selfSummary=""
+        bio={null}
+        simplifiedBio={null}
+        city="Hamburg"
+        isProvider={false}
+        verified={false}
+        credentials={[]}
+        publicServiceListings={[]}
+      />
+    );
     await expectNoAxeViolations(container);
   });
 });
