@@ -2,15 +2,14 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  getGetPublicListingQueryKey,
   getGetPublicProfileListingsQueryKey,
   getGetAvailabilityQueryKey,
   getGetPublicProfileCredentialsQueryKey,
-  getPublicListing,
   getPublicProfileCredentials,
   getPublicProfileListings,
   getAvailability,
   useCreateChat,
+  useGetPublicListing,
 } from "../../api/mira";
 import { ListingDetailPage } from "../../components/ListingDetailPage";
 import { useAccessibilityStore } from "../../stores/accessibility";
@@ -44,23 +43,13 @@ function ListingDetailRoute() {
   const availabilityRangeEnd = toLocalDate(addDays(new Date(), 29));
 
   const {
-    data: listing,
+    data: listingResponse,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: getGetPublicListingQueryKey(listingId),
-    queryFn: async () => {
-      const response = await getPublicListing(listingId);
+  } = useGetPublicListing(listingId);
+  const listing = listingResponse?.status === 200 ? listingResponse.data : undefined;
 
-      if (response.status !== 200) {
-        throw new Error(response.data.detail ?? "Failed to load listing.");
-      }
-
-      return response.data;
-    },
-  });
-
-  const authorId = listing?.author.userId;
+  const authorId = listing?.author?.userId;
   const queryAuthorId = authorId ?? "";
 
   const { data: otherListingsData } = useQuery({

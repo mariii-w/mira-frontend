@@ -29,6 +29,7 @@ export function Navbar() {
       ? { label: "My Services", to: "/my-listings" as const }
       : { label: "Find Users", to: "/browse-users" as const },
     COMMON_NAV_LINKS[1],
+    COMMON_NAV_LINKS[2],
   ];
 
   function handleGoogleLogin() {
