@@ -501,18 +501,6 @@ const ProfileUserIdRouteWithChildren = ProfileUserIdRoute._addFileChildren(
   ProfileUserIdRouteChildren,
 )
 
-interface ProfileUserIdRouteChildren {
-  ProfileUserIdEditRoute: typeof ProfileUserIdEditRoute
-}
-
-const ProfileUserIdRouteChildren: ProfileUserIdRouteChildren = {
-  ProfileUserIdEditRoute: ProfileUserIdEditRoute,
-}
-
-const ProfileUserIdRouteWithChildren = ProfileUserIdRoute._addFileChildren(
-  ProfileUserIdRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegisterRouteRoute: RegisterRouteRouteWithChildren,

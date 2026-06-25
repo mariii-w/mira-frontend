@@ -86,7 +86,6 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
         tags: listing.tags,
         hourRate: listing.price,
         distance: listing.location.serviceRadiusKm,
-        tags: listing.tags ?? []
     })) ?? []
 
     return(
