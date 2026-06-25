@@ -52,7 +52,7 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 p-3 rounded-lg text-small font-semibold text-foreground hover:bg-linen transition-colors"
+            className="w-full flex items-center gap-3 p-3 rounded-lg text-small font-semibold text-foreground hover:bg-linen transition-colors cursor-pointer"
           >
             <LogOut size={15} className="text-muted shrink-0" />
             Logout
