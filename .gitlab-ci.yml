@@ -71,7 +71,7 @@ accessibility:
 
 create_release:
   stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  image: registry.gitlab.com/gitlab-org/cli:latest
   rules:
     - if: "$CI_COMMIT_TAG"
   before_script: []
