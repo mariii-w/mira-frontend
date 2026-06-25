@@ -47,12 +47,12 @@ const providerSummary: ProviderServiceSummary = {
 describe('<UserCard /> role palettes', () => {
   it('uses the green palette for providers', () => {
     render(<UserCard profile={profile({ userType: 'PROVIDER' })} easyRead={false} />)
-    expect(screen.getByRole('link', { name: 'Patrick Smith' })).toHaveClass('bg-forest')
+    expect(screen.getByRole('link', { name: 'View profile of Patrick Smith' })).toHaveClass('bg-forest')
   })
 
   it('uses the violet palette for consumers', () => {
     render(<UserCard profile={profile({ userType: 'CUSTOMER' })} easyRead={false} />)
-    expect(screen.getByRole('link', { name: 'Patrick Smith' })).toHaveClass('bg-accent')
+    expect(screen.getByRole('link', { name: 'View profile of Patrick Smith' })).toHaveClass('bg-accent')
   })
 })
 
@@ -96,7 +96,7 @@ describe('<UserCard /> content', () => {
 describe('<UserCard /> links', () => {
   it('renders only the View Profile link pointing to "/"', () => {
     render(<UserCard profile={profile({ firstName: 'Patrick', lastName: 'Smith' })} easyRead={false} />)
-    const viewProfile = screen.getByRole('link', { name: 'Patrick Smith' })
+    const viewProfile = screen.getByRole('link', { name: 'View profile of Patrick Smith' })
     expect(viewProfile).toHaveAttribute('href', '/')
     expect(viewProfile).toHaveTextContent('View Profile')
     expect(screen.queryByRole('link', { name: 'Message Patrick Smith' })).not.toBeInTheDocument()
@@ -149,16 +149,16 @@ describe('<UserCard /> provider enrichment', () => {
 })
 
 describe('<UserCard /> accessible navigation links', () => {
-  it('puts the full profile context on the primary navigation link, without exposing a duplicate article', () => {
+  it('puts the full profile context on the card group, not the link', () => {
     render(<UserCard profile={profile({ firstName: 'Patrick', lastName: 'Smith' })} easyRead={false} />)
     expect(screen.queryByRole('article')).not.toBeInTheDocument()
 
-    const viewProfile = screen.getByRole('link', { name: 'Patrick Smith' })
+    const card = screen.getByRole('group', { name: 'Patrick Smith' })
+    expect(card).toBeInTheDocument()
+
+    const viewProfile = screen.getByRole('link', { name: 'View profile of Patrick Smith' })
     expect(viewProfile).toHaveTextContent('View Profile')
     expect(viewProfile).toHaveAttribute('href', '/')
-
-    const profileLinks = screen.getAllByRole('link')
-    expect(profileLinks[0]).toBe(viewProfile)
   })
 
   it('describes role and city for a consumer card with no enrichment, and excludes price', () => {
@@ -168,8 +168,8 @@ describe('<UserCard /> accessible navigation links', () => {
         easyRead={false}
       />,
     )
-    const viewProfile = screen.getByRole('link', { name: 'Anna Weber' })
-    const description = computeAccessibleDescription(viewProfile)
+    const card = screen.getByRole('group', { name: 'Anna Weber' })
+    const description = computeAccessibleDescription(card)
     expect(description).toContain('Consumer')
     expect(description).toContain('Berlin')
     expect(description).toContain('Friendly help.')
@@ -184,8 +184,8 @@ describe('<UserCard /> accessible navigation links', () => {
         providerSummary={providerSummary}
       />,
     )
-    const viewProfile = screen.getByRole('link', { name: 'Patrick Smith' })
-    const description = computeAccessibleDescription(viewProfile)
+    const card = screen.getByRole('group', { name: 'Patrick Smith' })
+    const description = computeAccessibleDescription(card)
     expect(description).toContain('Provider')
     expect(description).toContain('From')
     expect(description).toContain('20€/hr')
@@ -197,8 +197,8 @@ describe('<UserCard /> accessible navigation links', () => {
 
   it('omits city and price from the description when absent', () => {
     render(<UserCard profile={profile({ userType: 'PROVIDER', city: null, bio: null })} easyRead={false} />)
-    const viewProfile = screen.getByRole('link', { name: 'Patrick Smith' })
-    const description = computeAccessibleDescription(viewProfile)
+    const card = screen.getByRole('group', { name: 'Patrick Smith' })
+    const description = computeAccessibleDescription(card)
     expect(description).not.toContain('Berlin')
     expect(description).not.toContain('From')
   })
