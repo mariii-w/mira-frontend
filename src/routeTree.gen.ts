@@ -24,13 +24,13 @@ import { Route as RegisterNameRouteImport } from './routes/register/name'
 import { Route as RegisterDoneRouteImport } from './routes/register/done'
 import { Route as RegisterAddressRouteImport } from './routes/register/address'
 import { Route as RegisterAboutRouteImport } from './routes/register/about'
+import { Route as ProfileUserIdRouteImport } from './routes/profile.$userId'
 import { Route as EditListingListingIdRouteImport } from './routes/edit-listing.$listingId'
 import { Route as SearchBrowseUsersRouteImport } from './routes/_search/browse-users'
 import { Route as SearchBrowseServicesRouteImport } from './routes/_search/browse-services'
 import { Route as ListingsListingIdIndexRouteImport } from './routes/listings/$listingId.index'
-import { Route as ListingsListingIdBookRouteImport } from './routes/listings/$listingId_.book'
-import { Route as ProfileUserIdRouteImport } from './routes/profile.$userId'
 import { Route as ProfileUserIdEditRouteImport } from './routes/profile.$userId.edit'
+import { Route as ListingsListingIdBookRouteImport } from './routes/listings/$listingId_.book'
 
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
@@ -107,6 +107,11 @@ const RegisterAboutRoute = RegisterAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => RegisterRouteRoute,
 } as any)
+const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
+  id: '/profile/$userId',
+  path: '/profile/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EditListingListingIdRoute = EditListingListingIdRouteImport.update({
   id: '/edit-listing/$listingId',
   path: '/edit-listing/$listingId',
@@ -127,20 +132,15 @@ const ListingsListingIdIndexRoute = ListingsListingIdIndexRouteImport.update({
   path: '/listings/$listingId/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ListingsListingIdBookRoute = ListingsListingIdBookRouteImport.update({
-  id: '/listings/$listingId_/book',
-  path: '/listings/$listingId/book',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
-  id: '/profile/$userId',
-  path: '/profile/$userId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProfileUserIdEditRoute = ProfileUserIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
   getParentRoute: () => ProfileUserIdRoute,
+} as any)
+const ListingsListingIdBookRoute = ListingsListingIdBookRouteImport.update({
+  id: '/listings/$listingId_/book',
+  path: '/listings/$listingId/book',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -164,8 +164,8 @@ export interface FileRoutesByFullPath {
   '/register/role': typeof RegisterRoleRoute
   '/register/': typeof RegisterIndexRoute
   '/listings/$listingId/book': typeof ListingsListingIdBookRoute
-  '/listings/$listingId/': typeof ListingsListingIdIndexRoute
   '/profile/$userId/edit': typeof ProfileUserIdEditRoute
+  '/listings/$listingId/': typeof ListingsListingIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -187,8 +187,8 @@ export interface FileRoutesByTo {
   '/register/role': typeof RegisterRoleRoute
   '/register': typeof RegisterIndexRoute
   '/listings/$listingId/book': typeof ListingsListingIdBookRoute
-  '/listings/$listingId': typeof ListingsListingIdIndexRoute
   '/profile/$userId/edit': typeof ProfileUserIdEditRoute
+  '/listings/$listingId': typeof ListingsListingIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -212,8 +212,8 @@ export interface FileRoutesById {
   '/register/role': typeof RegisterRoleRoute
   '/register/': typeof RegisterIndexRoute
   '/listings/$listingId_/book': typeof ListingsListingIdBookRoute
-  '/listings/$listingId/': typeof ListingsListingIdIndexRoute
   '/profile/$userId/edit': typeof ProfileUserIdEditRoute
+  '/listings/$listingId/': typeof ListingsListingIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -238,8 +238,8 @@ export interface FileRouteTypes {
     | '/register/role'
     | '/register/'
     | '/listings/$listingId/book'
-    | '/listings/$listingId/'
     | '/profile/$userId/edit'
+    | '/listings/$listingId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -261,8 +261,8 @@ export interface FileRouteTypes {
     | '/register/role'
     | '/register'
     | '/listings/$listingId/book'
-    | '/listings/$listingId'
     | '/profile/$userId/edit'
+    | '/listings/$listingId'
   id:
     | '__root__'
     | '/'
@@ -285,8 +285,8 @@ export interface FileRouteTypes {
     | '/register/role'
     | '/register/'
     | '/listings/$listingId_/book'
-    | '/listings/$listingId/'
     | '/profile/$userId/edit'
+    | '/listings/$listingId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -301,9 +301,9 @@ export interface RootRouteChildren {
   SearchBrowseServicesRoute: typeof SearchBrowseServicesRoute
   SearchBrowseUsersRoute: typeof SearchBrowseUsersRoute
   EditListingListingIdRoute: typeof EditListingListingIdRoute
+  ProfileUserIdRoute: typeof ProfileUserIdRouteWithChildren
   ListingsListingIdBookRoute: typeof ListingsListingIdBookRoute
   ListingsListingIdIndexRoute: typeof ListingsListingIdIndexRoute
-  ProfileUserIdRoute: typeof ProfileUserIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -413,6 +413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterAboutRouteImport
       parentRoute: typeof RegisterRouteRoute
     }
+    '/profile/$userId': {
+      id: '/profile/$userId'
+      path: '/profile/$userId'
+      fullPath: '/profile/$userId'
+      preLoaderRoute: typeof ProfileUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/edit-listing/$listingId': {
       id: '/edit-listing/$listingId'
       path: '/edit-listing/$listingId'
@@ -441,26 +448,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListingsListingIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/listings/$listingId_/book': {
-      id: '/listings/$listingId_/book'
-      path: '/listings/$listingId/book'
-      fullPath: '/listings/$listingId/book'
-      preLoaderRoute: typeof ListingsListingIdBookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile/$userId': {
-      id: '/profile/$userId'
-      path: '/profile/$userId'
-      fullPath: '/profile/$userId'
-      preLoaderRoute: typeof ProfileUserIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/profile/$userId/edit': {
       id: '/profile/$userId/edit'
       path: '/edit'
       fullPath: '/profile/$userId/edit'
       preLoaderRoute: typeof ProfileUserIdEditRouteImport
       parentRoute: typeof ProfileUserIdRoute
+    }
+    '/listings/$listingId_/book': {
+      id: '/listings/$listingId_/book'
+      path: '/listings/$listingId/book'
+      fullPath: '/listings/$listingId/book'
+      preLoaderRoute: typeof ListingsListingIdBookRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -501,6 +501,18 @@ const ProfileUserIdRouteWithChildren = ProfileUserIdRoute._addFileChildren(
   ProfileUserIdRouteChildren,
 )
 
+interface ProfileUserIdRouteChildren {
+  ProfileUserIdEditRoute: typeof ProfileUserIdEditRoute
+}
+
+const ProfileUserIdRouteChildren: ProfileUserIdRouteChildren = {
+  ProfileUserIdEditRoute: ProfileUserIdEditRoute,
+}
+
+const ProfileUserIdRouteWithChildren = ProfileUserIdRoute._addFileChildren(
+  ProfileUserIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegisterRouteRoute: RegisterRouteRouteWithChildren,
@@ -513,9 +525,9 @@ const rootRouteChildren: RootRouteChildren = {
   SearchBrowseServicesRoute: SearchBrowseServicesRoute,
   SearchBrowseUsersRoute: SearchBrowseUsersRoute,
   EditListingListingIdRoute: EditListingListingIdRoute,
+  ProfileUserIdRoute: ProfileUserIdRouteWithChildren,
   ListingsListingIdBookRoute: ListingsListingIdBookRoute,
   ListingsListingIdIndexRoute: ListingsListingIdIndexRoute,
-  ProfileUserIdRoute: ProfileUserIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
