@@ -15,11 +15,12 @@ export function AccessibilityPanel() {
       <Popover.Trigger asChild>
         <Button
           variant="secondary"
+          aria-label="Accessibility settings"
           leadingIcon={<Accessibility />}
-          trailingIcon={<ChevronDown />}
+          trailingIcon={<ChevronDown className="hidden lg:block" />}
           className="border-cream/30 text-cream hover:bg-cream/10 data-[state=open]:bg-cream/10"
         >
-          Accessibility
+          <span className="hidden lg:inline">Accessibility</span>
         </Button>
       </Popover.Trigger>
 
@@ -28,7 +29,7 @@ export function AccessibilityPanel() {
           aria-label="Accessibility settings"
           align="end"
           sideOffset={8}
-          className="z-50 w-80 rounded-xl border border-border bg-surface p-2 shadow-lg"
+          className="z-50 w-[min(20rem,calc(100vw_-_2rem))] rounded-xl border border-border bg-surface p-2 shadow-lg"
         >
           <Row
             id="a11y-easy-read"
