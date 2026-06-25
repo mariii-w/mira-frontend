@@ -1,12 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
-import { Camera, Check, X } from 'lucide-react'
-import * as Switch from '../components/Switch'
-import { Button } from '../components/Button'
-import { Input } from '../components/Input'
-import { Label } from '../components/Label'
-import { Textarea } from '../components/Textarea'
-import { AvatarIcon } from '../components/AvatarIcon'
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import { EditProfileForm } from '../components/EditProfileForm'
 import { useAuthStore } from '../stores/auth'
 import {
   patchUser,
@@ -116,14 +110,9 @@ function EditProfilePage() {
   const [submitting, setSubmitting] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
 
-  const photoInputRef = useRef<HTMLInputElement>(null)
   const [pendingPhoto, setPendingPhoto] = useState<{ file: File; previewUrl: string } | null>(null)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [photoError, setPhotoError] = useState<string | null>(null)
-
-  function openPhotoPicker() {
-    photoInputRef.current?.click()
-  }
 
   function handlePhotoSelected(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -217,237 +206,50 @@ function EditProfilePage() {
   if (!currentUser || !isOwner) return null
 
   return (
-    <>
-      <main id="main-content">
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 p-4 overflow-y-auto"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) closeToProfile()
-          }}
-        >
-          <form
-            className="relative flex w-full max-w-md flex-col gap-5 rounded-2xl bg-linen border border-border p-6 shadow-xl my-8"
-            onSubmit={handleSubmit}
-            noValidate
-          >
-            <button
-              type="button"
-              aria-label="Schließen"
-              onClick={closeToProfile}
-              className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-full text-foreground hover:bg-foreground/5 transition-colors duration-150"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="flex flex-col items-center gap-3 pr-10">
-              <h1 className="self-start font-heading text-2xl font-bold text-foreground">Profil bearbeiten</h1>
-              <div className="flex flex-col items-center gap-1">
-                <div className="relative">
-                  <AvatarIcon
-                    size={112}
-                    firstName={currentUser.firstName ?? ''}
-                    lastName={currentUser.lastName ?? ''}
-                    picture={currentUser?.profileMedia ? mediaUrl(currentUser?.profileMedia?.url) : undefined}
-                  />
-                  <button
-                    type="button"
-                    aria-label="Profilbild ändern"
-                    onClick={openPhotoPicker}
-                    className="absolute -bottom-1 -right-3 inline-flex size-9 items-center justify-center rounded-full bg-charcoal text-cream border-2 border-linen"
-                  >
-                    <Camera size={18} />
-                  </button>
-                  <input
-                    ref={photoInputRef}
-                    type="file"
-                    accept="image/png, image/jpeg"
-                    className="hidden"
-                    onChange={handlePhotoSelected}
-                  />
-                </div>
-                <span className="text-small font-medium text-foreground">bearbeiten</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="firstName" required>Vorname</Label>
-              <Input
-                id="firstName"
-                size="sm"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                onBlur={() => setFirstNameError(validateName(firstName))}
-                autoComplete="given-name"
-                error={firstNameError}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="lastName" required>Nachname</Label>
-              <Input
-                id="lastName"
-                size="sm"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                onBlur={() => setLastNameError(validateName(lastName))}
-                autoComplete="family-name"
-                error={lastNameError}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="username" required>Benutzername</Label>
-              <Input
-                id="username"
-                size="sm"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                onBlur={() => setUsernameError(validateUsername(username))}
-                autoComplete="username"
-                error={usernameError}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="selfSummary">Profil Beschreibung</Label>
-              <Textarea
-                id="selfSummary"
-                value={selfSummary}
-                onChange={(e) => setSelfSummary(e.target.value)}
-                onBlur={() => setSelfSummaryError(validateSelfSummary(selfSummary))}
-                maxLength={200}
-                rows={4}
-                error={selfSummaryError}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="addressLine" required>Wohnangabe</Label>
-              <Input
-                id="addressLine"
-                size="sm"
-                value={addressLine}
-                onChange={(e) => setAddressLine(e.target.value)}
-                onBlur={() => setAddressLineError(validateAddressLine(addressLine))}
-                placeholder="Straße und Hausnummer, z. B. Kleiber Weg 5"
-                autoComplete="address-line1"
-                error={addressLineError}
-              />
-            </div>
-
-            <div className="grid grid-cols-[8rem_1fr] gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="postalCode" required>Postleitzahl</Label>
-                <Input
-                  id="postalCode"
-                  size="sm"
-                  inputMode="numeric"
-                  maxLength={5}
-                  value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, ''))}
-                  onBlur={() => setPostalCodeError(validatePostalCode(postalCode))}
-                  autoComplete="postal-code"
-                  error={postalCodeError}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="city" required>Stadt</Label>
-                <Input
-                  id="city"
-                  size="sm"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  onBlur={() => setCityError(validateCity(city))}
-                  autoComplete="address-level2"
-                  error={cityError}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between gap-4">
-              <label htmlFor="isPublic" className="text-small font-medium text-foreground cursor-pointer">
-                Öffentliches Profil
-              </label>
-              <Switch.Root
-                id="isPublic"
-                checked={isPublic}
-                onCheckedChange={setIsPublic}
-                className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-grey-olive/40 data-[state=checked]:bg-primary transition-colors duration-150"
-              >
-                <Switch.Thumb className="block h-5 w-5 rounded-full bg-surface shadow translate-x-0.5 data-[state=checked]:translate-x-[22px] transition-transform duration-150" />
-              </Switch.Root>
-            </div>
-
-            {serverError && (
-              <p role="alert" className="text-small text-red-600">{serverError}</p>
-            )}
-
-            <div className="flex items-center justify-between pt-4 border-t border-border/30">
-              <Button type="button" variant="ghost" size="md" onClick={closeToProfile}>
-                Abbrechen
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                size="md"
-                loading={submitting}
-                trailingIcon={<Check />}
-              >
-                Speichern
-              </Button>
-            </div>
-          </form>
-        </div>
-      </main>
-
-      {pendingPhoto && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-charcoal/60 p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) closePhotoPopup()
-          }}
-        >
-          <div className="relative flex w-full max-w-sm flex-col gap-5 rounded-2xl bg-linen border border-border p-6 shadow-xl">
-            <button
-              type="button"
-              aria-label="Schließen"
-              onClick={closePhotoPopup}
-              disabled={uploadingPhoto}
-              className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-full text-foreground hover:bg-foreground/5 transition-colors duration-150 disabled:opacity-50"
-            >
-              <X size={20} />
-            </button>
-
-            <h2 className="font-heading text-xl font-bold text-foreground">Profilbild</h2>
-
-            <img
-              src={pendingPhoto.previewUrl}
-              alt="Vorschau des neuen Profilbilds"
-              className="size-48 self-center rounded-full object-cover border border-border"
-            />
-
-            {photoError && (
-              <p role="alert" className="text-small text-red-600">{photoError}</p>
-            )}
-
-            <div className="flex items-center justify-between pt-4 border-t border-border/30">
-              <Button type="button" variant="ghost" size="md" onClick={closePhotoPopup} disabled={uploadingPhoto}>
-                Abbrechen
-              </Button>
-              <Button
-                type="button"
-                variant="primary"
-                size="md"
-                loading={uploadingPhoto}
-                trailingIcon={<Check />}
-                onClick={handlePhotoSave}
-              >
-                Speichern
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    <EditProfileForm
+      firstName={firstName}
+      lastName={lastName}
+      username={username}
+      selfSummary={selfSummary}
+      addressLine={addressLine}
+      postalCode={postalCode}
+      city={city}
+      isPublic={isPublic}
+      firstNameError={firstNameError}
+      lastNameError={lastNameError}
+      usernameError={usernameError}
+      selfSummaryError={selfSummaryError}
+      addressLineError={addressLineError}
+      postalCodeError={postalCodeError}
+      cityError={cityError}
+      serverError={serverError}
+      submitting={submitting}
+      userFirstName={currentUser.firstName ?? ''}
+      userLastName={currentUser.lastName ?? ''}
+      userPictureUrl={currentUser?.profileMedia ? mediaUrl(currentUser?.profileMedia?.url) : undefined}
+      pendingPhotoPreviewUrl={pendingPhoto?.previewUrl}
+      uploadingPhoto={uploadingPhoto}
+      photoError={photoError}
+      onFirstNameChange={setFirstName}
+      onLastNameChange={setLastName}
+      onUsernameChange={setUsername}
+      onSelfSummaryChange={setSelfSummary}
+      onAddressLineChange={setAddressLine}
+      onPostalCodeChange={setPostalCode}
+      onCityChange={setCity}
+      onIsPublicChange={setIsPublic}
+      onFirstNameBlur={() => setFirstNameError(validateName(firstName))}
+      onLastNameBlur={() => setLastNameError(validateName(lastName))}
+      onUsernameBlur={() => setUsernameError(validateUsername(username))}
+      onSelfSummaryBlur={() => setSelfSummaryError(validateSelfSummary(selfSummary))}
+      onAddressLineBlur={() => setAddressLineError(validateAddressLine(addressLine))}
+      onPostalCodeBlur={() => setPostalCodeError(validatePostalCode(postalCode))}
+      onCityBlur={() => setCityError(validateCity(city))}
+      onSubmit={handleSubmit}
+      onClose={closeToProfile}
+      onPhotoSelected={handlePhotoSelected}
+      onPhotoPopupClose={closePhotoPopup}
+      onPhotoSave={handlePhotoSave}
+    />
   )
 }
