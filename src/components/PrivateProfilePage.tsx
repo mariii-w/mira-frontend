@@ -10,7 +10,8 @@ import { cn } from '../lib/cn'
 interface PrivateProfilePageProps {
   userFirstName: string
   userLastName: string
-  userDescription: string
+  selfSummary: string
+  bio: string | null
   city: string
   pictureUrl?: string
   isProvider: boolean
@@ -48,7 +49,8 @@ function QuickActionLink({ to, variant = 'primary', icon, children }: {
 export function PrivateProfilePage({
   userFirstName,
   userLastName,
-  userDescription,
+  selfSummary,
+  bio,
   city,
   pictureUrl,
   isProvider,
@@ -69,12 +71,12 @@ export function PrivateProfilePage({
               <div className="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-4">
                 <AvatarIcon
                   size={140}
-                  className="border-4 border-cream shrink-0"
+                  className="border-4 border-cream shrink-0 animate-scale-in"
                   firstName={userFirstName}
                   lastName={userLastName}
                   picture={pictureUrl}
                 />
-                <div className="lg:pt-20 flex flex-col gap-1 items-center lg:items-start py-2">
+                <div className="lg:pt-20 flex flex-col gap-1 items-center lg:items-start py-2 animate-fade-in-up [animation-delay:100ms]">
                   <div className="flex items-center gap-3 flex-wrap justify-center lg:justify-start mt-4">
                     <h1 className="text-2xl sm:text-3xl font-semibold">
                       {userFirstName} {userLastName}
@@ -89,6 +91,7 @@ export function PrivateProfilePage({
                   {city && (
                     <p className="flex items-center gap-1 text-sm font-bold text-border">
                       <MapPin size={16} aria-hidden="true" />
+                      <span className="sr-only">Location: </span>
                       {city}
                     </p>
                   )}
@@ -98,7 +101,7 @@ export function PrivateProfilePage({
 
             {/* Quick Actions — on mobile renders after user info, on desktop sticks to right column */}
             {isProvider && (
-              <nav aria-label="Quick actions" tabIndex={0} className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+              <nav aria-label="Quick actions" className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 animate-fade-in-up [animation-delay:150ms]">
                 <h2 className="text-h1 font-bold">Quick Actions</h2>
                 <div className="w-full mx-auto h-px bg-border my-5" />
                 <div className="flex flex-col w-full gap-3">
@@ -125,16 +128,20 @@ export function PrivateProfilePage({
             )}
 
             {/* About */}
-            <section aria-labelledby="private-about-heading" aria-describedby="private-about-content" tabIndex={0} className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
-              <h2 id="private-about-heading" className="font-heading font-bold text-h2 mb-2">About me</h2>
-              <p id="private-about-content" className={!userDescription ? 'text-muted text-small' : undefined}>
-                {userDescription || 'No description provided.'}
-              </p>
+            <section aria-labelledby="private-about-heading" className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3 animate-fade-in-up [animation-delay:250ms]">
+              <h2 id="private-about-heading" className="font-heading font-bold text-h2">About me</h2>
+              <div className="flex flex-col gap-3">
+                {selfSummary && <p>{selfSummary}</p>}
+                {bio && <p>{bio}</p>}
+                {!selfSummary && !bio && (
+                  <p className="text-muted text-small">No description provided.</p>
+                )}
+              </div>
             </section>
 
             {/* Services */}
             {isProvider && (
-              <section aria-labelledby="my-services-heading" aria-describedby="my-services-count" tabIndex={0} className="col-span-1 lg:col-span-2 lg:row-start-3 bg-linen border border-border rounded-2xl p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+              <section aria-labelledby="my-services-heading" aria-describedby="my-services-count" className="col-span-1 lg:col-span-2 lg:row-start-3 bg-linen border border-border rounded-2xl p-6 animate-fade-in-up [animation-delay:350ms]">
                 <h2 id="my-services-heading" className="font-heading font-bold text-h2 mb-4">My Services</h2>
                 {ownerListings.length > 0
                   ? (

@@ -28,8 +28,9 @@ function VerifiedBadge({ credentials }: { credentials: VerifiedCredentialRespons
   return (
     <span className="relative inline-flex">
       <span
+        role="img"
+        aria-label={`Verified: ${credentials.map((c) => c.name).join(', ')}`}
         tabIndex={0}
-        aria-describedby={showTooltip ? tooltipId : undefined}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onFocus={() => setShowTooltip(true)}
@@ -81,16 +82,16 @@ export function PublicProfilePage({
           <div className="container mx-auto max-w-6xl -mt-16 sm:-mt-20 px-4 pb-8 grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
             {/* User info */}
-            <div tabIndex={0} className="col-span-1 lg:col-span-2 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <div className="col-span-1 lg:col-span-2 rounded-2xl">
               <div className="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-4">
                 <AvatarIcon
                   size={140}
-                  className="border-4 border-cream shrink-0"
+                  className="border-4 border-cream shrink-0 animate-scale-in"
                   firstName={userFirstName}
                   lastName={userLastName}
                   picture={pictureUrl}
                 />
-                <div className="lg:pt-20 flex flex-col gap-3 items-center lg:items-start py-2">
+                <div className="lg:pt-20 flex flex-col gap-3 items-center lg:items-start py-2 animate-fade-in-up [animation-delay:100ms]">
                   <div className="flex flex-row gap-3 items-center flex-wrap justify-center lg:justify-start mt-4">
                     <h1 className="text-2xl sm:text-3xl font-semibold">
                       {userFirstName} {userLastName}
@@ -106,6 +107,7 @@ export function PublicProfilePage({
                   {city && (
                     <p className="flex items-center gap-1 text-sm font-bold text-border">
                       <MapPin size={16} aria-hidden="true" />
+                      <span className="sr-only">Location: </span>
                       {city}
                     </p>
                   )}
@@ -115,7 +117,7 @@ export function PublicProfilePage({
 
 
             {/* How it works */}
-            <section aria-labelledby="how-it-works-heading" aria-describedby="how-it-works-steps" className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-4">
+            <section aria-labelledby="how-it-works-heading" className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-4 animate-fade-in-up [animation-delay:150ms]">
               <h2 id="how-it-works-heading" className="font-heading font-bold text-h2">
                 {isProvider ? 'How to book' : 'How it works'}
               </h2>
@@ -135,7 +137,7 @@ export function PublicProfilePage({
                       { title: 'Pay & enjoy', desc: 'Pay for the session and receive the service.' },
                     ]
                 ).map((step, i) => (
-                  <li key={i} tabIndex={0} className="flex gap-3 items-start rounded-lg p-1 -m-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+                  <li key={i} className="flex gap-3 items-start rounded-lg p-1 -m-1">
                     <span className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-small font-bold ${isProvider ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}`}>
                       {i + 1}
                     </span>
@@ -149,7 +151,7 @@ export function PublicProfilePage({
             </section>
 
             {/* About */}
-            <section aria-labelledby="public-about-heading" aria-describedby="public-about-content" tabIndex={0} className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <section aria-labelledby="public-about-heading" className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3 animate-fade-in-up [animation-delay:250ms]">
               <h2 id="public-about-heading" className="font-heading font-bold text-h2">About me</h2>
               <div id="public-about-content" className="flex flex-col gap-3">
                 {!easyRead && selfSummary && <p>{selfSummary}</p>}
@@ -164,7 +166,7 @@ export function PublicProfilePage({
             {isProvider && publicServiceListings.length > 0 && (
               <section
                 aria-labelledby="services-heading"
-                className="col-span-1 lg:col-span-2 lg:row-start-3 bg-linen border border-border rounded-2xl p-6"
+                className="col-span-1 lg:col-span-2 lg:row-start-3 bg-linen border border-border rounded-2xl p-6 animate-fade-in-up [animation-delay:350ms]"
               >
                 <h2 id="services-heading" className="font-heading font-bold text-h2 mb-4">Services</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -178,8 +180,7 @@ export function PublicProfilePage({
                         {listing.pictureLink && (
                           <img
                             src={listing.pictureLink}
-                            alt=""
-                            aria-hidden="true"
+                            alt={listing.pictureAltTextStatus === 'COMPLETED' && listing.pictureAltText ? listing.pictureAltText : ''}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                           />
                         )}

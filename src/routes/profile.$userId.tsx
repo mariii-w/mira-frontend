@@ -19,6 +19,7 @@ import type {
   MyListingSummary,
   PublicListingCollectionResponse,
   PublicListingSummary,
+  PublicProfileResponse,
   VerifiedCredentialResponse,
 } from '../api/model'
 
@@ -87,7 +88,7 @@ function Profile({ userId }: { userId: string }) {
   const pictureUrl = user?.profileMedia ? mediaUrl(user.profileMedia.url) : undefined
   const userFirstName = user?.firstName ?? ''
   const userLastName = user?.lastName ?? ''
-  const userDescription = user?.selfSummary ?? ''
+  const selfSummary = user?.selfSummary ?? ''
   const city = user
     ? 'privateAddress' in user
       ? user.privateAddress?.city ?? ''
@@ -106,7 +107,8 @@ function Profile({ userId }: { userId: string }) {
         <PrivateProfilePage
           userFirstName={userFirstName}
           userLastName={userLastName}
-          userDescription={userDescription}
+          selfSummary={selfSummary}
+          bio={user?.bio ?? null}
           city={city}
           pictureUrl={pictureUrl}
           isProvider={isProviderType}
@@ -119,14 +121,20 @@ function Profile({ userId }: { userId: string }) {
     )
   }
 
+  const credentials: VerifiedCredentialResponse[] = credentialsResponse ?? []
+  const publicProfile = user as PublicProfileResponse | undefined
+  const verified = publicProfile?.verified ?? false
+
   const publicServiceListings: ServiceCardProps[] = isProviderType
     ? ((listingsResponse?.items ?? []) as PublicListingSummary[]).map((listing) => ({
         link: `/listings/${listing.listingId}`,
         pictureLink: listing.primaryMedia ? mediaUrl(listing.primaryMedia.url) : undefined,
+        pictureAltText: listing.primaryMedia?.altText,
+        pictureAltTextStatus: listing.primaryMedia?.altTextStatus,
         location: `${listing.location.city}${listing.location.postalCode ? ', ' + listing.location.postalCode : ''}`,
         providerFirstName: listing.author.name,
         providerLastName: listing.author.surname,
-        varified: false,
+        varified: verified,
         label: listing.title,
         description: listing.description,
         tags: listing.tags,
@@ -134,19 +142,15 @@ function Profile({ userId }: { userId: string }) {
       }))
     : []
 
-  const credentials: VerifiedCredentialResponse[] = credentialsResponse ?? []
-  const verified = 'verified' in (user ?? {}) ? (user as { verified: boolean }).verified : false
-  const publicUser = user as { bio?: string | null; simplifiedBio?: string | null } | undefined
-
   return (
     <>
       <PublicProfilePage
         userFirstName={userFirstName}
         userLastName={userLastName}
         username={user?.username ?? ''}
-        selfSummary={userDescription}
-        bio={publicUser?.bio ?? null}
-        simplifiedBio={publicUser?.simplifiedBio ?? null}
+        selfSummary={selfSummary}
+        bio={user?.bio ?? null}
+        simplifiedBio={user?.simplifiedBio ?? null}
         city={city}
         pictureUrl={pictureUrl}
         isProvider={isProviderType}
