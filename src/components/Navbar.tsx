@@ -29,8 +29,9 @@ export function Navbar() {
     isProvider
       ? { label: "My Services", to: "/my-listings" as const }
       : { label: "Find Users", to: "/browse-users" as const },
-    COMMON_NAV_LINKS[1],
-    COMMON_NAV_LINKS[2],
+    // Calendar and Chat require an account, so don't even show them to
+    // logged-out visitors.
+    ...(user ? [COMMON_NAV_LINKS[1], COMMON_NAV_LINKS[2]] : []),
   ];
 
   function handleGoogleLogin() {
