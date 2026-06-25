@@ -17,7 +17,9 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
     ...actual,
     getRouteApi: () => ({ useSearch: () => mockSearch }),
     useNavigate: () => mockNavigate,
-    Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
+    Link: ({ children, to, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { children: React.ReactNode; to: string }) => (
+      <a href={to} {...props}>{children}</a>
+    ),
   }
 })
 
@@ -98,6 +100,19 @@ beforeEach(() => {
 afterEach(() => onlineManager.setOnline(true))
 
 describe('<SearchUsersPage /> role filtering', () => {
+  it('places skip-link focus on Users before tabbing to the first user card', async () => {
+    mockSuccess()
+    renderPage()
+
+    await screen.findByText('Patrick User')
+    const main = document.querySelector('#main-content')
+    expect(main).toHaveAccessibleName('Users')
+    expect(main).toHaveAttribute('tabindex', '-1')
+
+    const firstTabStop = main?.querySelector('a')
+    expect(firstTabStop).toHaveAccessibleName('Patrick User')
+  })
+
   it('shows counts for the current backend page', async () => {
     mockSuccess()
     renderPage()
@@ -280,8 +295,8 @@ describe('<SearchUsersPage /> provider enrichment', () => {
         } as never))
     renderPage()
 
-    const patrickCard = (await screen.findByRole('heading', { name: 'Patrick User' })).closest<HTMLElement>('[role="group"]')
-    const petraCard = screen.getByRole('heading', { name: 'Petra User' }).closest<HTMLElement>('[role="group"]')
+    const patrickCard = (await screen.findByRole('heading', { name: 'Patrick User' })).closest<HTMLElement>('li')
+    const petraCard = screen.getByRole('heading', { name: 'Petra User' }).closest<HTMLElement>('li')
     expect(patrickCard).not.toBeNull()
     expect(petraCard).not.toBeNull()
     expect(within(patrickCard!).getByText('18€/hr')).toBeInTheDocument()

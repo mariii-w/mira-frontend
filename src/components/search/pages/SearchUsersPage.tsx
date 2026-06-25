@@ -171,6 +171,12 @@ export function SearchUsersPage() {
               </div>
             )}
 
+            <main
+              id="main-content"
+              tabIndex={-1}
+              aria-label="Users"
+              className="flex flex-col gap-4 focus-visible:outline-none"
+            >
             {/* Loading */}
             {cardsLoading && (
               <div role="status" aria-live="polite" className="flex justify-center py-16">
@@ -226,6 +232,7 @@ export function SearchUsersPage() {
                 className="mt-2 flex justify-center"
               />
             )}
+            </main>
 
           </div>
         </div>

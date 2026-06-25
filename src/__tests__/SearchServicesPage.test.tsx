@@ -41,8 +41,8 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
     }),
     getRouteApi: () => ({ useSearch: () => mockSearchParams }),
     useNavigate: () => mockNavigate,
-    Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
-      <a href={String(to)}>{children}</a>
+    Link: ({ children, to, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { children: React.ReactNode; to: string }) => (
+      <a href={String(to)} {...props}>{children}</a>
     ),
   }
 })
@@ -199,6 +199,20 @@ describe('<SearchServicesPage />', () => {
       renderPage()
       await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
       expect(screen.getByRole('list', { name: 'Search results' })).toBeInTheDocument()
+    })
+
+    it('places skip-link focus on Services before tabbing to the first service card', async () => {
+      mockApiSuccess({ items: [makeListing({ title: 'Laptop Setup' })] })
+      renderPage()
+      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+
+      const main = document.querySelector('#main-content')
+      expect(main).toHaveAccessibleName('Services')
+      expect(main).toHaveAttribute('tabindex', '-1')
+      expect(screen.getByRole('heading', { name: 'Services' })).toBeInTheDocument()
+
+      const firstTabStop = main?.querySelector('a[href="/listings/listing-1"]')
+      expect(firstTabStop).toHaveAccessibleName('Laptop Setup')
     })
   })
 
