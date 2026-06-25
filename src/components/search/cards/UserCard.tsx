@@ -62,7 +62,7 @@ export function UserCard({ profile, easyRead, providerSummary }: UserCardProps) 
             firstName={profile.firstName}
             lastName={profile.lastName}
             picture={profile.profileMedia ? mediaUrl(profile.profileMedia.url) : undefined}
-            size={64}
+            size={80}
             bgColorClassName={isProvider ? 'bg-forest' : 'bg-accent'}
           />
           {verified && (
