@@ -147,7 +147,7 @@ function ListingDetailRoute() {
     <ListingDetailPage
       listing={listing}
       loading={isLoading}
-      error={error ? (error as Error).message : null}
+      error={error ? (error instanceof Error ? error.message : error.detail) : null}
       description={description ?? undefined}
       availableToday={availableToday}
       nextAvailableDate={nextAvailableDate}
