@@ -116,6 +116,40 @@ export function PublicProfilePage({
             </div>
 
 
+            {/* How it works */}
+            <div className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-4">
+              <p className="font-heading font-bold text-h2">
+                {isProvider ? 'How to book' : 'How it works'}
+              </p>
+              <div className="w-full h-px bg-border" />
+              <ol className="flex flex-col gap-4">
+                {(isProvider
+                  ? [
+                      { title: 'Explore services', desc: 'Browse the services this provider offers below.' },
+                      { title: 'Pick a session', desc: 'Choose a date and time that works for you.' },
+                      { title: 'Book & confirm', desc: 'Send a booking request and wait for confirmation.' },
+                      { title: 'Pay & enjoy', desc: 'Pay for the session and receive the service.' },
+                    ]
+                  : [
+                      { title: 'Create your profile', desc: 'Sign up and tell providers a bit about yourself.' },
+                      { title: 'Browse services', desc: 'Search for services that match your needs.' },
+                      { title: 'Book a session', desc: 'Pick a provider and request a booking.' },
+                      { title: 'Pay & enjoy', desc: 'Pay for the session and receive the service.' },
+                    ]
+                ).map((step, i) => (
+                  <li key={i} className="flex gap-3 items-start">
+                    <span className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-small font-bold ${isProvider ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}`}>
+                      {i + 1}
+                    </span>
+                    <div className="flex flex-col gap-0.5">
+                      <p className="font-semibold text-body">{step.title}</p>
+                      <p className="text-small text-muted">{step.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
             {/* About */}
             <div className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3">
               <h2 className="font-heading font-bold text-h2">About me</h2>
