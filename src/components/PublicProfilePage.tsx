@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import { Check, MapPin } from 'lucide-react'
+import { Check, MapPin, MessageCircle } from 'lucide-react'
 import { Navbar } from './Navbar'
 import { AvatarIcon } from './AvatarIcon'
 import { ServiceCard, type ServiceCardProps } from './ServiceCard'
@@ -122,9 +122,10 @@ export function PublicProfilePage({
                 <div className="flex flex-col w-full gap-3">
                   <button
                     type="button"
-                    className="relative inline-flex items-center justify-center font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 w-full px-4 text-body bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                    className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 w-full px-4 text-body border border-border bg-cream text-foreground hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 [&_svg]:size-[18px]"
                   >
-                    Contact
+                    <MessageCircle aria-hidden="true" />
+                    Message
                   </button>
                 </div>
               </div>
