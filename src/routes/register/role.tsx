@@ -9,7 +9,7 @@ import {
   type RegisterRoleSubmitError,
   type RegisterRoleSubmitValues,
 } from "../../components/RegisterRole";
-import { useAuthStore } from "../../stores/auth";
+import { exchangeRefreshForAccess, useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/role")({
   component: RegisterRoleRoute,
@@ -52,6 +52,10 @@ function RegisterRoleRoute() {
     }
 
     setUser(response.data);
+    // userType drives the backend's CAN_CREATE_LISTING permission, which is baked
+    // into the access token at issuance time — force a refresh now so the new
+    // permission is usable immediately, without requiring a full page reload.
+    await exchangeRefreshForAccess();
     await navigate({ to: "/register/name" });
   }
 

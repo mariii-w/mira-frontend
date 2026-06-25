@@ -16,6 +16,9 @@ import { createPortal } from 'react-dom'
 const FOCUSABLE =
   'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
 
+// Matches Tailwind's `lg` breakpoint, used app-wide as the mobile/desktop cutoff.
+const MOBILE_BREAKPOINT = 1024
+
 interface PopoverCtx {
   open: boolean
   setOpen: (open: boolean) => void
@@ -93,8 +96,11 @@ export function Content({
     if (!open || !triggerRef.current || !contentRef.current) return
     const t = triggerRef.current.getBoundingClientRect()
     const c = contentRef.current.getBoundingClientRect()
+    // Below the mobile breakpoint there's rarely room to anchor to the trigger's
+    // edge without overflowing the screen, so center on the viewport instead.
     const left =
-      align === 'start' ? t.left
+      window.innerWidth < MOBILE_BREAKPOINT ? (window.innerWidth - c.width) / 2
+      : align === 'start' ? t.left
       : align === 'end' ? t.right - c.width
       : t.left + t.width / 2 - c.width / 2
     setPos({
@@ -151,6 +157,7 @@ export function Content({
       ref={contentRef}
       id={contentId}
       role="dialog"
+      aria-modal="true"
       data-state="open"
       style={{ position: 'fixed', top: pos.top, left: pos.left }}
       className={className}

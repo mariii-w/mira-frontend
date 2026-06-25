@@ -20,8 +20,10 @@ import type {
 } from "../api/model";
 import { CalendarPage } from "../components/CalendarPage";
 import { get_access_token, useAuthStore } from "../stores/auth";
+import { requireAuth } from "../lib/requireAuth";
 
 export const Route = createFileRoute("/calendar")({
+  beforeLoad: requireAuth,
   component: CalendarRoute,
 });
 
