@@ -4723,7 +4723,7 @@ paths:
                     status: 404
                     detail: Schedule exception with the given identifier was not found
                     instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/exceptions/aa000000-0000-0000-0000-000000000001
-  "/chats":
+  "/v1/chats":
     get:
       tags:
         - Chats
@@ -4803,7 +4803,7 @@ paths:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
-  "/chats/{cid}/messages":
+  "/v1/chats/{cid}/messages":
     get:
       tags:
         - Chats
