@@ -110,7 +110,7 @@ describe('<SearchUsersPage /> role filtering', () => {
     expect(main).toHaveAttribute('tabindex', '-1')
 
     const firstTabStop = main?.querySelector('a')
-    expect(firstTabStop).toHaveAccessibleName('Patrick User')
+    expect(firstTabStop).toHaveAccessibleName('View profile of Patrick User')
   })
 
   it('shows counts for the current backend page', async () => {
@@ -295,8 +295,8 @@ describe('<SearchUsersPage /> provider enrichment', () => {
         } as never))
     renderPage()
 
-    const patrickCard = (await screen.findByRole('heading', { name: 'Patrick User' })).closest<HTMLElement>('li')
-    const petraCard = screen.getByRole('heading', { name: 'Petra User' }).closest<HTMLElement>('li')
+    const patrickCard = (await screen.findByRole('heading', { name: 'Patrick User' })).closest<HTMLElement>('[role="group"]')
+    const petraCard = screen.getByRole('heading', { name: 'Petra User' }).closest<HTMLElement>('[role="group"]')
     expect(patrickCard).not.toBeNull()
     expect(petraCard).not.toBeNull()
     expect(within(patrickCard!).getByText('18€/hr')).toBeInTheDocument()
