@@ -1,5 +1,6 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { usePageTitle } from '../../../hooks/usePageTitle.ts'
 import { useQuery } from '@tanstack/react-query'
 import { X } from 'lucide-react'
 import { SearchBar } from '../SearchBar.tsx'
@@ -51,6 +52,7 @@ async function fetchServiceTags(): Promise<ServiceTag[]> {
 
 // Search Page
 export function SearchServicesPage() {
+  usePageTitle('Browse Services')
   const search = routeApi.useSearch()
   const navigate = useNavigate({ from: '/browse-services' })
   const easyRead = useAccessibilityStore(state => state.easyRead)

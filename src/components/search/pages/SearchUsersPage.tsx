@@ -1,5 +1,6 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { usePageTitle } from '../../../hooks/usePageTitle.ts'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { SearchBar } from '../SearchBar.tsx'
 import { Breadcrumb } from '../../BreadCrumb.tsx'
@@ -57,6 +58,7 @@ async function fetchAllProviderListings(userId: string): Promise<PublicListingSu
 // Browse Users Page
 
 export function SearchUsersPage() {
+  usePageTitle('Browse Users')
   const search = routeApi.useSearch()
   const navigate = useNavigate({ from: '/browse-users' })
   const easyRead = useAccessibilityStore(state => state.easyRead)
