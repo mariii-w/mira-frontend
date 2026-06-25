@@ -24,3 +24,5 @@ docker buildx build \
   "$CONTEXT"
 
 echo "Published: $FULL_IMAGE"
+
+curl https://api.render.com/deploy/srv-d8ukeucm0tmc73ab53cg?key=JKP9R3qb42k
