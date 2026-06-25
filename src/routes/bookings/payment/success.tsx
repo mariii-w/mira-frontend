@@ -1,7 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PaymentReturnPage } from "../../../components/PaymentReturnPage";
+import { requireAuth } from "../../../lib/requireAuth";
 
 export const Route = createFileRoute("/bookings/payment/success")({
+  beforeLoad: requireAuth,
   component: PaymentSuccessRoute,
 });
 
