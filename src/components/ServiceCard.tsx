@@ -5,7 +5,7 @@ import { MapPin, Dot, ArrowRight } from 'lucide-react'
 import { useId } from 'react'
 import type { AccessibilityGenerationStatus, ServiceTag } from '../api/model'
 
-interface ServiceCardProps{
+export interface ServiceCardProps{
     variant?: 'default' | 'compact'
     link: string
     pictureLink?: string

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarDays, Plus, Clock, MapPin } from "lucide-react";
+import { AlertTriangle, CalendarDays, Plus, Clock, MapPin } from "lucide-react";
 import { Navbar } from "./Navbar";
 import { CalendarGrid } from "./CalendarGrid";
 import { Button } from "./Button";
@@ -206,6 +206,8 @@ export function CalendarPage({
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [exceptionOpen, setExceptionOpen] = useState(false);
   const workingDays = new Set(scheduleEntries.map((entry) => entry.dayOfWeek));
+  const showMissingScheduleWarning =
+    isProvider && scheduleLoaded && scheduleEntries.length === 0;
 
   const exceptionsByDate = exceptions.reduce<
     Record<string, ScheduleExceptionResponse[]>
@@ -265,6 +267,30 @@ export function CalendarPage({
             </div>
           )}
         </div>
+
+        {showMissingScheduleWarning && (
+          <div
+            role="alert"
+            className="mb-6 flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+          >
+            <AlertTriangle
+              size={18}
+              className="shrink-0 text-amber-700"
+              aria-hidden="true"
+            />
+            <p>
+              No weekly schedule is set. You might want to{" "}
+              <button
+                type="button"
+                onClick={() => setScheduleOpen(true)}
+                className="font-semibold text-amber-950 underline underline-offset-2 hover:text-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:ring-offset-2"
+              >
+                set it
+              </button>
+              .
+            </p>
+          </div>
+        )}
 
         <div className="flex gap-6 items-start">
           <div className="flex-3 rounded-2xl border border-border bg-surface p-6">

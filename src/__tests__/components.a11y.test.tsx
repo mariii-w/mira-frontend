@@ -10,7 +10,11 @@ import {
 import type { ReactElement, ReactNode } from "react";
 import axe from "axe-core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { getPublicListings, getServiceTags } from "../api/mira";
+import {
+  getPublicListings,
+  getPublicProfilesCollection,
+  getServiceTags,
+} from "../api/mira";
 import type { PublicListingSummary } from "../api/model";
 import { AccessibilityPanel } from "../components/AccessibilityPanel";
 import { AvatarIcon } from "../components/AvatarIcon";
@@ -27,13 +31,25 @@ import { CalendarGrid } from "../components/CalendarGrid";
 import { CalendarPage } from "../components/CalendarPage";
 import { CategoryCard } from "../components/CategoryCard";
 import { CreateListing } from "../components/CreateListing";
+import { CredentialCard } from "../components/CredentialCard";
+import { CredentialDocumentViewer } from "../components/CredentialDocumentViewer";
+import { Credentials } from "../components/Credentials";
 import { EditListing } from "../components/EditListing";
-import type { ListingDetails } from "../api/model";
+import type {
+  CredentialResponse,
+  ListingDetails,
+  PublicListingDetails,
+  PublicProfileResponse,
+} from "../api/model";
 import { ExceptionModal } from "../components/ExceptionModal";
 import { FilterBar } from "../components/FilterBar";
+import { FilterDrawer } from "../components/FilterDrawer";
 import { Home } from "../components/Home";
+import { InfoPage } from "../components/InfoPage";
 import { Input } from "../components/Input";
 import { Label } from "../components/Label";
+import { ListingDetailPage } from "../components/ListingDetailPage";
+import { ListingProviderCard } from "../components/ListingProviderCard";
 import { LoginCallback } from "../components/LoginCallback";
 import { Logo } from "../components/Logo";
 import { Modal } from "../components/Modal";
@@ -46,6 +62,7 @@ import {
 import { MyListings } from "../components/MyListings";
 import { Navbar } from "../components/Navbar";
 import { Pagination } from "../components/Pagination";
+import { PaymentReturnPage } from "../components/PaymentReturnPage";
 import * as Popover from "../components/Popover";
 import { RegisterAbout } from "../components/RegisterAbout";
 import { RegisterAddress } from "../components/RegisterAddress";
@@ -57,14 +74,34 @@ import { RegisterRole } from "../components/RegisterRole";
 import { SearchBar } from "../components/search/SearchBar";
 import { ServiceCard } from "../components/ServiceCard";
 import { ServiceUserToggle } from "../components/search/ServiceUserToggle.tsx";
+import { SearchRootPage } from "../components/search/pages/SearchRootPage.tsx";
+import { SearchServicesPage } from "../components/search/pages/SearchServicesPage.tsx";
+import { SearchUsersPage } from "../components/search/pages/SearchUsersPage.tsx";
 import { UserTypeFilter } from "../components/search/UserTypeFilter.tsx";
 import { Slider } from "../components/Slider";
+import { SubmitCredentialModal } from "../components/SubmitCredentialModal";
 import * as Switch from "../components/Switch";
 import { Textarea } from "../components/Textarea";
 import { UserMenu } from "../components/UserMenu";
 import { UserCard } from "../components/search/cards/UserCard";
 import { WeeklyScheduleModal } from "../components/WeeklyScheduleModal";
 import { useAuthStore, type User } from "../stores/auth";
+
+const routerMocks = vi.hoisted(() => ({
+  navigate: vi.fn(),
+  location: {
+    pathname: "/browse-services",
+    search: {
+      q: "shopping",
+      city: "Berlin",
+      radiusKm: 20 as number | undefined,
+      tagIds: ["tag-1"],
+      maxPrice: 50 as number | undefined,
+      role: "everyone",
+      from: undefined as string | undefined,
+    },
+  },
+}));
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
@@ -83,17 +120,29 @@ vi.mock("@tanstack/react-router", () => ({
       {children}
     </a>
   ),
-  useNavigate: () => vi.fn(),
+  Outlet: () => <section aria-label="Search content">Search outlet</section>,
+  getRouteApi: () => ({
+    useSearch: () => routerMocks.location.search,
+  }),
+  useNavigate: () => routerMocks.navigate,
+  useRouterState: ({ select }: { select: (state: { location: typeof routerMocks.location }) => unknown }) =>
+    select({ location: routerMocks.location }),
 }));
 
 vi.mock("../api/mira", () => ({
   getServiceTags: vi.fn(),
   getPublicListings: vi.fn(),
+  getPublicProfilesCollection: vi.fn(),
   logout: vi.fn().mockResolvedValue({ status: 204, data: undefined }),
+}));
+
+vi.mock("../lib/credentialEvidenceMedia", () => ({
+  fetchCredentialEvidenceMediaUrl: vi.fn().mockResolvedValue("blob:credential-document"),
 }));
 
 const mockGetServiceTags = vi.mocked(getServiceTags);
 const mockGetPublicListings = vi.mocked(getPublicListings);
+const mockGetPublicProfilesCollection = vi.mocked(getPublicProfilesCollection);
 
 function renderHome(listings: PublicListingSummary[] = []) {
   mockGetServiceTags.mockResolvedValue({
@@ -116,7 +165,31 @@ function renderHome(listings: PublicListingSummary[] = []) {
   );
 }
 
+function renderWithQuery(ui: ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+  );
+}
+
 beforeEach(() => {
+  routerMocks.navigate.mockClear();
+  routerMocks.location.pathname = "/browse-services";
+  routerMocks.location.search = {
+    q: "shopping",
+    city: "Berlin",
+    radiusKm: 20,
+    tagIds: ["tag-1"],
+    maxPrice: 50,
+    role: "everyone",
+    from: undefined,
+  };
+  Object.defineProperty(URL, "revokeObjectURL", {
+    configurable: true,
+    value: vi.fn(),
+  });
   vi.stubGlobal(
     "ResizeObserver",
     class ResizeObserver {
@@ -305,6 +378,95 @@ const publicListing = {
   createdAt: "2026-06-01T12:00:00.000Z",
   updatedAt: "2026-06-02T12:00:00.000Z",
   media: [],
+};
+
+const credential: CredentialResponse = {
+  credentialId: "credential-1",
+  credentialType: "IDENTITY_VERIFIED",
+  name: "Identity check",
+  description: "Government ID verification",
+  expiresAt: "2027-01-01T00:00:00.000Z",
+  isVisible: true,
+  evidenceMedia: {
+    mediaId: "evidence-1",
+    url: "/credential.jpg",
+    altTextStatus: "COMPLETED",
+    mimeType: "image/jpeg",
+    size: 1200,
+    width: 800,
+    height: 600,
+    createdAt: "2026-06-01T00:00:00.000Z",
+  },
+  createdAt: "2026-06-01T00:00:00.000Z",
+  latestVerification: {
+    verificationId: "verification-1",
+    status: "COMPLETED",
+    result: "APPROVED",
+    feedback: null,
+    createdAt: "2026-06-01T00:00:00.000Z",
+    completedAt: "2026-06-02T00:00:00.000Z",
+  },
+};
+
+const deniedCredential: CredentialResponse = {
+  ...credential,
+  credentialId: "credential-2",
+  name: "Student status",
+  credentialType: "STUDENT_VERIFIED",
+  isVisible: false,
+  latestVerification: {
+    verificationId: "verification-2",
+    status: "COMPLETED",
+    result: "DENIED",
+    feedback: "The uploaded document is unreadable.",
+    createdAt: "2026-06-03T00:00:00.000Z",
+    completedAt: "2026-06-04T00:00:00.000Z",
+  },
+};
+
+const publicProfile: PublicProfileResponse = {
+  userId: "provider-1",
+  username: "mira.provider",
+  firstName: "Mira",
+  lastName: "Muster",
+  userType: "PROVIDER",
+  bio: "Friendly local support.",
+  simplifiedBio: "I can help with errands.",
+  selfSummary: "Errands and tech help.",
+  accessibilityPreferences: [],
+  profileMedia: null,
+  city: "Berlin",
+  verified: true,
+};
+
+const listingDetails: PublicListingDetails = {
+  ...publicListing,
+  media: [
+    {
+      mediaId: "media-1",
+      position: 0,
+      url: "/listing-1.jpg",
+      altText: "Shopping bags",
+      altTextStatus: "COMPLETED",
+      mimeType: "image/jpeg",
+      size: 1000,
+      width: 800,
+      height: 600,
+      createdAt: "2026-01-01T00:00:00Z",
+    },
+    {
+      mediaId: "media-2",
+      position: 1,
+      url: "/listing-2.jpg",
+      altText: null,
+      altTextStatus: "FAILED",
+      mimeType: "image/jpeg",
+      size: 1000,
+      width: 800,
+      height: 600,
+      createdAt: "2026-01-01T00:00:00Z",
+    },
+  ],
 };
 
 const scheduleEntries = [
@@ -2095,6 +2257,9 @@ describe("component accessibility", () => {
     });
     expect(screen.getByLabelText(/easy language/i)).toBeInTheDocument();
     expect(screen.queryByText(/german/i)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: /accessibility settings/i }),
+    ).toHaveAttribute("aria-modal", "true");
     await expectNoAxeViolations(document.body);
   });
 
@@ -2110,6 +2275,10 @@ describe("component accessibility", () => {
         screen.getByRole("dialog", { name: /user menu/i }),
       ).toBeInTheDocument();
     });
+    expect(screen.getByRole("dialog", { name: /user menu/i })).toHaveAttribute(
+      "aria-modal",
+      "true",
+    );
     await expectNoAxeViolations(document.body);
   });
 
@@ -2335,6 +2504,57 @@ describe("component accessibility", () => {
 
     const { container } = render(<Navbar />);
     await expectNoAxeViolations(container);
+  });
+
+  it("Navbar mobile drawer (logged out) has no automated accessibility violations when opened", async () => {
+    render(<Navbar />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(document.body);
+  });
+
+  it("Navbar mobile drawer (logged in) has no automated accessibility violations when opened", async () => {
+    useAuthStore.getState().setUser({
+      userId: "user-1",
+      username: "mira",
+      firstName: "Mira",
+      lastName: "Muster",
+      userType: "PROVIDER",
+      bio: null,
+      simplifiedBio: null,
+      selfSummary: null,
+      accessibilityPreferences: [],
+      profileMedia: {
+        mediaId: "avatar-1",
+        url: "/avatar.jpg",
+        altTextStatus: "COMPLETED",
+        mimeType: "image/jpeg",
+        size: 1024,
+        width: 200,
+        height: 200,
+        createdAt: "2026-06-14T00:00:00.000Z",
+      },
+      registrationComplete: true,
+      isPublic: true,
+      privateAddress: null,
+    } satisfies User);
+
+    render(<Navbar />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(document.body);
   });
 
   it("Popover keyboard and outside-click behavior has no automated accessibility violations", async () => {
@@ -2922,5 +3142,871 @@ describe("component accessibility", () => {
     });
 
     await expectNoAxeViolations(document.body);
+  });
+
+  it("Credential surfaces have no automated accessibility violations", async () => {
+    const { container } = render(
+      <>
+        <CredentialCard
+          credential={credential}
+          userId="user-1"
+          onVisibilityChange={vi.fn()}
+          onDelete={vi.fn()}
+        />
+        <CredentialCard
+          credential={deniedCredential}
+          userId="user-1"
+          onVisibilityChange={vi.fn()}
+          onDelete={vi.fn()}
+        />
+      </>,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getAllByRole("button", { name: /view document/i })[0]);
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("dialog", { name: /uploaded document/i })).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.keyDown(document, { key: "Escape" });
+    });
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("button", { name: /view rejection reason/i }),
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("dialog", { name: /rejection reason/i })).toBeInTheDocument();
+    });
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("CredentialDocumentViewer loaded and error states have no automated accessibility violations", async () => {
+    const { fetchCredentialEvidenceMediaUrl } = await import("../lib/credentialEvidenceMedia");
+    const mockedFetch = vi.mocked(fetchCredentialEvidenceMediaUrl);
+    mockedFetch.mockResolvedValueOnce("blob:loaded-document");
+    render(
+      <CredentialDocumentViewer
+        open
+        onClose={vi.fn()}
+        userId="user-1"
+        credentialId="credential-1"
+        credentialName="Identity check"
+      />,
+    );
+    await waitFor(() => {
+      expect(
+        screen.getByRole("img", { name: /uploaded evidence for identity check/i }),
+      ).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(document.body);
+
+    cleanup();
+    mockedFetch.mockRejectedValueOnce(new Error("failed"));
+    render(
+      <CredentialDocumentViewer
+        open
+        onClose={vi.fn()}
+        userId="user-1"
+        credentialId="credential-1"
+        credentialName="Identity check"
+      />,
+    );
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/failed to load document/i);
+    });
+    await expectNoAxeViolations(document.body);
+  });
+
+  it.each([
+    ["loading", { credentials: [], loading: true, error: null }],
+    ["error", { credentials: [], loading: false, error: "Could not load credentials." }],
+    ["empty", { credentials: [], loading: false, error: null }],
+    ["populated", { credentials: [credential], loading: false, error: null }],
+  ])(
+    "Credentials %s state has no automated accessibility violations",
+    async (_name, state) => {
+      const { container } = render(
+        <Credentials
+          userId="user-1"
+          credentials={state.credentials}
+          loading={state.loading}
+          error={state.error}
+          submissionStatus="Credential submitted."
+          actionError={null}
+          updatingVisibilityId={null}
+          deletingId={null}
+          onAddCredential={vi.fn()}
+          onVisibilityChange={vi.fn()}
+          onDelete={vi.fn()}
+        />,
+      );
+
+      await expectNoAxeViolations(container);
+    },
+  );
+
+  it("InfoPage has no automated accessibility violations", async () => {
+    const { container } = render(
+      <InfoPage
+        page={{
+          title: "Accessibility",
+          intro: "How Mira supports accessible use.",
+          sections: [
+            {
+              title: "Accessibility panel",
+              body: [
+                "Use the panel to tune the interface.",
+                { text: "Contact us at", email: "support@example.com" },
+              ],
+            },
+          ],
+        }}
+      />,
+    );
+
+    await expectNoAxeViolations(container);
+  });
+
+  it.each(["success", "cancelled"] as const)(
+    "PaymentReturnPage %s state has no automated accessibility violations",
+    async (status) => {
+      const { container } = render(
+        <PaymentReturnPage status={status} onBackToBookings={vi.fn()} />,
+      );
+      await expectNoAxeViolations(container);
+    },
+  );
+
+  it("ListingDetailPage loaded state has no automated accessibility violations", async () => {
+    const onBookNow = vi.fn();
+    const { container } = render(
+      <ListingDetailPage
+        listing={listingDetails}
+        loading={false}
+        error={null}
+        description="Weekly pickup and drop-off support."
+        availableToday
+        otherListings={[
+          {
+            ...(publicListing as PublicListingSummary),
+            listingId: "listing-2",
+            title: "Laundry help",
+            primaryMedia: {
+              mediaId: "other-media",
+              url: "/other.jpg",
+              altText: "Laundry basket",
+              altTextStatus: "COMPLETED",
+            },
+          },
+        ]}
+        publicVerifiedCredentials={[{ name: "Identity check" } as never]}
+        onBookNow={onBookNow}
+      />,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /show photo 2/i }));
+      screen.getByText(/verified/i).focus();
+    });
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("ListingProviderCard standalone state has no automated accessibility violations", async () => {
+    const { container } = render(
+      <ListingProviderCard
+        authorName="Mira"
+        authorSurname="Muster"
+        price={24}
+        city="Berlin"
+        nextAvailableDate="2026-07-21"
+        tags={serviceTags}
+        publicVerifiedCredentials={[{ name: "Student status" } as never]}
+        onBookNow={vi.fn()}
+      />,
+    );
+
+    await act(async () => {
+      screen.getByText(/verified/i).focus();
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it.each([
+    ["loading", { loading: true, error: null, listing: undefined }],
+    ["error", { loading: false, error: "Could not load listing.", listing: undefined }],
+  ])(
+    "ListingDetailPage %s state has no automated accessibility violations",
+    async (_name, props) => {
+      const { container } = render(
+        <ListingDetailPage
+          listing={props.listing}
+          loading={props.loading}
+          error={props.error}
+          otherListings={[]}
+          onBookNow={vi.fn()}
+        />,
+      );
+      await expectNoAxeViolations(container);
+    },
+  );
+
+  it("FilterDrawer open state has no automated accessibility violations", async () => {
+    const onApply = vi.fn();
+    render(
+      <FilterDrawer
+        tags={[
+          { tagId: "tag-1", name: "Errands" },
+          { tagId: "tag-2", name: "Tutoring" },
+        ]}
+        selectedTagIds={["tag-1"]}
+        onTagToggle={vi.fn()}
+        distanceKm={20}
+        onDistanceChange={vi.fn()}
+        maxPrice={50}
+        onMaxPriceChange={vi.fn()}
+        onApply={onApply}
+        activeCount={2}
+      />,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /filters/i }));
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("dialog", { name: /filters/i })).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /show results/i }));
+    });
+    expect(onApply).toHaveBeenCalled();
+    await expectNoAxeViolations(document.body);
+  });
+
+  it("SubmitCredentialModal filled and validation states have no automated accessibility violations", async () => {
+    const onSubmit = vi.fn();
+    render(
+      <SubmitCredentialModal
+        open
+        onClose={vi.fn()}
+        credentialTypes={[
+          {
+            credentialType: "IDENTITY_VERIFIED",
+            name: "Identity check",
+            description: "Verify your identity.",
+          },
+          {
+            credentialType: "STUDENT_VERIFIED",
+            name: "Student status",
+            description: "Verify current enrollment.",
+          },
+        ]}
+        catalogLoading={false}
+        isSubmitting={false}
+        errorMessage="Upload failed."
+        onSubmit={onSubmit}
+      />,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /credential type/i }));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText(/identity check/i));
+      fireEvent.change(screen.getByLabelText(/choose file/i), {
+        target: {
+          files: [new File(["bad"], "notes.txt", { type: "text/plain" })],
+        },
+      });
+    });
+    await expectNoAxeViolations(document.body);
+
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText(/choose file/i), {
+        target: {
+          files: [new File(["ok"], "id.png", { type: "image/png" })],
+        },
+      });
+      fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    });
+    expect(onSubmit).toHaveBeenCalledWith("IDENTITY_VERIFIED", expect.any(File));
+  });
+
+  it("SearchRootPage toggle has no automated accessibility violations", async () => {
+    routerMocks.location.pathname = "/browse-users";
+    routerMocks.location.search = {
+      q: "mira",
+      city: "",
+      radiusKm: undefined,
+      tagIds: [],
+      maxPrice: undefined,
+      role: "everyone",
+      from: undefined,
+    };
+
+    const { container } = render(<SearchRootPage />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("switch"));
+    });
+    expect(routerMocks.navigate).toHaveBeenCalled();
+    await expectNoAxeViolations(container);
+  });
+
+  it("SearchServicesPage loaded flow has no automated accessibility violations", async () => {
+    mockGetServiceTags.mockResolvedValue({
+      data: serviceTags,
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: {
+        items: [
+          {
+            ...(publicListing as PublicListingSummary),
+            primaryMedia: {
+              mediaId: "media-1",
+              url: "/service.jpg",
+              altText: "Shopping bags",
+              altTextStatus: "COMPLETED",
+            },
+          },
+        ],
+        cursor: { limit: 10, next: "cursor-2" },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<SearchServicesPage />);
+    await waitFor(() => {
+      expect(screen.getByRole("list", { name: /search results/i })).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /remove price filter/i }));
+      fireEvent.click(screen.getByRole("button", { name: /remove filter/i }));
+      fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    });
+    expect(routerMocks.navigate).toHaveBeenCalled();
+    await expectNoAxeViolations(container);
+  });
+
+  it("SearchServicesPage empty and error flows have no automated accessibility violations", async () => {
+    mockGetServiceTags.mockResolvedValue({
+      data: serviceTags,
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValueOnce({
+      data: { items: [], cursor: { limit: 10, next: null } },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    const empty = renderWithQuery(<SearchServicesPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/no services found/i)).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(empty.container);
+
+    cleanup();
+    mockGetPublicListings.mockResolvedValueOnce({
+      data: null,
+      status: 500,
+      headers: new Headers(),
+    } as never);
+    const error = renderWithQuery(<SearchServicesPage />);
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/listings could not be loaded/i);
+    });
+    await expectNoAxeViolations(error.container);
+  });
+
+  it("SearchUsersPage loaded flow has no automated accessibility violations", async () => {
+    routerMocks.location.pathname = "/browse-users";
+    routerMocks.location.search = {
+      q: "mira",
+      city: "",
+      radiusKm: undefined,
+      tagIds: [],
+      maxPrice: undefined,
+      role: "everyone",
+      from: undefined,
+    };
+    mockGetPublicProfilesCollection.mockResolvedValue({
+      data: {
+        items: [
+          publicProfile,
+          {
+            ...publicProfile,
+            userId: "customer-1",
+            username: "anna",
+            firstName: "Anna",
+            lastName: "Weber",
+            userType: "CUSTOMER",
+            verified: false,
+          },
+        ],
+        cursor: { limit: 20, next: "profiles-2" },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: {
+        items: [publicListing as PublicListingSummary],
+        cursor: { limit: 500, next: null },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<SearchUsersPage />);
+    await waitFor(() => {
+      expect(screen.getByRole("list", { name: /user results/i })).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /providers/i }));
+      fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    });
+    expect(routerMocks.navigate).toHaveBeenCalled();
+    await expectNoAxeViolations(container);
+  });
+
+  it("SearchUsersPage empty, filtered-empty, and error flows have no automated accessibility violations", async () => {
+    routerMocks.location.pathname = "/browse-users";
+    routerMocks.location.search = {
+      q: "mira",
+      city: "",
+      radiusKm: undefined,
+      tagIds: [],
+      maxPrice: undefined,
+      role: "providers",
+      from: undefined,
+    };
+    mockGetPublicProfilesCollection.mockResolvedValueOnce({
+      data: {
+        items: [{ ...publicProfile, userType: "CUSTOMER", verified: false }],
+        cursor: { limit: 20, next: null },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    const filtered = renderWithQuery(<SearchUsersPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/no providers on this page/i)).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(filtered.container);
+
+    cleanup();
+    routerMocks.location.search = { ...routerMocks.location.search, role: "everyone" };
+    mockGetPublicProfilesCollection.mockResolvedValueOnce({
+      data: { items: [], cursor: { limit: 20, next: null } },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    const empty = renderWithQuery(<SearchUsersPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/no users found/i)).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(empty.container);
+
+    cleanup();
+    mockGetPublicProfilesCollection.mockResolvedValueOnce({
+      data: null,
+      status: 500,
+      headers: new Headers(),
+    } as never);
+    const error = renderWithQuery(<SearchUsersPage />);
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/users could not be loaded/i);
+    });
+    await expectNoAxeViolations(error.container);
+  });
+
+  it("CredentialCard status and delete confirmation states have no automated accessibility violations", async () => {
+    const onDelete = vi.fn();
+    const onVisibilityChange = vi.fn();
+    const failedCredential: CredentialResponse = {
+      ...credential,
+      credentialId: "credential-3",
+      name: "Failed credential",
+      latestVerification: {
+        verificationId: "verification-3",
+        status: "FAILED",
+        result: null,
+        feedback: null,
+        createdAt: "2026-06-05T00:00:00.000Z",
+        completedAt: null,
+      },
+    };
+    const expiredCredential: CredentialResponse = {
+      ...credential,
+      credentialId: "credential-4",
+      name: "Expired credential",
+      expiresAt: "2020-01-01T00:00:00.000Z",
+    };
+    const pendingCredential: CredentialResponse = {
+      ...credential,
+      credentialId: "credential-5",
+      name: "Pending credential",
+      latestVerification: null,
+    };
+
+    const { container } = render(
+      <>
+        <CredentialCard
+          credential={{ ...credential, isVisible: false }}
+          userId="user-1"
+          onVisibilityChange={onVisibilityChange}
+          onDelete={onDelete}
+        />
+        <CredentialCard
+          credential={failedCredential}
+          userId="user-1"
+          onVisibilityChange={vi.fn()}
+          onDelete={onDelete}
+        />
+        <CredentialCard
+          credential={expiredCredential}
+          userId="user-1"
+          onVisibilityChange={vi.fn()}
+          onDelete={onDelete}
+        />
+        <CredentialCard
+          credential={pendingCredential}
+          userId="user-1"
+          onVisibilityChange={vi.fn()}
+          onDelete={onDelete}
+        />
+      </>,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("switch", { name: /visible/i }));
+    });
+    expect(onVisibilityChange).toHaveBeenCalledWith("credential-1", true);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /delete "failed credential"/i }));
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/delete this credential/i);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^cancel$/i }));
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /delete "identity check"/i }));
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/delete this credential/i);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
+    });
+    expect(onDelete).toHaveBeenCalledWith("credential-1");
+    await expectNoAxeViolations(container);
+  });
+
+  it("ListingProviderCard tooltip mouse and blur states have no automated accessibility violations", async () => {
+    const { container } = render(
+      <ListingProviderCard
+        authorName="Mira"
+        authorSurname="Muster"
+        price={24}
+        city="Berlin"
+        availableToday
+        tags={serviceTags}
+        publicVerifiedCredentials={[{ name: "Identity check" } as never]}
+        onBookNow={vi.fn()}
+      />,
+    );
+    const verified = screen.getByText(/verified/i);
+    await act(async () => {
+      fireEvent.mouseEnter(verified);
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("tooltip")).toHaveTextContent(/identity check/i);
+    });
+    await act(async () => {
+      fireEvent.mouseLeave(verified);
+      verified.focus();
+      verified.blur();
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("SubmitCredentialModal loading and close states have no automated accessibility violations", async () => {
+    const onClose = vi.fn();
+    const loading = render(
+      <SubmitCredentialModal
+        open
+        onClose={onClose}
+        credentialTypes={[]}
+        catalogLoading
+        isSubmitting
+        errorMessage={null}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/loading credential types/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
+    await expectNoAxeViolations(document.body);
+
+    loading.unmount();
+    render(
+      <SubmitCredentialModal
+        open
+        onClose={onClose}
+        credentialTypes={[]}
+        catalogLoading={false}
+        isSubmitting={false}
+        errorMessage={null}
+        onSubmit={vi.fn()}
+      />,
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+    });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("Home loading, category, and provider navigation states have no automated accessibility violations", async () => {
+    useAuthStore.getState().setUser(user);
+    mockGetServiceTags.mockResolvedValue({
+      data: [
+        { tagId: "cleaning", name: "Cleaning", isBarrierefrei: false, isActive: true },
+        { tagId: "inactive", name: "Tutoring", isBarrierefrei: false, isActive: false },
+      ],
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: {
+        items: [
+          {
+            ...(publicListing as PublicListingSummary),
+            easyDescription: "Easy grocery help.",
+            primaryMedia: {
+              mediaId: "media-1",
+              url: "/service.jpg",
+              altText: "Shopping bags",
+              altTextStatus: "COMPLETED",
+            },
+          },
+        ],
+        cursor: { limit: 8, next: null },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<Home />);
+    await waitFor(() => {
+      expect(screen.getByText(/cleaning/i)).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText(/search for a service/i), {
+        target: { value: "cleaning" },
+      });
+      fireEvent.submit(screen.getByRole("search"));
+      fireEvent.click(screen.getByRole("button", { name: /get started/i }));
+      fireEvent.click(screen.getByRole("button", { name: /cleaning/i }));
+      fireEvent.click(screen.getByRole("button", { name: /scroll categories right/i }));
+      fireEvent.click(screen.getByRole("button", { name: /scroll listings right/i }));
+    });
+    expect(routerMocks.navigate).toHaveBeenCalled();
+    await expectNoAxeViolations(container);
+  });
+
+  it("Home query error states have no automated accessibility violations", async () => {
+    mockGetServiceTags.mockResolvedValue({
+      data: null,
+      status: 500,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: null,
+      status: 500,
+      headers: new Headers(),
+    } as never);
+    const { container } = renderWithQuery(<Home />);
+    await waitFor(() => {
+      expect(screen.getByText(/categories could not be loaded/i)).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("Home signed-in customer get-started path has no automated accessibility violations", async () => {
+    useAuthStore.getState().setUser({ ...user, userType: "CUSTOMER" });
+    mockGetServiceTags.mockResolvedValue({
+      data: [],
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: { items: [], cursor: { limit: 8, next: null } },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<Home />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /get started/i })).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /get started/i }));
+    });
+    expect(routerMocks.navigate).toHaveBeenCalledWith({
+      to: "/browse-services",
+      search: { q: "", city: "", tagIds: [], from: undefined },
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("Home signed-out provider call-to-action path has no automated accessibility violations", async () => {
+    mockGetServiceTags.mockResolvedValue({
+      data: [],
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: { items: [], cursor: { limit: 8, next: null } },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<Home />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /get started/i })).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /get started/i }));
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("SearchServicesPage search, filters, and previous pagination flows have no automated accessibility violations", async () => {
+    routerMocks.location.search = {
+      q: "",
+      city: "",
+      radiusKm: undefined,
+      tagIds: [],
+      maxPrice: undefined,
+      role: "everyone",
+      from: undefined,
+    };
+    mockGetServiceTags.mockResolvedValue({
+      data: serviceTags,
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: {
+        items: [publicListing as PublicListingSummary],
+        cursor: { limit: 10, next: "cursor-2" },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<SearchServicesPage />);
+    await waitFor(() => {
+      expect(screen.getByRole("list", { name: /search results/i })).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByRole("searchbox", { name: /search/i }), {
+        target: { value: "tutoring" },
+      });
+      fireEvent.keyDown(screen.getByRole("searchbox", { name: /search/i }), {
+        key: "Enter",
+      });
+      fireEvent.click(screen.getByText(/location/i).closest("button")!);
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("dialog", { name: /search location filters/i })).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText(/search location/i), {
+        target: { value: "Hamburg" },
+      });
+      fireEvent.click(screen.getByRole("checkbox", { name: /errands/i }));
+      fireEvent.click(screen.getByRole("button", { name: /show 1 results/i }));
+      fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /previous/i })).not.toBeDisabled();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /previous/i }));
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("SearchUsersPage search, consumers tab, and previous pagination flows have no automated accessibility violations", async () => {
+    routerMocks.location.pathname = "/browse-users";
+    routerMocks.location.search = {
+      q: "",
+      city: "",
+      radiusKm: undefined,
+      tagIds: [],
+      maxPrice: undefined,
+      role: "everyone",
+      from: undefined,
+    };
+    mockGetPublicProfilesCollection.mockResolvedValue({
+      data: {
+        items: [
+          publicProfile,
+          {
+            ...publicProfile,
+            userId: "customer-1",
+            username: "anna",
+            firstName: "Anna",
+            lastName: "Weber",
+            userType: "CUSTOMER",
+            verified: false,
+          },
+        ],
+        cursor: { limit: 20, next: "profiles-2" },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: {
+        items: [publicListing as PublicListingSummary],
+        cursor: { limit: 500, next: null },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<SearchUsersPage />);
+    await waitFor(() => {
+      expect(screen.getByRole("list", { name: /user results/i })).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByRole("searchbox", { name: /search/i }), {
+        target: { value: "anna" },
+      });
+      fireEvent.keyDown(screen.getByRole("searchbox", { name: /search/i }), {
+        key: "Enter",
+      });
+      fireEvent.click(screen.getByRole("button", { name: /consumers/i }));
+      fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /previous/i })).not.toBeDisabled();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /previous/i }));
+    });
+    await expectNoAxeViolations(container);
   });
 });
