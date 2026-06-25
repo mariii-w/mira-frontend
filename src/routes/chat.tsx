@@ -282,7 +282,7 @@ function Chat() {
                                 {listing ? (
                                     <ServiceCardChat
                                         pictureLink={listing.media[0] ? mediaUrl(listing.media[0].url) : undefined}
-                                        link=""
+                                        link={`/listings/${listing.listingId}`}
                                         label={listing.title}
                                         tags={listing.tags}
                                         hourRate={listing.price}

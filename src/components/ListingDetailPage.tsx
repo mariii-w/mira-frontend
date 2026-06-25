@@ -67,7 +67,7 @@ export function ListingDetailPage({
     );
   }
 
-  const media = [...listing.media].sort((a, b) => a.position - b.position);
+  const media = [...(listing.media ?? [])].sort((a, b) => a.position - b.position);
   const activeMedia = media[activeMediaIndex] ?? media[0];
 
   return (
@@ -153,7 +153,7 @@ export function ListingDetailPage({
                   id="other-services-heading"
                   className="text-label font-semibold tracking-widest text-muted uppercase mb-4"
                 >
-                  Other services from {listing.author.name}
+                  Other services from {listing.author?.name ?? "this provider"}
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {otherListings.map((item, index) => (
@@ -190,8 +190,8 @@ export function ListingDetailPage({
           </div>
 
           <ListingProviderCard
-            authorName={listing.author.name}
-            authorSurname={listing.author.surname}
+            authorName={listing.author?.name ?? "Unknown"}
+            authorSurname={listing.author?.surname ?? ""}
             price={listing.price}
             city={listing.location.city}
             availableToday={availableToday}
