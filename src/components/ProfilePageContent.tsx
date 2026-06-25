@@ -2,7 +2,7 @@ import { Check, ClipboardPen, MapPin, Briefcase, Plus, Calendar, Mail } from 'lu
 import { Navbar } from './Navbar'
 import { Button } from './Button'
 import { AvatarIcon } from './AvatarIcon'
-import { ServiceCardEdit, type ServiceCardEditProps } from './ServiceCardEdit'
+import { MyListingCard, type MyListingSummary } from './MyListingCard'
 import { ServiceCard, type ServiceCardProps } from './ServiceCard'
 
 type ProfilePageContentProps = {
@@ -15,9 +15,10 @@ type ProfilePageContentProps = {
   userDescription: string
   city: string
   pictureUrl?: string
-  serviceListings: ServiceCardEditProps[]
+  ownerListings: MyListingSummary[]
   publicServiceListings: ServiceCardProps[]
   onEditClick: () => void
+  onEditListing: (listingId: string) => void
   onActiveTabChange: (tab: string) => void
 }
 
@@ -30,9 +31,10 @@ export function ProfilePageContent({
   userDescription,
   city,
   pictureUrl,
-  serviceListings,
+  ownerListings,
   publicServiceListings,
   onEditClick,
+  onEditListing,
   onActiveTabChange,
 }: ProfilePageContentProps) {
 
@@ -171,8 +173,8 @@ export function ProfilePageContent({
               <div className="col-span-2 row-start-3 bg-linen border border-border rounded-2xl p-6">
                 <h2 className="mb-4">My Listings</h2>
                 <div className="flex flex-col gap-4">
-                  {serviceListings.map((listing) => (
-                    <ServiceCardEdit key={listing.link} {...listing} />
+                  {ownerListings.map((listing) => (
+                    <MyListingCard key={listing.listingId} listing={listing} onEdit={onEditListing} />
                   ))}
                 </div>
               </div>

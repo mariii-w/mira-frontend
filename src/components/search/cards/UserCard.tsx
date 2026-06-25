@@ -119,7 +119,8 @@ export function UserCard({ profile, easyRead, providerSummary }: UserCardProps) 
               Message
             </Link>
             <Link
-              to="/"
+              to="/profile/$userId"
+              params={{ userId: profile.userId }}
               aria-label={`View profile of ${displayName}`}
               className={`relative inline-flex w-full items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body no-underline [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${actionBg}`}
             >
