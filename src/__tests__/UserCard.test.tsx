@@ -94,13 +94,12 @@ describe('<UserCard /> content', () => {
 })
 
 describe('<UserCard /> links', () => {
-  it('renders Message and View Profile as distinct links pointing to "/"', () => {
+  it('renders only the View Profile link pointing to "/"', () => {
     render(<UserCard profile={profile({ firstName: 'Patrick', lastName: 'Smith' })} easyRead={false} />)
-    const message = screen.getByRole('link', { name: 'Message Patrick Smith' })
     const viewProfile = screen.getByRole('link', { name: 'Patrick Smith' })
-    expect(message).toHaveAttribute('href', '/')
     expect(viewProfile).toHaveAttribute('href', '/')
     expect(viewProfile).toHaveTextContent('View Profile')
+    expect(screen.queryByRole('link', { name: 'Message Patrick Smith' })).not.toBeInTheDocument()
   })
 })
 
