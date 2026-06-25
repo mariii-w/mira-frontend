@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
+import { computeAccessibleDescription } from 'dom-accessibility-api'
 import { describe, expect, it, vi } from 'vitest'
 import { ServiceCard } from '../components/ServiceCard'
 import type { ServiceTag } from '../api/model'
@@ -9,8 +10,9 @@ vi.mock('@tanstack/react-router', () => ({
     children,
     to,
     className,
-  }: { children: React.ReactNode; to: string; className?: string }) => (
-    <a href={to} className={className}>{children}</a>
+    ...props
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { children: React.ReactNode; to: string }) => (
+    <a href={to} className={className} {...props}>{children}</a>
   ),
 }))
 
@@ -41,7 +43,7 @@ describe('<ServiceCard variant="compact" />', () => {
 
   it('renders "View Listing" without an underline', () => {
     render(<ServiceCard {...baseProps} variant="compact" />)
-    const viewLink = screen.getByRole('link', { name: 'View Listing' })
+    const viewLink = screen.getByRole('link', { name: 'Friendly home cleaning in Berlin' })
     expect(viewLink).toHaveClass('no-underline')
   })
 
@@ -54,12 +56,36 @@ describe('<ServiceCard variant="compact" />', () => {
     const avatarTwo = screen.getByRole('img', { name: 'Mira Lilachofer avatar' })
     expect(avatarTwo).toHaveClass('bg-forest')
   })
+
+  it('puts the full listing context on the navigation link, without exposing a duplicate article', () => {
+    render(<ServiceCard {...baseProps} variant="compact" />)
+    expect(screen.queryByRole('article')).not.toBeInTheDocument()
+
+    const link = screen.getByRole('link', { name: 'Friendly home cleaning in Berlin' })
+    const description = computeAccessibleDescription(link)
+    expect(description).toContain('by Lena Hoffmann')
+    expect(description).toContain('Berlin')
+    expect(description).toContain('from 28€/hr')
+    expect(description).toContain('Regular home cleaning for kitchens, bathrooms, and living spaces.')
+  })
 })
 
 describe('<ServiceCard /> (default)', () => {
+  it('puts the full listing context on the navigation link, without exposing a duplicate article', () => {
+    render(<ServiceCard {...baseProps} />)
+    expect(screen.queryByRole('article')).not.toBeInTheDocument()
+
+    const link = screen.getByRole('link', { name: 'Friendly home cleaning in Berlin' })
+    const description = computeAccessibleDescription(link)
+    expect(description).toContain('by Lena Hoffmann')
+    expect(description).toContain('Berlin')
+    expect(description).toContain('28€ per hour')
+    expect(description).toContain('Regular home cleaning for kitchens, bathrooms, and living spaces.')
+  })
+
   it('renders "View service" without an underline', () => {
     render(<ServiceCard {...baseProps} />)
-    const viewLink = screen.getByRole('link', { name: /view service/i })
+    const viewLink = screen.getByRole('link', { name: 'Friendly home cleaning in Berlin' })
     expect(viewLink).toHaveClass('no-underline')
   })
 })
