@@ -71,29 +71,30 @@ export function PublicProfilePage({
 }: PublicProfilePageProps) {
   const easyRead = useAccessibilityStore((s) => s.easyRead)
   const displayBio = (easyRead && simplifiedBio) || bio
+
   return (
     <>
       <Navbar />
       <main id="main-content">
         <section>
-          <div className="bg-linear-to-r from-primary to-accent h-50 w-full" />
+          <div className="bg-linear-to-r from-primary to-accent h-40 sm:h-50 w-full" />
         </section>
         <section>
-          <div className="container mx-auto max-w-6xl -mt-20 p-4 grid grid-cols-3 gap-5 items-start">
+          <div className="container mx-auto max-w-6xl -mt-16 sm:-mt-20 px-4 pb-8 grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
             {/* User info */}
-            <div className="col-span-2">
-              <div className="flex flex-row items-center gap-4">
+            <div className="col-span-1 lg:col-span-2">
+              <div className="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-4">
                 <AvatarIcon
-                  size={200}
-                  className="border border-cream border-4"
+                  size={140}
+                  className="border-4 border-cream shrink-0"
                   firstName={userFirstName}
                   lastName={userLastName}
                   picture={pictureUrl}
                 />
-                <div className="pt-15 mt-4 flex flex-col gap-2">
-                  <div className="flex flex-row gap-4 items-center flex-wrap">
-                    <h1 className="text-3xl font-semibold">
+                <div className="lg:pt-20 flex flex-col gap-3 items-center lg:items-start py-2">
+                  <div className="flex flex-row gap-3 items-center flex-wrap justify-center lg:justify-start">
+                    <h1 className="text-2xl sm:text-3xl font-semibold">
                       {userFirstName} {userLastName}
                     </h1>
                     {verified && credentials.length > 0 && (
@@ -114,25 +115,25 @@ export function PublicProfilePage({
               </div>
             </div>
 
-            {/* Contact panel */}
+            {/* Quick Actions — on mobile renders after user info, on desktop sticks to right column */}
             {isProvider && (
-              <div className="col-start-3 row-start-2 row-span-3 bg-linen border border-border rounded-2xl p-6">
+              <div className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6">
                 <p className="text-h1 font-bold">Quick Actions</p>
-                <div className="w-full mx-auto h-px bg-border m-5" />
+                <div className="w-full mx-auto h-px bg-border my-5" />
                 <div className="flex flex-col w-full gap-3">
                   <button
                     type="button"
                     className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 w-full px-4 text-body border border-border bg-cream text-foreground hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 [&_svg]:size-[18px]"
                   >
                     <MessageCircle aria-hidden="true" />
-                    Message
+                    Message me
                   </button>
                 </div>
               </div>
             )}
 
             {/* About */}
-            <div className="col-span-2 row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3">
+            <div className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3">
               <h2 className="font-heading font-bold text-h2">About me</h2>
               {!easyRead && selfSummary && <p>{selfSummary}</p>}
               {displayBio && <p>{displayBio}</p>}
@@ -141,9 +142,9 @@ export function PublicProfilePage({
               )}
             </div>
 
-            {/* Listings */}
+            {/* Services */}
             {isProvider && publicServiceListings.length > 0 && (
-              <div className="col-span-2 row-start-3 bg-linen border border-border rounded-2xl p-6">
+              <div className="col-span-1 lg:col-span-2 lg:row-start-3 bg-linen border border-border rounded-2xl p-6">
                 <h2 className="font-heading font-bold text-h2 mb-4">Services</h2>
                 <div className="flex flex-col gap-4">
                   {publicServiceListings.map((listing) => (
