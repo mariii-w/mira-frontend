@@ -432,7 +432,7 @@ const componentCases: Array<[string, ReactElement]> = [
       <Textarea id="a11y-textarea" />
     </>,
   ],
-  ["UserMenu", <UserMenu firstName="Mira" lastName="Muster" isProvider />],
+  ["UserMenu", <UserMenu userId="user-1" firstName="Mira" lastName="Muster" isProvider />],
 ];
 
 describe("component accessibility", () => {
@@ -2013,7 +2013,7 @@ describe("component accessibility", () => {
   });
 
   it("UserMenu has no automated accessibility violations when opened", async () => {
-    render(<UserMenu firstName="Mira" lastName="Muster" isProvider />);
+    render(<UserMenu userId="user-1" firstName="Mira" lastName="Muster" isProvider />);
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /mira m\./i }));
@@ -2354,7 +2354,7 @@ describe("component accessibility", () => {
       "fetch",
       vi.fn().mockResolvedValue(new Response(null, { status: 204 })),
     );
-    render(<UserMenu firstName="Mira" lastName="" />);
+    render(<UserMenu userId="user-1" firstName="Mira" lastName="" />);
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /^mira$/i }));

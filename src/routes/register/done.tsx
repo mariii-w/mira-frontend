@@ -1,5 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useQuery, type QueryFunctionContext } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
+import { getGetPrivateUserProfileQueryKey, getPrivateUserProfile } from '../../api/mira'
+import type { PrivateUserProfileResponse } from '../../api/model'
 import { Button } from '../../components/Button'
 import { AvatarIcon } from '../../components/AvatarIcon'
 import { useAuthStore } from '../../stores/auth'
@@ -57,7 +61,7 @@ function RegisterDoneRoute() {
 
       <div className="flex flex-col gap-2 max-w-md">
         <h2 id="register-step-heading" className="font-heading text-3xl font-bold text-foreground">
-          You're all set, {firstName}!
+          You're all set, {user?.firstName ?? ''}!
         </h2>
         <p className="text-small text-muted">
           Welcome to Mira. You can now browse services in your area.
