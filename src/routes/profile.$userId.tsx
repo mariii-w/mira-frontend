@@ -120,7 +120,7 @@ function Profile({ userId }: { userId: string }) {
   }
 
   const publicServiceListings: ServiceCardProps[] = isProviderType
-    ? ((listingsResponse?.items ?? []) as PublicListingSummary[]).slice(0, 5).map((listing) => ({
+    ? ((listingsResponse?.items ?? []) as PublicListingSummary[]).map((listing) => ({
         link: `/listings/${listing.listingId}`,
         pictureLink: listing.primaryMedia ? mediaUrl(listing.primaryMedia.url) : undefined,
         location: `${listing.location.city}${listing.location.postalCode ? ', ' + listing.location.postalCode : ''}`,

@@ -1,8 +1,8 @@
 import { useId, useState } from 'react'
-import { Check, MapPin, MessageCircle } from 'lucide-react'
+import { Check, MapPin } from 'lucide-react'
 import { Navbar } from './Navbar'
 import { AvatarIcon } from './AvatarIcon'
-import { ServiceCard, type ServiceCardProps } from './ServiceCard'
+import type { ServiceCardProps } from './ServiceCard'
 import { useAccessibilityStore } from '../stores/accessibility'
 import type { VerifiedCredentialResponse } from '../api/model'
 
@@ -93,7 +93,7 @@ export function PublicProfilePage({
                   picture={pictureUrl}
                 />
                 <div className="lg:pt-20 flex flex-col gap-3 items-center lg:items-start py-2">
-                  <div className="flex flex-row gap-3 items-center flex-wrap justify-center lg:justify-start">
+                  <div className="flex flex-row gap-3 items-center flex-wrap justify-center lg:justify-start mt-4">
                     <h1 className="text-2xl sm:text-3xl font-semibold">
                       {userFirstName} {userLastName}
                     </h1>
@@ -102,7 +102,7 @@ export function PublicProfilePage({
                     )}
                   </div>
                   <p className="text-sm text-muted">@{username}</p>
-                  <p className="text-xl font-bold text-primary">
+                  <p className={`text-xl font-bold ${isProvider ? 'text-primary' : 'text-accent'}`}>
                     {isProvider ? 'Provider' : 'Consumer'}
                   </p>
                   {city && (
@@ -115,22 +115,6 @@ export function PublicProfilePage({
               </div>
             </div>
 
-            {/* Quick Actions — on mobile renders after user info, on desktop sticks to right column */}
-            {isProvider && (
-              <div className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6">
-                <p className="text-h1 font-bold">Quick Actions</p>
-                <div className="w-full mx-auto h-px bg-border my-5" />
-                <div className="flex flex-col w-full gap-3">
-                  <button
-                    type="button"
-                    className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 w-full px-4 text-body border border-border bg-cream text-foreground hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 [&_svg]:size-[18px]"
-                  >
-                    <MessageCircle aria-hidden="true" />
-                    Message me
-                  </button>
-                </div>
-              </div>
-            )}
 
             {/* About */}
             <div className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3">
@@ -144,14 +128,33 @@ export function PublicProfilePage({
 
             {/* Services */}
             {isProvider && publicServiceListings.length > 0 && (
-              <div className="col-span-1 lg:col-span-2 lg:row-start-3 bg-linen border border-border rounded-2xl p-6">
-                <h2 className="font-heading font-bold text-h2 mb-4">Services</h2>
-                <div className="flex flex-col gap-4">
+              <section
+                aria-labelledby="services-heading"
+                className="col-span-1 lg:col-span-2 lg:row-start-3 bg-linen border border-border rounded-2xl p-6"
+              >
+                <h2 id="services-heading" className="font-heading font-bold text-h2 mb-4">Services</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {publicServiceListings.map((listing) => (
-                    <ServiceCard key={listing.link} {...listing} />
+                    <a
+                      key={listing.link}
+                      href={listing.link}
+                      className="group flex flex-col gap-2 no-underline"
+                    >
+                      <div className="aspect-square rounded-xl overflow-hidden bg-border/20">
+                        {listing.pictureLink && (
+                          <img
+                            src={listing.pictureLink}
+                            alt={listing.label}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          />
+                        )}
+                      </div>
+                      <p className="text-small font-semibold text-foreground">{listing.label}</p>
+                      <p className="text-small text-muted">From {listing.hourRate}€/h</p>
+                    </a>
                   ))}
                 </div>
-              </div>
+              </section>
             )}
           </div>
         </section>
