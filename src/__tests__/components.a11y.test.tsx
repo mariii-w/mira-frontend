@@ -2257,6 +2257,9 @@ describe("component accessibility", () => {
     });
     expect(screen.getByLabelText(/easy language/i)).toBeInTheDocument();
     expect(screen.queryByText(/german/i)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: /accessibility settings/i }),
+    ).toHaveAttribute("aria-modal", "true");
     await expectNoAxeViolations(document.body);
   });
 
@@ -2272,6 +2275,10 @@ describe("component accessibility", () => {
         screen.getByRole("dialog", { name: /user menu/i }),
       ).toBeInTheDocument();
     });
+    expect(screen.getByRole("dialog", { name: /user menu/i })).toHaveAttribute(
+      "aria-modal",
+      "true",
+    );
     await expectNoAxeViolations(document.body);
   });
 
@@ -2497,6 +2504,57 @@ describe("component accessibility", () => {
 
     const { container } = render(<Navbar />);
     await expectNoAxeViolations(container);
+  });
+
+  it("Navbar mobile drawer (logged out) has no automated accessibility violations when opened", async () => {
+    render(<Navbar />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(document.body);
+  });
+
+  it("Navbar mobile drawer (logged in) has no automated accessibility violations when opened", async () => {
+    useAuthStore.getState().setUser({
+      userId: "user-1",
+      username: "mira",
+      firstName: "Mira",
+      lastName: "Muster",
+      userType: "PROVIDER",
+      bio: null,
+      simplifiedBio: null,
+      selfSummary: null,
+      accessibilityPreferences: [],
+      profileMedia: {
+        mediaId: "avatar-1",
+        url: "/avatar.jpg",
+        altTextStatus: "COMPLETED",
+        mimeType: "image/jpeg",
+        size: 1024,
+        width: 200,
+        height: 200,
+        createdAt: "2026-06-14T00:00:00.000Z",
+      },
+      registrationComplete: true,
+      isPublic: true,
+      privateAddress: null,
+    } satisfies User);
+
+    render(<Navbar />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(document.body);
   });
 
   it("Popover keyboard and outside-click behavior has no automated accessibility violations", async () => {

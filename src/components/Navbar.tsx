@@ -8,6 +8,7 @@ import { Logo } from "./Logo";
 import { Button } from "./Button";
 import { AccessibilityPanel } from "./AccessibilityPanel";
 import { UserMenu } from "./UserMenu";
+import { MobileNavDrawer } from "./MobileNavDrawer";
 import { useAuthStore } from "../stores/auth";
 import { mediaUrl } from "../lib/mediaUrl";
 
@@ -45,7 +46,7 @@ export function Navbar() {
           Skip to main content
         </a>
         <nav
-            className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-6"
+            className="mx-auto flex h-16 max-w-7xl items-center gap-4 lg:gap-8 px-4 lg:px-6"
             aria-label="Main navigation"
         >
           {/* Logo */}
@@ -54,7 +55,7 @@ export function Navbar() {
           </Link>
 
           {/* Nav links */}
-          <ul className="flex items-center gap-6 list-none m-0 p-0">
+          <ul className="hidden lg:flex items-center gap-6 list-none m-0 p-0">
             {navLinks.map(({ label, to }) => (
                 <li key={label}>
                   <Link
@@ -80,24 +81,35 @@ export function Navbar() {
           </ul>
 
           {/* Right side */}
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2 lg:gap-3">
             <AccessibilityPanel />
 
             {/* Divider */}
             <div className="h-6 w-px bg-cream/20" aria-hidden="true" />
 
             {user ? (
-                <UserMenu
-                    firstName={firstName}
-                    lastName={lastName}
-                    isProvider={isProvider}
-                    pictureUrl={pictureUrl}
-                />
+                <div className="hidden lg:block">
+                  <UserMenu
+                      firstName={firstName}
+                      lastName={lastName}
+                      isProvider={isProvider}
+                      pictureUrl={pictureUrl}
+                  />
+                </div>
             ) : (
-                <Button variant="primary" size="md" onClick={handleGoogleLogin}>
+                <Button variant="primary" size="md" className="px-3 lg:px-5" onClick={handleGoogleLogin}>
                   Login
                 </Button>
             )}
+
+            <MobileNavDrawer
+                navLinks={navLinks}
+                firstName={firstName}
+                lastName={lastName}
+                isLoggedIn={!!user}
+                isProvider={isProvider}
+                pictureUrl={pictureUrl}
+            />
           </div>
         </nav>
       </header>
