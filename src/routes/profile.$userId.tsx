@@ -1,10 +1,10 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ProfilePageContent } from '../components/ProfilePageContent'
 import { ProfilePageLoading, ProfilePageError } from '../components/ProfilePageLoadingError'
 import {type ServiceCardEditProps } from '../components/ServiceCardEdit.tsx'
 import { type ServiceCardProps } from '../components/ServiceCard'
-import { useAuthStore } from '../stores/auth'
+import { ensureAuthInitialized, useAuthStore } from '../stores/auth'
 import { useQuery } from '@tanstack/react-query'
 import { mediaUrl } from "../lib/mediaUrl";
 
@@ -43,9 +43,15 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
     const navigate = useNavigate()
     const currentUser = useAuthStore((s) => s.user)
     const isOwner = currentUser?.userId === userId
-    console.log(currentUser?.userId, isOwner)
+
+    // Wait for auth to settle before fetching, so logged-out visitors aren't stuck loading forever.
+    const [authReady, setAuthReady] = useState(false)
+    useEffect(() => {
+        void ensureAuthInitialized().finally(() => setAuthReady(true))
+    }, [])
+
     const { data: user, isLoading, error } = useQuery({
-        queryKey: ['user', userId],
+        queryKey: ['user', userId, isOwner],
         queryFn: async () => {
             if (isOwner) {
                 const response = await getPrivateUserProfile(userId)
@@ -57,7 +63,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
             if (response.status !== 200) throw response.data
             return response.data
         },
-        enabled: !!currentUser?.userId,
+        enabled: authReady,
     })
     const pictureUrl = user?.profileMedia ? mediaUrl(user.profileMedia.url) : user?.profileMedia ? mediaUrl(user.profileMedia.url) : undefined;
     const isProviderType = user?.userType === 'PROVIDER'
@@ -87,8 +93,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
 
     if (isLoading) return <ProfilePageLoading />
     if (error) return <ProfilePageError />
-    
-    console.log(isProvider, isOwner)
+
     const userDescription = user?.selfSummary ?? 'Keine Beschreibung hinterlegt.'
     const userFirstName = user?.firstName ?? ''
     const userLastName = user?.lastName ?? ''
