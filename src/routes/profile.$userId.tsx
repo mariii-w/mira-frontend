@@ -14,6 +14,12 @@ import {
   getAuthorListings,
   getPublicProfileListings,
 } from "../api/mira";
+import type {
+  MyListingCollectionResponse,
+  MyListingSummary,
+  PublicListingCollectionResponse,
+  PublicListingSummary,
+} from '../api/model'
 
 
 /* eslint-disable react-refresh/only-export-components */
@@ -57,7 +63,9 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
     const isProviderType = user?.userType === 'PROVIDER'
     isProvider = isProviderType
 
-    const { data: listingsResponse } = useQuery({
+    const { data: listingsResponse } = useQuery<
+      MyListingCollectionResponse | PublicListingCollectionResponse
+    >({
         queryKey: ['listings', userId, isOwner],
         queryFn: async () => {
             if (isOwner && isProviderType) {
@@ -92,7 +100,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
       : ''
 
     const serviceListings: ServiceCardEditProps[] = isOwner && isProviderType
-      ? (listingsResponse?.items ?? []).map((listing: any) => ({
+      ? ((listingsResponse?.items ?? []) as MyListingSummary[]).map((listing) => ({
           link: `/service/${listing.listingId}`,
           pictureLink: listing.primaryMedia?.url || './pic/ServiceExample1.png',
           label: listing.title,
@@ -102,7 +110,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
       : []
 
     const publicServiceListings: ServiceCardProps[] = !isOwner && isProviderType
-      ? (listingsResponse?.items ?? []).map((listing: any) => ({
+      ? ((listingsResponse?.items ?? []) as PublicListingSummary[]).map((listing) => ({
           link: `/service/${listing.listingId}`,
           pictureLink: listing.primaryMedia?.url || './pic/ServiceExample1.png',
           location: `${listing.location.city}${listing.location.postalCode ? ', ' + listing.location.postalCode : ''}`,
@@ -111,7 +119,6 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
           varified: false,
           label: listing.title,
           description: listing.description,
-          badges: listing.tags.map((tag: any) => ({ text: tag.name, variant: 'primary' as const })),
           tags: listing.tags,
           hourRate: listing.price,
           distance: listing.location.serviceRadiusKm,
