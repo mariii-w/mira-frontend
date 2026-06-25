@@ -85,10 +85,21 @@ describe('<Navbar />', () => {
     const dialog = within(screen.getByRole('dialog'))
     expect(dialog.getByRole('link', { name: /browse services/i })).toBeInTheDocument()
     expect(dialog.getByRole('link', { name: /find users/i })).toBeInTheDocument()
-    expect(dialog.getByRole('link', { name: /calendar/i })).toBeInTheDocument()
     expect(dialog.getByRole('link', { name: /how it works/i })).toBeInTheDocument()
+    // Calendar and Chat require an account, so logged-out visitors shouldn't see them.
+    expect(dialog.queryByRole('link', { name: /calendar/i })).not.toBeInTheDocument()
+    expect(dialog.queryByRole('link', { name: /chat/i })).not.toBeInTheDocument()
     expect(dialog.queryByRole('link', { name: /view profile/i })).not.toBeInTheDocument()
     expect(dialog.queryByRole('button', { name: /logout/i })).not.toBeInTheDocument()
+  })
+
+  it('logged in: drawer shows Calendar and Chat links', () => {
+    useAuthStore.getState().setUser(providerUser)
+    render(<Navbar />)
+    fireEvent.click(screen.getByRole('button', { name: /open menu/i }))
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.getByRole('link', { name: /calendar/i })).toBeInTheDocument()
+    expect(dialog.getByRole('link', { name: /chat/i })).toBeInTheDocument()
   })
 
   it('logged out: Login stays in the header (not moved into the drawer) while it is open', () => {
@@ -155,7 +166,7 @@ describe('<Navbar />', () => {
   it('closes the drawer after clicking a nav link inside it', () => {
     render(<Navbar />)
     fireEvent.click(screen.getByRole('button', { name: /open menu/i }))
-    fireEvent.click(within(screen.getByRole('dialog')).getByRole('link', { name: /calendar/i }))
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('link', { name: /browse services/i }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
