@@ -103,7 +103,7 @@ export function PublicProfilePage({
                   </div>
                   <p className="text-sm text-muted">@{username}</p>
                   <p className="text-xl font-bold text-primary">
-                    {isProvider ? 'Provider' : 'Customer'}
+                    {isProvider ? 'Provider' : 'Consumer'}
                   </p>
                   {city && (
                     <p className="flex items-center gap-1 text-sm font-bold text-border">

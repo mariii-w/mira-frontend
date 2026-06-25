@@ -86,7 +86,7 @@ export function ProfilePageContent({
                     {isProvider ? (
                       <p className="text-xl font-bold text-primary">Provider</p>
                     ) : (
-                      <p className="text-xl font-bold text-accent">Customer</p>
+                      <p className="text-xl font-bold text-accent">Consumer</p>
                     )}
                   </div>
                   <div>

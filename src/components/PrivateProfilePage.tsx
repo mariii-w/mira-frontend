@@ -1,8 +1,11 @@
 import { Briefcase, Calendar, Check, ClipboardPen, Mail, MapPin, Plus } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
 import { Navbar } from './Navbar'
 import { Button } from './Button'
 import { AvatarIcon } from './AvatarIcon'
 import { MyListingCard, type MyListingSummary } from './MyListingCard'
+import { cn } from '../lib/cn'
 
 interface PrivateProfilePageProps {
   userFirstName: string
@@ -14,7 +17,32 @@ interface PrivateProfilePageProps {
   ownerListings: MyListingSummary[]
   onEditClick: () => void
   onEditListing: (listingId: string) => void
-  onActiveTabChange: (tab: string) => void
+}
+
+const QUICK_ACTION_VARIANT = {
+  primary: 'bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-hover',
+  accent: 'bg-accent text-accent-foreground hover:bg-accent-hover active:bg-accent-hover',
+  secondary: 'bg-transparent text-foreground border border-charcoal hover:bg-charcoal/5 active:bg-charcoal/10',
+} as const
+
+function QuickActionLink({ to, variant = 'primary', icon, children }: {
+  to: string
+  variant?: keyof typeof QUICK_ACTION_VARIANT
+  icon: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <Link
+      to={to}
+      className={cn(
+        'relative inline-flex items-center justify-center w-full gap-2 font-medium rounded-full transition-colors duration-150 h-11 px-5 text-body [&_svg]:size-[18px] no-underline',
+        QUICK_ACTION_VARIANT[variant],
+      )}
+    >
+      <span aria-hidden="true" className="inline-flex shrink-0">{icon}</span>
+      {children}
+    </Link>
+  )
 }
 
 export function PrivateProfilePage({
@@ -27,7 +55,6 @@ export function PrivateProfilePage({
   ownerListings,
   onEditClick,
   onEditListing,
-  onActiveTabChange,
 }: PrivateProfilePageProps) {
   return (
     <>
@@ -59,7 +86,7 @@ export function PrivateProfilePage({
                     </Button>
                   </div>
                   <p className="text-xl font-bold text-primary">
-                    {isProvider ? 'Provider' : 'Customer'}
+                    {isProvider ? 'Provider' : 'Consumer'}
                   </p>
                   {city && (
                     <p className="flex items-center gap-1 text-sm font-bold text-border">
@@ -77,24 +104,24 @@ export function PrivateProfilePage({
                 <p className="text-h1 font-bold">Quick Actions</p>
                 <div className="w-full mx-auto h-px bg-border my-5" />
                 <div className="flex flex-col w-full gap-3">
-                  <Button variant="primary" size="md" leadingIcon={<Briefcase />} onClick={() => onActiveTabChange('account')}>
+                  <QuickActionLink to="/my-listings" variant="primary" icon={<Briefcase />}>
                     My Services
-                  </Button>
-                  <Button variant="accent" size="md" leadingIcon={<Plus />} onClick={() => onActiveTabChange('listings')}>
+                  </QuickActionLink>
+                  <QuickActionLink to="/create-listing" variant="accent" icon={<Plus />}>
                     Create Service
-                  </Button>
-                  <Button variant="secondary" size="md" leadingIcon={<Calendar />} onClick={() => onActiveTabChange('listings')}>
+                  </QuickActionLink>
+                  <QuickActionLink to="/calendar" variant="secondary" icon={<Calendar />}>
                     Calendar
-                  </Button>
-                  <Button variant="secondary" size="md" leadingIcon={<Mail />} onClick={() => onActiveTabChange('listings')}>
+                  </QuickActionLink>
+                  <QuickActionLink to="/my-bookings" variant="secondary" icon={<Mail />}>
                     My Bookings
-                  </Button>
+                  </QuickActionLink>
                 </div>
                 <div className="w-full mx-auto h-px bg-border my-5" />
                 <div className="flex flex-col w-full">
-                  <Button variant="primary" size="md" leadingIcon={<Check />} onClick={() => onActiveTabChange('account')}>
+                  <QuickActionLink to="/my-credentials" variant="primary" icon={<Check />}>
                     Verify
-                  </Button>
+                  </QuickActionLink>
                 </div>
               </div>
             )}

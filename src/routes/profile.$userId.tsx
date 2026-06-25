@@ -1,5 +1,4 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
 import { PrivateProfilePage } from '../components/PrivateProfilePage'
 import { PublicProfilePage } from '../components/PublicProfilePage'
 import { ProfilePageLoading, ProfilePageError } from '../components/ProfilePageLoadingError'
@@ -34,7 +33,6 @@ function ProfilePage() {
 }
 
 function Profile({ userId }: { userId: string }) {
-  const [, setActiveTab] = useState('account')
   const navigate = useNavigate()
   const currentUser = useAuthStore((s) => s.user)
   const isOwner = currentUser?.userId === userId
@@ -115,7 +113,6 @@ function Profile({ userId }: { userId: string }) {
           ownerListings={ownerListings}
           onEditClick={() => navigate({ to: '/profile/$userId/edit', params: { userId } })}
           onEditListing={(listingId) => navigate({ to: '/edit-listing/$listingId', params: { listingId } })}
-          onActiveTabChange={setActiveTab}
         />
         <Outlet />
       </>
