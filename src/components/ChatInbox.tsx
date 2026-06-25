@@ -39,7 +39,12 @@ export function ChatInbox({ chats, selectedChatId, onSelectChat }: ChatInboxProp
                                 {chat.lastMessage}
                             </p>
                         </div>
-                        {chat.unread && <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />}
+                        {chat.unread && (
+                            <span className="shrink-0 inline-flex items-center">
+                                <span className="sr-only">Unread</span>
+                                <span aria-hidden="true" className="w-2.5 h-2.5 rounded-full bg-primary" />
+                            </span>
+                        )}
                     </button>
                 );
             })}

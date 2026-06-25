@@ -1,4 +1,4 @@
-import { useEffect, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import {
   ArrowRight,
 } from 'lucide-react'
@@ -33,8 +33,16 @@ function Chat() {
     const [selectedChatId, setSelectedChatId] = useState<string>("");
     const [messagesByChat, setMessagesByChat] = useState<Record<string, LiveMessage[]>>({});
     const [draft, setDraft] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
 
     const currentUserId = useAuthStore((s) => s.user?.userId);
+    // Ref so the subscribe effect doesn't resubscribe everything on auth rehydration.
+    const currentUserIdRef = useRef(currentUserId);
+    useEffect(() => {
+        currentUserIdRef.current = currentUserId;
+    }, [currentUserId]);
+    const [subscribeErrors, setSubscribeErrors] = useState<Set<string>>(new Set());
+    const conversationRef = useRef<HTMLDivElement>(null);
 
     const { data: chatsResponse, isLoading: chatsLoading, isError: chatsErrored } = useListChats(
         { user: currentUserId ?? "", sortby: "latest" },
@@ -51,6 +59,16 @@ function Chat() {
         })
         : [];
     const chatIdsKey = chats.map((c) => c.id).join(",");
+    // Search just filters the display list; subscriptions stay on the full set.
+    const visibleChats = searchQuery.trim()
+        ? chats.filter((c) => {
+            const q = searchQuery.trim().toLowerCase();
+            return (
+                `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) ||
+                c.lastMessage.toLowerCase().includes(q)
+            );
+        })
+        : chats;
 
     // Deep link (e.g. from a listing's "Message" button) wins, then manual pick, then the first chat.
     const activeChatId = selectedChatId || cidFromLink || chats[0]?.id || "";
@@ -101,7 +119,7 @@ function Chat() {
                     id: `ws-${incoming.id}`,
                     rawId: incoming.id,
                     text: describeMessageContent(incoming.content),
-                    self: incoming.sender.id === currentUserId,
+                    self: incoming.sender.id === currentUserIdRef.current,
                     timestamp: new Date(incoming.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
                 };
 
@@ -113,12 +131,21 @@ function Chat() {
                 .then((unsub) => {
                     if (cancelled) {
                         unsub();
-                    } else {
-                        unsubscribes.push(unsub);
+                        return;
                     }
+                    unsubscribes.push(unsub);
+                    setSubscribeErrors((prev) => {
+                        if (!prev.has(cid)) return prev;
+                        const next = new Set(prev);
+                        next.delete(cid);
+                        return next;
+                    });
                 })
                 .catch((err) => {
                     console.error("Failed to subscribe to chat", cid, err);
+                    if (!cancelled) {
+                        setSubscribeErrors((prev) => new Set(prev).add(cid));
+                    }
                 });
         });
 
@@ -126,7 +153,7 @@ function Chat() {
             cancelled = true;
             unsubscribes.forEach((unsub) => unsub());
         };
-    }, [chatIdsKey, currentUserId]);
+    }, [chatIdsKey]);
 
     // Tear down the shared socket when leaving the chat page entirely.
     useEffect(() => {
@@ -400,7 +427,14 @@ function Chat() {
                             <div className="border-b-2 border-border">
                                 <h1 className="mt-10 mx-10">Inbox</h1>
                                 <div className="mx-9 mb-3 mt-5">
-                                    <Input placeholder="Search Chat" aria-label="Search chats" size="lg" className="m-1 bg-cream"/>
+                                    <Input
+                                        placeholder="Search Chat"
+                                        aria-label="Search chats"
+                                        size="lg"
+                                        className="m-1 bg-cream"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
                                 </div>
                             </div>
                             <div className="max-h-72 overflow-y-auto lg:max-h-none lg:overflow-visible">
@@ -411,9 +445,12 @@ function Chat() {
                                 {!chatsLoading && !chatsErrored && chats.length === 0 && (
                                     <p className="m-5 text-black/60">No conversations yet.</p>
                                 )}
-                                {!chatsLoading && !chatsErrored && chats.length > 0 && (
+                                {!chatsLoading && !chatsErrored && chats.length > 0 && visibleChats.length === 0 && (
+                                    <p className="m-5 text-black/60">No conversations match your search.</p>
+                                )}
+                                {!chatsLoading && !chatsErrored && visibleChats.length > 0 && (
                                     <ChatInbox
-                                        chats={chats}
+                                        chats={visibleChats}
                                         selectedChatId={activeChatId}
                                         onSelectChat={setSelectedChatId}
                                     />
@@ -436,8 +473,13 @@ function Chat() {
                                 </div>
                             </div>
                             <div className="m-2">
+                                {activeChatId && subscribeErrors.has(activeChatId) && (
+                                    <p role="status" className="mx-1 mb-2 text-sm text-amber-700">
+                                        Live updates aren't connected for this conversation. New messages may not appear until you refresh.
+                                    </p>
+                                )}
                                 {/* Chat Field */}
-                                <div className="h-96 lg:h-140 overflow-y-auto px-4 py-3 flex flex-col" role="log" aria-live="polite" aria-label="Conversation messages">
+                                <div ref={conversationRef} tabIndex={-1} className="h-96 lg:h-140 overflow-y-auto px-4 py-3 flex flex-col" role="log" aria-live="polite" aria-label="Conversation messages">
                                     {activeChatId && historyLoading && <p className="text-black/60">Loading messages…</p>}
                                     {activeChatId && historyErrored && <p className="text-black/60">Couldn't load this conversation's messages.</p>}
                                     {messages.map((msg) => (
