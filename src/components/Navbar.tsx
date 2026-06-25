@@ -14,6 +14,7 @@ import { mediaUrl } from "../lib/mediaUrl";
 
 const COMMON_NAV_LINKS = [
   { label: 'Browse Services', to: '/browse-services' },
+  { label: 'Find Users', to: '/browse-users' },
   { label: "Calendar", to: "/calendar" },
   { label: "Chat", to: "/chat" },
 ] as const;
@@ -26,11 +27,10 @@ export function Navbar() {
   const pictureUrl = user?.profileMedia ? mediaUrl(user.profileMedia.url) : undefined;
   const navLinks = [
     COMMON_NAV_LINKS[0],
-    isProvider
-      ? { label: "My Services", to: "/my-listings" as const }
-      : { label: "Find Users", to: "/browse-users" as const },
     COMMON_NAV_LINKS[1],
+    ...(isProvider ? [{ label: "My Services", to: "/my-listings" as const }] : []),
     COMMON_NAV_LINKS[2],
+    COMMON_NAV_LINKS[3],
   ];
 
   function handleGoogleLogin() {
