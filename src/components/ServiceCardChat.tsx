@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Badge } from "./Badge"
 import { Button } from "./Button"
-import { MapPin, Dot, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 export interface ServiceCardTag {
   tagId: string

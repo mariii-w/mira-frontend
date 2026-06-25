@@ -2827,83 +2827,6 @@ paths:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
-    patch:
-      summary: Reorder listing media
-      operationId: updateListingMedia
-      description: Reorders all media items attached to a listing owned by the authenticated user. The items array defines the complete desired order; it must contain exactly the media IDs currently attached to the listing.
-      tags:
-        - Listings (Media)
-      security:
-        - bearerHttpAuthentication: []
-      requestBody:
-        required: true
-        content:
-          "application/json":
-            schema:
-              "$ref": "#/components/schemas/UpdateListingMediaRequest"
-            examples:
-              default:
-                summary: Example reorder request
-                value:
-                  items:
-                    - mediaId: "11111111-2222-3333-4444-555555555555"
-                    - mediaId: "22222222-3333-4444-5555-666666666666"
-      responses:
-        "200":
-          description: Listing media reordered successfully.
-          content:
-            "application/json":
-              schema:
-                type: array
-                items:
-                  "$ref": "#/components/schemas/ListingMediaItem"
-              examples:
-                default:
-                  summary: Example reordered listing media
-                  value:
-                    - mediaId: "11111111-2222-3333-4444-555555555555"
-                      position: 0
-                      url: "/v1/listing-media/11111111-2222-3333-4444-555555555555/content"
-                      altText: Open laptop on a wooden desk
-                      altTextStatus: COMPLETED
-                      mimeType: image/jpeg
-                      size: 248576
-                      width: 1280
-                      height: 720
-                      createdAt: "2026-04-20T16:10:00Z"
-        "400":
-          description: Bad Request. The request payload is invalid.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-        "401":
-          "$ref": "#/components/responses/UnauthorizedError"
-          description: Unauthorized. Authentication is required.
-        "403":
-          description: Forbidden. The authenticated account is not allowed to access this resource.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-        "404":
-          description: Not Found. No listing exists for the given identifier.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-        "409":
-          description: Conflict. The request conflicts with the current resource state.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-        "422":
-          description: Unprocessable Entity. The provided order does not contain exactly the currently attached listing media IDs.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
   "/v1/listings/{listingId}/media/{mediaId}":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
@@ -2919,7 +2842,6 @@ paths:
       requestBody:
         required: true
         content:
-          "multipart/form-data":
           "multipart/form-data":
             schema:
               "$ref": "#/components/schemas/ReplaceListingMediaRequest"
