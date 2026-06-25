@@ -11,7 +11,7 @@ RUN npm ci
 
 COPY . .
 
-ARG VITE_API_BASE_URL=/
+ARG VITE_API_BASE_URL=https://mira-uni-deploy.onrender.com
 
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 

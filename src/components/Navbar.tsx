@@ -34,7 +34,7 @@ export function Navbar() {
   ];
 
   function handleGoogleLogin() {
-    window.location.href = API_BASE_URL;
+    window.location.href = `${API_BASE_URL}/auth/login/google`;
   }
 
   return (
