@@ -76,14 +76,12 @@ export function PublicProfilePage({
     <>
       <Navbar />
       <main id="main-content">
-        <section>
-          <div className="bg-linear-to-r from-primary to-accent h-40 sm:h-50 w-full" />
-        </section>
-        <section>
+        <div aria-hidden="true" className="bg-linear-to-r from-primary to-accent h-40 sm:h-50 w-full" />
+        <section aria-label="Profile">
           <div className="container mx-auto max-w-6xl -mt-16 sm:-mt-20 px-4 pb-8 grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
             {/* User info */}
-            <div className="col-span-1 lg:col-span-2">
+            <div tabIndex={0} className="col-span-1 lg:col-span-2 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
               <div className="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-4">
                 <AvatarIcon
                   size={140}
@@ -107,7 +105,7 @@ export function PublicProfilePage({
                   </p>
                   {city && (
                     <p className="flex items-center gap-1 text-sm font-bold text-border">
-                      <MapPin size={16} />
+                      <MapPin size={16} aria-hidden="true" />
                       {city}
                     </p>
                   )}
@@ -117,12 +115,12 @@ export function PublicProfilePage({
 
 
             {/* How it works */}
-            <div className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-4">
-              <p className="font-heading font-bold text-h2">
+            <section aria-labelledby="how-it-works-heading" aria-describedby="how-it-works-steps" className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-4">
+              <h2 id="how-it-works-heading" className="font-heading font-bold text-h2">
                 {isProvider ? 'How to book' : 'How it works'}
-              </p>
+              </h2>
               <div className="w-full h-px bg-border" />
-              <ol className="flex flex-col gap-4">
+              <ol id="how-it-works-steps" className="flex flex-col gap-4">
                 {(isProvider
                   ? [
                       { title: 'Explore services', desc: 'Browse the services this provider offers below.' },
@@ -137,7 +135,7 @@ export function PublicProfilePage({
                       { title: 'Pay & enjoy', desc: 'Pay for the session and receive the service.' },
                     ]
                 ).map((step, i) => (
-                  <li key={i} className="flex gap-3 items-start">
+                  <li key={i} tabIndex={0} className="flex gap-3 items-start rounded-lg p-1 -m-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
                     <span className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-small font-bold ${isProvider ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}`}>
                       {i + 1}
                     </span>
@@ -148,17 +146,19 @@ export function PublicProfilePage({
                   </li>
                 ))}
               </ol>
-            </div>
+            </section>
 
             {/* About */}
-            <div className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3">
-              <h2 className="font-heading font-bold text-h2">About me</h2>
-              {!easyRead && selfSummary && <p>{selfSummary}</p>}
-              {displayBio && <p>{displayBio}</p>}
-              {!displayBio && !selfSummary && (
-                <p className="text-muted text-small">No description provided.</p>
-              )}
-            </div>
+            <section aria-labelledby="public-about-heading" aria-describedby="public-about-content" tabIndex={0} className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+              <h2 id="public-about-heading" className="font-heading font-bold text-h2">About me</h2>
+              <div id="public-about-content" className="flex flex-col gap-3">
+                {!easyRead && selfSummary && <p>{selfSummary}</p>}
+                {displayBio && <p>{displayBio}</p>}
+                {!displayBio && !selfSummary && (
+                  <p className="text-muted text-small">No description provided.</p>
+                )}
+              </div>
+            </section>
 
             {/* Services */}
             {isProvider && publicServiceListings.length > 0 && (
@@ -172,13 +172,14 @@ export function PublicProfilePage({
                     <a
                       key={listing.link}
                       href={listing.link}
-                      className="group flex flex-col gap-2 no-underline"
+                      className="group flex flex-col gap-2 no-underline rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     >
                       <div className="aspect-square rounded-xl overflow-hidden bg-border/20">
                         {listing.pictureLink && (
                           <img
                             src={listing.pictureLink}
-                            alt={listing.label}
+                            alt=""
+                            aria-hidden="true"
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                           />
                         )}

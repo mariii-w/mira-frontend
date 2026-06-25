@@ -60,10 +60,8 @@ export function PrivateProfilePage({
     <>
       <Navbar />
       <main id="main-content">
-        <section>
-          <div className="bg-linear-to-r from-primary to-accent h-40 sm:h-50 w-full" />
-        </section>
-        <section>
+        <div aria-hidden="true" className="bg-linear-to-r from-primary to-accent h-40 sm:h-50 w-full" />
+        <section aria-label="Profile">
           <div className="container mx-auto max-w-6xl -mt-16 sm:-mt-20 px-4 pb-8 grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
             {/* User info */}
@@ -90,7 +88,7 @@ export function PrivateProfilePage({
                   </p>
                   {city && (
                     <p className="flex items-center gap-1 text-sm font-bold text-border">
-                      <MapPin size={16} />
+                      <MapPin size={16} aria-hidden="true" />
                       {city}
                     </p>
                   )}
@@ -100,8 +98,8 @@ export function PrivateProfilePage({
 
             {/* Quick Actions — on mobile renders after user info, on desktop sticks to right column */}
             {isProvider && (
-              <div className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6">
-                <p className="text-h1 font-bold">Quick Actions</p>
+              <nav aria-label="Quick actions" tabIndex={0} className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+                <h2 className="text-h1 font-bold">Quick Actions</h2>
                 <div className="w-full mx-auto h-px bg-border my-5" />
                 <div className="flex flex-col w-full gap-3">
                   <QuickActionLink to="/my-listings" variant="primary" icon={<Briefcase />}>
@@ -120,36 +118,38 @@ export function PrivateProfilePage({
                 <div className="w-full mx-auto h-px bg-border my-5" />
                 <div className="flex flex-col w-full">
                   <QuickActionLink to="/my-credentials" variant="primary" icon={<Check />}>
-                    Verify
+                    Get Verified
                   </QuickActionLink>
                 </div>
-              </div>
+              </nav>
             )}
 
             {/* About */}
-            <div className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6">
-              <h2 className="font-heading font-bold text-h2 mb-2">About me</h2>
-              {userDescription
-                ? <p>{userDescription}</p>
-                : <p className="text-muted text-small">No description provided.</p>
-              }
-            </div>
+            <section aria-labelledby="private-about-heading" aria-describedby="private-about-content" tabIndex={0} className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+              <h2 id="private-about-heading" className="font-heading font-bold text-h2 mb-2">About me</h2>
+              <p id="private-about-content" className={!userDescription ? 'text-muted text-small' : undefined}>
+                {userDescription || 'No description provided.'}
+              </p>
+            </section>
 
             {/* Services */}
             {isProvider && (
-              <div className="col-span-1 lg:col-span-2 lg:row-start-3 bg-linen border border-border rounded-2xl p-6">
-                <h2 className="font-heading font-bold text-h2 mb-4">My Services</h2>
+              <section aria-labelledby="my-services-heading" aria-describedby="my-services-count" tabIndex={0} className="col-span-1 lg:col-span-2 lg:row-start-3 bg-linen border border-border rounded-2xl p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+                <h2 id="my-services-heading" className="font-heading font-bold text-h2 mb-4">My Services</h2>
                 {ownerListings.length > 0
                   ? (
-                    <div className="flex flex-col gap-4">
-                      {ownerListings.map((listing) => (
-                        <MyListingCard key={listing.listingId} listing={listing} onEdit={onEditListing} />
-                      ))}
-                    </div>
+                    <>
+                      <p id="my-services-count" className="sr-only">{ownerListings.length} active {ownerListings.length === 1 ? 'service' : 'services'}</p>
+                      <div className="flex flex-col gap-4">
+                        {ownerListings.map((listing) => (
+                          <MyListingCard key={listing.listingId} listing={listing} onEdit={onEditListing} />
+                        ))}
+                      </div>
+                    </>
                   )
-                  : <p className="text-muted text-small">No active services yet.</p>
+                  : <p id="my-services-count" className="text-muted text-small">No active services yet.</p>
                 }
-              </div>
+              </section>
             )}
           </div>
         </section>

@@ -36,7 +36,9 @@ export function MyListingCard({ listing, onEdit }: MyListingCardProps) {
   return (
     <article
       aria-labelledby={headingId}
-      className="bg-surface rounded-2xl overflow-hidden shadow-sm border border-border/20 flex flex-col sm:flex-row"
+      aria-describedby={`listing-desc-${listing.listingId}`}
+      tabIndex={0}
+      className="bg-surface rounded-2xl overflow-hidden shadow-sm border border-border/20 flex flex-col sm:flex-row focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     >
       {/* Image — full-width banner on mobile, fixed sidebar on sm+ */}
       <div className="relative h-48 sm:h-auto sm:w-44 shrink-0 bg-linen">
@@ -76,7 +78,7 @@ export function MyListingCard({ listing, onEdit }: MyListingCardProps) {
               {badge.label}
             </span>
           </div>
-          <p className="text-small text-muted line-clamp-3">{listing.description}</p>
+          <p id={`listing-desc-${listing.listingId}`} className="text-small text-muted line-clamp-3">{listing.description}</p>
         </div>
         <div className="flex justify-end">
           <Button
