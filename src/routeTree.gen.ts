@@ -18,6 +18,7 @@ import { Route as MyBookingsRouteImport } from './routes/my-bookings'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as ContactUsRouteImport } from './routes/contact-us'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as AboutRouteImport } from './routes/about'
@@ -84,6 +85,11 @@ const CreateListingRoute = CreateListingRouteImport.update({
 const ContactUsRoute = ContactUsRouteImport.update({
   id: '/contact-us',
   path: '/contact-us',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendarRoute = CalendarRouteImport.update({
@@ -203,8 +209,8 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
   '/calendar': typeof CalendarRoute
-  '/contact-us': typeof ContactUsRoute
   '/chat': typeof ChatRoute
+  '/contact-us': typeof ContactUsRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-bookings': typeof MyBookingsRoute
@@ -235,8 +241,8 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
   '/calendar': typeof CalendarRoute
-  '/contact-us': typeof ContactUsRoute
   '/chat': typeof ChatRoute
+  '/contact-us': typeof ContactUsRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-bookings': typeof MyBookingsRoute
@@ -271,6 +277,7 @@ export interface FileRoutesById {
   '/accessibility': typeof AccessibilityRoute
   '/calendar': typeof CalendarRoute
   '/chat': typeof ChatRoute
+  '/contact-us': typeof ContactUsRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
   '/my-bookings': typeof MyBookingsRoute
@@ -305,6 +312,7 @@ export interface FileRouteTypes {
     | '/accessibility'
     | '/calendar'
     | '/chat'
+    | '/contact-us'
     | '/create-listing'
     | '/login'
     | '/my-bookings'
@@ -336,6 +344,7 @@ export interface FileRouteTypes {
     | '/accessibility'
     | '/calendar'
     | '/chat'
+    | '/contact-us'
     | '/create-listing'
     | '/login'
     | '/my-bookings'
@@ -369,6 +378,7 @@ export interface FileRouteTypes {
     | '/accessibility'
     | '/calendar'
     | '/chat'
+    | '/contact-us'
     | '/create-listing'
     | '/login'
     | '/my-bookings'
@@ -403,6 +413,7 @@ export interface RootRouteChildren {
   AccessibilityRoute: typeof AccessibilityRoute
   CalendarRoute: typeof CalendarRoute
   ChatRoute: typeof ChatRoute
+  ContactUsRoute: typeof ContactUsRoute
   CreateListingRoute: typeof CreateListingRoute
   LoginRoute: typeof LoginRoute
   MyBookingsRoute: typeof MyBookingsRoute
@@ -475,6 +486,13 @@ declare module '@tanstack/react-router' {
       path: '/create-listing'
       fullPath: '/create-listing'
       preLoaderRoute: typeof CreateListingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact-us': {
+      id: '/contact-us'
+      path: '/contact-us'
+      fullPath: '/contact-us'
+      preLoaderRoute: typeof ContactUsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -699,6 +717,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccessibilityRoute: AccessibilityRoute,
   CalendarRoute: CalendarRoute,
   ChatRoute: ChatRoute,
+  ContactUsRoute: ContactUsRoute,
   CreateListingRoute: CreateListingRoute,
   LoginRoute: LoginRoute,
   MyBookingsRoute: MyBookingsRoute,
