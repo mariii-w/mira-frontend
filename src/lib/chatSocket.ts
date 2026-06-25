@@ -13,12 +13,14 @@ export type ChatTopicMessage = {
     id: string;
     username: string;
   };
-  content: unknown; // shape unconfirmed, parse defensively
+  content: unknown;
   createdAt: string;
 };
 
 let client: Client | null = null;
 let connectPromise: Promise<Client> | null = null;
+let connectGeneration = 0;
+let connectedToken: string | null = null;
 
 function createClient(token: string): Client {
   return new Client({
@@ -31,13 +33,22 @@ function createClient(token: string): Client {
 }
 
 export async function connectChatSocket(): Promise<Client> {
-  if (client?.connected) return client;
+  // Re-check token freshness even if a client already exists.
+  const token = await get_access_token();
+  if (!token) {
+    throw new Error("Cannot open chat socket: no access token available");
+  }
+
+  if (client?.connected && connectedToken === token) return client;
   if (connectPromise) return connectPromise;
 
+  const generation = ++connectGeneration;
+
   connectPromise = (async () => {
-    const token = await get_access_token();
-    if (!token) {
-      throw new Error("Cannot open chat socket: no access token available");
+    if (client) {
+      client.deactivate();
+      client = null;
+      connectedToken = null;
     }
 
     const newClient = createClient(token);
@@ -50,7 +61,14 @@ export async function connectChatSocket(): Promise<Client> {
       newClient.activate();
     });
 
+    // superseded by a disconnect/newer connect while this was in flight
+    if (generation !== connectGeneration) {
+      newClient.deactivate();
+      throw new Error("Chat socket connection superseded");
+    }
+
     client = newClient;
+    connectedToken = token;
     return newClient;
   })();
 
@@ -62,8 +80,11 @@ export async function connectChatSocket(): Promise<Client> {
 }
 
 export function disconnectChatSocket(): void {
+  connectGeneration++;
   client?.deactivate();
   client = null;
+  connectedToken = null;
+  connectPromise = null;
 }
 
 // Returns an unsubscribe function; call it on chat switch.

@@ -33,7 +33,7 @@ export function ServiceCardChat(
             <div className='flex flex-col lg:flex-col gap-3'>
                 {pictureLink && (
                     <div className='w-full border-b border-border'>
-                        <img src={pictureLink} className="w-full h-32 rounded-t-2xl object-cover" alt="" />
+                        <img src={pictureLink} className="w-full h-32 rounded-t-2xl object-cover" alt={`Photo for ${label}`} />
                     </div>
                 )}
                 
