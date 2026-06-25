@@ -86,7 +86,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
         badges: listing.tags.map(tag => ({ text: tag.name, variant: 'primary' as const })),
         tags: listing.tags,
         hourRate: listing.price,
-        distance: listing.location.serviceRadiusKm
+        distance: listing.location.serviceRadiusKm,
     })) ?? []
 
     return(
