@@ -14,6 +14,7 @@ import { mediaUrl } from "../lib/mediaUrl";
 const COMMON_NAV_LINKS = [
   { label: 'Browse Services', to: '/browse-services' },
   { label: "Calendar", to: "/calendar" },
+  { label: "Chat", to: "/chat" },
 ] as const;
 
 export function Navbar() {
@@ -28,6 +29,7 @@ export function Navbar() {
       ? { label: "My Services", to: "/my-listings" as const }
       : { label: "Find Users", to: "/browse-users" as const },
     COMMON_NAV_LINKS[1],
+    COMMON_NAV_LINKS[2],
   ];
 
   function handleGoogleLogin() {
