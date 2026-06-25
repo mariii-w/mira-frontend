@@ -94,7 +94,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
     if (isLoading) return <ProfilePageLoading />
     if (error) return <ProfilePageError />
 
-    const userDescription = user?.selfSummary ?? 'Keine Beschreibung hinterlegt.'
+    const userDescription = user?.selfSummary ?? 'No description provided.'
     const userFirstName = user?.firstName ?? ''
     const userLastName = user?.lastName ?? ''
 
