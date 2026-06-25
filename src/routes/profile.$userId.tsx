@@ -102,7 +102,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
     const serviceListings: ServiceCardEditProps[] = isOwner && isProviderType
       ? ((listingsResponse?.items ?? []) as MyListingSummary[]).map((listing) => ({
           link: `/service/${listing.listingId}`,
-          pictureLink: listing.primaryMedia?.url || './pic/ServiceExample1.png',
+          pictureLink: listing.primaryMedia ? mediaUrl(listing.primaryMedia.url) : undefined,
           label: listing.title,
           description: listing.description,
           status: listing.publicationStatus === 'DRAFT' ? 'draft' : 'active'
@@ -112,7 +112,7 @@ function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
     const publicServiceListings: ServiceCardProps[] = !isOwner && isProviderType
       ? ((listingsResponse?.items ?? []) as PublicListingSummary[]).map((listing) => ({
           link: `/service/${listing.listingId}`,
-          pictureLink: listing.primaryMedia?.url || './pic/ServiceExample1.png',
+          pictureLink: listing.primaryMedia ? mediaUrl(listing.primaryMedia.url) : undefined,
           location: `${listing.location.city}${listing.location.postalCode ? ', ' + listing.location.postalCode : ''}`,
           providerFirstName: listing.author.name,
           providerLastName: listing.author.surname,

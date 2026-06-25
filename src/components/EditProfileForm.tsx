@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useRef, type ChangeEvent, type FormEvent } from 'react'
 import { Camera, Check, X } from 'lucide-react'
 import * as Switch from './Switch'
 import { Button } from './Button'
@@ -12,7 +12,8 @@ type EditProfileFormProps = {
   lastName: string
   username: string
   selfSummary: string
-  addressLine: string
+  street: string
+  houseNumber: string
   postalCode: string
   city: string
   isPublic: boolean
@@ -20,7 +21,8 @@ type EditProfileFormProps = {
   lastNameError: string | null
   usernameError: string | null
   selfSummaryError: string | null
-  addressLineError: string | null
+  streetError: string | null
+  houseNumberError: string | null
   postalCodeError: string | null
   cityError: string | null
   serverError: string | null
@@ -31,11 +33,13 @@ type EditProfileFormProps = {
   pendingPhotoPreviewUrl?: string
   uploadingPhoto: boolean
   photoError: string | null
+  fileError: string | null
   onFirstNameChange: (value: string) => void
   onLastNameChange: (value: string) => void
   onUsernameChange: (value: string) => void
   onSelfSummaryChange: (value: string) => void
-  onAddressLineChange: (value: string) => void
+  onStreetChange: (value: string) => void
+  onHouseNumberChange: (value: string) => void
   onPostalCodeChange: (value: string) => void
   onCityChange: (value: string) => void
   onIsPublicChange: (value: boolean) => void
@@ -43,7 +47,8 @@ type EditProfileFormProps = {
   onLastNameBlur: () => void
   onUsernameBlur: () => void
   onSelfSummaryBlur: () => void
-  onAddressLineBlur: () => void
+  onStreetBlur: () => void
+  onHouseNumberBlur: () => void
   onPostalCodeBlur: () => void
   onCityBlur: () => void
   onSubmit: (e: FormEvent<HTMLFormElement>) => void
@@ -58,7 +63,8 @@ export function EditProfileForm({
   lastName,
   username,
   selfSummary,
-  addressLine,
+  street,
+  houseNumber,
   postalCode,
   city,
   isPublic,
@@ -66,7 +72,8 @@ export function EditProfileForm({
   lastNameError,
   usernameError,
   selfSummaryError,
-  addressLineError,
+  streetError,
+  houseNumberError,
   postalCodeError,
   cityError,
   serverError,
@@ -77,11 +84,13 @@ export function EditProfileForm({
   pendingPhotoPreviewUrl,
   uploadingPhoto,
   photoError,
+  fileError,
   onFirstNameChange,
   onLastNameChange,
   onUsernameChange,
   onSelfSummaryChange,
-  onAddressLineChange,
+  onStreetChange,
+  onHouseNumberChange,
   onPostalCodeChange,
   onCityChange,
   onIsPublicChange,
@@ -89,7 +98,8 @@ export function EditProfileForm({
   onLastNameBlur,
   onUsernameBlur,
   onSelfSummaryBlur,
-  onAddressLineBlur,
+  onStreetBlur,
+  onHouseNumberBlur,
   onPostalCodeBlur,
   onCityBlur,
   onSubmit,
@@ -99,28 +109,84 @@ export function EditProfileForm({
   onPhotoSave,
 }: EditProfileFormProps) {
   const photoInputRef = useRef<HTMLInputElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
 
   function openPhotoPicker() {
     photoInputRef.current?.click()
   }
 
+  function getFocusable(container: HTMLElement): HTMLElement[] {
+    return Array.from(
+      container.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([type="hidden"]):not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((el) => el.offsetParent !== null)
+  }
+
+  function makeTrapHandler(containerRef: React.RefObject<HTMLElement | null>) {
+    return (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const container = containerRef.current
+      if (!container) return
+      const els = getFocusable(container)
+      if (!els.length) return
+      const first = els[0]
+      const last = els[els.length - 1]
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus() }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus() }
+      }
+    }
+  }
+
+  // Focus trap for main form
+  useEffect(() => {
+    const form = formRef.current
+    if (!form) return
+    const trigger = document.activeElement as HTMLElement
+    getFocusable(form)[0]?.focus()
+    const handler = makeTrapHandler(formRef)
+    form.addEventListener('keydown', handler)
+    return () => {
+      form.removeEventListener('keydown', handler)
+      trigger?.focus()
+    }
+  }, [])
+
+  // Focus trap for photo popup
+  useEffect(() => {
+    if (!pendingPhotoPreviewUrl) return
+    const popup = popupRef.current
+    if (!popup) return
+    getFocusable(popup)[0]?.focus()
+    const handler = makeTrapHandler(popupRef)
+    popup.addEventListener('keydown', handler)
+    return () => popup.removeEventListener('keydown', handler)
+  }, [pendingPhotoPreviewUrl])
+
   return (
     <>
       <main id="main-content">
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-charcoal/50 p-4 overflow-y-auto"
           onClick={(e) => {
             if (e.target === e.currentTarget) onClose()
           }}
         >
           <form
+            ref={formRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-profile-heading"
             className="relative flex w-full max-w-md flex-col gap-5 rounded-2xl bg-linen border border-border p-6 shadow-xl my-8"
             onSubmit={onSubmit}
             noValidate
           >
             <button
               type="button"
-              aria-label="Schließen"
+              aria-label="Close"
               onClick={onClose}
               className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-full text-foreground hover:bg-foreground/5 transition-colors duration-150"
             >
@@ -128,8 +194,8 @@ export function EditProfileForm({
             </button>
 
             <div className="flex flex-col items-center gap-3 pr-10">
-              <h1 className="self-start font-heading text-2xl font-bold text-foreground">
-                Profil bearbeiten
+              <h1 id="edit-profile-heading" className="self-start font-heading text-2xl font-bold text-foreground">
+                Edit profile
               </h1>
               <div className="flex flex-col items-center gap-1">
                 <div className="relative">
@@ -141,7 +207,7 @@ export function EditProfileForm({
                   />
                   <button
                     type="button"
-                    aria-label="Profilbild ändern"
+                    aria-label="Change profile picture"
                     onClick={openPhotoPicker}
                     className="absolute -bottom-1 -right-3 inline-flex size-9 items-center justify-center rounded-full bg-charcoal text-cream border-2 border-linen"
                   >
@@ -155,13 +221,18 @@ export function EditProfileForm({
                     onChange={onPhotoSelected}
                   />
                 </div>
-                <span className="text-small font-medium text-foreground">bearbeiten</span>
+                <span className="text-small font-medium text-foreground">Change Photo</span>
               </div>
+              {fileError && (
+                <p role="alert" className="text-small text-red-600 text-center">
+                  {fileError}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="firstName" required>
-                Vorname
+                First name
               </Label>
               <Input
                 id="firstName"
@@ -176,7 +247,7 @@ export function EditProfileForm({
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="lastName" required>
-                Nachname
+                Last name
               </Label>
               <Input
                 id="lastName"
@@ -191,7 +262,7 @@ export function EditProfileForm({
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="username" required>
-                Benutzername
+                Username
               </Label>
               <Input
                 id="username"
@@ -205,7 +276,7 @@ export function EditProfileForm({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="selfSummary">Profil Beschreibung</Label>
+              <Label htmlFor="selfSummary">Profile description</Label>
               <Textarea
                 id="selfSummary"
                 value={selfSummary}
@@ -217,26 +288,41 @@ export function EditProfileForm({
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="addressLine" required>
-                Wohnangabe
-              </Label>
-              <Input
-                id="addressLine"
-                size="sm"
-                value={addressLine}
-                onChange={(e) => onAddressLineChange(e.target.value)}
-                onBlur={onAddressLineBlur}
-                placeholder="Straße und Hausnummer, z. B. Kleiber Weg 5"
-                autoComplete="address-line1"
-                error={addressLineError}
-              />
+            <div className="grid grid-cols-[1fr_8rem] gap-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="street" required>
+                  Street
+                </Label>
+                <Input
+                  id="street"
+                  size="sm"
+                  value={street}
+                  onChange={(e) => onStreetChange(e.target.value)}
+                  onBlur={onStreetBlur}
+                  autoComplete="address-line1"
+                  error={streetError}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="houseNumber" required>
+                  House no.
+                </Label>
+                <Input
+                  id="houseNumber"
+                  size="sm"
+                  value={houseNumber}
+                  onChange={(e) => onHouseNumberChange(e.target.value)}
+                  onBlur={onHouseNumberBlur}
+                  autoComplete="address-line2"
+                  error={houseNumberError}
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="postalCode" required>
-                  Postleitzahl
+                  Postal code
                 </Label>
                 <Input
                   id="postalCode"
@@ -252,7 +338,7 @@ export function EditProfileForm({
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="city" required>
-                  Stadt
+                  City
                 </Label>
                 <Input
                   id="city"
@@ -271,7 +357,7 @@ export function EditProfileForm({
                 htmlFor="isPublic"
                 className="text-small font-medium text-foreground cursor-pointer"
               >
-                Öffentliches Profil
+                Public profile
               </label>
               <Switch.Root
                 id="isPublic"
@@ -291,7 +377,7 @@ export function EditProfileForm({
 
             <div className="flex items-center justify-between pt-4 border-t border-border/30">
               <Button type="button" variant="ghost" size="md" onClick={onClose}>
-                Abbrechen
+                Cancel
               </Button>
               <Button
                 type="submit"
@@ -300,7 +386,7 @@ export function EditProfileForm({
                 loading={submitting}
                 trailingIcon={<Check />}
               >
-                Speichern
+                Save
               </Button>
             </div>
           </form>
@@ -314,10 +400,16 @@ export function EditProfileForm({
             if (e.target === e.currentTarget) onPhotoPopupClose()
           }}
         >
-          <div className="relative flex w-full max-w-sm flex-col gap-5 rounded-2xl bg-linen border border-border p-6 shadow-xl">
+          <div
+            ref={popupRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="photo-popup-heading"
+            className="relative flex w-full max-w-sm flex-col gap-5 rounded-2xl bg-linen border border-border p-6 shadow-xl"
+          >
             <button
               type="button"
-              aria-label="Schließen"
+              aria-label="Close"
               onClick={onPhotoPopupClose}
               disabled={uploadingPhoto}
               className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-full text-foreground hover:bg-foreground/5 transition-colors duration-150 disabled:opacity-50"
@@ -325,11 +417,11 @@ export function EditProfileForm({
               <X size={20} />
             </button>
 
-            <h2 className="font-heading text-xl font-bold text-foreground">Profilbild</h2>
+            <h2 id="photo-popup-heading" className="font-heading text-xl font-bold text-foreground">Profile picture</h2>
 
             <img
               src={pendingPhotoPreviewUrl}
-              alt="Vorschau des neuen Profilbilds"
+              alt="Preview of new profile picture"
               className="size-48 self-center rounded-full object-cover border border-border"
             />
 
@@ -347,7 +439,7 @@ export function EditProfileForm({
                 onClick={onPhotoPopupClose}
                 disabled={uploadingPhoto}
               >
-                Abbrechen
+                Cancel
               </Button>
               <Button
                 type="button"
@@ -357,7 +449,7 @@ export function EditProfileForm({
                 trailingIcon={<Check />}
                 onClick={onPhotoSave}
               >
-                Speichern
+                Save
               </Button>
             </div>
           </div>

@@ -1,11 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { EditProfileForm } from '../components/EditProfileForm'
 import { useAuthStore } from '../stores/auth'
 import {
   patchUser,
   uploadProfilePhoto,
-  type PatchUserPayload,
   type RegisterPatchError,
   type UploadPhotoError,
 } from '../lib/patchUser'
@@ -55,16 +55,16 @@ function validateSelfSummary(value: string): string | null {
   return null
 }
 
-// "Kleiber Weg 5" -> { street: 'Kleiber Weg', houseNumber: '5' }
-function parseAddressLine(value: string): { street: string; houseNumber: string } | null {
-  const match = value.trim().match(/^(.+?)\s+(\d+\s*[a-zA-Z]?)$/)
-  if (!match) return null
-  return { street: match[1].trim(), houseNumber: match[2].replace(/\s+/g, '') }
+function validateStreet(value: string): string | null {
+  if (!value.trim()) return 'Required.'
+  if (value.trim().length > 100) return 'Maximum 100 characters.'
+  return null
 }
 
-function validateAddressLine(value: string): string | null {
+function validateHouseNumber(value: string): string | null {
   if (!value.trim()) return 'Required.'
-  if (!parseAddressLine(value)) return 'Bitte Straße und Hausnummer angeben, z. B. "Kleiber Weg 5".'
+  if (value.trim().length > 10) return 'Maximum 10 characters.'
+  if (/^\s|\s$/.test(value)) return 'Must not start or end with a space.'
   return null
 }
 
@@ -72,10 +72,10 @@ function validateAddressLine(value: string): string | null {
 function EditProfilePage() {
   const { userId } = Route.useParams()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const currentUser = useAuthStore((s) => s.user)
   const isOwner = currentUser?.userId === userId
 
-  // Only the profile owner can edit it — bounce everyone else back.
   useEffect(() => {
     if (currentUser && !isOwner) {
       navigate({ to: '/profile/$userId', params: { userId } })
@@ -90,11 +90,8 @@ function EditProfilePage() {
   const [lastName, setLastName] = useState(currentUser?.lastName ?? '')
   const [username, setUsername] = useState(currentUser?.username ?? '')
   const [selfSummary, setSelfSummary] = useState(currentUser?.selfSummary ?? '')
-  const [addressLine, setAddressLine] = useState(
-    currentUser?.privateAddress
-      ? `${currentUser.privateAddress.street} ${currentUser.privateAddress.houseNumber}`.trim()
-      : '',
-  )
+  const [street, setStreet] = useState(currentUser?.privateAddress?.street ?? '')
+  const [houseNumber, setHouseNumber] = useState(currentUser?.privateAddress?.houseNumber ?? '')
   const [postalCode, setPostalCode] = useState(currentUser?.privateAddress?.postalCode ?? '')
   const [city, setCity] = useState(currentUser?.privateAddress?.city ?? '')
   const [isPublic, setIsPublic] = useState(currentUser?.isPublic ?? true)
@@ -103,7 +100,8 @@ function EditProfilePage() {
   const [lastNameError, setLastNameError] = useState<string | null>(null)
   const [usernameError, setUsernameError] = useState<string | null>(null)
   const [selfSummaryError, setSelfSummaryError] = useState<string | null>(null)
-  const [addressLineError, setAddressLineError] = useState<string | null>(null)
+  const [streetError, setStreetError] = useState<string | null>(null)
+  const [houseNumberError, setHouseNumberError] = useState<string | null>(null)
   const [postalCodeError, setPostalCodeError] = useState<string | null>(null)
   const [cityError, setCityError] = useState<string | null>(null)
 
@@ -113,11 +111,24 @@ function EditProfilePage() {
   const [pendingPhoto, setPendingPhoto] = useState<{ file: File; previewUrl: string } | null>(null)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [photoError, setPhotoError] = useState<string | null>(null)
+  const [fileError, setFileError] = useState<string | null>(null)
+
+  function validateFile(file: File): string | null {
+    if (file.size > 5 * 1024 * 1024) return 'Image is too large. Max 5 MB.'
+    if (!['image/jpeg', 'image/png'].includes(file.type)) return 'Unsupported format. Use JPG or PNG.'
+    return null
+  }
 
   function handlePhotoSelected(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    e.target.value = '' // allow picking the same file again later
+    e.target.value = ''
     if (!file) return
+    const err = validateFile(file)
+    if (err) {
+      setFileError(err)
+      return
+    }
+    setFileError(null)
     setPhotoError(null)
     setPendingPhoto({ file, previewUrl: URL.createObjectURL(file) })
   }
@@ -127,6 +138,7 @@ function EditProfilePage() {
     if (pendingPhoto) URL.revokeObjectURL(pendingPhoto.previewUrl)
     setPendingPhoto(null)
     setPhotoError(null)
+    setFileError(null)
   }
 
   async function handlePhotoSave() {
@@ -152,7 +164,8 @@ function EditProfilePage() {
     const lnErr = validateName(lastName)
     const unErr = validateUsername(username)
     const ssErr = validateSelfSummary(selfSummary)
-    const alErr = validateAddressLine(addressLine)
+    const stErr = validateStreet(street)
+    const hnErr = validateHouseNumber(houseNumber)
     const pErr = validatePostalCode(postalCode)
     const cErr = validateCity(city)
 
@@ -160,37 +173,32 @@ function EditProfilePage() {
     setLastNameError(lnErr)
     setUsernameError(unErr)
     setSelfSummaryError(ssErr)
-    setAddressLineError(alErr)
+    setStreetError(stErr)
+    setHouseNumberError(hnErr)
     setPostalCodeError(pErr)
     setCityError(cErr)
 
-    if (fnErr || lnErr || unErr || ssErr || alErr || pErr || cErr) return
-
-    const parsedAddress = parseAddressLine(addressLine)
-    if (!parsedAddress) {
-      setAddressLineError(validateAddressLine(addressLine))
-      return
-    }
+    if (fnErr || lnErr || unErr || ssErr || stErr || hnErr || pErr || cErr) return
 
     setSubmitting(true)
     setServerError(null)
 
-    const payload: PatchUserPayload = {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      username,
-      privateAddress: {
-        street: parsedAddress.street,
-        houseNumber: parsedAddress.houseNumber,
-        postalCode,
-        city: city.trim(),
-      },
-      selfSummary: selfSummary.trim(),
-      isPublic,
-    }
-
     try {
-      await patchUser(payload)
+      await patchUser({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        username,
+        privateAddress: {
+          street: street.trim(),
+          houseNumber: houseNumber.trim(),
+          postalCode,
+          city: city.trim(),
+        },
+        selfSummary: selfSummary.trim(),
+        isPublic,
+      })
+      await queryClient.invalidateQueries({ queryKey: ['user', userId] })
+      await queryClient.invalidateQueries({ queryKey: ['listings', userId] })
       closeToProfile()
     } catch (e) {
       const err = e as RegisterPatchError
@@ -211,7 +219,8 @@ function EditProfilePage() {
       lastName={lastName}
       username={username}
       selfSummary={selfSummary}
-      addressLine={addressLine}
+      street={street}
+      houseNumber={houseNumber}
       postalCode={postalCode}
       city={city}
       isPublic={isPublic}
@@ -219,7 +228,8 @@ function EditProfilePage() {
       lastNameError={lastNameError}
       usernameError={usernameError}
       selfSummaryError={selfSummaryError}
-      addressLineError={addressLineError}
+      streetError={streetError}
+      houseNumberError={houseNumberError}
       postalCodeError={postalCodeError}
       cityError={cityError}
       serverError={serverError}
@@ -230,11 +240,13 @@ function EditProfilePage() {
       pendingPhotoPreviewUrl={pendingPhoto?.previewUrl}
       uploadingPhoto={uploadingPhoto}
       photoError={photoError}
+      fileError={fileError}
       onFirstNameChange={setFirstName}
       onLastNameChange={setLastName}
       onUsernameChange={setUsername}
       onSelfSummaryChange={setSelfSummary}
-      onAddressLineChange={setAddressLine}
+      onStreetChange={setStreet}
+      onHouseNumberChange={setHouseNumber}
       onPostalCodeChange={setPostalCode}
       onCityChange={setCity}
       onIsPublicChange={setIsPublic}
@@ -242,7 +254,8 @@ function EditProfilePage() {
       onLastNameBlur={() => setLastNameError(validateName(lastName))}
       onUsernameBlur={() => setUsernameError(validateUsername(username))}
       onSelfSummaryBlur={() => setSelfSummaryError(validateSelfSummary(selfSummary))}
-      onAddressLineBlur={() => setAddressLineError(validateAddressLine(addressLine))}
+      onStreetBlur={() => setStreetError(validateStreet(street))}
+      onHouseNumberBlur={() => setHouseNumberError(validateHouseNumber(houseNumber))}
       onPostalCodeBlur={() => setPostalCodeError(validatePostalCode(postalCode))}
       onCityBlur={() => setCityError(validateCity(city))}
       onSubmit={handleSubmit}
