@@ -46,24 +46,24 @@ E-Mail: user@example.com
 
 The project follows WCAG 2.1 AA as a baseline.
 
-| Area              | Implementation                                                                                                                                                                       |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Visual & motion    | Global `:focus-visible` styles (with a fallback for older browsers); `prefers-reduced-motion` disables animations; heading font is [Atkinson Hyperlegible](https://brailleinstitute.org/freefont), built for low-vision readers |
-| User preferences  | **Easy Language** (easy and simple-read text) and **Reduce motion** toggles in the header `AccessibilityPanel`, persisted via Zustand (`stores/accessibility.ts`) and mirrored onto `<html data-easy-read>` / `<html data-reduced-motion>` |
-| Keyboard & focus   | `Modal`, `Popover`, and `Switch` support full keyboard navigation (Tab, Shift+Tab, Escape); `Modal` traps focus while open and restores it on close; the booking `CalendarGrid` uses roving tabindex (arrow keys, Home, End) |
-| Live updates       | Booking status and duration updates use `aria-live="polite"`; credential loading states use `role="status"` with `aria-live="polite"`                                            |
-| Tooltips           | Verified-credential badges use a `role="tooltip"` plus `aria-describedby` pattern, reachable by hover, focus, and keyboard alike                                                    |
-| Forms              | `Input` and `Textarea` mark errors with `aria-invalid` and `aria-describedby`, announced via `role="alert"`; required fields are flagged on `Label`                                |
-| Icons & loading    | Icon-only buttons require `aria-label` (a dev-mode warning catches missing ones); decorative icons are `aria-hidden`; loading states use `aria-busy` plus visually-hidden `sr-only` text |
-| Semantic HTML      | `<nav>`, `<main>`, `<section>`, and `<article>` throughout, with labelled `<ul>`/`<li>` lists and `aria-labelledby` on every section                                                 |
+| Area             | Implementation                                                                                                                                                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Visual & motion  | Global `:focus-visible` styles (with a fallback for older browsers); `prefers-reduced-motion` disables animations; heading font is [Atkinson Hyperlegible](https://brailleinstitute.org/freefont), built for low-vision readers            |
+| User preferences | **Easy Language** (easy and simple-read text) and **Reduce motion** toggles in the header `AccessibilityPanel`, persisted via Zustand (`stores/accessibility.ts`) and mirrored onto `<html data-easy-read>` / `<html data-reduced-motion>` |
+| Keyboard & focus | `Modal`, `Popover`, and `Switch` support full keyboard navigation (Tab, Shift+Tab, Escape); `Modal` traps focus while open and restores it on close; the booking `CalendarGrid` uses roving tabindex (arrow keys, Home, End)               |
+| Live updates     | Booking status and duration updates use `aria-live="polite"`; credential loading states use `role="status"` with `aria-live="polite"`                                                                                                      |
+| Tooltips         | Verified-credential badges use a `role="tooltip"` plus `aria-describedby` pattern, reachable by hover, focus, and keyboard alike                                                                                                           |
+| Forms            | `Input` and `Textarea` mark errors with `aria-invalid` and `aria-describedby`, announced via `role="alert"`; required fields are flagged on `Label`                                                                                        |
+| Icons & loading  | Icon-only buttons require `aria-label` (a dev-mode warning catches missing ones); decorative icons are `aria-hidden`; loading states use `aria-busy` plus visually-hidden `sr-only` text                                                   |
+| Semantic HTML    | `<nav>`, `<main>`, `<section>`, and `<article>` throughout, with labelled `<ul>`/`<li>` lists and `aria-labelledby` on every section                                                                                                       |
 
 ### Automated Accessibility Testing
 
 Accessibility isn't only checked by hand. The CI pipeline runs an automated [`axe-core`](https://github.com/dequelabs/axe-core) scan on every push and merge request, as its own `accessibility` stage alongside the regular unit tests.
 
-| Check                        | What it does                                                                                                          |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `npm run test:a11y`          | Runs `src/__tests__/components.a11y.test.tsx`, which scans 20+ component states with axe, under its own Vitest config (`vite.a11y.config.ts`) |
+| Check                          | What it does                                                                                                                                  |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run test:a11y`            | Runs `src/__tests__/components.a11y.test.tsx`, which scans 20+ component states with axe, under its own Vitest config (`vite.a11y.config.ts`) |
 | `npm run check:routes-no-html` | A separate `accessibility-route-check` stage that fails the build if a route renders raw HTML instead of the shared, tested component library |
 
 ## Design System
@@ -120,7 +120,7 @@ Icons are standardized on [lucide-react](https://lucide.dev) throughout.
 
 <details>
 <summary>Start the Backend</summary>
-
+SERVER: https://drive.google.com/file/d/173U-MzPIxcziajj_iIJfxkE-n3WIyhQe/view?usp=sharing
 ```sh
 # stripe
 stripe login
@@ -143,6 +143,7 @@ export MIRA_LOG=DEBUG
 export MIRA_FILE_LOG_ENABLED=true
 export MIRA_DEMO_SKIP_GOOGLE_ID_TOKEN_SIGNATURE=false
 export MIRA_POST_LOGIN_REDIRECT_URL=http://localhost:5173/login
+
 # in memory db(delete after shutdown)
 
 java -jar ./backend.jar --spring.profiles.active=local-h2 --server.port=8081
@@ -156,11 +157,11 @@ export DB_USERNAME=
 export DB_PASSWORD=
 java -jar ./backend.jar --spring.profiles.active=postgres --server.port=8081
 
-```
+````
 
 </details>
 
-> **Note:** `og:url` will be incorrect in development builds.  
+> **Note:** `og:url` will be incorrect in development builds.
 > In production, the frontend and backend are served from the same server, but during development the frontend runs on a separate dev-server port.
 
 > > Note: On some systems, STOMP may fail when using npm. If chat functionality does not work, try using pnpm instead by replacing npm commands with the equivalent pnpm commands.
@@ -170,7 +171,7 @@ VITE_API_BASE_URL=http://localhost:8081
 npm install
 npm run openapi
 npm run dev
-```
+````
 
 ### Tech Stack
 
@@ -213,14 +214,14 @@ The `accessibility-route-check` and `accessibility` stages were added after the 
 
 #### Pipeline jobs
 
-| Job                          | Stage                       | Command                       | Purpose                                                      |
-| ----------------------------- | ---------------------------- | ------------------------------ | -------------------------------------------------------------- |
-| `build`                      | build                        | `npm run build`               | TypeScript check and Vite production build                    |
-| `test`                       | test                          | `npm run test:ci`             | Vitest unit tests with V8 coverage                             |
-| `accessibility-route-check`  | accessibility-route-check    | `npm run check:routes-no-html`| Fails if a route renders raw HTML instead of shared components |
-| `accessibility`              | accessibility                 | `npm run test:a11y`           | Axe-core accessibility scans, with their own coverage report  |
-| `lint`                       | lint                          | `npm run lint`                | ESLint                                                         |
-| `publish`                    | release                       | `./publish`                   | Builds and publishes a Docker image, tagged releases only     |
+| Job                         | Stage                     | Command                        | Purpose                                                        |
+| --------------------------- | ------------------------- | ------------------------------ | -------------------------------------------------------------- |
+| `build`                     | build                     | `npm run build`                | TypeScript check and Vite production build                     |
+| `test`                      | test                      | `npm run test:ci`              | Vitest unit tests with V8 coverage                             |
+| `accessibility-route-check` | accessibility-route-check | `npm run check:routes-no-html` | Fails if a route renders raw HTML instead of shared components |
+| `accessibility`             | accessibility             | `npm run test:a11y`            | Axe-core accessibility scans, with their own coverage report   |
+| `lint`                      | lint                      | `npm run lint`                 | ESLint                                                         |
+| `publish`                   | release                   | `./publish`                    | Builds and publishes a Docker image, tagged releases only      |
 
 ---
 
