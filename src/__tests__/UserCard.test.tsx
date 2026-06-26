@@ -10,12 +10,21 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({
     children,
     to,
+    params,
     className,
     'aria-label': ariaLabel,
-    ...props
-  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { children: React.ReactNode; to: string; 'aria-label'?: string }) => (
-    <a href={to} className={className} aria-label={ariaLabel} {...props}>{children}</a>
-  ),
+  }: {
+    children: React.ReactNode
+    to: string
+    params?: Record<string, string>
+    className?: string
+    'aria-label'?: string
+  }) => {
+    const href = params
+      ? Object.entries(params).reduce((path, [key, value]) => path.replace(`$${key}`, value), to)
+      : to
+    return <a href={href} className={className} aria-label={ariaLabel}>{children}</a>
+  },
 }))
 
 function profile(overrides: Partial<PublicProfileResponse> = {}): PublicProfileResponse {
@@ -47,12 +56,12 @@ const providerSummary: ProviderServiceSummary = {
 describe('<UserCard /> role palettes', () => {
   it('uses the green palette for providers', () => {
     render(<UserCard profile={profile({ userType: 'PROVIDER' })} easyRead={false} />)
-    expect(screen.getByRole('link', { name: 'View profile of Patrick Smith' })).toHaveClass('bg-forest')
+    expect(screen.getByRole('link', { name: /view profile/i })).toHaveClass('bg-forest')
   })
 
   it('uses the violet palette for consumers', () => {
     render(<UserCard profile={profile({ userType: 'CUSTOMER' })} easyRead={false} />)
-    expect(screen.getByRole('link', { name: 'View profile of Patrick Smith' })).toHaveClass('bg-accent')
+    expect(screen.getByRole('link', { name: /view profile/i })).toHaveClass('bg-accent')
   })
 })
 
@@ -94,11 +103,10 @@ describe('<UserCard /> content', () => {
 })
 
 describe('<UserCard /> links', () => {
-  it('renders only the View Profile link pointing to "/"', () => {
-    render(<UserCard profile={profile({ firstName: 'Patrick', lastName: 'Smith' })} easyRead={false} />)
+  it('renders only the View Profile link, pointing to the profile route', () => {
+    render(<UserCard profile={profile({ userId: 'user-1', firstName: 'Patrick', lastName: 'Smith' })} easyRead={false} />)
     const viewProfile = screen.getByRole('link', { name: 'View profile of Patrick Smith' })
-    expect(viewProfile).toHaveAttribute('href', '/')
-    expect(viewProfile).toHaveTextContent('View Profile')
+    expect(viewProfile).toHaveAttribute('href', '/profile/user-1')
     expect(screen.queryByRole('link', { name: 'Message Patrick Smith' })).not.toBeInTheDocument()
   })
 })
@@ -148,17 +156,11 @@ describe('<UserCard /> provider enrichment', () => {
   })
 })
 
-describe('<UserCard /> accessible navigation links', () => {
-  it('puts the full profile context on the card group, not the link', () => {
+describe('<UserCard /> accessible focus group', () => {
+  it('is a single tabbable group labelled by the display name', () => {
     render(<UserCard profile={profile({ firstName: 'Patrick', lastName: 'Smith' })} easyRead={false} />)
-    expect(screen.queryByRole('article')).not.toBeInTheDocument()
-
-    const card = screen.getByRole('group', { name: 'Patrick Smith' })
-    expect(card).toBeInTheDocument()
-
-    const viewProfile = screen.getByRole('link', { name: 'View profile of Patrick Smith' })
-    expect(viewProfile).toHaveTextContent('View Profile')
-    expect(viewProfile).toHaveAttribute('href', '/')
+    const group = screen.getByRole('group', { name: 'Patrick Smith' })
+    expect(group).toHaveAttribute('tabindex', '0')
   })
 
   it('describes role and city for a consumer card with no enrichment, and excludes price', () => {
@@ -168,8 +170,8 @@ describe('<UserCard /> accessible navigation links', () => {
         easyRead={false}
       />,
     )
-    const card = screen.getByRole('group', { name: 'Anna Weber' })
-    const description = computeAccessibleDescription(card)
+    const group = screen.getByRole('group', { name: 'Anna Weber' })
+    const description = computeAccessibleDescription(group)
     expect(description).toContain('Consumer')
     expect(description).toContain('Berlin')
     expect(description).toContain('Friendly help.')
@@ -184,8 +186,8 @@ describe('<UserCard /> accessible navigation links', () => {
         providerSummary={providerSummary}
       />,
     )
-    const card = screen.getByRole('group', { name: 'Patrick Smith' })
-    const description = computeAccessibleDescription(card)
+    const group = screen.getByRole('group', { name: 'Patrick Smith' })
+    const description = computeAccessibleDescription(group)
     expect(description).toContain('Provider')
     expect(description).toContain('From')
     expect(description).toContain('20€/hr')
@@ -197,8 +199,8 @@ describe('<UserCard /> accessible navigation links', () => {
 
   it('omits city and price from the description when absent', () => {
     render(<UserCard profile={profile({ userType: 'PROVIDER', city: null, bio: null })} easyRead={false} />)
-    const card = screen.getByRole('group', { name: 'Patrick Smith' })
-    const description = computeAccessibleDescription(card)
+    const group = screen.getByRole('group', { name: 'Patrick Smith' })
+    const description = computeAccessibleDescription(group)
     expect(description).not.toContain('Berlin')
     expect(description).not.toContain('From')
   })

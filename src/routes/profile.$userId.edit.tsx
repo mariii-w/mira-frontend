@@ -64,7 +64,7 @@ function parseAddressLine(value: string): { street: string; houseNumber: string 
 
 function validateAddressLine(value: string): string | null {
   if (!value.trim()) return 'Required.'
-  if (!parseAddressLine(value)) return 'Bitte Straße und Hausnummer angeben, z. B. "Kleiber Weg 5".'
+  if (!parseAddressLine(value)) return 'Please enter street and house number, e.g. "Kleiber Weg 5".'
   return null
 }
 

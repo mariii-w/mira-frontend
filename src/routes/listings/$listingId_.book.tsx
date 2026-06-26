@@ -14,10 +14,10 @@ import type {
   UnauthorizedErrorResponse,
 } from "../../api/model";
 import { BookingPage } from "../../components/BookingPage";
-import { requireAuth } from "../../lib/requireAuth";
+import { requireConsumer } from "../../lib/requireAuth";
 
 export const Route = createFileRoute("/listings/$listingId_/book")({
-  beforeLoad: requireAuth,
+  beforeLoad: requireConsumer,
   component: BookingRoute,
 });
 

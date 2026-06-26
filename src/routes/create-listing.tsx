@@ -11,7 +11,7 @@ import {
 } from "../api/mira";
 import { authFetch, type FetchResponse } from "../lib/authFetch";
 import { createListingActions } from "../lib/createListingActions";
-import { requireAuth } from "../lib/requireAuth";
+import { requireProvider } from "../lib/requireAuth";
 import type {
   ListingDetails,
   ProblemDetailsResponse,
@@ -19,7 +19,7 @@ import type {
 } from "../api/model";
 
 export const Route = createFileRoute("/create-listing")({
-  beforeLoad: requireAuth,
+  beforeLoad: requireProvider,
   component: CreateListingPage,
 });
 

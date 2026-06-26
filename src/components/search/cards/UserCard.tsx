@@ -49,20 +49,20 @@ export function UserCard({ profile, easyRead, providerSummary }: UserCardProps) 
     : 'bg-accent text-accent-foreground hover:bg-accent-hover active:bg-accent-hover focus-visible:ring-accent'
 
   return (
-    <div className="bg-linen rounded-2xl flex flex-col p-3 gap-3 border border-border w-full h-full">
-      <div
-        role="group"
-        tabIndex={0}
-        aria-labelledby={nameId}
-        aria-describedby={describedBy}
-        className="flex gap-3 flex-1"
-      >
+    <div
+      role="group"
+      tabIndex={0}
+      aria-labelledby={nameId}
+      aria-describedby={describedBy}
+      className="bg-linen rounded-2xl flex flex-col p-3 gap-3 border border-border w-full h-full"
+    >
+      <div className="flex gap-3 flex-1">
         <div className="relative shrink-0 self-start">
           <AvatarIcon
             firstName={profile.firstName}
             lastName={profile.lastName}
             picture={profile.profileMedia ? mediaUrl(profile.profileMedia.url) : undefined}
-            size={64}
+            size={80}
             bgColorClassName={isProvider ? 'bg-forest' : 'bg-accent'}
           />
           {verified && (
@@ -108,18 +108,19 @@ export function UserCard({ profile, easyRead, providerSummary }: UserCardProps) 
               <ProviderServicesSection serviceCount={providerSummary.serviceCount} topTags={providerSummary.topTags} />
             </div>
           )}
-        </div>
-      </div>
 
-      <div className="border-t border-border pt-2">
-        <Link
-          to="/"
-          aria-label={`View profile of ${displayName}`}
-          className={`relative inline-flex w-full items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-12 px-6 text-body no-underline [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${actionBg}`}
-        >
-          View Profile
-          <ArrowRight aria-hidden="true" />
-        </Link>
+          <div className="border-t border-border pt-2 mt-auto">
+            <Link
+              to="/profile/$userId"
+              params={{ userId: profile.userId }}
+              aria-label={`View profile of ${displayName}`}
+              className={`relative inline-flex w-full items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body no-underline [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${actionBg}`}
+            >
+              View Profile
+              <ArrowRight aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   )
