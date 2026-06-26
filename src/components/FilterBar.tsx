@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useId } from 'react'
+import { useState, useRef, useId } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { Input } from './Input'
@@ -85,6 +85,7 @@ export function FilterBar({
   activeCount = 0,
 }: FilterBarProps) {
   const [search, setSearch] = useState('')
+  const [prevSearch, setPrevSearch] = useState('')
   const [activeTagIndex, setActiveTagIndex] = useState(0)
   const tagRefs = useRef<(HTMLInputElement | null)[]>([])
 
@@ -92,7 +93,10 @@ export function FilterBar({
     tag.name.toLowerCase().includes(search.toLowerCase())
   )
 
-  useEffect(() => { setActiveTagIndex(0) }, [search])
+  if (prevSearch !== search) {
+    setPrevSearch(search)
+    setActiveTagIndex(0)
+  }
 
   function handleTagKeyDown(e: React.KeyboardEvent) {
     const count = filteredTags.length
@@ -134,7 +138,7 @@ export function FilterBar({
             onChange={(e) => setSearch(e.target.value)}
           />
           <ul
-            role="group"
+            role="list"
             aria-label="Available tags"
             className="mt-2 flex flex-col gap-2 max-h-48 overflow-y-auto list-none p-0 m-0"
             onKeyDown={handleTagKeyDown}

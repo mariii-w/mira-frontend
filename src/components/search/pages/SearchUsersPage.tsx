@@ -212,7 +212,7 @@ export function SearchUsersPage() {
 
             {/* Results list */}
             {resultsReady && visibleProfiles.length > 0 && (
-                <ul role="list" className="grid grid-cols-1 lg:grid-cols-2 gap-4 list-none m-0 p-0">
+                <ul role="list" aria-label="User results" className="grid grid-cols-1 lg:grid-cols-2 gap-4 list-none m-0 p-0">
                   {visibleProfiles.map((profile, index) => (
                     <li
                       key={profile.userId}
