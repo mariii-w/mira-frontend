@@ -8,9 +8,16 @@ import {
 } from "../../api/mira";
 import type { PrivateUserProfileResponse } from "../../api/model";
 import { RegisterDone } from "../../components/RegisterDone";
+import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/done")({
+  head: () =>
+    createPageMeta({
+      title: "Registration Complete",
+      description: "Finish Mira registration and continue to your next step.",
+      path: "/register/done",
+    }),
   component: RegisterDoneRoute,
 });
 
@@ -49,7 +56,10 @@ function RegisterDoneRoute() {
       user={data ?? user}
       onContinue={() =>
         navigate({
-          to: (data ?? user)?.userType === "PROVIDER" ? "/calendar" : "/browse-services",
+          to:
+            (data ?? user)?.userType === "PROVIDER"
+              ? "/calendar"
+              : "/browse-services",
         })
       }
     />

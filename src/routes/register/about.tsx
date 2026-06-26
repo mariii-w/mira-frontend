@@ -5,9 +5,17 @@ import {
   RegisterAbout,
   type RegisterAboutSubmitValues,
 } from "../../components/RegisterAbout";
+import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/about")({
+  head: () =>
+    createPageMeta({
+      title: "About You",
+      description:
+        "Add profile details that help other Mira users understand who you are.",
+      path: "/register/about",
+    }),
   component: RegisterAboutRoute,
 });
 

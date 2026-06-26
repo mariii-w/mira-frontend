@@ -54,7 +54,7 @@ export const INFO_PAGES = {
         title: "What you can contact us about",
         body: [
           "You can contact the Mira team about the project, accounts, services, bookings, credential information, confusing flows, or feedback about the experience.",
-          { text: "Support contact:", email: "mira.support@gmail.com" },
+          { text: "Support contact:", email: "support@mira.com" },
           "If something on Mira feels unclear, incomplete, or difficult to use, a short description of what happened is already helpful.",
         ],
       },
@@ -70,7 +70,10 @@ export const INFO_PAGES = {
         body: [
           "If your message is about an accessibility barrier, please contact the accessibility contact directly.",
           "Useful details include the page, the action you were trying to complete, the device or browser you used, and any assistive technology involved.",
-          { text: "Accessibility Contact Person:", email: "mira.accessibility@gmail.com" },
+          {
+            text: "Accessibility Contact Person:",
+            email: "accessibility@mira.com",
+          },
         ],
       },
       {
@@ -120,7 +123,10 @@ export const INFO_PAGES = {
       {
         title: "Accessibility contact",
         body: [
-          { text: "Accessibility Contact Person:", email: "mira.accessibility@gmail.com" },
+          {
+            text: "Accessibility Contact Person:",
+            email: "accessibility@mira.com",
+          },
           "If something is hard to use, confusing, or does not work well with your assistive technology, please contact us. You can help us understand the issue better by including the page where it happened, what you were trying to do, your device or browser, and the assistive technology you used.",
         ],
       },

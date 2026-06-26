@@ -5,9 +5,16 @@ import {
   RegisterPhoto,
   type RegisterPhotoSubmitError,
 } from "../../components/RegisterPhoto";
+import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/photo")({
+  head: () =>
+    createPageMeta({
+      title: "Profile Photo",
+      description: "Upload or skip a profile photo for your Mira account.",
+      path: "/register/photo",
+    }),
   component: RegisterPhotoRoute,
 });
 

@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { InfoPage } from "../components/InfoPage";
 import { INFO_PAGES } from "../components/infoPages";
+import { createPageMeta } from "../lib/headers";
 
 export const Route = createFileRoute("/about")({
+  head: () =>
+    createPageMeta({
+      title: "About",
+      description: "Learn what Mira is  & who it is for",
+      path: "/about",
+    }),
   component: AboutRoute,
 });
 

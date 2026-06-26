@@ -2,8 +2,15 @@ import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { RegisterLayout } from "../../components/RegisterLayout";
 import { useAuthStore } from "../../stores/auth";
 import { requireAuth } from "../../lib/requireAuth";
+import { createPageMeta } from "../../lib/headers";
 
 export const Route = createFileRoute("/register")({
+  head: () =>
+    createPageMeta({
+      title: "Registration",
+      description: "Complete your Mira registration and prepare your profile.",
+      path: "/register",
+    }),
   beforeLoad: requireAuth,
   component: RegisterLayoutRoute,
 });

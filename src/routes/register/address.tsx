@@ -5,9 +5,17 @@ import {
   RegisterAddress,
   type RegisterAddressSubmitValues,
 } from "../../components/RegisterAddress";
+import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/address")({
+  head: () =>
+    createPageMeta({
+      title: "Add Address",
+      description:
+        "Add your private address so Mira can support local service matching.",
+      path: "/register/address",
+    }),
   component: RegisterAddressRoute,
 });
 

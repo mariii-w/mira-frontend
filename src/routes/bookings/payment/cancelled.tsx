@@ -1,8 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PaymentReturnPage } from "../../../components/PaymentReturnPage";
 import { requireAuth } from "../../../lib/requireAuth";
+import { createPageMeta } from "../../../lib/headers";
 
 export const Route = createFileRoute("/bookings/payment/cancelled")({
+  head: () =>
+    createPageMeta({
+      title: "Payment Cancelled",
+      description: "Payment didnt work",
+      path: "/bookings/payment/cancelled",
+    }),
   beforeLoad: requireAuth,
   component: PaymentCancelledRoute,
 });
