@@ -122,7 +122,7 @@ describe('<ListingProviderCard />', () => {
     expect(screen.getByRole('tooltip')).toHaveTextContent('Master plumber')
   })
 
-  it('shows "Today" when available today, otherwise "See calendar"', () => {
+  it('shows "Today" when available today, otherwise prompts to contact the provider', () => {
     const { rerender } = render(
       <ListingProviderCard
         authorName="Klaus"
@@ -149,7 +149,9 @@ describe('<ListingProviderCard />', () => {
         onBookNow={vi.fn()}
       />,
     )
-    expect(screen.getByText('See calendar')).toBeInTheDocument()
+    expect(
+      screen.getByText('Contact provider for availability'),
+    ).toBeInTheDocument()
   })
 
   it('calls onBookNow when Book Now is clicked', () => {

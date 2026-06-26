@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   ArrowLeft,
   Minus,
@@ -9,12 +9,14 @@ import {
   MapPin,
   MapPinned,
   ArrowRight,
+  Check,
 } from "lucide-react";
 import type {
   CreateBookingRequest,
   LocationType,
   PublicListingDetails,
   ProviderAvailabilityResponse,
+  VerifiedCredentialResponse,
 } from "../../../api/model";
 import { CalendarGrid } from "./CalendarGrid";
 
@@ -31,6 +33,7 @@ interface BookingPageProps {
   month: number;
   availability?: ProviderAvailabilityResponse;
   listing?: PublicListingDetails;
+  publicVerifiedCredentials?: VerifiedCredentialResponse[];
   bookingPending: boolean;
   bookingError: string | null;
   onMonthChange: (year: number, month: number) => void;
@@ -139,6 +142,7 @@ export function BookingPage({
   month,
   availability,
   listing,
+  publicVerifiedCredentials = [],
   bookingPending,
   bookingError,
   onMonthChange,
@@ -150,6 +154,9 @@ export function BookingPage({
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [durationHours, setDurationHours] = useState(1);
   const [locationType, setLocationType] = useState<LocationType | null>(null);
+  const [showVerifiedDetails, setShowVerifiedDetails] = useState(false);
+  const verifiedDetailsId = useId();
+  const hasPublicVerifiedCredentials = publicVerifiedCredentials.length > 0;
   const [description, setDescription] = useState("");
 
   const dayMap = new Map<string, DayAvailability>(
@@ -291,9 +298,39 @@ export function BookingPage({
                   <p className="text-xs text-primary-foreground uppercase tracking-wide font-semibold mb-1">
                     You're booking
                   </p>
-                  <p className="text-body font-bold text-primary-foreground mb-1">
-                    {listing.title}
-                  </p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-body font-bold text-primary-foreground">
+                      {listing.title}
+                    </p>
+                    {hasPublicVerifiedCredentials && (
+                      <span className="relative inline-flex">
+                        <span
+                          tabIndex={0}
+                          aria-describedby={showVerifiedDetails ? verifiedDetailsId : undefined}
+                          onMouseEnter={() => setShowVerifiedDetails(true)}
+                          onMouseLeave={() => setShowVerifiedDetails(false)}
+                          onFocus={() => setShowVerifiedDetails(true)}
+                          onBlur={() => setShowVerifiedDetails(false)}
+                          className="inline-flex items-center gap-1 h-6 px-2.5 rounded-full text-small font-medium bg-primary-foreground/20 text-primary-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/80"
+                        >
+                          <Check size={12} aria-hidden="true" />
+                          Verified
+                        </span>
+                        {showVerifiedDetails && (
+                          <span
+                            id={verifiedDetailsId}
+                            role="tooltip"
+                            className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 rounded-lg bg-background px-3 py-2 text-left text-small text-foreground shadow-lg ring-1 ring-border"
+                          >
+                            <span className="block font-semibold">Verified credentials</span>
+                            <span className="mt-1 block">
+                              {publicVerifiedCredentials.map((credential) => credential.name).join(", ")}
+                            </span>
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </div>
                   <p className="flex items-center gap-1 text-xs text-primary-foreground">
                     <MapPinned size={11} aria-hidden="true" />
                     {listing.location?.city ?? "Location unavailable"}
@@ -314,8 +351,10 @@ export function BookingPage({
         )}
 
         <section
+          id="main-content"
+          tabIndex={-1}
           aria-labelledby="pick-datetime-heading"
-          className="bg-linen rounded-2xl border border-border p-6 mb-4"
+          className="bg-linen rounded-2xl border border-border p-6 mb-4 focus-visible:outline-none"
         >
           <div className="flex items-center gap-3 mb-4">
             <StepBadge n={1} />
@@ -593,6 +632,7 @@ export function BookingPage({
                     : "border-border",
                 ].join(" ")}
                 aria-describedby="desc-hint"
+                aria-invalid={description.length > 0 && description.length < 10 ? true : undefined}
               />
               <p
                 id="desc-hint"
@@ -660,9 +700,19 @@ export function BookingPage({
               </p>
             </div>
           </div>
+          {!canSubmit && (
+            <span id="booking-submit-hint" className="sr-only">
+              {[
+                !selectedSlot && "Select a date and time.",
+                !locationType && "Select a location type.",
+                description.length < 10 && "Description must be at least 10 characters.",
+              ].filter(Boolean).join(" ")}
+            </span>
+          )}
           <button
             type="button"
             disabled={!canSubmit || bookingPending}
+            aria-describedby={!canSubmit ? "booking-submit-hint" : undefined}
             onClick={() => {
               if (!selectedSlot || !locationType) return;
               onCreateBooking({

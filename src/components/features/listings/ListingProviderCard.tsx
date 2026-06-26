@@ -29,7 +29,7 @@ export interface ListingProviderCardProps {
 
 function formatAvailability(availableToday?: boolean, nextAvailableDate?: string): string {
   if (availableToday) return "Today";
-  if (!nextAvailableDate) return "See calendar";
+  if (!nextAvailableDate) return "Contact provider for availability";
 
   return new Date(`${nextAvailableDate}T00:00:00`).toLocaleDateString("default", {
     weekday: "short",
@@ -167,11 +167,18 @@ export function ListingProviderCard({
         <p className="text-small font-semibold mb-2">Tags</p>
         <div className="flex flex-wrap gap-2">
           {tags.map((tag) => (
-            <Badge
+            <Link
               key={tag.tagId}
-              text={tag.name}
-              variant={tag.isBarrierefrei ? "accent" : "primary"}
-            />
+              to="/browse-services"
+              search={{ q: "", city: "", tagIds: [tag.tagId] }}
+              aria-label={`Browse services tagged ${tag.name}`}
+              className="no-underline rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/80"
+            >
+              <Badge
+                text={tag.name}
+                variant={tag.isBarrierefrei ? "accent" : "primary"}
+              />
+            </Link>
           ))}
         </div>
       </div>

@@ -300,7 +300,7 @@ describe("<EditListingPage />", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
     await waitFor(() =>
-      expect(screen.getByText("Required.")).toBeInTheDocument(),
+      expect(screen.getByText("Title is required.")).toBeInTheDocument(),
     );
   });
 
@@ -537,7 +537,7 @@ describe("<EditListingPage />", () => {
       });
       fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
       await waitFor(() =>
-        expect(screen.getByText("At least 10 characters.")).toBeInTheDocument(),
+        expect(screen.getByText("Description must be at least 10 characters.")).toBeInTheDocument(),
       );
     });
 
@@ -551,7 +551,7 @@ describe("<EditListingPage />", () => {
       fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
       await waitFor(() =>
         expect(
-          screen.getByText("Must be a positive number."),
+          screen.getByText("Hourly rate must be a positive number."),
         ).toBeInTheDocument(),
       );
     });
@@ -572,7 +572,7 @@ describe("<EditListingPage />", () => {
       fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
       await waitFor(() =>
         expect(
-          screen.getByText("Must be exactly 5 digits."),
+          screen.getByText("Postal code must be exactly 5 digits."),
         ).toBeInTheDocument(),
       );
     });

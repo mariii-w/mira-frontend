@@ -27,22 +27,21 @@ interface RegisterNameProps {
   onContinue: (values: RegisterNameSubmitValues) => Promise<void>;
 }
 
-function validateName(value: string): string | null {
+function validateName(value: string, label: string): string | null {
   const v = value.trim();
-  if (!v) return "Required.";
-  if (v.length > 100) return "Maximum 100 characters.";
+  if (!v) return `${label} is required.`;
+  if (v.length > 100) return `${label} must be 100 characters or fewer.`;
   if (!/^[A-Za-zÄÖÜäöü](?:[^0-9]*[^0-9\s])?$/.test(v)) {
-    return "No digits. Must not start or end with a space.";
+    return `${label} must not contain digits or start/end with a space.`;
   }
   return null;
 }
 
 function validateUsername(value: string): string | null {
-  if (!value) return "Required.";
-  if (value.length < 3) return "Minimum 3 characters.";
-  if (value.length > 50) return "Maximum 50 characters.";
+  if (!value) return "Username is required.";
+  if (value.length < 3 || value.length > 50) return "Username must be 3–50 characters.";
   if (!/^[a-z0-9_]+$/.test(value)) {
-    return "Only lowercase letters, digits, and underscores.";
+    return "Username may only contain lowercase letters, digits, and underscores.";
   }
   return null;
 }
@@ -75,8 +74,8 @@ export function RegisterName({
     e.preventDefault();
     if (submitting) return;
 
-    const fnErr = validateName(firstName);
-    const lnErr = validateName(lastName);
+    const fnErr = validateName(firstName, 'First name');
+    const lnErr = validateName(lastName, 'Last name');
     const unErr = validateUsername(username);
 
     setFirstNameError(fnErr);
@@ -132,8 +131,9 @@ export function RegisterName({
             size="sm"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            onBlur={() => setFirstNameError(validateName(firstName))}
+            onBlur={() => setFirstNameError(validateName(firstName, 'First name'))}
             autoComplete="given-name"
+            required
             error={firstNameError}
           />
         </div>
@@ -146,8 +146,9 @@ export function RegisterName({
             size="sm"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            onBlur={() => setLastNameError(validateName(lastName))}
+            onBlur={() => setLastNameError(validateName(lastName, 'Last name'))}
             autoComplete="family-name"
+            required
             error={lastNameError}
           />
         </div>
@@ -164,13 +165,13 @@ export function RegisterName({
           onChange={(e) => setUsername(e.target.value)}
           onBlur={() => setUsernameError(validateUsername(username))}
           autoComplete="username"
+          required
+          aria-describedby="username-hint"
           error={usernameError}
         />
-        {!usernameError && (
-          <p className="text-small text-muted">
-            Lowercase letters, numbers and underscores. 3-50 characters.
-          </p>
-        )}
+        <p id="username-hint" className="text-small text-muted">
+          Lowercase letters, numbers and underscores. 3–50 characters.
+        </p>
       </div>
 
       {serverError && (

@@ -59,7 +59,7 @@ function StatusFilterBar({
             aria-pressed={selected}
             aria-label={filter.label}
             onClick={() => onChange(filter.value)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-small font-semibold transition-colors ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-small font-semibold transition-colors cursor-pointer ${
               selected
                 ? "bg-foreground text-cream"
                 : "border border-foreground/25 text-foreground hover:bg-black/5"
@@ -121,14 +121,16 @@ export function MyListings({
 }: MyListingsProps) {
   return (
     <>
-      <main
-        id="main-content"
-        className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
-      >
-        <div className="mx-auto max-w-3xl">
+      <main className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8">
+        <section
+          id="main-content"
+          tabIndex={-1}
+          aria-labelledby="services-heading"
+          className="mx-auto max-w-3xl focus-visible:outline-none"
+        >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8 animate-fade-in-up">
             <div className="flex flex-col gap-1">
-              <h1 className="font-heading text-h1 font-bold text-foreground">
+              <h1 id="services-heading" className="font-heading text-h1 font-bold text-foreground">
                 My Services
               </h1>
               <p className="text-small text-muted">
@@ -244,7 +246,7 @@ export function MyListings({
               )}
             </>
           )}
-        </div>
+        </section>
       </main>
     </>
   );

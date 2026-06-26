@@ -56,11 +56,16 @@ export function Credentials({
 
   return (
     <>
-      <main id="main-content" className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8">
-        <div className="mx-auto max-w-3xl">
+      <main className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8">
+        <section
+          id="main-content"
+          tabIndex={-1}
+          aria-labelledby="credentials-heading"
+          className="mx-auto max-w-3xl focus-visible:outline-none"
+        >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8 animate-fade-in-up">
             <div className="flex flex-col gap-1">
-              <h1 className="font-heading text-h1 font-bold text-foreground">My Credentials</h1>
+              <h1 id="credentials-heading" className="font-heading text-h1 font-bold text-foreground">My Credentials</h1>
               <p className="text-small text-muted">
                 {activeCount} active credential{activeCount === 1 ? '' : 's'}
               </p>
@@ -121,7 +126,7 @@ export function Credentials({
               ))}
             </ul>
           )}
-        </div>
+        </section>
       </main>
     </>
   )

@@ -72,7 +72,7 @@ export function ListingDetailPage({
   return (
     <div className="min-h-dvh bg-background">
       {banner}
-      <main id="main-content" className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-6 py-8">
         <Breadcrumb
           className="mb-4 animate-fade-in-up"
           links={[
@@ -83,7 +83,9 @@ export function ListingDetailPage({
         />
 
         <h1
-          className="text-h1 font-heading font-bold text-foreground mb-6 animate-fade-in-up"
+          id="main-content"
+          tabIndex={-1}
+          className="text-h1 font-heading font-bold text-foreground mb-6 animate-fade-in-up focus-visible:outline-none"
           style={{ animationDelay: "60ms" }}
         >
           {listing.title}

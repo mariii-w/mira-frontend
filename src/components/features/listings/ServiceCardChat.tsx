@@ -68,16 +68,16 @@ export function ServiceCardChat(
                                     to={link}
                                     className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-hover [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                                 >
-                                    View Listing
+                                    View Service
                                     <ArrowRight aria-hidden="true" />
                                 </Link>
                             ) : (
                                 <Button
                                     disabled
                                     trailingIcon={<ArrowRight />}
-                                    aria-label="View listing (unavailable)"
+                                    aria-label="View service (unavailable)"
                                 >
-                                    View Listing
+                                    View Service
                                 </Button>
                             )}
                         </div>

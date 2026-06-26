@@ -133,6 +133,7 @@ export function SubmitCredentialModal({
               variant="secondary"
               size="md"
               leadingIcon={<Upload />}
+              aria-describedby={["evidence-hint", fileError ? "evidence-error" : undefined].filter(Boolean).join(" ")}
               onClick={() => fileInputRef.current?.click()}
             >
               Choose file
@@ -151,11 +152,11 @@ export function SubmitCredentialModal({
               {file ? file.name : ''}
             </p>
           </div>
-          <p className="text-small text-muted">JPG or PNG.</p>
+          <p id="evidence-hint" className="text-small text-muted">JPG or PNG.</p>
         </div>
 
         {(fileError || errorMessage) && (
-          <p role="alert" className="text-sm text-red-600">
+          <p id="evidence-error" role="alert" className="text-sm text-red-600">
             {fileError ?? errorMessage}
           </p>
         )}

@@ -36,7 +36,11 @@ export function MyListingCard({ listing, onEdit }: MyListingCardProps) {
   return (
     <article
       aria-labelledby={headingId}
-      className="bg-surface rounded-2xl overflow-hidden shadow-sm border border-border/20 flex flex-col sm:flex-row"
+      aria-describedby={`listing-desc-${listing.listingId}`}
+      tabIndex={0}
+      onClick={() => onEdit(listing.listingId)}
+      onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onEdit(listing.listingId) } }}
+      className="bg-surface rounded-2xl overflow-hidden shadow-sm border border-border/20 flex flex-col sm:flex-row cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     >
       {/* Image — full-width banner on mobile, fixed sidebar on sm+ */}
       <div className="relative h-48 sm:h-auto sm:w-44 shrink-0 bg-linen">
@@ -83,8 +87,9 @@ export function MyListingCard({ listing, onEdit }: MyListingCardProps) {
             variant="primary"
             size="md"
             trailingIcon={<SquarePen />}
-            aria-label={`Edit "${listing.title}"`}
-            onClick={() => onEdit(listing.listingId)}
+            aria-label="Edit"
+            aria-describedby={headingId}
+            onClick={(e) => { e.stopPropagation(); onEdit(listing.listingId) }}
           >
             Edit
           </Button>

@@ -74,7 +74,7 @@ export function PublicProfilePage({
 
   return (
     <>
-      <main id="main-content">
+      <main>
         <div aria-hidden="true" className="bg-linear-to-r from-primary to-accent h-40 sm:h-50 w-full" />
         <section aria-label="Profile">
           <div className="container mx-auto max-w-6xl -mt-16 sm:-mt-20 px-4 pb-8 grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
@@ -149,7 +149,7 @@ export function PublicProfilePage({
             </section>
 
             {/* About */}
-            <section aria-labelledby="public-about-heading" className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3 animate-fade-in-up [animation-delay:250ms]">
+            <section id="main-content" tabIndex={-1} aria-labelledby="public-about-heading" className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3 animate-fade-in-up [animation-delay:250ms] focus-visible:outline-none">
               <h2 id="public-about-heading" className="font-heading font-bold text-h2">About me</h2>
               <div id="public-about-content" className="flex flex-col gap-3">
                 {!easyRead && selfSummary && <p>{selfSummary}</p>}
