@@ -54,7 +54,6 @@ export function ServiceCard(
         return (
             <div
                 role="group"
-                tabIndex={0}
                 aria-labelledby={titleId}
                 aria-describedby={describedBy}
                 className="bg-surface rounded-2xl flex flex-col p-4 gap-3 w-full h-full"
@@ -94,7 +93,6 @@ export function ServiceCard(
     return(
         <div
             role="group"
-            tabIndex={0}
             aria-labelledby={titleId}
             aria-describedby={describedBy}
             className="bg-linen rounded-2xl flex flex-col p-3 gap-3 border border-border w-full"
