@@ -100,6 +100,7 @@ Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `b
 
 <details>
 <summary>Start the Backend</summary>
+
 ```sh
 # stripe
 stripe login
@@ -135,14 +136,16 @@ DB_USERNAME=
 DB_PASSWORD=
 java -jar ./backend.jar --spring.profiles.active=postgres --server.port=8081
 
-````
-<details>
+```
+
+</details>
+
 ```sh
 VITE_API_BASE_URL=http://localhost:8081
 npm install
 npm run openapi
 npm run dev
-````
+```
 
 ### Tech Stack
 
