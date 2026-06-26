@@ -152,21 +152,21 @@ export function MyListings({
           {showMissingAvailabilityWarning && (
             <div
               role="alert"
-              className="mb-6 flex items-center gap-3 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-950"
+              className="mb-6 flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950"
             >
               <AlertTriangle
                 size={18}
-                className="shrink-0 text-red-700"
+                className="shrink-0 text-amber-700"
                 aria-hidden="true"
               />
               <p>
-                No availability is set.{" "}
+                No weekly schedule is set. You might want to{" "}
                 <button
                   type="button"
                   onClick={onSetAvailability}
-                  className="font-semibold text-red-950 underline underline-offset-2 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2"
+                  className="font-semibold text-amber-950 underline underline-offset-2 hover:text-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:ring-offset-2"
                 >
-                  Go to calendar
+                  set it
                 </button>
                 .
               </p>
