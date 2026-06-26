@@ -14,9 +14,15 @@ import {
 import { ListingDetailPage } from "../../components/ListingDetailPage";
 import { useAccessibilityStore } from "../../stores/accessibility";
 import { useAuthStore } from "../../stores/auth";
-import { usePageTitle } from "../../lib/usePageTitle";
+import { createPageMeta } from "../../lib/headers";
 
 export const Route = createFileRoute("/listings/$listingId/")({
+  head: () =>
+      createPageMeta({
+        title: "Service Details",
+        description:
+            "View a Mira service listing with provider information, availability, and booking options.",
+      }),
   component: ListingDetailRoute,
 });
 
@@ -39,6 +45,7 @@ function ListingDetailRoute() {
   const currentUserId = useAuthStore((s) => s.user?.userId);
   const [messageError, setMessageError] = useState<string | null>(null);
   const createChat = useCreateChat();
+
   const today = toLocalDate(new Date());
   // 30-day lookahead, comfortably under the API's 31-day range limit.
   const availabilityRangeEnd = toLocalDate(addDays(new Date(), 29));
@@ -48,8 +55,9 @@ function ListingDetailRoute() {
     isLoading,
     error,
   } = useGetPublicListing(listingId);
-  const listing = listingResponse?.status === 200 ? listingResponse.data : undefined;
-  usePageTitle(listing?.title ?? '')
+
+  const listing =
+      listingResponse?.status === 200 ? listingResponse.data : undefined;
 
   const authorId = listing?.author?.userId;
   const queryAuthorId = authorId ?? "";
@@ -57,7 +65,9 @@ function ListingDetailRoute() {
   const { data: otherListingsData } = useQuery({
     queryKey: getGetPublicProfileListingsQueryKey(queryAuthorId, { limit: 5 }),
     queryFn: async () => {
-      const response = await getPublicProfileListings(queryAuthorId, { limit: 5 });
+      const response = await getPublicProfileListings(queryAuthorId, {
+        limit: 5,
+      });
 
       // A 404 means the author has no publicly eligible profile (not public yet,
       // or registration incomplete) — treat that as "no other listings" rather
@@ -67,7 +77,9 @@ function ListingDetailRoute() {
       }
 
       if (response.status !== 200) {
-        throw new Error(response.data.detail ?? "Failed to load other listings.");
+        throw new Error(
+            response.data.detail ?? "Failed to load other listings.",
+        );
       }
 
       return response.data;
@@ -85,7 +97,9 @@ function ListingDetailRoute() {
       }
 
       if (response.status !== 200) {
-        throw new Error(response.data.detail ?? "Failed to load provider credentials.");
+        throw new Error(
+            response.data.detail ?? "Failed to load provider credentials.",
+        );
       }
 
       return response.data;
@@ -113,58 +127,65 @@ function ListingDetailRoute() {
   });
 
   const description = listing
-    ? (easyRead && listing.easyDescription ? listing.easyDescription : listing.description)
-    : undefined;
+      ? easyRead && listing.easyDescription
+          ? listing.easyDescription
+          : listing.description
+      : undefined;
 
   const nextAvailableDay = [...(availability?.days ?? [])]
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .find((day) => day.freeWindows.length > 0);
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .find((day) => day.freeWindows.length > 0);
+
   const availableToday = nextAvailableDay?.date === today;
   const nextAvailableDate = nextAvailableDay?.date;
 
   const otherListings = (otherListingsData?.items ?? []).filter(
-    (item) => item.listingId !== listingId,
+      (item) => item.listingId !== listingId,
   );
 
   const isOwnListing = !!currentUserId && authorId === currentUserId;
+
   // Only consumers can book; providers can still view the listing.
   const isProvider = useAuthStore((s) => s.user?.userType) === "PROVIDER";
 
   function handleMessage() {
     setMessageError(null);
+
     createChat.mutate(
-      { data: { listingId } },
-      {
-        onSuccess: (response) => {
-          if (response.status === 200 || response.status === 201) {
-            navigate({ to: "/chat", search: { cid: response.data.cid } });
-          } else {
-            setMessageError(response.data.detail ?? "Couldn't start the chat.");
-          }
+        { data: { listingId } },
+        {
+          onSuccess: (response) => {
+            if (response.status === 200 || response.status === 201) {
+              navigate({ to: "/chat", search: { cid: response.data.cid } });
+            } else {
+              setMessageError(response.data.detail ?? "Couldn't start the chat.");
+            }
+          },
+          onError: () => setMessageError("Couldn't start the chat. Try again."),
         },
-        onError: () => setMessageError("Couldn't start the chat. Try again."),
-      },
     );
   }
 
   return (
-    <ListingDetailPage
-      listing={listing}
-      loading={isLoading}
-      error={error ? (error instanceof Error ? error.message : error.detail) : null}
-      description={description ?? undefined}
-      availableToday={availableToday}
-      nextAvailableDate={nextAvailableDate}
-      otherListings={otherListings}
-      publicVerifiedCredentials={publicCredentialsData?.items ?? []}
-      onBookNow={() =>
-        navigate({ to: "/listings/$listingId/book", params: { listingId } })
-      }
-      canBook={!isProvider}
-      onMessage={handleMessage}
-      canMessage={!isOwnListing}
-      messagePending={createChat.isPending}
-      messageError={messageError}
-    />
+      <ListingDetailPage
+          listing={listing}
+          loading={isLoading}
+          error={
+            error ? (error instanceof Error ? error.message : error.detail) : null
+          }
+          description={description ?? undefined}
+          availableToday={availableToday}
+          nextAvailableDate={nextAvailableDate}
+          otherListings={otherListings}
+          publicVerifiedCredentials={publicCredentialsData?.items ?? []}
+          onBookNow={() =>
+              navigate({ to: "/listings/$listingId/book", params: { listingId } })
+          }
+          canBook={!isProvider}
+          onMessage={handleMessage}
+          canMessage={!isOwnListing}
+          messagePending={createChat.isPending}
+          messageError={messageError}
+      />
   );
 }

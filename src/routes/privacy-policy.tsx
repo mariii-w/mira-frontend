@@ -1,8 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { InfoPage } from "../components/InfoPage";
 import { INFO_PAGES } from "../components/infoPages";
+import { createPageMeta } from "../lib/headers";
 
 export const Route = createFileRoute("/privacy-policy")({
+  head: () =>
+    createPageMeta({
+      title: "Privacy Policy",
+      description:
+        "Understand how Mira handles profile, listing, booking, and credential data.",
+      path: "/privacy-policy",
+    }),
   component: PrivacyPolicyRoute,
 });
 

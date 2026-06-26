@@ -20,7 +20,7 @@ import {
 } from "../api/mira";
 import { useAuthStore } from "../stores/auth";
 import { requireProvider } from "../lib/requireAuth";
-import { usePageTitle } from "../lib/usePageTitle";
+import { createPageMeta } from "../lib/headers";
 import type {
   ListingDetails,
   ListingMediaPreview,
@@ -31,6 +31,12 @@ import type {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/edit-listing/$listingId")({
+  head: () =>
+      createPageMeta({
+        title: "Edit Service",
+        description:
+            "Update a Mira service listing, media, availability, and publication status.",
+      }),
   beforeLoad: requireProvider,
   component: EditListingPage,
 });
@@ -55,26 +61,27 @@ export function EditListingPage() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const userId = user?.userId;
+
   const [listing, setListing] = useState<ListingDetails | null>(null);
-  usePageTitle(listing?.title ? `Edit – ${listing.title}` : 'Edit Service')
   const [loadError, setLoadError] = useState<string | null>(null);
   const [availableTags, setAvailableTags] = useState<ServiceTag[]>([]);
   const [tagsLoading, setTagsLoading] = useState(true);
-  const [nextAvailableDate, setNextAvailableDate] = useState<string | undefined>();
+  const [nextAvailableDate, setNextAvailableDate] = useState<
+      string | undefined
+  >();
   const [availableToday, setAvailableToday] = useState(false);
-  const [otherListings, setOtherListings] = useState<PublicListingSummary[]>([]);
+  const [otherListings, setOtherListings] = useState<PublicListingSummary[]>(
+      [],
+  );
 
   const refreshListing = useCallback(async (): Promise<ListingDetails> => {
     if (!userId) throw new Error("You must be signed in to edit this listing.");
 
-    const response = await getAuthorListing(
-      userId,
-      listingId,
-    );
+    const response = await getAuthorListing(userId, listingId);
 
     if (response.status !== 200) {
       throw new Error(
-        getProblemDetail(response.data) ?? "Failed to load listing.",
+          getProblemDetail(response.data) ?? "Failed to load listing.",
       );
     }
 
@@ -82,7 +89,7 @@ export function EditListingPage() {
   }, [listingId, userId]);
 
   const handleRefreshMedia = useCallback(async (): Promise<
-    ListingMediaPreview[]
+      ListingMediaPreview[]
   > => {
     const nextListing = await refreshListing();
     setListing(nextListing);
@@ -112,6 +119,7 @@ export function EditListingPage() {
 
   useEffect(() => {
     if (!listing) return;
+
     let cancelled = false;
 
     async function loadAvailability() {
@@ -124,8 +132,8 @@ export function EditListingPage() {
       if (cancelled || response.status !== 200) return;
 
       const nextAvailableDay = [...response.data.days]
-        .sort((a, b) => a.date.localeCompare(b.date))
-        .find((day) => day.freeWindows.length > 0);
+          .sort((a, b) => a.date.localeCompare(b.date))
+          .find((day) => day.freeWindows.length > 0);
 
       setAvailableToday(nextAvailableDay?.date === today);
       setNextAvailableDate(nextAvailableDay?.date);
@@ -144,12 +152,14 @@ export function EditListingPage() {
 
   useEffect(() => {
     if (!listing) return;
+
     let cancelled = false;
 
     async function loadOtherListings() {
       const response = await getPublicListings({ userId, limit: 5 });
 
       if (cancelled) return;
+
       setOtherListings(response.status === 200 ? response.data.items : []);
     }
 
@@ -169,6 +179,7 @@ export function EditListingPage() {
 
       try {
         const response = await getServiceTags();
+
         if (!cancelled && response.status === 200) {
           setAvailableTags(response.data ?? []);
         }
@@ -187,48 +198,43 @@ export function EditListingPage() {
   }, []);
 
   async function handleSubmit(values: EditListingFormValues) {
-    const updateResponse = await updateListing(
-      listingId,
-      {
-        title: values.title,
-        description: values.description,
-        price: values.price,
-        tagIds: values.tagIds,
-        location: values.location,
-      },
-    );
+    const updateResponse = await updateListing(listingId, {
+      title: values.title,
+      description: values.description,
+      price: values.price,
+      tagIds: values.tagIds,
+      location: values.location,
+    });
 
     if (updateResponse.status !== 200) {
       throw new Error(
-        getProblemDetail(updateResponse.data) ??
+          getProblemDetail(updateResponse.data) ??
           `Failed to save listing (${updateResponse.status}).`,
       );
     }
 
     if (values.imageFiles.length > 0) {
-      const mediaResponse = await uploadListingMedia(
-        listingId,
-        { files: values.imageFiles },
-      );
+      const mediaResponse = await uploadListingMedia(listingId, {
+        files: values.imageFiles,
+      });
 
       if (mediaResponse.status !== 200) {
         throw new Error(
-          getProblemDetail(mediaResponse.data) ??
+            getProblemDetail(mediaResponse.data) ??
             `Failed to upload listing media (${mediaResponse.status}).`,
         );
       }
     }
+
+    await navigate({ to: "/my-listings" });
   }
 
   async function handleRemoveImage(mediaId: string) {
-    const response = await deleteListingMedia(
-      listingId,
-      mediaId,
-    );
+    const response = await deleteListingMedia(listingId, mediaId);
 
     if (response.status !== 204) {
       throw new Error(
-        getProblemDetail(response.data) ??
+          getProblemDetail(response.data) ??
           "Failed to delete image. Please try again.",
       );
     }
@@ -240,11 +246,12 @@ export function EditListingPage() {
       pause: pauseListing,
       resume: resumeListing,
     };
+
     const response = await actionMap[action](listingId);
 
     if (response.status !== 200) {
       throw new Error(
-        getProblemDetail(response.data) ??
+          getProblemDetail(response.data) ??
           `Action failed (${response.status}).`,
       );
     }
@@ -257,7 +264,7 @@ export function EditListingPage() {
 
     if (response.status !== 204) {
       throw new Error(
-        getProblemDetail(response.data) ??
+          getProblemDetail(response.data) ??
           `Failed to delete listing (${response.status}).`,
       );
     }
@@ -266,20 +273,20 @@ export function EditListingPage() {
   }
 
   return (
-    <EditListing
-      listing={listing}
-      loadError={loadError}
-      availableTags={availableTags}
-      tagsLoading={tagsLoading}
-      availableToday={availableToday}
-      nextAvailableDate={nextAvailableDate}
-      otherListings={otherListings}
-      onBack={() => navigate({ to: "/my-listings" })}
-      onSubmit={handleSubmit}
-      onDelete={handleDelete}
-      onRemoveImage={handleRemoveImage}
-      onStatusAction={handleStatusAction}
-      onRefreshMedia={handleRefreshMedia}
-    />
+      <EditListing
+          listing={listing}
+          loadError={loadError}
+          availableTags={availableTags}
+          tagsLoading={tagsLoading}
+          availableToday={availableToday}
+          nextAvailableDate={nextAvailableDate}
+          otherListings={otherListings}
+          onBack={() => navigate({ to: "/my-listings" })}
+          onSubmit={handleSubmit}
+          onDelete={handleDelete}
+          onRemoveImage={handleRemoveImage}
+          onStatusAction={handleStatusAction}
+          onRefreshMedia={handleRefreshMedia}
+      />
   );
 }

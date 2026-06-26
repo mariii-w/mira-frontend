@@ -1,8 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PaymentReturnPage } from "../../../components/PaymentReturnPage";
 import { requireAuth } from "../../../lib/requireAuth";
+import { createPageMeta } from "../../../lib/headers";
 
 export const Route = createFileRoute("/bookings/payment/success")({
+  head: () =>
+    createPageMeta({
+      title: "Payment Successful",
+      description: "The payment was successfull",
+      path: "/bookings/payment/success",
+    }),
   beforeLoad: requireAuth,
   component: PaymentSuccessRoute,
 });

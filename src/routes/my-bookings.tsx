@@ -14,8 +14,16 @@ import type { AllowedAction, BookingDetails } from "../components/BookingCard";
 import { executeBookingAction } from "../lib/bookingActions";
 import { useAuthStore } from "../stores/auth";
 import { requireAuth } from "../lib/requireAuth";
+import { createPageMeta } from "../lib/headers";
 
 export const Route = createFileRoute("/my-bookings")({
+  head: () =>
+    createPageMeta({
+      title: "My Bookings",
+      description:
+        "Track your Mira booking requests, confirmations, payments, and actions.",
+      path: "/my-bookings",
+    }),
   beforeLoad: requireAuth,
   component: MyBookingsRoute,
 });
@@ -38,9 +46,7 @@ function MyBookingsRoute() {
     error: queryError,
     refetch,
   } = useQuery({
-    queryKey: userId
-      ? getListMyBookingsQueryKey(userId)
-      : ["bookings"],
+    queryKey: userId ? getListMyBookingsQueryKey(userId) : ["bookings"],
     queryFn: async () => {
       if (!userId) throw new Error("You must be signed in to view bookings.");
 
