@@ -98,12 +98,51 @@ Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `b
 > **Note:** `og:url` will be incorrect in development builds.  
 > In production, the frontend and backend are served from the same server, but during development the frontend runs on a separate dev-server port.
 
+<details>
+<summary>Start the Backend</summary>
+```sh
+# stripe
+stripe login
+stripe listen --forward-to localhost:8081/v1/stripe/webhook
+
+# Server
+
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+LISA_API_TOKEN=
+OPENCAGE_API_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+AUTH_JWT_SECRET="replace-with-at-least-32-random-bytes"
+STRIPE_CHECKOUT_CANCEL_URL=http://localhost:5173/bookings/payment/cancelled
+STRIPE_CHECKOUT_SUCCESS_URL="http://localhost:5173/bookings/payment/success?session_id={CHECKOUT_SESSION_ID}"
+MIRA_MEDIA_S3_ENABLED=false
+TESTNIG=true
+MIRA_LOG=DEBUG
+MIRA_FILE_LOG_ENABLED=true
+MIRA_DEMO_SKIP_GOOGLE_ID_TOKEN_SIGNATURE=false
+
+# in memory db(delete after shutdown)
+
+java -jar ./backend.jar --spring.profiles.active=local-h2 --server.port=8081
+
+# with postgres db
+
+# install postgres with postgis a database named miradb & set username/password
+
+DATASOURCE_URL=jdbc:postgresql://localhost:5432/miradb
+DB_USERNAME=
+DB_PASSWORD=
+java -jar ./backend.jar --spring.profiles.active=postgres --server.port=8081
+
+````
+<details>
 ```sh
 VITE_API_BASE_URL=http://localhost:8081
 npm install
 npm run openapi
 npm run dev
-```
+````
 
 ### Tech Stack
 
