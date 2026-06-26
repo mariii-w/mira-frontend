@@ -3175,7 +3175,7 @@ describe("component accessibility", () => {
     vi.useRealTimers();
     await waitFor(() => {
       expect(
-        screen.getAllByText(/maximum 120 characters/i).length,
+        screen.getAllByText(/120 characters or fewer/i).length,
       ).toBeGreaterThan(0);
     });
     await expectNoAxeViolations(container);
