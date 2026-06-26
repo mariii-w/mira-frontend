@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import type { ChatMessage } from "../../components/features/chat/ChatBubble.tsx";
 import type { ChatPreview } from "../../components/features/chat/ChatInbox.tsx";
 import { ChatPageView } from "../../components/features/chat/ChatPageView.tsx";
@@ -33,6 +33,7 @@ export const Route = createFileRoute("/_app/chat")({
 type LiveMessage = ChatMessage & { rawId: number };
 // eslint-disable-next-line react-refresh/only-export-components
 function Chat() {
+  const navigate = useNavigate();
   const { cid: cidFromLink } = Route.useSearch();
   const [selectedChatId, setSelectedChatId] = useState<string>("");
   const [messagesByChat, setMessagesByChat] = useState<
@@ -238,6 +239,13 @@ function Chat() {
       onSend={handleSend}
       listing={listing}
       listingIsError={listingIsError}
+      onViewProfile={() => {
+        if (!selectedChat) return;
+        navigate({
+          to: "/profile/$userId",
+          params: { userId: selectedChat.userId },
+        });
+      }}
     />
   );
 }

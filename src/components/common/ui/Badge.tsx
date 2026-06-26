@@ -15,10 +15,10 @@ export interface BadgeProps {
 export function Badge({ variant = 'primary', text }: BadgeProps) {
   return (
     <div className={cn(
-      'inline-flex items-center h-9 rounded-full px-4 py-0.5 font-medium text-h3',
+      'inline-flex items-center min-h-9 rounded-full px-4 py-1.5 font-medium text-h3',
       VARIANT[variant]
     )}>
-      <p>{text}</p>
+      <p className="text-center">{text}</p>
     </div>
   );
 }

@@ -31,6 +31,7 @@ export interface ChatPageViewProps {
     onSend: () => void;
     listing: PublicListingDetails | undefined;
     listingIsError: boolean;
+    onViewProfile: () => void;
 }
 
 // Presentational view for the chat route 
@@ -55,6 +56,7 @@ export function ChatPageView({
     onSend,
     listing,
     listingIsError,
+    onViewProfile,
 }: ChatPageViewProps) {
     return (
         <>
@@ -165,8 +167,15 @@ export function ChatPageView({
                             <div className="border-t-2 border-border">
                                 <div className="m-4">
                                     <h3 className="text-primary font-bold"> About {selectedChat?.firstName ?? "this contact"}</h3>
-                                    <div className="mt-3">
-                                        <Button variant ='secondary' trailingIcon={<ArrowRight/>}>View Full Profile </Button>
+                                    <div className="mt-3 flex justify-center">
+                                        <Button
+                                            variant="secondary"
+                                            trailingIcon={<ArrowRight />}
+                                            disabled={!selectedChat}
+                                            onClick={onViewProfile}
+                                        >
+                                            View Full Profile
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
