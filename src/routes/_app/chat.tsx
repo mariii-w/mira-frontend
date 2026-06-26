@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import type { ChatMessage } from "../../components/features/chat/ChatBubble.tsx";
 import type { ChatPreview } from "../../components/features/chat/ChatInbox.tsx";
@@ -12,7 +13,13 @@ import { describeMessageContent, toChatPreview } from "../../lib/chatContent.ts"
 import { useAuthStore } from "../../stores/auth";
 import { requireAuth } from "../../lib/requireAuth";
 import { createPageMeta } from "../../lib/headers";
-import { useGetPublicListing, useHistory, useListChats } from "../../api/mira.ts";
+import {
+  getGetPublicProfileCredentialsQueryKey,
+  getPublicProfileCredentials,
+  useGetPublicListing,
+  useHistory,
+  useListChats,
+} from "../../api/mira.ts";
 
 export const Route = createFileRoute("/_app/chat")({
   head: () =>
@@ -140,6 +147,28 @@ function Chat() {
   const listing =
     listingResponse?.status === 200 ? listingResponse.data : undefined;
 
+  const contactUserId = selectedChat?.userId ?? "";
+  const { data: contactCredentialsData } = useQuery({
+    queryKey: getGetPublicProfileCredentialsQueryKey(contactUserId),
+    queryFn: async () => {
+      const response = await getPublicProfileCredentials(contactUserId);
+
+      if (response.status === 404) {
+        return { items: [] };
+      }
+
+      if (response.status !== 200) {
+        throw new Error(
+          response.data.detail ?? "Failed to load contact credentials.",
+        );
+      }
+
+      return response.data;
+    },
+    enabled: !!contactUserId,
+  });
+  const contactVerifiedCredentials = contactCredentialsData?.items ?? [];
+
   // Subscribe to every chat's topic, not just the open one.
   useEffect(() => {
     if (!chatIdsKey) return;
@@ -239,6 +268,7 @@ function Chat() {
       onSend={handleSend}
       listing={listing}
       listingIsError={listingIsError}
+      contactVerifiedCredentials={contactVerifiedCredentials}
       onViewProfile={() => {
         if (!selectedChat) return;
         navigate({

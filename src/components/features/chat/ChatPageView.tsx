@@ -1,5 +1,5 @@
-import type { KeyboardEvent, RefObject } from "react";
-import { ArrowRight, Search } from "lucide-react";
+import { useId, useState, type KeyboardEvent, type RefObject } from "react";
+import { ArrowRight, Check, Search } from "lucide-react";
 import { Button } from "../../common/ui/Button";
 import { AvatarIcon } from "../../common/ui/AvatarIcon";
 import { Input } from "../../common/ui/Input.tsx";
@@ -8,7 +8,7 @@ import { ServiceCardChat } from "../listings/ServiceCardChat.tsx";
 import { ChatBubble, type ChatMessage } from "./ChatBubble.tsx";
 import { ChatInbox, type ChatPreview } from "./ChatInbox.tsx";
 import { mediaUrl } from "../../../lib/mediaUrl";
-import type { PublicListingDetails } from "../../../api/model";
+import type { PublicListingDetails, VerifiedCredentialResponse } from "../../../api/model";
 
 export interface ChatPageViewProps {
     chats: ChatPreview[];
@@ -31,6 +31,7 @@ export interface ChatPageViewProps {
     onSend: () => void;
     listing: PublicListingDetails | undefined;
     listingIsError: boolean;
+    contactVerifiedCredentials: VerifiedCredentialResponse[];
     onViewProfile: () => void;
 }
 
@@ -56,8 +57,13 @@ export function ChatPageView({
     onSend,
     listing,
     listingIsError,
+    contactVerifiedCredentials,
     onViewProfile,
 }: ChatPageViewProps) {
+    const [showVerifiedDetails, setShowVerifiedDetails] = useState(false);
+    const verifiedDetailsId = useId();
+    const hasVerifiedCredentials = contactVerifiedCredentials.length > 0;
+
     return (
         <>
             <main id="main-content">
@@ -110,6 +116,34 @@ export function ChatPageView({
                                         <>
                                             <AvatarIcon firstName={selectedChat.firstName} lastName={selectedChat.lastName} size={60}/>
                                             <h2 className="text-2xl font-bold ml-2">{selectedChat.firstName} {selectedChat.lastName}</h2>
+                                            {hasVerifiedCredentials && (
+                                                <span className="relative inline-flex ml-2">
+                                                    <span
+                                                        tabIndex={0}
+                                                        aria-describedby={showVerifiedDetails ? verifiedDetailsId : undefined}
+                                                        onMouseEnter={() => setShowVerifiedDetails(true)}
+                                                        onMouseLeave={() => setShowVerifiedDetails(false)}
+                                                        onFocus={() => setShowVerifiedDetails(true)}
+                                                        onBlur={() => setShowVerifiedDetails(false)}
+                                                        className="inline-flex items-center gap-1 h-7 px-3 rounded-full text-small font-medium bg-primary text-primary-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                                                    >
+                                                        <Check size={14} aria-hidden="true" />
+                                                        Verified
+                                                    </span>
+                                                    {showVerifiedDetails && (
+                                                        <span
+                                                            id={verifiedDetailsId}
+                                                            role="tooltip"
+                                                            className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 rounded-lg bg-background px-3 py-2 text-left text-small text-foreground shadow-lg ring-1 ring-border"
+                                                        >
+                                                            <span className="block font-semibold">Verified credentials</span>
+                                                            <span className="mt-1 block">
+                                                                {contactVerifiedCredentials.map((credential) => credential.name).join(", ")}
+                                                            </span>
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            )}
                                         </>
                                     ) : (
                                         <h2 className="text-2xl font-bold ml-2 text-black/60">
