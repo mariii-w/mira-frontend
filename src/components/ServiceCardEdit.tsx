@@ -25,7 +25,7 @@ const statusConfig: Record<ServiceStatus, {
     inactive: {
         label: 'Inaktiv',
         icon: <CircleOff size={12} />,
-        className: 'bg-gray-100 text-gray-500 border border-gray-200',
+        className: 'bg-gray-100 text-gray-600 border border-gray-200',
     },
     draft: {
         label: 'Entwurf',
