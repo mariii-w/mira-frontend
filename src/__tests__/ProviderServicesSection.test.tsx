@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { ProviderServicesSection } from '../features/search/ProviderServicesSection'
+import { ProviderServicesSection } from '../components/features/search/ProviderServicesSection'
 
 const tags = [
   { tagId: 'wifi', name: 'Wi-Fi Setup', usageCount: 2, isBarrierefrei: false, minPrice: 22 },

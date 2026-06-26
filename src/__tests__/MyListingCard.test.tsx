@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { MyListingCard, type MyListingSummary } from '../features/listings/MyListingCard'
+import { MyListingCard, type MyListingSummary } from '../components/features/listings/MyListingCard'
 
 const baseListing: MyListingSummary = {
   listingId: 'abc-123',

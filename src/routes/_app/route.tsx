@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { Navbar } from '../../common/layout/Navbar'
-import { Footer } from '../../common/layout/Footer'
+import { Navbar } from '../../components/common/layout/Navbar'
+import { Footer } from '../../components/common/layout/Footer'
 
 export const Route = createFileRoute('/_app')({
   component: AppLayout,

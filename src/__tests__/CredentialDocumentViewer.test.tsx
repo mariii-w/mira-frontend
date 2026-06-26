@@ -2,10 +2,10 @@ import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { CredentialDocumentViewer } from '../features/credentials/CredentialDocumentViewer'
+import { CredentialDocumentViewer } from '../components/features/credentials/CredentialDocumentViewer'
 import { fetchCredentialEvidenceMediaUrl } from '../lib/credentialEvidenceMedia'
 
-vi.mock('../common/ui/Modal', () => ({
+vi.mock('../components/common/ui/Modal', () => ({
   Modal: ({ open, children, title }: { open: boolean; children: ReactNode; title: string }) =>
     open ? <div role="dialog" aria-label={title}>{children}</div> : null,
 }))

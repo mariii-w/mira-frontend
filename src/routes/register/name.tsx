@@ -5,7 +5,7 @@ import {
   RegisterName,
   type RegisterNameSubmitError,
   type RegisterNameSubmitValues,
-} from "../../features/register/RegisterName";
+} from "../../components/features/register/RegisterName";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/name")({

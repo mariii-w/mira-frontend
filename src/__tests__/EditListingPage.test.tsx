@@ -89,7 +89,7 @@ vi.mock("../api/mira", () => ({
 }));
 
 
-vi.mock("../common/ui/MultiSelect", () => ({
+vi.mock("../components/common/ui/MultiSelect", () => ({
   MultiSelect: ({
     onChange,
     value,
@@ -111,7 +111,7 @@ vi.mock("../common/ui/MultiSelect", () => ({
 }));
 
 import { EditListingPage } from "../routes/_app/edit-listing.$listingId";
-import type { MultiSelectProps } from "../common/ui/MultiSelect";
+import type { MultiSelectProps } from "../components/common/ui/MultiSelect";
 
 type PublicationStatus = "DRAFT" | "ACTIVE" | "PAUSED" | "DELETED";
 

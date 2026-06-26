@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { InfoPage } from "../../common/InfoPage";
-import { INFO_PAGES } from "../../common/infoPages";
+import { InfoPage } from "../../components/common/InfoPage";
+import { INFO_PAGES } from "../../components/common/infoPages";
 
 export const Route = createFileRoute("/_app/contact-us")({
   component: ContactUsRoute,

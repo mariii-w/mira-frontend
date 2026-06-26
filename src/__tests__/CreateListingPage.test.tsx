@@ -4,7 +4,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import type { ComponentProps } from "react";
 
 
-vi.mock("../common/ui/MultiSelect", () => ({
+vi.mock("../components/common/ui/MultiSelect", () => ({
   MultiSelect: ({
     onChange,
     id,
@@ -24,8 +24,8 @@ vi.mock("../common/ui/MultiSelect", () => ({
   ),
 }));
 
-import { CreateListing } from "../features/listings/CreateListing";
-import type { MultiSelectProps } from "../common/ui/MultiSelect";
+import { CreateListing } from "../components/features/listings/CreateListing";
+import type { MultiSelectProps } from "../components/common/ui/MultiSelect";
 
 const availableTags = [
   {

@@ -15,8 +15,8 @@ import type {
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
 } from "../../api/model";
-import { MyBookings } from "../../features/bookings/MyBookings";
-import type { AllowedAction, BookingDetails } from "../../features/bookings/BookingCard";
+import { MyBookings } from "../../components/features/bookings/MyBookings";
+import type { AllowedAction, BookingDetails } from "../../components/features/bookings/BookingCard";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/_app/my-bookings")({

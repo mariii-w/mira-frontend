@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import {
   RegisterRole,
   type RegisterRoleSubmitValues,
-} from "../features/register/RegisterRole";
-import source from "../features/register/RegisterRole.tsx?raw";
+} from "../components/features/register/RegisterRole";
+import source from "../components/features/register/RegisterRole.tsx?raw";
 
 describe("RegisterRole", () => {
   it("renders the current role from props", () => {

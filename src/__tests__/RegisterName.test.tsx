@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   RegisterName,
   type RegisterNameSubmitValues,
-} from "../features/register/RegisterName";
+} from "../components/features/register/RegisterName";
 
 describe("RegisterName", () => {
   it("submits normalized name values through the continue handler", async () => {

@@ -13,7 +13,7 @@ import type {
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
 } from "../../../api/model";
-import { BookingPage } from "../../../features/bookings/BookingPage";
+import { BookingPage } from "../../../components/features/bookings/BookingPage";
 
 export const Route = createFileRoute("/_app/listings/$listingId_/book")({
   component: BookingRoute,

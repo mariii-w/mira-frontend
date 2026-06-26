@@ -2,9 +2,9 @@ import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { WeeklyScheduleModal } from '../features/bookings/WeeklyScheduleModal'
+import { WeeklyScheduleModal } from '../components/features/bookings/WeeklyScheduleModal'
 
-vi.mock('../common/ui/Modal', () => ({
+vi.mock('../components/common/ui/Modal', () => ({
   Modal: ({ open, children, title }: { open: boolean; children: ReactNode; title: string }) =>
     open ? <div role="dialog" aria-label={title}>{children}</div> : null,
 }))

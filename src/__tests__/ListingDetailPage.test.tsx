@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { ListingDetailPage } from '../features/listings/ListingDetailPage'
+import { ListingDetailPage } from '../components/features/listings/ListingDetailPage'
 import type {
   PublicListingDetails,
   PublicListingSummary,

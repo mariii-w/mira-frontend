@@ -4,7 +4,7 @@ import type { PatchUserProfileRequest } from "../../api/model";
 import {
   RegisterAddress,
   type RegisterAddressSubmitValues,
-} from "../../features/register/RegisterAddress";
+} from "../../components/features/register/RegisterAddress";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/address")({

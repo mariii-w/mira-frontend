@@ -7,7 +7,7 @@ import {
   getPrivateUserProfile,
 } from "../../api/mira";
 import type { PrivateUserProfileResponse } from "../../api/model";
-import { RegisterDone } from "../../features/register/RegisterDone";
+import { RegisterDone } from "../../components/features/register/RegisterDone";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/done")({

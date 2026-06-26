@@ -10,7 +10,7 @@ import {
   getPublicProfileListings,
   getAvailability,
 } from "../../../api/mira";
-import { ListingDetailPage } from "../../../features/listings/ListingDetailPage";
+import { ListingDetailPage } from "../../../components/features/listings/ListingDetailPage";
 import { useAccessibilityStore } from "../../../stores/accessibility";
 
 export const Route = createFileRoute("/_app/listings/$listingId/")({

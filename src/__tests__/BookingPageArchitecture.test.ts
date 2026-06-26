@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import source from "../features/bookings/BookingPage.tsx?raw";
-import bookingCardSource from "../features/bookings/BookingCard.tsx?raw";
+import source from "../components/features/bookings/BookingPage.tsx?raw";
+import bookingCardSource from "../components/features/bookings/BookingCard.tsx?raw";
 import queryClientSource from "../lib/queryClient.ts?raw";
 import bookingRouteSource from "../routes/_app/listings/$listingId_.book.tsx?raw";
 
