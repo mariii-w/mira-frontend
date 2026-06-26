@@ -95,9 +95,6 @@ Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `b
 
 ### Getting Started
 
-> **Note:** `og:url` will be incorrect in development builds.  
-> In production, the frontend and backend are served from the same server, but during development the frontend runs on a separate dev-server port.
-
 <details>
 <summary>Start the Backend</summary>
 
@@ -139,7 +136,12 @@ java -jar ./backend.jar --spring.profiles.active=postgres --server.port=8081
 ```
 
 </details>
-> Note: On some systems, STOMP may fail when using npm. If chat functionality does not work, try using pnpm instead by replacing npm commands with the equivalent pnpm commands.
+
+> **Note:** `og:url` will be incorrect in development builds.  
+> In production, the frontend and backend are served from the same server, but during development the frontend runs on a separate dev-server port.
+
+>> Note: On some systems, STOMP may fail when using npm. If chat functionality does not work, try using pnpm instead by replacing npm commands with the equivalent pnpm commands.
+
 ```sh
 VITE_API_BASE_URL=http://localhost:8081
 npm install
