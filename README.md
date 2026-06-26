@@ -1,6 +1,6 @@
 # Mira — Frontend
 
-> Last updated: 2026-05-10
+> Last updated: 2026-06-26
 
 React + TypeScript frontend for the Mira platform. Built with Vite, Tailwind CSS v4, and TanStack Router.
 
@@ -9,7 +9,13 @@ React + TypeScript frontend for the Mira platform. Built with Vite, Tailwind CSS
 <!-- Add Figma link here -->
 > Figma: https://www.figma.com/design/DDBQZwK4QjCup1GH4OblFu/Design?node-id=240-1053&t=Mxw89tVCKZcrnzMo-1
 
+## Demo
+The server shuts down after 15min inactivity and may take 1 minute to start up agin
+
+> Render: https://mira-uni-deploy.onrender.com/
 Stripe testing info
+
+### Credit Card
 ```
 Kartennummer: 4242 4242 4242 4242
 Ablaufdatum: 12/34
@@ -21,7 +27,24 @@ E-Mail: user@example.com
 ```
 ---
 
-## Tech Stack
+## Accessibility
+
+The project follows WCAG 2.1 AA as a baseline:
+
+- Focus-visible styles applied globally via `:focus-visible`, with a fallback for older browsers
+- `prefers-reduced-motion` media query disables all animations, with an in-app override toggle
+- User-facing accessibility toggles — **Leichte Sprache** (easy-read German) and **Reduce motion** — accessible from the header `AccessibilityPanel`
+- Preferences are persisted via the Zustand store (`stores/accessibility.ts`) and mirrored onto `<html data-easy-read>` / `<html data-reduced-motion>` so CSS reacts
+- Custom `Popover` and `Switch` primitives include full keyboard navigation (Tab, Shift+Tab, Escape) and ARIA wiring
+- Icon-only buttons require `aria-label` (enforced by a dev-mode warning)
+- Loading state uses `aria-busy` and a visually-hidden "Loading…" text
+- Semantic HTML throughout: `<nav>`, `<main>`, `<section>`, `<article>`, `<ul>`/`<li>` lists with `aria-labelledby` on every section
+- Heading fonts use [Atkinson Hyperlegible](https://brailleinstitute.org/freefont), designed for low-vision readers
+
+
+## Developer Docs
+
+### Tech Stack
 
 | Tool | Version | Purpose |
 |------|---------|---------|
@@ -38,14 +61,14 @@ E-Mail: user@example.com
 
 ---
 
-## Getting Started
+### Getting Started
 
-### Prerequisites
+#### Prerequisites
 
 - Node.js 22+
 - npm 10+
 
-### Installation
+#### Installation
 
 ```bash
 # Clone the repo
@@ -56,7 +79,7 @@ cd mudkip-project
 npm ci
 ```
 
-### Development
+#### Development
 
 ```bash
 npm run dev
@@ -64,7 +87,7 @@ npm run dev
 
 Opens the dev server at `http://localhost:5173` with HMR enabled.
 
-### Build
+#### Build
 
 ```bash
 npm run build
@@ -72,13 +95,13 @@ npm run build
 
 Runs TypeScript type-checking (`tsc -b`) followed by the Vite production build. Output goes to `dist/`.
 
-### Preview production build
+#### Preview production build
 
 ```bash
 npm run preview
 ```
 
-### Lint
+#### Lint
 
 ```bash
 npm run lint
@@ -86,7 +109,7 @@ npm run lint
 
 Runs ESLint across all `.ts` / `.tsx` files.
 
-### Tests
+#### Tests
 
 ```bash
 # Watch mode (local development)
@@ -98,9 +121,8 @@ npm run test:ci
 
 Coverage is collected via `@vitest/coverage-v8`.
 
----
 
-## Project Structure
+### Project Structure
 
 ```
 src/
@@ -124,11 +146,11 @@ src/
 
 ---
 
-## Design Tokens
+### Design Tokens
 
 Design tokens are defined in `src/globals.css` using Tailwind CSS v4's `@theme` block and are available as Tailwind utilities throughout the app.
 
-### Colors
+#### Colors
 
 | Token | Hex | Role |
 |-------|-----|------|
@@ -145,7 +167,7 @@ Design tokens are defined in `src/globals.css` using Tailwind CSS v4's `@theme` 
 
 Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `border`, `muted`) are also defined.
 
-### Typography
+#### Typography
 
 | Token | Size | Font |
 |-------|------|------|
@@ -157,7 +179,7 @@ Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `b
 
 ---
 
-## Routes
+### Routes
 
 | Path | File | Purpose |
 |------|------|---------|
@@ -166,7 +188,7 @@ Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `b
 
 ---
 
-## Components
+### Components
 
 All components are showcased on the styleguide page (`/styleguide`).
 
@@ -187,7 +209,7 @@ All components are showcased on the styleguide page (`/styleguide`).
 
 ---
 
-## CI/CD Pipeline
+### CI/CD Pipeline
 
 The project uses **GitLab CI** (`.gitlab-ci.yml`). The pipeline runs on every push and merge request and has two sequential stages.
 
@@ -203,7 +225,7 @@ Both jobs run on the `node:22` Docker image.
 
 The `feature/runner-test` branch was used to verify the GitLab Runner was connected and working before wiring up real build and test jobs.
 
-### Pipeline jobs
+#### Pipeline jobs
 
 | Job | Stage | Command | Purpose |
 |-----|-------|---------|---------|
@@ -212,7 +234,7 @@ The `feature/runner-test` branch was used to verify the GitLab Runner was connec
 
 ---
 
-## Branch Strategy
+### Branch Strategy
 
 | Branch | Purpose |
 |--------|---------|
@@ -220,19 +242,3 @@ The `feature/runner-test` branch was used to verify the GitLab Runner was connec
 | `dev` | Integration branch — all feature branches merge here first |
 | `feat/*` | Individual feature or component work |
 | `feature/runner-test` | One-off branch used to smoke-test the GitLab Runner |
-
----
-
-## Accessibility
-
-The project follows WCAG 2.1 AA as a baseline:
-
-- Focus-visible styles applied globally via `:focus-visible`, with a fallback for older browsers
-- `prefers-reduced-motion` media query disables all animations, with an in-app override toggle
-- User-facing accessibility toggles — **Leichte Sprache** (easy-read German) and **Reduce motion** — accessible from the header `AccessibilityPanel`
-- Preferences are persisted via the Zustand store (`stores/accessibility.ts`) and mirrored onto `<html data-easy-read>` / `<html data-reduced-motion>` so CSS reacts
-- Custom `Popover` and `Switch` primitives include full keyboard navigation (Tab, Shift+Tab, Escape) and ARIA wiring
-- Icon-only buttons require `aria-label` (enforced by a dev-mode warning)
-- Loading state uses `aria-busy` and a visually-hidden "Loading…" text
-- Semantic HTML throughout: `<nav>`, `<main>`, `<section>`, `<article>`, `<ul>`/`<li>` lists with `aria-labelledby` on every section
-- Heading fonts use [Atkinson Hyperlegible](https://brailleinstitute.org/freefont), designed for low-vision readers
