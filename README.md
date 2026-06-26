@@ -4,6 +4,13 @@
 
 React + TypeScript frontend for the Mira platform. Built with Vite, Tailwind CSS v4, and TanStack Router.
 
+## Rückfragen
+
+Bei Problemen oder Unklarheiten können Sie uns jederzeit kontaktieren:
+
+Telefon:
+E-Mail:
+
 ## Design
 
 <!-- Add Figma link here -->
@@ -16,7 +23,6 @@ The server shuts down after 15min inactivity and may take 1 minute to start up a
 
 > Render: https://mira-uni-deploy.onrender.com/
 > Stripe testing info
-
 
 ### Credit Card
 
@@ -84,7 +90,6 @@ Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `b
 <details>
 <summary>More Info</summary>
 
-
 ### Tech Stack
 
 | Tool                                                                                                 | Version | Purpose                                                             |
@@ -134,4 +139,5 @@ The `feature/runner-test` branch was used to verify the GitLab Runner was connec
 | `main`    | Production-ready code                                      |
 | `dev`     | Integration branch — all feature branches merge here first |
 | `sprint*` | Each sprint                                                |
+
 </details>
