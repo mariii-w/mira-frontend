@@ -72,6 +72,11 @@ describe('<PrivateProfilePage />', () => {
     expect(screen.getByRole('main')).toBeInTheDocument()
   })
 
+  it('renders the uploaded profile picture with the user name as alt text', () => {
+    render(<PrivateProfilePage {...baseProps} pictureUrl="/profile/mira.png" />)
+    expect(screen.getByRole('img', { name: 'Mira Hofer avatar' })).toHaveAttribute('src', '/profile/mira.png')
+  })
+
   it('calls onEditClick when the Edit Profile button is clicked', () => {
     const onEditClick = vi.fn()
     render(<PrivateProfilePage {...baseProps} onEditClick={onEditClick} />)
@@ -132,6 +137,11 @@ describe('<PrivateProfilePage />', () => {
     it('shows "No active services yet." when the listing list is empty', () => {
       render(<PrivateProfilePage {...baseProps} ownerListings={[]} />)
       expect(screen.getByText('No active services yet.')).toBeInTheDocument()
+    })
+
+    it('does not render listing edit buttons when the listing list is empty', () => {
+      render(<PrivateProfilePage {...baseProps} ownerListings={[]} />)
+      expect(screen.queryByRole('button', { name: /edit "/i })).not.toBeInTheDocument()
     })
 
     it('renders a card for each listing', () => {

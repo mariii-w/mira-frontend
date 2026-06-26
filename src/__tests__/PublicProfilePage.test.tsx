@@ -90,6 +90,11 @@ describe('<PublicProfilePage />', () => {
     expect(screen.getByRole('main')).toBeInTheDocument()
   })
 
+  it('renders the uploaded profile picture with the user name as alt text', () => {
+    render(<PublicProfilePage {...baseProps} pictureUrl="/profile/klaus.png" />)
+    expect(screen.getByRole('img', { name: 'Klaus Mueller avatar' })).toHaveAttribute('src', '/profile/klaus.png')
+  })
+
   describe('VerifiedBadge', () => {
     it('is not shown when verified is false', () => {
       render(<PublicProfilePage {...baseProps} verified={false} credentials={credentials} />)
@@ -129,6 +134,15 @@ describe('<PublicProfilePage />', () => {
       render(<PublicProfilePage {...baseProps} verified={true} credentials={credentials} />)
       fireEvent.focus(screen.getByRole('img', { name: /verified/i }))
       expect(screen.getByRole('tooltip')).toHaveTextContent('Identity verified')
+    })
+
+    it('shows and hides the tooltip on pointer hover', () => {
+      render(<PublicProfilePage {...baseProps} verified={true} credentials={credentials} />)
+      const badge = screen.getByRole('img', { name: /verified/i })
+      fireEvent.mouseEnter(badge)
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Identity verified')
+      fireEvent.mouseLeave(badge)
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
     })
 
     it('hides the tooltip on blur', () => {
@@ -228,6 +242,11 @@ describe('<PublicProfilePage />', () => {
       render(<PublicProfilePage {...baseProps} publicServiceListings={serviceListings} />)
       const link = screen.getByRole('link', { name: /PC Support/i })
       expect(link).toHaveAttribute('href', '/listings/listing-1')
+    })
+
+    it('renders each service price as an hourly starting rate', () => {
+      render(<PublicProfilePage {...baseProps} publicServiceListings={serviceListings} />)
+      expect(screen.getByText('From 20€/h')).toBeInTheDocument()
     })
 
     it('renders service images with AI alt text when status is COMPLETED', () => {
