@@ -64,9 +64,9 @@ export function ChatPageView({
                 <section className=" mt-30">
                     <div className="container mx-auto -mt-20 lg:h-200 bg bg-linen rounded-2xl border-2 border-border flex flex-col lg:flex-row">
                         {/* Inbox */}
-                        <section className="w-full lg:w-1/4 border-b-2 lg:border-b-0 lg:border-r-2 border-border">
+                        <section className="w-full lg:w-1/4 border-b-2 lg:border-b-0 lg:border-r-2 border-border" aria-labelledby="inbox-heading">
                             <div className="border-b-2 border-border">
-                                <h1 className="mt-10 mx-10">Inbox</h1>
+                                <h1 id="inbox-heading" className="mt-10 mx-10">Inbox</h1>
                                 <div className="mx-9 mb-3 mt-5">
                                     <Input
                                         placeholder="Search Chat"
@@ -79,15 +79,15 @@ export function ChatPageView({
                                 </div>
                             </div>
                             <div className="max-h-72 overflow-y-auto lg:max-h-none lg:overflow-visible">
-                                {chatsLoading && <p className="m-5 text-black/60">Loading chats…</p>}
+                                {chatsLoading && <p role="status" className="m-5 text-black/60">Loading chats…</p>}
                                 {chatsErrored && (
-                                    <p className="m-5 text-black/60">Couldn't reach the chat server. Make sure the backend is running, then try again.</p>
+                                    <p role="alert" className="m-5 text-black/60">Couldn't reach the chat server. Make sure the backend is running, then try again.</p>
                                 )}
                                 {!chatsLoading && !chatsErrored && chats.length === 0 && (
-                                    <p className="m-5 text-black/60">No conversations yet.</p>
+                                    <p role="status" className="m-5 text-black/60">No conversations yet.</p>
                                 )}
                                 {!chatsLoading && !chatsErrored && chats.length > 0 && visibleChats.length === 0 && (
-                                    <p className="m-5 text-black/60">No conversations match your search.</p>
+                                    <p role="status" className="m-5 text-black/60">No conversations match your search.</p>
                                 )}
                                 {!chatsLoading && !chatsErrored && visibleChats.length > 0 && (
                                     <ChatInbox
@@ -98,18 +98,18 @@ export function ChatPageView({
                                 )}
                             </div>
                         </section>
-                        <section className="w-full lg:w-2/4 bg-cream">
+                        <section className="w-full lg:w-2/4 bg-cream" aria-label="Conversation">
                             <div className="border-b-2 border-border flex flex-row bg-linen">
                                 <div className=" flex flex-row items-center m-2 w-full">
                                     {selectedChat ? (
                                         <>
                                             <AvatarIcon firstName={selectedChat.firstName} lastName={selectedChat.lastName} size={60}/>
-                                            <p className="text-2xl font-bold ml-2">{selectedChat.firstName} {selectedChat.lastName}</p>
+                                            <h2 className="text-2xl font-bold ml-2">{selectedChat.firstName} {selectedChat.lastName}</h2>
                                         </>
                                     ) : (
-                                        <p className="text-2xl font-bold ml-2 text-black/60">
+                                        <h2 className="text-2xl font-bold ml-2 text-black/60">
                                             {chatsLoading ? "Loading…" : chatsErrored ? "Chat unavailable" : "No conversations yet"}
-                                        </p>
+                                        </h2>
                                     )}
                                 </div>
                             </div>
@@ -121,8 +121,8 @@ export function ChatPageView({
                                 )}
                                 {/* Chat Field */}
                                 <div ref={conversationRef} tabIndex={-1} className="h-96 lg:h-140 overflow-y-auto px-4 py-3 flex flex-col" role="log" aria-live="polite" aria-label="Conversation messages">
-                                    {activeChatId && historyLoading && <p className="text-black/60">Loading messages…</p>}
-                                    {activeChatId && historyErrored && <p className="text-black/60">Couldn't load this conversation's messages.</p>}
+                                    {activeChatId && historyLoading && <p role="status" className="text-black/60">Loading messages…</p>}
+                                    {activeChatId && historyErrored && <p role="alert" className="text-black/60">Couldn't load this conversation's messages.</p>}
                                     {messages.map((msg) => (
                                         <ChatBubble key={msg.id} message={msg.text} self={msg.self} timestamp={msg.timestamp} />
                                     ))}
@@ -147,8 +147,8 @@ export function ChatPageView({
                                 </div>
                             </div>
                         </section>
-                        <section className="hidden lg:block lg:w-1/4 border-l-2 border-border">
-                            <p className="text-primary text-xl font-semibold-xl m-5">ABOUT THIS SERVICE</p>
+                        <section className="hidden lg:block lg:w-1/4 border-l-2 border-border" aria-labelledby="about-service-heading">
+                            <h2 id="about-service-heading" className="text-primary text-xl font-semibold-xl m-5">ABOUT THIS SERVICE</h2>
                             <div className="m-4  border-border">
                                 {listing ? (
                                     <ServiceCardChat
@@ -159,14 +159,14 @@ export function ChatPageView({
                                         hourRate={listing.price}
                                     />
                                 ) : selectedChat?.listingId && !listingIsError ? (
-                                    <p className="text-black/60">Loading service…</p>
+                                    <p role="status" className="text-black/60">Loading service…</p>
                                 ) : (
                                     <p className="text-black/60">No service linked to this conversation.</p>
                                 )}
                             </div>
                             <div className="border-t-2 border-border">
                                 <div className="m-4">
-                                    <p className="text-primary font-bold"> About {selectedChat?.firstName ?? "this contact"}</p>
+                                    <h3 className="text-primary font-bold"> About {selectedChat?.firstName ?? "this contact"}</h3>
                                     <div className="mt-3">
                                         <Button variant ='secondary' trailingIcon={<ArrowRight/>}>View Full Profile </Button>
                                     </div>
