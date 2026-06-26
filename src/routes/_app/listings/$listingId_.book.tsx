@@ -4,8 +4,10 @@ import { useState } from "react";
 import {
   getGetPublicListingQueryKey,
   getGetAvailabilityQueryKey,
+  getGetPublicProfileCredentialsQueryKey,
   getAvailability,
   getPublicListing,
+  getPublicProfileCredentials,
   createBooking,
 } from "../../../api/mira";
 import type {
@@ -87,6 +89,27 @@ function BookingRoute() {
     staleTime: 10 * 60 * 1000,
   });
 
+  const authorId = listing?.author?.userId ?? "";
+  const { data: publicCredentialsData } = useQuery({
+    queryKey: getGetPublicProfileCredentialsQueryKey(authorId),
+    queryFn: async () => {
+      const response = await getPublicProfileCredentials(authorId);
+
+      if (response.status === 404) {
+        return { items: [] };
+      }
+
+      if (response.status !== 200) {
+        throw new Error(
+          getErrorDetail(response.data) ?? "Failed to load provider credentials.",
+        );
+      }
+
+      return response.data;
+    },
+    enabled: !!authorId,
+  });
+
   const bookingMutation = useMutation({
     mutationFn: async (booking: CreateBookingRequest) => {
       const response = await createBooking(booking);
@@ -107,6 +130,7 @@ function BookingRoute() {
       month={month}
       availability={availability}
       listing={listing}
+      publicVerifiedCredentials={publicCredentialsData?.items ?? []}
       bookingPending={bookingMutation.isPending}
       bookingError={
         bookingMutation.isError
