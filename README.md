@@ -120,7 +120,9 @@ Icons are standardized on [lucide-react](https://lucide.dev) throughout.
 
 <details>
 <summary>Start the Backend</summary>
+
 SERVER: https://drive.google.com/file/d/173U-MzPIxcziajj_iIJfxkE-n3WIyhQe/view?usp=sharing
+
 ```sh
 # stripe
 stripe login
@@ -157,7 +159,7 @@ export DB_USERNAME=
 export DB_PASSWORD=
 java -jar ./backend.jar --spring.profiles.active=postgres --server.port=8081
 
-````
+```
 
 </details>
 
@@ -171,7 +173,7 @@ VITE_API_BASE_URL=http://localhost:8081
 npm install
 npm run openapi
 npm run dev
-````
+```
 
 ### Tech Stack
 
