@@ -128,8 +128,11 @@ vi.mock("@tanstack/react-router", () => ({
     useSearch: () => routerMocks.location.search,
   }),
   useNavigate: () => routerMocks.navigate,
-  useRouterState: ({ select }: { select: (state: { location: typeof routerMocks.location }) => unknown }) =>
-    select({ location: routerMocks.location }),
+  useRouterState: ({
+    select,
+  }: {
+    select: (state: { location: typeof routerMocks.location }) => unknown;
+  }) => select({ location: routerMocks.location }),
 }));
 
 vi.mock("../api/mira", () => ({
@@ -140,7 +143,9 @@ vi.mock("../api/mira", () => ({
 }));
 
 vi.mock("../lib/credentialEvidenceMedia", () => ({
-  fetchCredentialEvidenceMediaUrl: vi.fn().mockResolvedValue("blob:credential-document"),
+  fetchCredentialEvidenceMediaUrl: vi
+    .fn()
+    .mockResolvedValue("blob:credential-document"),
 }));
 
 const mockGetServiceTags = vi.mocked(getServiceTags);
@@ -566,7 +571,12 @@ const componentCases: Array<[string, ReactElement]> = [
       label="Shopping help"
       description="Help with weekly shopping."
       tags={[
-        { tagId: "errands", name: "Errands", isBarrierefrei: false, isActive: true },
+        {
+          tagId: "errands",
+          name: "Errands",
+          isBarrierefrei: false,
+          isActive: true,
+        },
       ]}
       hourRate={20}
     />,
@@ -671,8 +681,20 @@ const componentCases: Array<[string, ReactElement]> = [
         serviceCount: 4,
         startingPrice: 20,
         topTags: [
-          { tagId: "wifi", name: "Laptop & Wi-Fi Setup", usageCount: 2, isBarrierefrei: false, minPrice: 22 },
-          { tagId: "a11y", name: "Accessible tech help", usageCount: 1, isBarrierefrei: true, minPrice: 28 },
+          {
+            tagId: "wifi",
+            name: "Laptop & Wi-Fi Setup",
+            usageCount: 2,
+            isBarrierefrei: false,
+            minPrice: 22,
+          },
+          {
+            tagId: "a11y",
+            name: "Accessible tech help",
+            usageCount: 1,
+            isBarrierefrei: true,
+            minPrice: 28,
+          },
         ],
       }}
     />,
@@ -742,7 +764,9 @@ describe("component accessibility", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /previous month/i })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /previous month/i }),
+    ).toBeDisabled();
     expect(screen.getByRole("button", { name: /next month/i })).toBeDisabled();
 
     rerender(
@@ -890,7 +914,9 @@ describe("component accessibility", () => {
 
       if (state.listing) {
         await waitFor(() => {
-          expect(screen.getByDisplayValue(/grocery pickup/i)).toBeInTheDocument();
+          expect(
+            screen.getByDisplayValue(/grocery pickup/i),
+          ).toBeInTheDocument();
         });
       }
 
@@ -939,7 +965,9 @@ describe("component accessibility", () => {
       fireEvent.click(screen.getByRole("button", { name: /monday, july 20/i }));
     });
     await waitFor(() => {
-      expect(screen.getByRole("option", { name: /11:00/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: /11:00/i }),
+      ).toBeInTheDocument();
     });
 
     await act(async () => {
@@ -950,7 +978,7 @@ describe("component accessibility", () => {
           name: /tell the provider what you need/i,
         }),
         {
-        target: { value: "Please pick up groceries from the market." },
+          target: { value: "Please pick up groceries from the market." },
         },
       );
     });
@@ -1012,7 +1040,9 @@ describe("component accessibility", () => {
       fireEvent.click(screen.getByRole("button", { name: /monday, july 20/i }));
     });
     await waitFor(() => {
-      expect(screen.getByRole("option", { name: /08:00/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: /08:00/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("option", { name: /08:00/i }));
@@ -1023,13 +1053,17 @@ describe("component accessibility", () => {
       ).toBeInTheDocument();
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /increase duration/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /increase duration/i }),
+      );
     });
     await waitFor(() => {
       expect(screen.getAllByText("2h").length).toBeGreaterThan(0);
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /decrease duration/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /decrease duration/i }),
+      );
     });
     await waitFor(() => {
       expect(screen.getAllByText("1h").length).toBeGreaterThan(0);
@@ -1042,7 +1076,9 @@ describe("component accessibility", () => {
         }),
         { target: { value: "Set up the printer and home Wi-Fi." } },
       );
-      fireEvent.click(screen.getByRole("button", { name: /send booking request/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /send booking request/i }),
+      );
     });
 
     expect(onCreateBooking).toHaveBeenCalledWith({
@@ -1081,9 +1117,7 @@ describe("component accessibility", () => {
     );
 
     expect(screen.getByText(/no availability this month/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /sending/i }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: /sending/i })).toBeDisabled();
     await expectNoAxeViolations(container);
   });
 
@@ -1192,7 +1226,9 @@ describe("component accessibility", () => {
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /today/i }));
-      fireEvent.click(screen.getByRole("button", { name: /tuesday, july 21/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /tuesday, july 21/i }),
+      );
     });
     expect(onToday).toHaveBeenCalled();
     expect(onSelectedDateChange).toHaveBeenCalled();
@@ -1361,10 +1397,14 @@ describe("component accessibility", () => {
       ).toHaveLength(2);
     });
     await act(async () => {
-      fireEvent.click(screen.getAllByRole("button", { name: /delete exception/i })[0]);
+      fireEvent.click(
+        screen.getAllByRole("button", { name: /delete exception/i })[0],
+      );
     });
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /^cancel$/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /^cancel$/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /^cancel$/i }));
@@ -1375,10 +1415,14 @@ describe("component accessibility", () => {
       ).toHaveLength(2);
     });
     await act(async () => {
-      fireEvent.click(screen.getAllByRole("button", { name: /delete exception/i })[1]);
+      fireEvent.click(
+        screen.getAllByRole("button", { name: /delete exception/i })[1],
+      );
     });
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /^delete$/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /^delete$/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
@@ -1416,11 +1460,15 @@ describe("component accessibility", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /add extra availability/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /add extra availability/i }),
+      );
       fireEvent.change(screen.getByLabelText(/date/i), {
         target: { value: "2026-08-01" },
       });
-      fireEvent.click(screen.getByRole("button", { name: /add availability/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /add availability/i }),
+      );
     });
     expect(onCreate).toHaveBeenLastCalledWith({
       date: "2026-08-01",
@@ -1515,7 +1563,11 @@ describe("component accessibility", () => {
     [
       "RegisterName",
       <RegisterName
-        initialValues={{ firstName: "Mira", lastName: "Muster", username: "mira" }}
+        initialValues={{
+          firstName: "Mira",
+          lastName: "Muster",
+          username: "mira",
+        }}
         onBack={vi.fn()}
         onContinue={vi.fn()}
       />,
@@ -1542,16 +1594,17 @@ describe("component accessibility", () => {
     ],
     [
       "RegisterPhoto",
-      <RegisterPhoto initialValues={user} onBack={vi.fn()} onContinue={vi.fn()} />,
+      <RegisterPhoto
+        initialValues={user}
+        onBack={vi.fn()}
+        onContinue={vi.fn()}
+      />,
     ],
     [
       "RegisterRole",
       <RegisterRole currentUserType="PROVIDER" onContinue={vi.fn()} />,
     ],
-    [
-      "RegisterDone",
-      <RegisterDone user={user} onContinue={vi.fn()} />,
-    ],
+    ["RegisterDone", <RegisterDone user={user} onContinue={vi.fn()} />],
   ] satisfies Array<[string, ReactElement]>)(
     "%s has no automated accessibility violations",
     async (_name, ui) => {
@@ -1566,7 +1619,11 @@ describe("component accessibility", () => {
       .mockRejectedValueOnce({ field: "username", message: "Taken." })
       .mockRejectedValueOnce(new Error("Could not save profile."));
     const { container } = render(
-      <RegisterName initialValues={null} onBack={vi.fn()} onContinue={onContinue} />,
+      <RegisterName
+        initialValues={null}
+        onBack={vi.fn()}
+        onContinue={onContinue}
+      />,
     );
 
     await act(async () => {
@@ -1673,7 +1730,11 @@ describe("component accessibility", () => {
       .mockImplementation(() => {});
     const onContinue = vi.fn().mockRejectedValue(new Error("Upload failed."));
     const { container, unmount } = render(
-      <RegisterPhoto initialValues={null} onBack={vi.fn()} onContinue={onContinue} />,
+      <RegisterPhoto
+        initialValues={null}
+        onBack={vi.fn()}
+        onContinue={onContinue}
+      />,
     );
     const input = screen.getByLabelText(/choose photo/i);
 
@@ -1873,7 +1934,9 @@ describe("component accessibility", () => {
   });
 
   it("EditListing destructive and media states have no automated accessibility violations", async () => {
-    const onRemoveImage = vi.fn().mockRejectedValue(new Error("Remove failed."));
+    const onRemoveImage = vi
+      .fn()
+      .mockRejectedValue(new Error("Remove failed."));
     const { container } = render(
       <EditListing
         listing={editListing}
@@ -1894,7 +1957,9 @@ describe("component accessibility", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /remove image: shopping bags/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /remove image: shopping bags/i }),
+      );
     });
     await waitFor(() =>
       expect(screen.getByText(/remove failed/i)).toBeInTheDocument(),
@@ -1998,7 +2063,9 @@ describe("component accessibility", () => {
       fireEvent.blur(screen.getByLabelText(/city/i));
       fireEvent.change(container.querySelector('input[type="file"]')!, {
         target: {
-          files: [new File(["image"], "new-listing.png", { type: "image/png" })],
+          files: [
+            new File(["image"], "new-listing.png", { type: "image/png" }),
+          ],
         },
       });
     });
@@ -2009,7 +2076,9 @@ describe("component accessibility", () => {
       fireEvent.click(screen.getByRole("button", { name: /delete service/i }));
     });
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /^cancel$/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /^cancel$/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /^cancel$/i }));
@@ -2052,7 +2121,9 @@ describe("component accessibility", () => {
   ])(
     "EditListing %s status state has no automated accessibility violations",
     async (_name, state) => {
-      const onStatusAction = vi.fn().mockRejectedValue(new Error(state.error ?? ""));
+      const onStatusAction = vi
+        .fn()
+        .mockRejectedValue(new Error(state.error ?? ""));
       const { container } = render(
         <EditListing
           listing={state.listing}
@@ -2114,7 +2185,9 @@ describe("component accessibility", () => {
     await act(async () => {
       fireEvent.change(container.querySelector('input[type="file"]')!, {
         target: {
-          files: [new File(["image"], "new-listing.png", { type: "image/png" })],
+          files: [
+            new File(["image"], "new-listing.png", { type: "image/png" }),
+          ],
         },
       });
       fireEvent.change(screen.getByLabelText(/street/i), {
@@ -2238,8 +2311,12 @@ describe("component accessibility", () => {
       fireEvent.change(screen.getByLabelText(/search for a service/i), {
         target: { value: "cleaning" },
       });
-      fireEvent.click(screen.getByRole("button", { name: /scroll categories right/i }));
-      fireEvent.click(screen.getByRole("button", { name: /scroll listings left/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /scroll categories right/i }),
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: /scroll listings left/i }),
+      );
     });
 
     expect(scrollBy).toHaveBeenCalled();
@@ -2455,28 +2532,16 @@ describe("component accessibility", () => {
     },
   );
 
-  it("Navbar login action remains accessible", async () => {
-    const originalLocation = window.location;
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: { ...originalLocation, href: "" },
-    });
-
+  it("Navbar login action is an accessible link to Google OAuth", async () => {
     const { container } = render(<Navbar />);
 
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /login/i }));
-    });
+    const loginLink = screen.getByRole("link", { name: /login/i });
 
-    expect(window.location.href).toBe(
+    expect(loginLink).toHaveAttribute(
+      "href",
       "http://localhost:8081/auth/login/google",
     );
     await expectNoAxeViolations(container);
-
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: originalLocation,
-    });
   });
 
   it("Navbar logged-in state has no automated accessibility violations", async () => {
@@ -2715,7 +2780,11 @@ describe("component accessibility", () => {
               href: "/bookings/booking-1/acknowledge",
               method: "POST",
             },
-            { rel: "cancel", href: "/bookings/booking-1/cancel", method: "POST" },
+            {
+              rel: "cancel",
+              href: "/bookings/booking-1/cancel",
+              method: "POST",
+            },
           ],
         }}
         onActionComplete={onActionComplete}
@@ -2766,9 +2835,17 @@ describe("component accessibility", () => {
   it("MyBookings filters and empty state have no automated accessibility violations", async () => {
     const bookings = [
       bookingSummary,
-      { ...bookingSummary, bookingId: "booking-2", status: "CONFIRMED" as const },
+      {
+        ...bookingSummary,
+        bookingId: "booking-2",
+        status: "CONFIRMED" as const,
+      },
       { ...bookingSummary, bookingId: "booking-3", status: "PAID" as const },
-      { ...bookingSummary, bookingId: "booking-4", status: "COMPLETED" as const },
+      {
+        ...bookingSummary,
+        bookingId: "booking-4",
+        status: "COMPLETED" as const,
+      },
     ];
     const { container } = render(
       <MyBookings
@@ -2819,7 +2896,11 @@ describe("component accessibility", () => {
 
   it("Registration validation edge states have no automated accessibility violations", async () => {
     const name = render(
-      <RegisterName initialValues={null} onBack={vi.fn()} onContinue={vi.fn()} />,
+      <RegisterName
+        initialValues={null}
+        onBack={vi.fn()}
+        onContinue={vi.fn()}
+      />,
     );
     await act(async () => {
       fireEvent.change(screen.getByLabelText(/first name/i), {
@@ -2887,7 +2968,9 @@ describe("component accessibility", () => {
       <RegisterPhoto
         initialValues={null}
         onBack={vi.fn()}
-        onContinue={vi.fn().mockRejectedValue({ field: "file", message: "File failed." })}
+        onContinue={vi
+          .fn()
+          .mockRejectedValue({ field: "file", message: "File failed." })}
       />,
     );
     const photoInput = screen.getByLabelText(/choose photo/i);
@@ -2909,7 +2992,9 @@ describe("component accessibility", () => {
     const role = render(
       <RegisterRole
         currentUserType="CUSTOMER"
-        onContinue={vi.fn().mockRejectedValue({ field: "server", message: "Pick failed." })}
+        onContinue={vi
+          .fn()
+          .mockRejectedValue({ field: "server", message: "Pick failed." })}
       />,
     );
     await act(async () => {
@@ -2931,12 +3016,27 @@ describe("component accessibility", () => {
 
     await act(async () => {
       fireEvent.submit(screen.getByRole("search"));
-      fireEvent.click(screen.getByRole("button", { name: /scroll categories left/i }));
-      fireEvent.click(screen.getByRole("button", { name: /scroll listings right/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /scroll categories left/i }),
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: /scroll listings right/i }),
+      );
     });
 
     expect(scrollBy).toHaveBeenCalled();
     await expectNoAxeViolations(container);
+  });
+
+  it("Home signed-out provider call-to-action links to Google OAuth", async () => {
+    renderHome([]);
+
+    const getStartedLink = screen.getByRole("link", { name: /get started/i });
+
+    expect(getStartedLink).toHaveAttribute(
+      "href",
+      "http://localhost:8081/auth/login/google",
+    );
   });
 
   it("Small component branch states have no automated accessibility violations", async () => {
@@ -3036,7 +3136,9 @@ describe("component accessibility", () => {
       />,
     );
 
-    expect(screen.getByLabelText(/generating description/i)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/generating description/i),
+    ).toBeInTheDocument();
     await act(async () => {
       await vi.advanceTimersByTimeAsync(4000);
     });
@@ -3072,7 +3174,9 @@ describe("component accessibility", () => {
 
     vi.useRealTimers();
     await waitFor(() => {
-      expect(screen.getAllByText(/maximum 120 characters/i).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByText(/maximum 120 characters/i).length,
+      ).toBeGreaterThan(0);
     });
     await expectNoAxeViolations(container);
   });
@@ -3166,10 +3270,14 @@ describe("component accessibility", () => {
     );
 
     await act(async () => {
-      fireEvent.click(screen.getAllByRole("button", { name: /view document/i })[0]);
+      fireEvent.click(
+        screen.getAllByRole("button", { name: /view document/i })[0],
+      );
     });
     await waitFor(() => {
-      expect(screen.getByRole("dialog", { name: /uploaded document/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("dialog", { name: /uploaded document/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.keyDown(document, { key: "Escape" });
@@ -3180,14 +3288,17 @@ describe("component accessibility", () => {
       );
     });
     await waitFor(() => {
-      expect(screen.getByRole("dialog", { name: /rejection reason/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("dialog", { name: /rejection reason/i }),
+      ).toBeInTheDocument();
     });
 
     await expectNoAxeViolations(container);
   });
 
   it("CredentialDocumentViewer loaded and error states have no automated accessibility violations", async () => {
-    const { fetchCredentialEvidenceMediaUrl } = await import("../lib/credentialEvidenceMedia");
+    const { fetchCredentialEvidenceMediaUrl } =
+      await import("../lib/credentialEvidenceMedia");
     const mockedFetch = vi.mocked(fetchCredentialEvidenceMediaUrl);
     mockedFetch.mockResolvedValueOnce("blob:loaded-document");
     render(
@@ -3201,7 +3312,9 @@ describe("component accessibility", () => {
     );
     await waitFor(() => {
       expect(
-        screen.getByRole("img", { name: /uploaded evidence for identity check/i }),
+        screen.getByRole("img", {
+          name: /uploaded evidence for identity check/i,
+        }),
       ).toBeInTheDocument();
     });
     await expectNoAxeViolations(document.body);
@@ -3218,14 +3331,19 @@ describe("component accessibility", () => {
       />,
     );
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(/failed to load document/i);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /failed to load document/i,
+      );
     });
     await expectNoAxeViolations(document.body);
   });
 
   it.each([
     ["loading", { credentials: [], loading: true, error: null }],
-    ["error", { credentials: [], loading: false, error: "Could not load credentials." }],
+    [
+      "error",
+      { credentials: [], loading: false, error: "Could not load credentials." },
+    ],
     ["empty", { credentials: [], loading: false, error: null }],
     ["populated", { credentials: [credential], loading: false, error: null }],
   ])(
@@ -3341,7 +3459,10 @@ describe("component accessibility", () => {
 
   it.each([
     ["loading", { loading: true, error: null, listing: undefined }],
-    ["error", { loading: false, error: "Could not load listing.", listing: undefined }],
+    [
+      "error",
+      { loading: false, error: "Could not load listing.", listing: undefined },
+    ],
   ])(
     "ListingDetailPage %s state has no automated accessibility violations",
     async (_name, props) => {
@@ -3381,7 +3502,9 @@ describe("component accessibility", () => {
       fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     });
     await waitFor(() => {
-      expect(screen.getByRole("dialog", { name: /filters/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("dialog", { name: /filters/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /show results/i }));
@@ -3438,7 +3561,10 @@ describe("component accessibility", () => {
       });
       fireEvent.click(screen.getByRole("button", { name: /submit/i }));
     });
-    expect(onSubmit).toHaveBeenCalledWith("IDENTITY_VERIFIED", expect.any(File));
+    expect(onSubmit).toHaveBeenCalledWith(
+      "IDENTITY_VERIFIED",
+      expect.any(File),
+    );
   });
 
   it("SearchRootPage toggle has no automated accessibility violations", async () => {
@@ -3488,10 +3614,14 @@ describe("component accessibility", () => {
 
     const { container } = renderWithQuery(<SearchServicesPage />);
     await waitFor(() => {
-      expect(screen.getByRole("list", { name: /search results/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("list", { name: /search results/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /remove price filter/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /remove price filter/i }),
+      );
       fireEvent.click(screen.getByRole("button", { name: /remove filter/i }));
       fireEvent.click(screen.getByRole("button", { name: /next/i }));
     });
@@ -3524,7 +3654,9 @@ describe("component accessibility", () => {
     } as never);
     const error = renderWithQuery(<SearchServicesPage />);
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(/listings could not be loaded/i);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /listings could not be loaded/i,
+      );
     });
     await expectNoAxeViolations(error.container);
   });
@@ -3570,7 +3702,9 @@ describe("component accessibility", () => {
 
     const { container } = renderWithQuery(<SearchUsersPage />);
     await waitFor(() => {
-      expect(screen.getByRole("list", { name: /user results/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("list", { name: /user results/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /providers/i }));
@@ -3601,12 +3735,17 @@ describe("component accessibility", () => {
     } as never);
     const filtered = renderWithQuery(<SearchUsersPage />);
     await waitFor(() => {
-      expect(screen.getByText(/no providers on this page/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/no providers on this page/i),
+      ).toBeInTheDocument();
     });
     await expectNoAxeViolations(filtered.container);
 
     cleanup();
-    routerMocks.location.search = { ...routerMocks.location.search, role: "everyone" };
+    routerMocks.location.search = {
+      ...routerMocks.location.search,
+      role: "everyone",
+    };
     mockGetPublicProfilesCollection.mockResolvedValueOnce({
       data: { items: [], cursor: { limit: 20, next: null } },
       status: 200,
@@ -3626,7 +3765,9 @@ describe("component accessibility", () => {
     } as never);
     const error = renderWithQuery(<SearchUsersPage />);
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(/users could not be loaded/i);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /users could not be loaded/i,
+      );
     });
     await expectNoAxeViolations(error.container);
   });
@@ -3695,20 +3836,28 @@ describe("component accessibility", () => {
     expect(onVisibilityChange).toHaveBeenCalledWith("credential-1", true);
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /delete "failed credential"/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /delete "failed credential"/i }),
+      );
     });
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(/delete this credential/i);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /delete this credential/i,
+      );
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /^cancel$/i }));
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /delete "identity check"/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /delete "identity check"/i }),
+      );
     });
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(/delete this credential/i);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /delete this credential/i,
+      );
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
@@ -3783,11 +3932,26 @@ describe("component accessibility", () => {
   });
 
   it("Home loading, category, and provider navigation states have no automated accessibility violations", async () => {
+    const scrollBy = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, "scrollBy", {
+      configurable: true,
+      value: scrollBy,
+    });
     useAuthStore.getState().setUser(user);
     mockGetServiceTags.mockResolvedValue({
       data: [
-        { tagId: "cleaning", name: "Cleaning", isBarrierefrei: false, isActive: true },
-        { tagId: "inactive", name: "Tutoring", isBarrierefrei: false, isActive: false },
+        {
+          tagId: "cleaning",
+          name: "Cleaning",
+          isBarrierefrei: false,
+          isActive: true,
+        },
+        {
+          tagId: "inactive",
+          name: "Tutoring",
+          isBarrierefrei: false,
+          isActive: false,
+        },
       ],
       status: 200,
       headers: new Headers(),
@@ -3824,10 +3988,15 @@ describe("component accessibility", () => {
       fireEvent.submit(screen.getByRole("search"));
       fireEvent.click(screen.getByRole("button", { name: /get started/i }));
       fireEvent.click(screen.getByRole("button", { name: /cleaning/i }));
-      fireEvent.click(screen.getByRole("button", { name: /scroll categories right/i }));
-      fireEvent.click(screen.getByRole("button", { name: /scroll listings right/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /scroll categories right/i }),
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: /scroll listings right/i }),
+      );
     });
     expect(routerMocks.navigate).toHaveBeenCalled();
+    expect(scrollBy).toHaveBeenCalled();
     await expectNoAxeViolations(container);
   });
 
@@ -3844,7 +4013,9 @@ describe("component accessibility", () => {
     } as never);
     const { container } = renderWithQuery(<Home />);
     await waitFor(() => {
-      expect(screen.getByText(/categories could not be loaded/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/categories could not be loaded/i),
+      ).toBeInTheDocument();
     });
     await expectNoAxeViolations(container);
   });
@@ -3864,7 +4035,9 @@ describe("component accessibility", () => {
 
     const { container } = renderWithQuery(<Home />);
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /get started/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /get started/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /get started/i }));
@@ -3890,10 +4063,9 @@ describe("component accessibility", () => {
 
     const { container } = renderWithQuery(<Home />);
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /get started/i })).toBeInTheDocument();
-    });
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /get started/i }));
+      expect(
+        screen.getByRole("link", { name: /get started/i }),
+      ).toHaveAttribute("href", "http://localhost:8081/auth/login/google");
     });
     await expectNoAxeViolations(container);
   });
@@ -3924,7 +4096,9 @@ describe("component accessibility", () => {
 
     const { container } = renderWithQuery(<SearchServicesPage />);
     await waitFor(() => {
-      expect(screen.getByRole("list", { name: /search results/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("list", { name: /search results/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.change(screen.getByRole("searchbox", { name: /search/i }), {
@@ -3936,7 +4110,9 @@ describe("component accessibility", () => {
       fireEvent.click(screen.getByText(/location/i).closest("button")!);
     });
     await waitFor(() => {
-      expect(screen.getByRole("dialog", { name: /search location filters/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("dialog", { name: /search location filters/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.change(screen.getByPlaceholderText(/search location/i), {
@@ -3947,7 +4123,9 @@ describe("component accessibility", () => {
       fireEvent.click(screen.getByRole("button", { name: /next/i }));
     });
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /previous/i })).not.toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: /previous/i }),
+      ).not.toBeDisabled();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /previous/i }));
@@ -3996,7 +4174,9 @@ describe("component accessibility", () => {
 
     const { container } = renderWithQuery(<SearchUsersPage />);
     await waitFor(() => {
-      expect(screen.getByRole("list", { name: /user results/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("list", { name: /user results/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.change(screen.getByRole("searchbox", { name: /search/i }), {
@@ -4009,7 +4189,9 @@ describe("component accessibility", () => {
       fireEvent.click(screen.getByRole("button", { name: /next/i }));
     });
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /previous/i })).not.toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: /previous/i }),
+      ).not.toBeDisabled();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /previous/i }));
