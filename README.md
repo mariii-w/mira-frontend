@@ -40,6 +40,14 @@ Name: user name
 E-Mail: user@example.com
 ```
 
+## Seeded Data
+
+Seeded data is for layout purposes only.
+
+Text simplification runs through LISA and is only applied to real listings. To test simplified listing text, create a listing as a provider.
+
+Seeded listings may also not support the full booking flow. To test bookings, create a real listing as a provider, then book it as a consumer.
+
 ---
 
 ## Accessibility
