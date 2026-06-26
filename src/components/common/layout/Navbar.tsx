@@ -91,7 +91,11 @@ export function Navbar() {
         className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 lg:gap-8 lg:px-6"
         aria-label="Main navigation"
       >
-        <Link to="/" aria-label="Mira home" className="shrink-0">
+        <Link
+          to="/"
+          aria-label="Mira home"
+          className="shrink-0 cursor-pointer select-none"
+        >
           <Logo variant="primary" height={36} />
         </Link>
 

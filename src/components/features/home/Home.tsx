@@ -5,8 +5,16 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import { useState, useRef } from "react";
-import { usePageTitle } from "../../../hooks/usePageTitle";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type RefObject,
+  type SetStateAction,
+} from "react";
+
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "../../common/ui/Button";
@@ -89,6 +97,42 @@ const CAN_HELP_STEPS = [
   },
 ];
 
+type CarouselScrollState = {
+  canScrollLeft: boolean;
+  canScrollRight: boolean;
+};
+
+const initialCarouselScrollState: CarouselScrollState = {
+  canScrollLeft: false,
+  canScrollRight: false,
+};
+
+function getCarouselScrollState(
+  element: HTMLElement | null,
+): CarouselScrollState {
+  if (!element) return initialCarouselScrollState;
+
+  const maxScrollLeft = element.scrollWidth - element.clientWidth;
+  if (maxScrollLeft <= 1) return initialCarouselScrollState;
+
+  return {
+    canScrollLeft: element.scrollLeft > 1,
+    canScrollRight: element.scrollLeft < maxScrollLeft - 1,
+  };
+}
+
+function setCarouselScrollState(
+  setState: Dispatch<SetStateAction<CarouselScrollState>>,
+  nextState: CarouselScrollState,
+) {
+  setState((currentState) =>
+    currentState.canScrollLeft === nextState.canScrollLeft &&
+    currentState.canScrollRight === nextState.canScrollRight
+      ? currentState
+      : nextState,
+  );
+}
+
 // Curated photo per category tag name. Names must match the real ServiceTag
 // labels from the backend. Only tags present here are eligible to show up in "Popular Categories".
 const CATEGORY_IMAGES: Record<string, string> = {
@@ -130,11 +174,16 @@ function toListingCards(listings: PublicListingSummary[], easyRead: boolean) {
 }
 
 export function Home() {
-  usePageTitle('Home')
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const categoryRef = useRef<HTMLUListElement>(null);
   const providerRef = useRef<HTMLUListElement>(null);
+  const [categoryScrollState, setCategoryScrollState] = useState(
+    initialCarouselScrollState,
+  );
+  const [listingScrollState, setListingScrollState] = useState(
+    initialCarouselScrollState,
+  );
   const easyRead = useAccessibilityStore((state) => state.easyRead);
   const user = useAuthStore((state) => state.user);
   const isLoggedIn = !!user;
@@ -163,14 +212,52 @@ export function Home() {
       imageSrc: CATEGORY_IMAGES[tag.name],
     }));
 
+  const updateCategoryScrollState = useCallback(() => {
+    setCarouselScrollState(
+      setCategoryScrollState,
+      getCarouselScrollState(categoryRef.current),
+    );
+  }, []);
+
+  const updateListingScrollState = useCallback(() => {
+    setCarouselScrollState(
+      setListingScrollState,
+      getCarouselScrollState(providerRef.current),
+    );
+  }, []);
+
+  useEffect(() => {
+    updateCategoryScrollState();
+  }, [categories.length, tagsQuery.isLoading, updateCategoryScrollState]);
+
+  useEffect(() => {
+    updateListingScrollState();
+  }, [
+    featuredListingsQuery.isLoading,
+    listingCards.length,
+    updateListingScrollState,
+  ]);
+
+  useEffect(() => {
+    function handleResize() {
+      updateCategoryScrollState();
+      updateListingScrollState();
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [updateCategoryScrollState, updateListingScrollState]);
+
   function scroll(
-    ref: React.RefObject<HTMLUListElement | null>,
+    ref: RefObject<HTMLUListElement | null>,
     dir: "left" | "right",
+    updateScrollState: () => void,
   ) {
     ref.current?.scrollBy({
       left: dir === "right" ? 280 : -280,
       behavior: "smooth",
     });
+    window.requestAnimationFrame(updateScrollState);
   }
 
   return (
@@ -465,19 +552,25 @@ export function Home() {
                 >
                   <button
                     type="button"
-                    onClick={() => scroll(categoryRef, "left")}
+                    onClick={() =>
+                      scroll(categoryRef, "left", updateCategoryScrollState)
+                    }
+                    disabled={!categoryScrollState.canScrollLeft}
                     aria-label="Scroll categories left"
                     aria-controls="categories-list"
-                    className="w-10 h-10 cursor-pointer rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                    className="w-10 h-10 cursor-pointer rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <ChevronLeft size={18} aria-hidden="true" />
                   </button>
                   <button
                     type="button"
-                    onClick={() => scroll(categoryRef, "right")}
+                    onClick={() =>
+                      scroll(categoryRef, "right", updateCategoryScrollState)
+                    }
+                    disabled={!categoryScrollState.canScrollRight}
                     aria-label="Scroll categories right"
                     aria-controls="categories-list"
-                    className="w-10 h-10 cursor-pointer rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                    className="w-10 h-10 cursor-pointer rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <ChevronRight size={18} aria-hidden="true" />
                   </button>
@@ -498,6 +591,7 @@ export function Home() {
               <ul
                 id="categories-list"
                 ref={categoryRef}
+                onScroll={updateCategoryScrollState}
                 className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth list-none m-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
                 style={{ scrollbarWidth: "none" }}
                 tabIndex={0}
@@ -559,19 +653,25 @@ export function Home() {
                   >
                     <button
                       type="button"
-                      onClick={() => scroll(providerRef, "left")}
+                      onClick={() =>
+                        scroll(providerRef, "left", updateListingScrollState)
+                      }
+                      disabled={!listingScrollState.canScrollLeft}
                       aria-label="Scroll listings left"
                       aria-controls="listings-list"
-                      className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                      className="w-10 h-10 cursor-pointer rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <ChevronLeft size={18} aria-hidden="true" />
                     </button>
                     <button
                       type="button"
-                      onClick={() => scroll(providerRef, "right")}
+                      onClick={() =>
+                        scroll(providerRef, "right", updateListingScrollState)
+                      }
+                      disabled={!listingScrollState.canScrollRight}
                       aria-label="Scroll listings right"
                       aria-controls="listings-list"
-                      className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                      className="w-10 h-10 cursor-pointer rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <ChevronRight size={18} aria-hidden="true" />
                     </button>
@@ -600,6 +700,7 @@ export function Home() {
                 <ul
                   id="listings-list"
                   ref={providerRef}
+                  onScroll={updateListingScrollState}
                   className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth list-none m-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
                   style={{ scrollbarWidth: "none" }}
                   tabIndex={0}
@@ -651,7 +752,6 @@ export function Home() {
           </div>
         </section>
       </main>
-
     </>
   );
 }

@@ -78,7 +78,7 @@ function Row({ id, title, description, checked, onCheckedChange }: RowProps) {
         aria-describedby={`${id}-desc`}
         checked={checked}
         onCheckedChange={onCheckedChange}
-        className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-grey-olive/40 data-[state=checked]:bg-primary transition-colors duration-150"
+        className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full bg-grey-olive/40 data-[state=checked]:bg-primary transition-colors duration-150"
       >
         <Switch.Thumb className="block h-5 w-5 rounded-full bg-surface shadow translate-x-0.5 data-[state=checked]:translate-x-[22px] transition-transform duration-150" />
       </Switch.Root>

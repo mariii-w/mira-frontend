@@ -9,7 +9,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import type { ReactNode } from "react";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { Navbar } from "../components/common/layout/Navbar";
 import { useAuthStore, type User } from "../stores/auth";
 import { listMyBookings } from "../api/mira";
@@ -27,6 +27,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
       activeProps,
       inactiveProps,
       onClick,
+      ...rest
     }: {
       children: ReactNode;
       to: string;
@@ -34,13 +35,14 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
       activeProps?: { className?: string };
       inactiveProps?: { className?: string };
       onClick?: () => void;
-    }) => (
+    } & AnchorHTMLAttributes<HTMLAnchorElement>) => (
       <a
         href={to}
         className={
           className ?? inactiveProps?.className ?? activeProps?.className
         }
         onClick={onClick}
+        {...rest}
       >
         {children}
       </a>
@@ -123,6 +125,14 @@ function makeBooking(
 }
 
 describe("<Navbar />", () => {
+  it("renders the home logo link with pointer cursor and non-selectable text behavior", () => {
+    renderNavbar();
+    expect(screen.getByRole("link", { name: /mira home/i })).toHaveClass(
+      "cursor-pointer",
+      "select-none",
+    );
+  });
+
   it("renders the hamburger trigger, closed, with no drawer in the document", () => {
     renderNavbar();
     const trigger = screen.getByRole("button", { name: /open menu/i });
