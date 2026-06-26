@@ -1,5 +1,5 @@
 import type { KeyboardEvent, RefObject } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { Button } from "../../common/ui/Button";
 import { AvatarIcon } from "../../common/ui/AvatarIcon";
 import { Input } from "../../common/ui/Input.tsx";
@@ -67,12 +67,17 @@ export function ChatPageView({
                         <section className="w-full lg:w-1/4 border-b-2 lg:border-b-0 lg:border-r-2 border-border" aria-labelledby="inbox-heading">
                             <div className="border-b-2 border-border">
                                 <h1 id="inbox-heading" className="mt-10 mx-10">Inbox</h1>
-                                <div className="mx-9 mb-3 mt-5">
+                                <div className="mx-9 mb-3 mt-5 relative">
+                                    <Search
+                                        size={18}
+                                        aria-hidden="true"
+                                        className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-muted"
+                                    />
                                     <Input
                                         placeholder="Search Chat"
                                         aria-label="Search chats"
                                         size="lg"
-                                        className="m-1 bg-cream"
+                                        className="m-1 bg-cream pl-11"
                                         value={searchQuery}
                                         onChange={(e) => onSearchChange(e.target.value)}
                                     />
@@ -164,10 +169,10 @@ export function ChatPageView({
                                     <p className="text-black/60">No service linked to this conversation.</p>
                                 )}
                             </div>
-                            <div className="border-t-2 border-border">
-                                <div className="m-4">
-                                    <h3 className="text-primary font-bold"> About {selectedChat?.firstName ?? "this contact"}</h3>
-                                    <div className="mt-3 flex justify-center">
+                            <div className="m-4">
+                                <div className="bg-cream rounded-2xl border border-border w-full p-3 flex flex-col gap-3">
+                                    <h3 className="text-primary font-bold">About {selectedChat?.firstName ?? "this contact"}</h3>
+                                    <div className="flex justify-center">
                                         <Button
                                             variant="secondary"
                                             trailingIcon={<ArrowRight />}
