@@ -129,13 +129,15 @@ export function MyBookings({
 
   return (
     <>
-      <main
-        id="main-content"
-        className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
-      >
-        <div className="mx-auto max-w-3xl">
+      <main className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8">
+        <section
+          id="main-content"
+          tabIndex={-1}
+          aria-labelledby="bookings-heading"
+          className="mx-auto max-w-3xl focus-visible:outline-none"
+        >
           <div className="flex flex-col gap-1 mb-8 animate-fade-in-up">
-            <h1 className="font-heading text-h1 font-bold text-foreground">
+            <h1 id="bookings-heading" className="font-heading text-h1 font-bold text-foreground">
               {isProvider ? "Bookings received" : "My Bookings"}
             </h1>
             <p className="text-small text-muted">
@@ -207,7 +209,7 @@ export function MyBookings({
               ))}
             </ul>
           )}
-        </div>
+        </section>
       </main>
     </>
   );

@@ -226,7 +226,7 @@ export function CalendarPage({
       <main className="mx-auto max-w-7xl px-6 py-8">
         <div className="mb-6 flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">My Calendar</h1>
+            <h1 id="calendar-page-heading" className="text-2xl font-bold text-foreground">My Calendar</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {isProvider
                 ? "Manage your bookings, working hours & time off."
@@ -291,7 +291,12 @@ export function CalendarPage({
         )}
 
         <div className="flex flex-col lg:flex-row gap-6 lg:items-start">
-          <div className="flex-3 min-w-0 rounded-2xl border border-border bg-surface p-6">
+          <section
+            id="main-content"
+            tabIndex={-1}
+            aria-labelledby="calendar-page-heading"
+            className="flex-3 min-w-0 rounded-2xl border border-border bg-surface p-6 focus-visible:outline-none"
+          >
             <div className="mb-3 flex items-center justify-between">
               {isProvider && (
                 <div
@@ -468,7 +473,7 @@ export function CalendarPage({
                 );
               }}
             />
-          </div>
+          </section>
 
           <div className="flex-2 min-w-0 flex flex-col gap-4">
             <div

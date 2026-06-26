@@ -411,10 +411,7 @@ export function EditListing({
 
   return (
     <>
-      <main
-        id="main-content"
-        className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
-      >
+      <main className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8">
         <form
           onSubmit={handleSubmit}
           noValidate
@@ -493,7 +490,7 @@ export function EditListing({
           )}
 
           {/* Title */}
-          <div className="flex flex-col gap-1.5">
+          <div id="main-content" tabIndex={-1} className="flex flex-col gap-1.5 focus-visible:outline-none">
             <Label htmlFor="listing-title" required={isEditable}>
               Title
             </Label>

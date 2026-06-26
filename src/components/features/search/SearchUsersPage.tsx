@@ -159,6 +159,12 @@ export function SearchUsersPage() {
         <div className="px-6">
           <div className="mx-auto max-w-6xl pt-1 pb-6 lg:py-6 flex flex-col gap-4">
 
+            <main
+              id="main-content"
+              tabIndex={-1}
+              aria-labelledby="user-results-heading"
+              className="flex flex-col gap-4 focus-visible:outline-none"
+            >
             {profilesQuery.isSuccess ? (
               <UserTypeFilter
                 selected={search.role}
@@ -168,17 +174,10 @@ export function SearchUsersPage() {
               />
             ) : (
               <div>
-                <h1 className="font-heading text-h1 font-bold text-foreground">Users</h1>
+                <h1 id="user-results-heading" className="font-heading text-h1 font-bold text-foreground">Users</h1>
                 <p className="text-body text-foreground mt-1">Showing public profiles</p>
               </div>
             )}
-
-            <main
-              id="main-content"
-              tabIndex={-1}
-              aria-label="Users"
-              className="flex flex-col gap-4 focus-visible:outline-none"
-            >
             {/* Loading */}
             {cardsLoading && (
               <div role="status" aria-live="polite" className="flex justify-center py-16">

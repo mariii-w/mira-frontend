@@ -314,8 +314,10 @@ export function BookingPage({
         )}
 
         <section
+          id="main-content"
+          tabIndex={-1}
           aria-labelledby="pick-datetime-heading"
-          className="bg-linen rounded-2xl border border-border p-6 mb-4"
+          className="bg-linen rounded-2xl border border-border p-6 mb-4 focus-visible:outline-none"
         >
           <div className="flex items-center gap-3 mb-4">
             <StepBadge n={1} />

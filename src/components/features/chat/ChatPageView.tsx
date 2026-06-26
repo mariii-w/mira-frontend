@@ -58,11 +58,11 @@ export function ChatPageView({
 }: ChatPageViewProps) {
     return (
         <>
-            <main id="main-content">
+            <main>
                 <section className=" mt-30">
                     <div className="container mx-auto -mt-20 lg:h-200 bg bg-linen rounded-2xl border-2 border-border flex flex-col lg:flex-row">
                         {/* Inbox */}
-                        <section className="w-full lg:w-1/4 border-b-2 lg:border-b-0 lg:border-r-2 border-border" aria-labelledby="inbox-heading">
+                        <section id="main-content" tabIndex={-1} className="w-full lg:w-1/4 border-b-2 lg:border-b-0 lg:border-r-2 border-border focus-visible:outline-none" aria-labelledby="inbox-heading">
                             <div className="border-b-2 border-border">
                                 <h1 id="inbox-heading" className="mt-10 mx-10">Inbox</h1>
                                 <div className="mx-9 mb-3 mt-5">

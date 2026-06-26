@@ -59,7 +59,7 @@ export function PrivateProfilePage({
 }: PrivateProfilePageProps) {
   return (
     <>
-      <main id="main-content">
+      <main>
         <div aria-hidden="true" className="bg-linear-to-r from-primary to-accent h-40 sm:h-50 w-full" />
         <section aria-label="Profile">
           <div className="container mx-auto max-w-6xl -mt-16 sm:-mt-20 px-4 pb-8 grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
@@ -98,7 +98,7 @@ export function PrivateProfilePage({
             </div>
 
             {/* Quick Actions — on mobile renders after user info, on desktop sticks to right column */}
-            <nav aria-label="Quick actions" className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 animate-fade-in-up [animation-delay:150ms]">
+            <nav id="main-content" tabIndex={-1} aria-label="Quick actions" className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 animate-fade-in-up [animation-delay:150ms] focus-visible:outline-none">
               <h2 className="text-h1 font-bold">Quick Actions</h2>
               <div className="w-full mx-auto h-px bg-border my-5" />
               <div className="flex flex-col w-full gap-3">
