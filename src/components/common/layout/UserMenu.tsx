@@ -10,9 +10,23 @@ interface UserMenuProps {
     lastName: string
     isProvider?: boolean
     pictureUrl?: string
+    notificationCount?: number
 }
 
-export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMenuProps) {
+function NotificationBadge({ count }: { count: number }) {
+    if (count <= 0) return null
+
+    return (
+        <span
+            aria-label={`${count} ${count === 1 ? 'notification' : 'notifications'}`}
+            className="absolute left-10 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold leading-none text-white ring-2 ring-cream"
+        >
+            {count}
+        </span>
+    )
+}
+
+export function UserMenu({ firstName, lastName, isProvider, pictureUrl, notificationCount = 0 }: UserMenuProps) {
     const navigate = useNavigate()
     const displayName = lastName ? `${firstName} ${lastName[0]}.` : firstName
 
@@ -33,6 +47,7 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl }: UserMe
                     leadingIcon={<AvatarIcon firstName={firstName} lastName={lastName} picture={pictureUrl} size={32} />}
                     trailingIcon={<ChevronDown size={16} />}
                 >
+                    <NotificationBadge count={notificationCount} />
                     {displayName}
                 </Button>
             </Popover.Trigger>

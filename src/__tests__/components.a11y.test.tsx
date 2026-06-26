@@ -139,6 +139,7 @@ vi.mock("../api/mira", () => ({
   getServiceTags: vi.fn(),
   getPublicListings: vi.fn(),
   getPublicProfilesCollection: vi.fn(),
+  listMyBookings: vi.fn().mockResolvedValue({ status: 200, data: { items: [] } }),
   logout: vi.fn().mockResolvedValue({ status: 204, data: undefined }),
 }));
 
@@ -863,8 +864,10 @@ describe("component accessibility", () => {
           onStatusFilterChange={vi.fn()}
           onCreate={vi.fn()}
           onEdit={vi.fn()}
+          onSetAvailability={vi.fn()}
           onNextPage={vi.fn()}
           onPreviousPage={vi.fn()}
+          showMissingAvailabilityWarning={false}
         />,
       );
 
@@ -2882,8 +2885,10 @@ describe("component accessibility", () => {
         onStatusFilterChange={onStatusFilterChange}
         onCreate={vi.fn()}
         onEdit={vi.fn()}
+        onSetAvailability={vi.fn()}
         onNextPage={vi.fn()}
         onPreviousPage={vi.fn()}
+        showMissingAvailabilityWarning={false}
       />,
     );
 

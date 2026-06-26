@@ -14,6 +14,7 @@ interface MobileNavDrawerProps {
   isLoggedIn: boolean
   isProvider?: boolean
   pictureUrl?: string
+  notificationCount?: number
 }
 
 export function MobileNavDrawer({
@@ -23,6 +24,7 @@ export function MobileNavDrawer({
   isLoggedIn,
   isProvider,
   pictureUrl,
+  notificationCount = 0,
 }: MobileNavDrawerProps) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
@@ -41,10 +43,22 @@ export function MobileNavDrawer({
       <Dialog.Trigger asChild>
         <Button
           variant="icon"
-          aria-label="Open menu"
+          aria-label={
+            notificationCount > 0
+              ? `Open menu, ${notificationCount} ${notificationCount === 1 ? 'notification' : 'notifications'}`
+              : 'Open menu'
+          }
           className="flex lg:hidden border-cream/30 text-cream hover:bg-cream/10"
         >
           <Menu />
+          {notificationCount > 0 && (
+            <span
+              aria-hidden="true"
+              className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold leading-none text-white ring-2 ring-charcoal"
+            >
+              {notificationCount}
+            </span>
+          )}
         </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -64,7 +78,17 @@ export function MobileNavDrawer({
 
           {isLoggedIn && (
             <div className="flex items-center gap-3 p-3">
-              <AvatarIcon firstName={firstName} lastName={lastName} picture={pictureUrl} size={40} />
+              <span className="relative inline-flex">
+                <AvatarIcon firstName={firstName} lastName={lastName} picture={pictureUrl} size={40} />
+                {notificationCount > 0 && (
+                  <span
+                    aria-label={`${notificationCount} ${notificationCount === 1 ? 'notification' : 'notifications'}`}
+                    className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold leading-none text-white ring-2 ring-background"
+                  >
+                    {notificationCount}
+                  </span>
+                )}
+              </span>
               <span className="text-body font-bold text-foreground">{fullName}</span>
             </div>
           )}
