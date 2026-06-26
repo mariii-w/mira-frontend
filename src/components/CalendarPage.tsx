@@ -292,8 +292,8 @@ export function CalendarPage({
           </div>
         )}
 
-        <div className="flex gap-6 items-start">
-          <div className="flex-3 rounded-2xl border border-border bg-surface p-6">
+        <div className="flex flex-col lg:flex-row gap-6 lg:items-start">
+          <div className="flex-3 min-w-0 rounded-2xl border border-border bg-surface p-6">
             <div className="mb-3 flex items-center justify-between">
               {isProvider && (
                 <div
@@ -472,7 +472,7 @@ export function CalendarPage({
             />
           </div>
 
-          <div className="flex-2 flex flex-col gap-4">
+          <div className="flex-2 min-w-0 flex flex-col gap-4">
             <div
               className="rounded-2xl border border-border bg-surface p-5"
               aria-live="polite"
