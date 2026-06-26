@@ -5,7 +5,6 @@
 
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { Button } from "./Button";
 import { AccessibilityPanel } from "./AccessibilityPanel";
 import { UserMenu } from "./UserMenu";
 import { MobileNavDrawer } from "./MobileNavDrawer";
@@ -38,10 +37,6 @@ export function Navbar() {
     // logged-out visitors.
     ...(user ? [COMMON_NAV_LINKS[1], COMMON_NAV_LINKS[2]] : []),
   ];
-
-  function handleGoogleLogin() {
-    window.location.href = `${API_BASE_URL}/auth/login/google`;
-  }
 
   return (
     <header className="sticky top-0 z-40 w-full bg-charcoal">
@@ -99,14 +94,12 @@ export function Navbar() {
               />
             </div>
           ) : (
-            <Button
-              variant="primary"
-              size="md"
-              className="px-3 lg:px-5"
-              onClick={handleGoogleLogin}
+            <a
+              href={`${API_BASE_URL}/auth/login/google`}
+              className="relative inline-flex h-11 items-center justify-center rounded-full bg-primary px-3 text-body font-medium text-primary-foreground no-underline transition-colors duration-150 hover:bg-primary-hover active:bg-primary-hover lg:px-5"
             >
               Login
-            </Button>
+            </a>
           )}
 
           <MobileNavDrawer

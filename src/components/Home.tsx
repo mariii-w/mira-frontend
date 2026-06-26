@@ -288,31 +288,42 @@ export function Home() {
                 List the services you offer, set your prices and schedule. We
                 handle bookings, payments and reviews — keep your time.
               </p>
-              <Button
-                variant="accent"
-                size="lg"
-                trailingIcon={<ArrowRight />}
-                fullWidth
-                onClick={() => {
-                  if (!user) {
-                    //TODO: replace
-                    window.location.href = `${API_BASE_URL}/auth/login/google`;
-                    return;
-                  }
+              {!user ? (
+                <a
+                  href={`${API_BASE_URL}/auth/login/google`}
+                  className="relative inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-accent px-8 text-body font-medium text-accent-foreground no-underline transition-colors duration-150 hover:bg-accent-hover active:bg-accent-hover [&_svg]:size-5"
+                >
+                  Get started
+                  <span aria-hidden="true" className="inline-flex shrink-0">
+                    <ArrowRight />
+                  </span>
+                </a>
+              ) : (
+                <Button
+                  variant="accent"
+                  size="lg"
+                  trailingIcon={<ArrowRight />}
+                  fullWidth
+                  onClick={() => {
+                    if (user.userType === "PROVIDER") {
+                      navigate({ to: "/my-listings" });
+                      return;
+                    }
 
-                  if (user.userType === "PROVIDER") {
-                    navigate({ to: "/my-listings" });
-                    return;
-                  }
-
-                  navigate({
-                    to: "/browse-services",
-                    search: { q: "", city: "", tagIds: [], from: undefined },
-                  });
-                }}
-              >
-                Get started
-              </Button>
+                    navigate({
+                      to: "/browse-services",
+                      search: {
+                        q: "",
+                        city: "",
+                        tagIds: [],
+                        from: undefined,
+                      },
+                    });
+                  }}
+                >
+                  Get started
+                </Button>
+              )}
               {isLoggedIn && (
                 <p className="text-small text-foreground/60 text-center -mt-1">
                   You're already signed in.
