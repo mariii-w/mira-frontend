@@ -11,7 +11,7 @@ export function ProviderServicesSection({ serviceCount, topTags }: ProviderServi
       <p className="text-label font-bold uppercase tracking-wide text-muted">
         Offers {serviceCount} {serviceCount === 1 ? 'service' : 'services'}
       </p>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex flex-wrap gap-2">
         {topTags.map(tag => (
           <span
             key={tag.tagId}

@@ -12,3 +12,22 @@ export async function requireAuth() {
     throw redirect({ to: "/login", search: { error: undefined } });
   }
 }
+
+// Provider-only routes (listing management, credentials). Sends other
+// logged-in users home instead of to login.
+export async function requireProvider() {
+  await requireAuth();
+
+  if (useAuthStore.getState().user?.userType !== "PROVIDER") {
+    throw redirect({ to: "/" });
+  }
+}
+
+// Consumer-only routes (booking). Providers can view listings but not book.
+export async function requireConsumer() {
+  await requireAuth();
+
+  if (useAuthStore.getState().user?.userType !== "CUSTOMER") {
+    throw redirect({ to: "/" });
+  }
+}
