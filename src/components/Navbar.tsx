@@ -26,11 +26,9 @@ export function Navbar() {
   const isProvider = user?.userType === "PROVIDER";
   const pictureUrl = user?.profileMedia ? mediaUrl(user.profileMedia.url) : undefined;
   const navLinks = [
-      COMMON_NAV_LINKS[0],
-      COMMON_NAV_LINKS[1],
-    isProvider
-      ? { label: "My Services", to: "/my-listings" as const }
-      : { label: "Find Users", to: "/browse-users" as const },
+    COMMON_NAV_LINKS[0],
+    COMMON_NAV_LINKS[1],
+    ...(isProvider ? [{ label: "My Services", to: "/my-listings" as const }] : []),
     // Calendar and Chat require an account, so don't even show them to
     // logged-out visitors.
     ...(user ? [COMMON_NAV_LINKS[2], COMMON_NAV_LINKS[3]] : []),
