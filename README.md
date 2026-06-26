@@ -79,7 +79,10 @@ Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `b
 
 ---
 
-## Developer Docs
+<details>
+
+<summary>## Developer Docs</summary>
+
 
 ### Tech Stack
 
@@ -130,3 +133,4 @@ The `feature/runner-test` branch was used to verify the GitLab Runner was connec
 | `main`    | Production-ready code                                      |
 | `dev`     | Integration branch — all feature branches merge here first |
 | `sprint*` | Each sprint                                                |
+</details>
