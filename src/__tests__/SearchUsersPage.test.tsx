@@ -106,7 +106,7 @@ describe('<SearchUsersPage /> role filtering', () => {
 
     await screen.findByText('Patrick User')
     const main = document.querySelector('#main-content')
-    expect(main).toHaveAccessibleName('Users')
+    expect(main).toHaveAccessibleName('2 users')
     expect(main).toHaveAttribute('tabindex', '-1')
 
     const firstTabStop = main?.querySelector('a')
