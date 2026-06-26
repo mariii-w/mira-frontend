@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { AlertTriangle, Plus } from "lucide-react";
 import { Button } from "../../common/ui/Button";
 import {
   MyListingCard,
@@ -28,8 +28,10 @@ interface MyListingsProps {
   onStatusFilterChange: (value: StatusFilter) => void;
   onCreate: () => void;
   onEdit: (listingId: string) => void;
+  onSetAvailability: () => void;
   onNextPage: () => void;
   onPreviousPage: () => void;
+  showMissingAvailabilityWarning: boolean;
 }
 
 function StatusFilterBar({
@@ -112,8 +114,10 @@ export function MyListings({
   onStatusFilterChange,
   onCreate,
   onEdit,
+  onSetAvailability,
   onNextPage,
   onPreviousPage,
+  showMissingAvailabilityWarning,
 }: MyListingsProps) {
   return (
     <>
@@ -144,6 +148,30 @@ export function MyListings({
               counts={statusCounts}
             />
           </div>
+
+          {showMissingAvailabilityWarning && (
+            <div
+              role="alert"
+              className="mb-6 flex items-center gap-3 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-950"
+            >
+              <AlertTriangle
+                size={18}
+                className="shrink-0 text-red-700"
+                aria-hidden="true"
+              />
+              <p>
+                No availability is set.{" "}
+                <button
+                  type="button"
+                  onClick={onSetAvailability}
+                  className="font-semibold text-red-950 underline underline-offset-2 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2"
+                >
+                  Go to calendar
+                </button>
+                .
+              </p>
+            </div>
+          )}
 
           <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
             {!loading && !error

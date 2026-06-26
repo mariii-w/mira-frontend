@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { getAuthorListings } from '../api/mira'
+import { getAuthorListings, getWeeklySchedule } from '../api/mira'
 
 const mockNavigate = vi.fn()
 
@@ -25,11 +25,16 @@ vi.mock('../api/mira', () => ({
     `/v1/users/${userId}/listings`,
     params,
   ],
+  getGetWeeklyScheduleQueryKey: (userId: string) => [
+    `/v1/users/${userId}/schedule/weekly`,
+  ],
   getAuthorListings: vi.fn(),
+  getWeeklySchedule: vi.fn(),
 }))
 
 
 const mockGetListings = vi.mocked(getAuthorListings)
+const mockGetWeeklySchedule = vi.mocked(getWeeklySchedule)
 
 function renderRoute() {
   const queryClient = new QueryClient({
@@ -73,10 +78,21 @@ function mockSuccess(items: object[]) {
   mockGetListings.mockResolvedValue(makeListingsResponse(items))
 }
 
+function mockSchedule(
+  entries: object[] = [{ dayOfWeek: 'MON', startTime: '09:00', endTime: '17:00' }],
+) {
+  mockGetWeeklySchedule.mockResolvedValue({
+    status: 200,
+    data: { entries },
+    headers: new Headers(),
+  } as Awaited<ReturnType<typeof getWeeklySchedule>>)
+}
+
 import { MyListingsRoute } from '../routes/_app/my-listings'
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockSchedule()
 })
 
 describe('<MyListingsPage />', () => {
@@ -209,6 +225,20 @@ describe('<MyListingsPage />', () => {
     renderRoute()
     await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
     expect(screen.getByRole('button', { name: /Create service/ })).toBeInTheDocument()
+  })
+
+  it('warns providers to set availability and links to calendar when weekly schedule is empty', async () => {
+    mockSuccess(makeListings([{}]))
+    mockSchedule([])
+
+    renderRoute()
+
+    const warning = await screen.findByRole('alert')
+    expect(warning).toHaveTextContent(/No availability is set/i)
+
+    fireEvent.click(screen.getByRole('button', { name: /go to calendar/i }))
+
+    expect(mockNavigate).toHaveBeenCalledWith({ to: '/calendar' })
   })
 
   describe('status filter', () => {

@@ -864,8 +864,10 @@ describe("component accessibility", () => {
           onStatusFilterChange={vi.fn()}
           onCreate={vi.fn()}
           onEdit={vi.fn()}
+          onSetAvailability={vi.fn()}
           onNextPage={vi.fn()}
           onPreviousPage={vi.fn()}
+          showMissingAvailabilityWarning={false}
         />,
       );
 
@@ -2883,8 +2885,10 @@ describe("component accessibility", () => {
         onStatusFilterChange={onStatusFilterChange}
         onCreate={vi.fn()}
         onEdit={vi.fn()}
+        onSetAvailability={vi.fn()}
         onNextPage={vi.fn()}
         onPreviousPage={vi.fn()}
+        showMissingAvailabilityWarning={false}
       />,
     );
 
