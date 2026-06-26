@@ -1,4 +1,4 @@
-import { Accessibility } from "lucide-react";
+import { PersonStanding } from "lucide-react";
 import { Navbar } from "./Navbar";
 import type { InfoPageContent } from "./infoPages";
 
@@ -27,7 +27,9 @@ export function InfoPage({ page }: { page: InfoPageContent }) {
                 className="flex items-center gap-2 text-h2 font-heading font-semibold text-foreground"
               >
                 {section.title === "Accessibility panel" && (
-                  <Accessibility size={24} aria-hidden="true" className="shrink-0" />
+                  <span className="inline-flex items-center justify-center rounded-full border border-current p-[3px] shrink-0" aria-hidden="true">
+                    <PersonStanding size={24} />
+                  </span>
                 )}
                 {section.title}
               </h2>
