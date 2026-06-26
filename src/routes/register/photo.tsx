@@ -4,7 +4,7 @@ import type { ProblemDetailsResponse } from "../../api/model";
 import {
   RegisterPhoto,
   type RegisterPhotoSubmitError,
-} from "../../components/RegisterPhoto";
+} from "../../components/features/register/RegisterPhoto";
 import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 

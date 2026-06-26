@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { PrivateProfilePage } from '../components/PrivateProfilePage'
+import { PrivateProfilePage } from '../components/features/profiles/PrivateProfilePage'
 import type { MyListingSummary } from '../api/model'
 
 vi.mock('@tanstack/react-router', () => ({
@@ -10,9 +10,6 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }))
 
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
 
 const baseListing: MyListingSummary = {
   listingId: 'listing-1',

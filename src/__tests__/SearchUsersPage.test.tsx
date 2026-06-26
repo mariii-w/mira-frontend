@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { onlineManager, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { SearchUsersPage } from '../components/search/pages/SearchUsersPage'
+import { SearchUsersPage } from '../components/features/search/SearchUsersPage'
 import { getPublicProfilesCollection, getPublicListings } from '../api/mira'
 import type { PublicListingSummary } from '../api/model'
 

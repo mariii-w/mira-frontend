@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import source from "../components/BookingPage.tsx?raw";
-import bookingCardSource from "../components/BookingCard.tsx?raw";
+import source from "../components/features/bookings/BookingPage.tsx?raw";
+import bookingCardSource from "../components/features/bookings/BookingCard.tsx?raw";
 import queryClientSource from "../lib/queryClient.ts?raw";
-import bookingRouteSource from "../routes/listings/$listingId_.book.tsx?raw";
+import bookingRouteSource from "../routes/_app/listings/$listingId_.book.tsx?raw";
 
 describe("booking page architecture", () => {
   it("keeps fetching out of the booking component", () => {
@@ -26,6 +26,6 @@ describe("booking page architecture", () => {
 
   it("uses the generated API client from the booking route", () => {
     expect(bookingRouteSource).not.toMatch(/\bfetch\s*\(/);
-    expect(bookingRouteSource).toMatch(/from ["']\.\.\/\.\.\/api\/mira["']/);
+    expect(bookingRouteSource).toMatch(/from ["']\.\.\/\.\.\/\.\.\/api\/mira["']/);
   });
 });

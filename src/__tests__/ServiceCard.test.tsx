@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import { computeAccessibleDescription } from 'dom-accessibility-api'
 import { describe, expect, it, vi } from 'vitest'
-import { ServiceCard } from '../components/ServiceCard'
+import { ServiceCard } from '../components/features/listings/ServiceCard'
 import type { ServiceTag } from '../api/model'
 
 vi.mock('@tanstack/react-router', () => ({

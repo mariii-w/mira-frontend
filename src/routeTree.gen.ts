@@ -9,102 +9,43 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsOfUseRouteImport } from './routes/terms-of-use'
-import { Route as StyleguideRouteImport } from './routes/styleguide'
-import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
-import { Route as MyListingsRouteImport } from './routes/my-listings'
-import { Route as MyCredentialsRouteImport } from './routes/my-credentials'
-import { Route as MyBookingsRouteImport } from './routes/my-bookings'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as CreateListingRouteImport } from './routes/create-listing'
-import { Route as ContactUsRouteImport } from './routes/contact-us'
-import { Route as ChatRouteImport } from './routes/chat'
-import { Route as CalendarRouteImport } from './routes/calendar'
-import { Route as AccessibilityRouteImport } from './routes/accessibility'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as RegisterRouteRouteImport } from './routes/register/route'
-import { Route as SearchRouteRouteImport } from './routes/_search/route'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as RegisterIndexRouteImport } from './routes/register/index'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as RegisterRoleRouteImport } from './routes/register/role'
 import { Route as RegisterPhotoRouteImport } from './routes/register/photo'
 import { Route as RegisterNameRouteImport } from './routes/register/name'
 import { Route as RegisterDoneRouteImport } from './routes/register/done'
 import { Route as RegisterAddressRouteImport } from './routes/register/address'
 import { Route as RegisterAboutRouteImport } from './routes/register/about'
-import { Route as ProfileUserIdRouteImport } from './routes/profile.$userId'
-import { Route as EditListingListingIdRouteImport } from './routes/edit-listing.$listingId'
-import { Route as SearchBrowseUsersRouteImport } from './routes/_search/browse-users'
-import { Route as SearchBrowseServicesRouteImport } from './routes/_search/browse-services'
-import { Route as ListingsListingIdIndexRouteImport } from './routes/listings/$listingId.index'
-import { Route as ProfileUserIdEditRouteImport } from './routes/profile.$userId.edit'
-import { Route as ListingsListingIdBookRouteImport } from './routes/listings/$listingId_.book'
-import { Route as BookingsPaymentSuccessRouteImport } from './routes/bookings/payment/success'
-import { Route as BookingsPaymentCancelledRouteImport } from './routes/bookings/payment/cancelled'
+import { Route as AppTermsOfUseRouteImport } from './routes/_app/terms-of-use'
+import { Route as AppStyleguideRouteImport } from './routes/_app/styleguide'
+import { Route as AppPrivacyPolicyRouteImport } from './routes/_app/privacy-policy'
+import { Route as AppMyListingsRouteImport } from './routes/_app/my-listings'
+import { Route as AppMyCredentialsRouteImport } from './routes/_app/my-credentials'
+import { Route as AppMyBookingsRouteImport } from './routes/_app/my-bookings'
+import { Route as AppCreateListingRouteImport } from './routes/_app/create-listing'
+import { Route as AppContactUsRouteImport } from './routes/_app/contact-us'
+import { Route as AppChatRouteImport } from './routes/_app/chat'
+import { Route as AppCalendarRouteImport } from './routes/_app/calendar'
+import { Route as AppAccessibilityRouteImport } from './routes/_app/accessibility'
+import { Route as AppAboutRouteImport } from './routes/_app/about'
+import { Route as AppSearchRouteRouteImport } from './routes/_app/_search/route'
+import { Route as AppProfileUserIdRouteImport } from './routes/_app/profile.$userId'
+import { Route as AppEditListingListingIdRouteImport } from './routes/_app/edit-listing.$listingId'
+import { Route as AppSearchBrowseUsersRouteImport } from './routes/_app/_search/browse-users'
+import { Route as AppSearchBrowseServicesRouteImport } from './routes/_app/_search/browse-services'
+import { Route as AppListingsListingIdIndexRouteImport } from './routes/_app/listings/$listingId.index'
+import { Route as AppProfileUserIdEditRouteImport } from './routes/_app/profile.$userId.edit'
+import { Route as AppListingsListingIdBookRouteImport } from './routes/_app/listings/$listingId_.book'
+import { Route as AppBookingsPaymentSuccessRouteImport } from './routes/_app/bookings/payment/success'
+import { Route as AppBookingsPaymentCancelledRouteImport } from './routes/_app/bookings/payment/cancelled'
 
-const TermsOfUseRoute = TermsOfUseRouteImport.update({
-  id: '/terms-of-use',
-  path: '/terms-of-use',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StyleguideRoute = StyleguideRouteImport.update({
-  id: '/styleguide',
-  path: '/styleguide',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
-  id: '/privacy-policy',
-  path: '/privacy-policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MyListingsRoute = MyListingsRouteImport.update({
-  id: '/my-listings',
-  path: '/my-listings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MyCredentialsRoute = MyCredentialsRouteImport.update({
-  id: '/my-credentials',
-  path: '/my-credentials',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MyBookingsRoute = MyBookingsRouteImport.update({
-  id: '/my-bookings',
-  path: '/my-bookings',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CreateListingRoute = CreateListingRouteImport.update({
-  id: '/create-listing',
-  path: '/create-listing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactUsRoute = ContactUsRouteImport.update({
-  id: '/contact-us',
-  path: '/contact-us',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CalendarRoute = CalendarRouteImport.update({
-  id: '/calendar',
-  path: '/calendar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccessibilityRoute = AccessibilityRouteImport.update({
-  id: '/accessibility',
-  path: '/accessibility',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRouteRoute = RegisterRouteRouteImport.update({
@@ -112,19 +53,19 @@ const RegisterRouteRoute = RegisterRouteRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SearchRouteRoute = SearchRouteRouteImport.update({
-  id: '/_search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterIndexRoute = RegisterIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => RegisterRouteRoute,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const RegisterRoleRoute = RegisterRoleRouteImport.update({
   id: '/role',
@@ -156,73 +97,136 @@ const RegisterAboutRoute = RegisterAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => RegisterRouteRoute,
 } as any)
-const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
+const AppTermsOfUseRoute = AppTermsOfUseRouteImport.update({
+  id: '/terms-of-use',
+  path: '/terms-of-use',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppStyleguideRoute = AppStyleguideRouteImport.update({
+  id: '/styleguide',
+  path: '/styleguide',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppPrivacyPolicyRoute = AppPrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppMyListingsRoute = AppMyListingsRouteImport.update({
+  id: '/my-listings',
+  path: '/my-listings',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppMyCredentialsRoute = AppMyCredentialsRouteImport.update({
+  id: '/my-credentials',
+  path: '/my-credentials',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppMyBookingsRoute = AppMyBookingsRouteImport.update({
+  id: '/my-bookings',
+  path: '/my-bookings',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCreateListingRoute = AppCreateListingRouteImport.update({
+  id: '/create-listing',
+  path: '/create-listing',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppContactUsRoute = AppContactUsRouteImport.update({
+  id: '/contact-us',
+  path: '/contact-us',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCalendarRoute = AppCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAccessibilityRoute = AppAccessibilityRouteImport.update({
+  id: '/accessibility',
+  path: '/accessibility',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAboutRoute = AppAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppSearchRouteRoute = AppSearchRouteRouteImport.update({
+  id: '/_search',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProfileUserIdRoute = AppProfileUserIdRouteImport.update({
   id: '/profile/$userId',
   path: '/profile/$userId',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const EditListingListingIdRoute = EditListingListingIdRouteImport.update({
+const AppEditListingListingIdRoute = AppEditListingListingIdRouteImport.update({
   id: '/edit-listing/$listingId',
   path: '/edit-listing/$listingId',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const SearchBrowseUsersRoute = SearchBrowseUsersRouteImport.update({
+const AppSearchBrowseUsersRoute = AppSearchBrowseUsersRouteImport.update({
   id: '/browse-users',
   path: '/browse-users',
-  getParentRoute: () => SearchRouteRoute,
+  getParentRoute: () => AppSearchRouteRoute,
 } as any)
-const SearchBrowseServicesRoute = SearchBrowseServicesRouteImport.update({
+const AppSearchBrowseServicesRoute = AppSearchBrowseServicesRouteImport.update({
   id: '/browse-services',
   path: '/browse-services',
-  getParentRoute: () => SearchRouteRoute,
+  getParentRoute: () => AppSearchRouteRoute,
 } as any)
-const ListingsListingIdIndexRoute = ListingsListingIdIndexRouteImport.update({
-  id: '/listings/$listingId/',
-  path: '/listings/$listingId/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileUserIdEditRoute = ProfileUserIdEditRouteImport.update({
+const AppListingsListingIdIndexRoute =
+  AppListingsListingIdIndexRouteImport.update({
+    id: '/listings/$listingId/',
+    path: '/listings/$listingId/',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppProfileUserIdEditRoute = AppProfileUserIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
-  getParentRoute: () => ProfileUserIdRoute,
+  getParentRoute: () => AppProfileUserIdRoute,
 } as any)
-const ListingsListingIdBookRoute = ListingsListingIdBookRouteImport.update({
-  id: '/listings/$listingId_/book',
-  path: '/listings/$listingId/book',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BookingsPaymentSuccessRoute = BookingsPaymentSuccessRouteImport.update({
-  id: '/bookings/payment/success',
-  path: '/bookings/payment/success',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BookingsPaymentCancelledRoute =
-  BookingsPaymentCancelledRouteImport.update({
+const AppListingsListingIdBookRoute =
+  AppListingsListingIdBookRouteImport.update({
+    id: '/listings/$listingId_/book',
+    path: '/listings/$listingId/book',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppBookingsPaymentSuccessRoute =
+  AppBookingsPaymentSuccessRouteImport.update({
+    id: '/bookings/payment/success',
+    path: '/bookings/payment/success',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppBookingsPaymentCancelledRoute =
+  AppBookingsPaymentCancelledRouteImport.update({
     id: '/bookings/payment/cancelled',
     path: '/bookings/payment/cancelled',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AppRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
   '/register': typeof RegisterRouteRouteWithChildren
-  '/about': typeof AboutRoute
-  '/accessibility': typeof AccessibilityRoute
-  '/calendar': typeof CalendarRoute
-  '/chat': typeof ChatRoute
-  '/contact-us': typeof ContactUsRoute
-  '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/my-bookings': typeof MyBookingsRoute
-  '/my-credentials': typeof MyCredentialsRoute
-  '/my-listings': typeof MyListingsRoute
-  '/privacy-policy': typeof PrivacyPolicyRoute
-  '/styleguide': typeof StyleguideRoute
-  '/terms-of-use': typeof TermsOfUseRoute
-  '/browse-services': typeof SearchBrowseServicesRoute
-  '/browse-users': typeof SearchBrowseUsersRoute
-  '/edit-listing/$listingId': typeof EditListingListingIdRoute
-  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
+  '/about': typeof AppAboutRoute
+  '/accessibility': typeof AppAccessibilityRoute
+  '/calendar': typeof AppCalendarRoute
+  '/chat': typeof AppChatRoute
+  '/contact-us': typeof AppContactUsRoute
+  '/create-listing': typeof AppCreateListingRoute
+  '/my-bookings': typeof AppMyBookingsRoute
+  '/my-credentials': typeof AppMyCredentialsRoute
+  '/my-listings': typeof AppMyListingsRoute
+  '/privacy-policy': typeof AppPrivacyPolicyRoute
+  '/styleguide': typeof AppStyleguideRoute
+  '/terms-of-use': typeof AppTermsOfUseRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -230,31 +234,31 @@ export interface FileRoutesByFullPath {
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
   '/register/': typeof RegisterIndexRoute
-  '/bookings/payment/cancelled': typeof BookingsPaymentCancelledRoute
-  '/bookings/payment/success': typeof BookingsPaymentSuccessRoute
-  '/listings/$listingId/book': typeof ListingsListingIdBookRoute
-  '/profile/$userId/edit': typeof ProfileUserIdEditRoute
-  '/listings/$listingId/': typeof ListingsListingIdIndexRoute
+  '/browse-services': typeof AppSearchBrowseServicesRoute
+  '/browse-users': typeof AppSearchBrowseUsersRoute
+  '/edit-listing/$listingId': typeof AppEditListingListingIdRoute
+  '/profile/$userId': typeof AppProfileUserIdRouteWithChildren
+  '/bookings/payment/cancelled': typeof AppBookingsPaymentCancelledRoute
+  '/bookings/payment/success': typeof AppBookingsPaymentSuccessRoute
+  '/listings/$listingId/book': typeof AppListingsListingIdBookRoute
+  '/profile/$userId/edit': typeof AppProfileUserIdEditRoute
+  '/listings/$listingId/': typeof AppListingsListingIdIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/accessibility': typeof AccessibilityRoute
-  '/calendar': typeof CalendarRoute
-  '/chat': typeof ChatRoute
-  '/contact-us': typeof ContactUsRoute
-  '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/my-bookings': typeof MyBookingsRoute
-  '/my-credentials': typeof MyCredentialsRoute
-  '/my-listings': typeof MyListingsRoute
-  '/privacy-policy': typeof PrivacyPolicyRoute
-  '/styleguide': typeof StyleguideRoute
-  '/terms-of-use': typeof TermsOfUseRoute
-  '/browse-services': typeof SearchBrowseServicesRoute
-  '/browse-users': typeof SearchBrowseUsersRoute
-  '/edit-listing/$listingId': typeof EditListingListingIdRoute
-  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
+  '/': typeof AppIndexRoute
+  '/about': typeof AppAboutRoute
+  '/accessibility': typeof AppAccessibilityRoute
+  '/calendar': typeof AppCalendarRoute
+  '/chat': typeof AppChatRoute
+  '/contact-us': typeof AppContactUsRoute
+  '/create-listing': typeof AppCreateListingRoute
+  '/my-bookings': typeof AppMyBookingsRoute
+  '/my-credentials': typeof AppMyCredentialsRoute
+  '/my-listings': typeof AppMyListingsRoute
+  '/privacy-policy': typeof AppPrivacyPolicyRoute
+  '/styleguide': typeof AppStyleguideRoute
+  '/terms-of-use': typeof AppTermsOfUseRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -262,69 +266,70 @@ export interface FileRoutesByTo {
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
   '/register': typeof RegisterIndexRoute
-  '/bookings/payment/cancelled': typeof BookingsPaymentCancelledRoute
-  '/bookings/payment/success': typeof BookingsPaymentSuccessRoute
-  '/listings/$listingId/book': typeof ListingsListingIdBookRoute
-  '/profile/$userId/edit': typeof ProfileUserIdEditRoute
-  '/listings/$listingId': typeof ListingsListingIdIndexRoute
+  '/browse-services': typeof AppSearchBrowseServicesRoute
+  '/browse-users': typeof AppSearchBrowseUsersRoute
+  '/edit-listing/$listingId': typeof AppEditListingListingIdRoute
+  '/profile/$userId': typeof AppProfileUserIdRouteWithChildren
+  '/bookings/payment/cancelled': typeof AppBookingsPaymentCancelledRoute
+  '/bookings/payment/success': typeof AppBookingsPaymentSuccessRoute
+  '/listings/$listingId/book': typeof AppListingsListingIdBookRoute
+  '/profile/$userId/edit': typeof AppProfileUserIdEditRoute
+  '/listings/$listingId': typeof AppListingsListingIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/_search': typeof SearchRouteRouteWithChildren
+  '/_app': typeof AppRouteRouteWithChildren
   '/register': typeof RegisterRouteRouteWithChildren
-  '/about': typeof AboutRoute
-  '/accessibility': typeof AccessibilityRoute
-  '/calendar': typeof CalendarRoute
-  '/chat': typeof ChatRoute
-  '/contact-us': typeof ContactUsRoute
-  '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
-  '/my-bookings': typeof MyBookingsRoute
-  '/my-credentials': typeof MyCredentialsRoute
-  '/my-listings': typeof MyListingsRoute
-  '/privacy-policy': typeof PrivacyPolicyRoute
-  '/styleguide': typeof StyleguideRoute
-  '/terms-of-use': typeof TermsOfUseRoute
-  '/_search/browse-services': typeof SearchBrowseServicesRoute
-  '/_search/browse-users': typeof SearchBrowseUsersRoute
-  '/edit-listing/$listingId': typeof EditListingListingIdRoute
-  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
+  '/_app/_search': typeof AppSearchRouteRouteWithChildren
+  '/_app/about': typeof AppAboutRoute
+  '/_app/accessibility': typeof AppAccessibilityRoute
+  '/_app/calendar': typeof AppCalendarRoute
+  '/_app/chat': typeof AppChatRoute
+  '/_app/contact-us': typeof AppContactUsRoute
+  '/_app/create-listing': typeof AppCreateListingRoute
+  '/_app/my-bookings': typeof AppMyBookingsRoute
+  '/_app/my-credentials': typeof AppMyCredentialsRoute
+  '/_app/my-listings': typeof AppMyListingsRoute
+  '/_app/privacy-policy': typeof AppPrivacyPolicyRoute
+  '/_app/styleguide': typeof AppStyleguideRoute
+  '/_app/terms-of-use': typeof AppTermsOfUseRoute
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
   '/register/name': typeof RegisterNameRoute
   '/register/photo': typeof RegisterPhotoRoute
   '/register/role': typeof RegisterRoleRoute
+  '/_app/': typeof AppIndexRoute
   '/register/': typeof RegisterIndexRoute
-  '/bookings/payment/cancelled': typeof BookingsPaymentCancelledRoute
-  '/bookings/payment/success': typeof BookingsPaymentSuccessRoute
-  '/listings/$listingId_/book': typeof ListingsListingIdBookRoute
-  '/profile/$userId/edit': typeof ProfileUserIdEditRoute
-  '/listings/$listingId/': typeof ListingsListingIdIndexRoute
+  '/_app/_search/browse-services': typeof AppSearchBrowseServicesRoute
+  '/_app/_search/browse-users': typeof AppSearchBrowseUsersRoute
+  '/_app/edit-listing/$listingId': typeof AppEditListingListingIdRoute
+  '/_app/profile/$userId': typeof AppProfileUserIdRouteWithChildren
+  '/_app/bookings/payment/cancelled': typeof AppBookingsPaymentCancelledRoute
+  '/_app/bookings/payment/success': typeof AppBookingsPaymentSuccessRoute
+  '/_app/listings/$listingId_/book': typeof AppListingsListingIdBookRoute
+  '/_app/profile/$userId/edit': typeof AppProfileUserIdEditRoute
+  '/_app/listings/$listingId/': typeof AppListingsListingIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/register'
+    | '/login'
     | '/about'
     | '/accessibility'
     | '/calendar'
     | '/chat'
     | '/contact-us'
     | '/create-listing'
-    | '/login'
     | '/my-bookings'
     | '/my-credentials'
     | '/my-listings'
     | '/privacy-policy'
     | '/styleguide'
     | '/terms-of-use'
-    | '/browse-services'
-    | '/browse-users'
-    | '/edit-listing/$listingId'
-    | '/profile/$userId'
     | '/register/about'
     | '/register/address'
     | '/register/done'
@@ -332,6 +337,10 @@ export interface FileRouteTypes {
     | '/register/photo'
     | '/register/role'
     | '/register/'
+    | '/browse-services'
+    | '/browse-users'
+    | '/edit-listing/$listingId'
+    | '/profile/$userId'
     | '/bookings/payment/cancelled'
     | '/bookings/payment/success'
     | '/listings/$listingId/book'
@@ -339,6 +348,7 @@ export interface FileRouteTypes {
     | '/listings/$listingId/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/login'
     | '/'
     | '/about'
     | '/accessibility'
@@ -346,17 +356,12 @@ export interface FileRouteTypes {
     | '/chat'
     | '/contact-us'
     | '/create-listing'
-    | '/login'
     | '/my-bookings'
     | '/my-credentials'
     | '/my-listings'
     | '/privacy-policy'
     | '/styleguide'
     | '/terms-of-use'
-    | '/browse-services'
-    | '/browse-users'
-    | '/edit-listing/$listingId'
-    | '/profile/$userId'
     | '/register/about'
     | '/register/address'
     | '/register/done'
@@ -364,6 +369,10 @@ export interface FileRouteTypes {
     | '/register/photo'
     | '/register/role'
     | '/register'
+    | '/browse-services'
+    | '/browse-users'
+    | '/edit-listing/$listingId'
+    | '/profile/$userId'
     | '/bookings/payment/cancelled'
     | '/bookings/payment/success'
     | '/listings/$listingId/book'
@@ -371,156 +380,54 @@ export interface FileRouteTypes {
     | '/listings/$listingId'
   id:
     | '__root__'
-    | '/'
-    | '/_search'
+    | '/_app'
     | '/register'
-    | '/about'
-    | '/accessibility'
-    | '/calendar'
-    | '/chat'
-    | '/contact-us'
-    | '/create-listing'
     | '/login'
-    | '/my-bookings'
-    | '/my-credentials'
-    | '/my-listings'
-    | '/privacy-policy'
-    | '/styleguide'
-    | '/terms-of-use'
-    | '/_search/browse-services'
-    | '/_search/browse-users'
-    | '/edit-listing/$listingId'
-    | '/profile/$userId'
+    | '/_app/_search'
+    | '/_app/about'
+    | '/_app/accessibility'
+    | '/_app/calendar'
+    | '/_app/chat'
+    | '/_app/contact-us'
+    | '/_app/create-listing'
+    | '/_app/my-bookings'
+    | '/_app/my-credentials'
+    | '/_app/my-listings'
+    | '/_app/privacy-policy'
+    | '/_app/styleguide'
+    | '/_app/terms-of-use'
     | '/register/about'
     | '/register/address'
     | '/register/done'
     | '/register/name'
     | '/register/photo'
     | '/register/role'
+    | '/_app/'
     | '/register/'
-    | '/bookings/payment/cancelled'
-    | '/bookings/payment/success'
-    | '/listings/$listingId_/book'
-    | '/profile/$userId/edit'
-    | '/listings/$listingId/'
+    | '/_app/_search/browse-services'
+    | '/_app/_search/browse-users'
+    | '/_app/edit-listing/$listingId'
+    | '/_app/profile/$userId'
+    | '/_app/bookings/payment/cancelled'
+    | '/_app/bookings/payment/success'
+    | '/_app/listings/$listingId_/book'
+    | '/_app/profile/$userId/edit'
+    | '/_app/listings/$listingId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  SearchRouteRoute: typeof SearchRouteRouteWithChildren
+  AppRouteRoute: typeof AppRouteRouteWithChildren
   RegisterRouteRoute: typeof RegisterRouteRouteWithChildren
-  AboutRoute: typeof AboutRoute
-  AccessibilityRoute: typeof AccessibilityRoute
-  CalendarRoute: typeof CalendarRoute
-  ChatRoute: typeof ChatRoute
-  ContactUsRoute: typeof ContactUsRoute
-  CreateListingRoute: typeof CreateListingRoute
   LoginRoute: typeof LoginRoute
-  MyBookingsRoute: typeof MyBookingsRoute
-  MyCredentialsRoute: typeof MyCredentialsRoute
-  MyListingsRoute: typeof MyListingsRoute
-  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
-  StyleguideRoute: typeof StyleguideRoute
-  TermsOfUseRoute: typeof TermsOfUseRoute
-  EditListingListingIdRoute: typeof EditListingListingIdRoute
-  ProfileUserIdRoute: typeof ProfileUserIdRouteWithChildren
-  BookingsPaymentCancelledRoute: typeof BookingsPaymentCancelledRoute
-  BookingsPaymentSuccessRoute: typeof BookingsPaymentSuccessRoute
-  ListingsListingIdBookRoute: typeof ListingsListingIdBookRoute
-  ListingsListingIdIndexRoute: typeof ListingsListingIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms-of-use': {
-      id: '/terms-of-use'
-      path: '/terms-of-use'
-      fullPath: '/terms-of-use'
-      preLoaderRoute: typeof TermsOfUseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/styleguide': {
-      id: '/styleguide'
-      path: '/styleguide'
-      fullPath: '/styleguide'
-      preLoaderRoute: typeof StyleguideRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy-policy': {
-      id: '/privacy-policy'
-      path: '/privacy-policy'
-      fullPath: '/privacy-policy'
-      preLoaderRoute: typeof PrivacyPolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/my-listings': {
-      id: '/my-listings'
-      path: '/my-listings'
-      fullPath: '/my-listings'
-      preLoaderRoute: typeof MyListingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/my-credentials': {
-      id: '/my-credentials'
-      path: '/my-credentials'
-      fullPath: '/my-credentials'
-      preLoaderRoute: typeof MyCredentialsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/my-bookings': {
-      id: '/my-bookings'
-      path: '/my-bookings'
-      fullPath: '/my-bookings'
-      preLoaderRoute: typeof MyBookingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/create-listing': {
-      id: '/create-listing'
-      path: '/create-listing'
-      fullPath: '/create-listing'
-      preLoaderRoute: typeof CreateListingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact-us': {
-      id: '/contact-us'
-      path: '/contact-us'
-      fullPath: '/contact-us'
-      preLoaderRoute: typeof ContactUsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/calendar': {
-      id: '/calendar'
-      path: '/calendar'
-      fullPath: '/calendar'
-      preLoaderRoute: typeof CalendarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/accessibility': {
-      id: '/accessibility'
-      path: '/accessibility'
-      fullPath: '/accessibility'
-      preLoaderRoute: typeof AccessibilityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -530,18 +437,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_search': {
-      id: '/_search'
+    '/_app': {
+      id: '/_app'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof SearchRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register/': {
@@ -550,6 +450,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/register/'
       preLoaderRoute: typeof RegisterIndexRouteImport
       parentRoute: typeof RegisterRouteRoute
+    }
+    '/_app/': {
+      id: '/_app/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRouteRoute
     }
     '/register/role': {
       id: '/register/role'
@@ -593,84 +500,236 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterAboutRouteImport
       parentRoute: typeof RegisterRouteRoute
     }
-    '/profile/$userId': {
-      id: '/profile/$userId'
+    '/_app/terms-of-use': {
+      id: '/_app/terms-of-use'
+      path: '/terms-of-use'
+      fullPath: '/terms-of-use'
+      preLoaderRoute: typeof AppTermsOfUseRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/styleguide': {
+      id: '/_app/styleguide'
+      path: '/styleguide'
+      fullPath: '/styleguide'
+      preLoaderRoute: typeof AppStyleguideRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/privacy-policy': {
+      id: '/_app/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof AppPrivacyPolicyRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/my-listings': {
+      id: '/_app/my-listings'
+      path: '/my-listings'
+      fullPath: '/my-listings'
+      preLoaderRoute: typeof AppMyListingsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/my-credentials': {
+      id: '/_app/my-credentials'
+      path: '/my-credentials'
+      fullPath: '/my-credentials'
+      preLoaderRoute: typeof AppMyCredentialsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/my-bookings': {
+      id: '/_app/my-bookings'
+      path: '/my-bookings'
+      fullPath: '/my-bookings'
+      preLoaderRoute: typeof AppMyBookingsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/create-listing': {
+      id: '/_app/create-listing'
+      path: '/create-listing'
+      fullPath: '/create-listing'
+      preLoaderRoute: typeof AppCreateListingRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/contact-us': {
+      id: '/_app/contact-us'
+      path: '/contact-us'
+      fullPath: '/contact-us'
+      preLoaderRoute: typeof AppContactUsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/chat': {
+      id: '/_app/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/calendar': {
+      id: '/_app/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof AppCalendarRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/accessibility': {
+      id: '/_app/accessibility'
+      path: '/accessibility'
+      fullPath: '/accessibility'
+      preLoaderRoute: typeof AppAccessibilityRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/about': {
+      id: '/_app/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AppAboutRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/_search': {
+      id: '/_app/_search'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppSearchRouteRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/profile/$userId': {
+      id: '/_app/profile/$userId'
       path: '/profile/$userId'
       fullPath: '/profile/$userId'
-      preLoaderRoute: typeof ProfileUserIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppProfileUserIdRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/edit-listing/$listingId': {
-      id: '/edit-listing/$listingId'
+    '/_app/edit-listing/$listingId': {
+      id: '/_app/edit-listing/$listingId'
       path: '/edit-listing/$listingId'
       fullPath: '/edit-listing/$listingId'
-      preLoaderRoute: typeof EditListingListingIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEditListingListingIdRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_search/browse-users': {
-      id: '/_search/browse-users'
+    '/_app/_search/browse-users': {
+      id: '/_app/_search/browse-users'
       path: '/browse-users'
       fullPath: '/browse-users'
-      preLoaderRoute: typeof SearchBrowseUsersRouteImport
-      parentRoute: typeof SearchRouteRoute
+      preLoaderRoute: typeof AppSearchBrowseUsersRouteImport
+      parentRoute: typeof AppSearchRouteRoute
     }
-    '/_search/browse-services': {
-      id: '/_search/browse-services'
+    '/_app/_search/browse-services': {
+      id: '/_app/_search/browse-services'
       path: '/browse-services'
       fullPath: '/browse-services'
-      preLoaderRoute: typeof SearchBrowseServicesRouteImport
-      parentRoute: typeof SearchRouteRoute
+      preLoaderRoute: typeof AppSearchBrowseServicesRouteImport
+      parentRoute: typeof AppSearchRouteRoute
     }
-    '/listings/$listingId/': {
-      id: '/listings/$listingId/'
+    '/_app/listings/$listingId/': {
+      id: '/_app/listings/$listingId/'
       path: '/listings/$listingId'
       fullPath: '/listings/$listingId/'
-      preLoaderRoute: typeof ListingsListingIdIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppListingsListingIdIndexRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/profile/$userId/edit': {
-      id: '/profile/$userId/edit'
+    '/_app/profile/$userId/edit': {
+      id: '/_app/profile/$userId/edit'
       path: '/edit'
       fullPath: '/profile/$userId/edit'
-      preLoaderRoute: typeof ProfileUserIdEditRouteImport
-      parentRoute: typeof ProfileUserIdRoute
+      preLoaderRoute: typeof AppProfileUserIdEditRouteImport
+      parentRoute: typeof AppProfileUserIdRoute
     }
-    '/listings/$listingId_/book': {
-      id: '/listings/$listingId_/book'
+    '/_app/listings/$listingId_/book': {
+      id: '/_app/listings/$listingId_/book'
       path: '/listings/$listingId/book'
       fullPath: '/listings/$listingId/book'
-      preLoaderRoute: typeof ListingsListingIdBookRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppListingsListingIdBookRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/bookings/payment/success': {
-      id: '/bookings/payment/success'
+    '/_app/bookings/payment/success': {
+      id: '/_app/bookings/payment/success'
       path: '/bookings/payment/success'
       fullPath: '/bookings/payment/success'
-      preLoaderRoute: typeof BookingsPaymentSuccessRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppBookingsPaymentSuccessRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/bookings/payment/cancelled': {
-      id: '/bookings/payment/cancelled'
+    '/_app/bookings/payment/cancelled': {
+      id: '/_app/bookings/payment/cancelled'
       path: '/bookings/payment/cancelled'
       fullPath: '/bookings/payment/cancelled'
-      preLoaderRoute: typeof BookingsPaymentCancelledRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppBookingsPaymentCancelledRouteImport
+      parentRoute: typeof AppRouteRoute
     }
   }
 }
 
-interface SearchRouteRouteChildren {
-  SearchBrowseServicesRoute: typeof SearchBrowseServicesRoute
-  SearchBrowseUsersRoute: typeof SearchBrowseUsersRoute
+interface AppSearchRouteRouteChildren {
+  AppSearchBrowseServicesRoute: typeof AppSearchBrowseServicesRoute
+  AppSearchBrowseUsersRoute: typeof AppSearchBrowseUsersRoute
 }
 
-const SearchRouteRouteChildren: SearchRouteRouteChildren = {
-  SearchBrowseServicesRoute: SearchBrowseServicesRoute,
-  SearchBrowseUsersRoute: SearchBrowseUsersRoute,
+const AppSearchRouteRouteChildren: AppSearchRouteRouteChildren = {
+  AppSearchBrowseServicesRoute: AppSearchBrowseServicesRoute,
+  AppSearchBrowseUsersRoute: AppSearchBrowseUsersRoute,
 }
 
-const SearchRouteRouteWithChildren = SearchRouteRoute._addFileChildren(
-  SearchRouteRouteChildren,
+const AppSearchRouteRouteWithChildren = AppSearchRouteRoute._addFileChildren(
+  AppSearchRouteRouteChildren,
+)
+
+interface AppProfileUserIdRouteChildren {
+  AppProfileUserIdEditRoute: typeof AppProfileUserIdEditRoute
+}
+
+const AppProfileUserIdRouteChildren: AppProfileUserIdRouteChildren = {
+  AppProfileUserIdEditRoute: AppProfileUserIdEditRoute,
+}
+
+const AppProfileUserIdRouteWithChildren =
+  AppProfileUserIdRoute._addFileChildren(AppProfileUserIdRouteChildren)
+
+interface AppRouteRouteChildren {
+  AppSearchRouteRoute: typeof AppSearchRouteRouteWithChildren
+  AppAboutRoute: typeof AppAboutRoute
+  AppAccessibilityRoute: typeof AppAccessibilityRoute
+  AppCalendarRoute: typeof AppCalendarRoute
+  AppChatRoute: typeof AppChatRoute
+  AppContactUsRoute: typeof AppContactUsRoute
+  AppCreateListingRoute: typeof AppCreateListingRoute
+  AppMyBookingsRoute: typeof AppMyBookingsRoute
+  AppMyCredentialsRoute: typeof AppMyCredentialsRoute
+  AppMyListingsRoute: typeof AppMyListingsRoute
+  AppPrivacyPolicyRoute: typeof AppPrivacyPolicyRoute
+  AppStyleguideRoute: typeof AppStyleguideRoute
+  AppTermsOfUseRoute: typeof AppTermsOfUseRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppEditListingListingIdRoute: typeof AppEditListingListingIdRoute
+  AppProfileUserIdRoute: typeof AppProfileUserIdRouteWithChildren
+  AppBookingsPaymentCancelledRoute: typeof AppBookingsPaymentCancelledRoute
+  AppBookingsPaymentSuccessRoute: typeof AppBookingsPaymentSuccessRoute
+  AppListingsListingIdBookRoute: typeof AppListingsListingIdBookRoute
+  AppListingsListingIdIndexRoute: typeof AppListingsListingIdIndexRoute
+}
+
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppSearchRouteRoute: AppSearchRouteRouteWithChildren,
+  AppAboutRoute: AppAboutRoute,
+  AppAccessibilityRoute: AppAccessibilityRoute,
+  AppCalendarRoute: AppCalendarRoute,
+  AppChatRoute: AppChatRoute,
+  AppContactUsRoute: AppContactUsRoute,
+  AppCreateListingRoute: AppCreateListingRoute,
+  AppMyBookingsRoute: AppMyBookingsRoute,
+  AppMyCredentialsRoute: AppMyCredentialsRoute,
+  AppMyListingsRoute: AppMyListingsRoute,
+  AppPrivacyPolicyRoute: AppPrivacyPolicyRoute,
+  AppStyleguideRoute: AppStyleguideRoute,
+  AppTermsOfUseRoute: AppTermsOfUseRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppEditListingListingIdRoute: AppEditListingListingIdRoute,
+  AppProfileUserIdRoute: AppProfileUserIdRouteWithChildren,
+  AppBookingsPaymentCancelledRoute: AppBookingsPaymentCancelledRoute,
+  AppBookingsPaymentSuccessRoute: AppBookingsPaymentSuccessRoute,
+  AppListingsListingIdBookRoute: AppListingsListingIdBookRoute,
+  AppListingsListingIdIndexRoute: AppListingsListingIdIndexRoute,
+}
+
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
 )
 
 interface RegisterRouteRouteChildren {
@@ -697,41 +756,10 @@ const RegisterRouteRouteWithChildren = RegisterRouteRoute._addFileChildren(
   RegisterRouteRouteChildren,
 )
 
-interface ProfileUserIdRouteChildren {
-  ProfileUserIdEditRoute: typeof ProfileUserIdEditRoute
-}
-
-const ProfileUserIdRouteChildren: ProfileUserIdRouteChildren = {
-  ProfileUserIdEditRoute: ProfileUserIdEditRoute,
-}
-
-const ProfileUserIdRouteWithChildren = ProfileUserIdRoute._addFileChildren(
-  ProfileUserIdRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  SearchRouteRoute: SearchRouteRouteWithChildren,
+  AppRouteRoute: AppRouteRouteWithChildren,
   RegisterRouteRoute: RegisterRouteRouteWithChildren,
-  AboutRoute: AboutRoute,
-  AccessibilityRoute: AccessibilityRoute,
-  CalendarRoute: CalendarRoute,
-  ChatRoute: ChatRoute,
-  ContactUsRoute: ContactUsRoute,
-  CreateListingRoute: CreateListingRoute,
   LoginRoute: LoginRoute,
-  MyBookingsRoute: MyBookingsRoute,
-  MyCredentialsRoute: MyCredentialsRoute,
-  MyListingsRoute: MyListingsRoute,
-  PrivacyPolicyRoute: PrivacyPolicyRoute,
-  StyleguideRoute: StyleguideRoute,
-  TermsOfUseRoute: TermsOfUseRoute,
-  EditListingListingIdRoute: EditListingListingIdRoute,
-  ProfileUserIdRoute: ProfileUserIdRouteWithChildren,
-  BookingsPaymentCancelledRoute: BookingsPaymentCancelledRoute,
-  BookingsPaymentSuccessRoute: BookingsPaymentSuccessRoute,
-  ListingsListingIdBookRoute: ListingsListingIdBookRoute,
-  ListingsListingIdIndexRoute: ListingsListingIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

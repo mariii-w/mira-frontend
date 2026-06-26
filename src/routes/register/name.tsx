@@ -5,7 +5,7 @@ import {
   RegisterName,
   type RegisterNameSubmitError,
   type RegisterNameSubmitValues,
-} from "../../components/RegisterName";
+} from "../../components/features/register/RegisterName";
 import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 

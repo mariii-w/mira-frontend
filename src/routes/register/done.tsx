@@ -7,7 +7,7 @@ import {
   getPrivateUserProfile,
 } from "../../api/mira";
 import type { PrivateUserProfileResponse } from "../../api/model";
-import { RegisterDone } from "../../components/RegisterDone";
+import { RegisterDone } from "../../components/features/register/RegisterDone";
 import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 
