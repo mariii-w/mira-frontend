@@ -99,6 +99,13 @@ export function CreateListing({
   const [serverError, setServerError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const priceRef = useRef<HTMLInputElement>(null);
+  const streetRef = useRef<HTMLInputElement>(null);
+  const houseNumberRef = useRef<HTMLInputElement>(null);
+  const postalCodeRef = useRef<HTMLInputElement>(null);
+  const cityRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const picked = Array.from(e.target.files ?? []).slice(
@@ -140,6 +147,16 @@ export function CreateListing({
     setTagError(tagErr);
 
     if (tErr || dErr || pErr || sErr || hErr || pcErr || cErr || tagErr) {
+      const firstInvalid =
+        tErr ? titleRef.current :
+        dErr ? descriptionRef.current :
+        pErr ? priceRef.current :
+        sErr ? streetRef.current :
+        hErr ? houseNumberRef.current :
+        pcErr ? postalCodeRef.current :
+        cErr ? cityRef.current :
+        null;
+      firstInvalid?.focus();
       return null;
     }
 
@@ -220,6 +237,7 @@ export function CreateListing({
               Title
             </Label>
             <Input
+              ref={titleRef}
               id="listing-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -236,6 +254,7 @@ export function CreateListing({
               Description
             </Label>
             <Textarea
+              ref={descriptionRef}
               id="listing-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -255,6 +274,7 @@ export function CreateListing({
               Hourly rate (€)
             </Label>
             <Input
+              ref={priceRef}
               id="listing-price"
               type="number"
               min={0}
@@ -340,6 +360,7 @@ export function CreateListing({
                   Street
                 </Label>
                 <Input
+                  ref={streetRef}
                   id="listing-street"
                   value={street}
                   onChange={(e) => setStreet(e.target.value)}
@@ -353,6 +374,7 @@ export function CreateListing({
                   No.
                 </Label>
                 <Input
+                  ref={houseNumberRef}
                   id="listing-house"
                   value={houseNumber}
                   onChange={(e) => setHouseNumber(e.target.value)}
@@ -371,6 +393,7 @@ export function CreateListing({
                   Postal code
                 </Label>
                 <Input
+                  ref={postalCodeRef}
                   id="listing-postal"
                   value={postalCode}
                   onChange={(e) =>
@@ -390,6 +413,7 @@ export function CreateListing({
                   City
                 </Label>
                 <Input
+                  ref={cityRef}
                   id="listing-city"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
