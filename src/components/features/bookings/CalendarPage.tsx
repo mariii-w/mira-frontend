@@ -400,7 +400,7 @@ export function CalendarPage({
                     aria-pressed={isSelected}
                     tabIndex={isActive ? 0 : -1}
                     className={[
-                      "w-full min-h-20 p-1.5 flex flex-col items-start text-xs transition-colors rounded-lg border",
+                      "w-full min-h-20 cursor-pointer p-1.5 flex flex-col items-start text-xs transition-colors rounded-lg border",
                       isSelected
                         ? "border-forest bg-mint"
                         : isBlocked

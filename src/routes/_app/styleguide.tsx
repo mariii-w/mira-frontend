@@ -172,7 +172,7 @@ function CalDay({ date, calToday, selectedDay, onSelect }: CalDayProps) {
       aria-pressed={isSelected}
       className={[
         'w-full aspect-square rounded-lg text-small font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
-        isPast     ? 'text-muted/40 cursor-not-allowed' : 'hover:bg-mint',
+        isPast     ? 'text-muted/40 cursor-not-allowed' : 'cursor-pointer hover:bg-mint',
         isSelected ? 'bg-primary text-primary-foreground hover:bg-primary' : '',
         isToday && !isSelected ? 'ring-1 ring-primary text-primary' : '',
         !isSelected && !isToday && !isPast ? 'text-foreground' : '',
