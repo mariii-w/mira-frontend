@@ -203,6 +203,7 @@ export function EditProfileForm({
                 <button
                   type="button"
                   aria-label={`Profile picture: ${userPictureUrl ? `${userFirstName} ${userLastName} avatar` : 'no photo set'}. Activate to change.`}
+                  aria-describedby={fileError ? "photo-file-error" : undefined}
                   onClick={openPhotoPicker}
                   className="relative cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-full"
                 >
@@ -230,7 +231,7 @@ export function EditProfileForm({
                 <span aria-hidden="true" className="text-small font-medium text-foreground">Change Photo</span>
               </div>
               {fileError && (
-                <p role="alert" className="text-small text-red-600 text-center">
+                <p id="photo-file-error" role="alert" className="text-small text-red-600 text-center">
                   {fileError}
                 </p>
               )}
@@ -247,6 +248,7 @@ export function EditProfileForm({
                 onChange={(e) => onFirstNameChange(e.target.value)}
                 onBlur={onFirstNameBlur}
                 autoComplete="given-name"
+                required
                 error={firstNameError}
               />
             </div>
@@ -262,6 +264,7 @@ export function EditProfileForm({
                 onChange={(e) => onLastNameChange(e.target.value)}
                 onBlur={onLastNameBlur}
                 autoComplete="family-name"
+                required
                 error={lastNameError}
               />
             </div>
@@ -277,6 +280,7 @@ export function EditProfileForm({
                 onChange={(e) => onUsernameChange(e.target.value)}
                 onBlur={onUsernameBlur}
                 autoComplete="username"
+                required
                 error={usernameError}
               />
             </div>
@@ -306,6 +310,7 @@ export function EditProfileForm({
                   onChange={(e) => onStreetChange(e.target.value)}
                   onBlur={onStreetBlur}
                   autoComplete="address-line1"
+                  required
                   error={streetError}
                 />
               </div>
@@ -320,6 +325,7 @@ export function EditProfileForm({
                   onChange={(e) => onHouseNumberChange(e.target.value)}
                   onBlur={onHouseNumberBlur}
                   autoComplete="address-line2"
+                  required
                   error={houseNumberError}
                 />
               </div>
@@ -339,6 +345,7 @@ export function EditProfileForm({
                   onChange={(e) => onPostalCodeChange(e.target.value.replace(/\D/g, ''))}
                   onBlur={onPostalCodeBlur}
                   autoComplete="postal-code"
+                  required
                   error={postalCodeError}
                 />
               </div>
@@ -353,6 +360,7 @@ export function EditProfileForm({
                   onChange={(e) => onCityChange(e.target.value)}
                   onBlur={onCityBlur}
                   autoComplete="address-level2"
+                  required
                   error={cityError}
                 />
               </div>
