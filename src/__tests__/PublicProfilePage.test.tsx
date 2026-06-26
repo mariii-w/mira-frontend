@@ -6,13 +6,27 @@ import { useAccessibilityStore } from '../stores/accessibility'
 import type { ServiceCardProps } from '../components/ServiceCard'
 import type { VerifiedCredentialResponse } from '../api/model'
 
+type MockAccessibilityState = {
+  easyRead: boolean
+  reducedMotion: boolean
+  setEasyRead: (value: boolean) => void
+  setReducedMotion: (value: boolean) => void
+}
+
+const defaultAccessibilityState: MockAccessibilityState = {
+  easyRead: false,
+  reducedMotion: false,
+  setEasyRead: vi.fn(),
+  setReducedMotion: vi.fn(),
+}
+
 vi.mock('../components/Navbar', () => ({
   Navbar: () => <nav data-testid="navbar" />,
 }))
 
 vi.mock('../stores/accessibility', () => ({
-  useAccessibilityStore: vi.fn((selector: (s: { easyRead: boolean }) => unknown) =>
-    selector({ easyRead: false })
+  useAccessibilityStore: vi.fn((selector: (s: MockAccessibilityState) => unknown) =>
+    selector(defaultAccessibilityState)
   ),
 }))
 
@@ -191,7 +205,8 @@ describe('<PublicProfilePage />', () => {
 
     it('shows simplifiedBio instead of bio when easyRead is on', () => {
       vi.mocked(useAccessibilityStore).mockImplementationOnce(
-        (selector: (s: { easyRead: boolean }) => unknown) => selector({ easyRead: true })
+        (selector: (s: MockAccessibilityState) => unknown) =>
+          selector({ ...defaultAccessibilityState, easyRead: true })
       )
       render(
         <PublicProfilePage
@@ -208,7 +223,8 @@ describe('<PublicProfilePage />', () => {
 
     it('shows bio when easyRead is on but simplifiedBio is null', () => {
       vi.mocked(useAccessibilityStore).mockImplementationOnce(
-        (selector: (s: { easyRead: boolean }) => unknown) => selector({ easyRead: true })
+        (selector: (s: MockAccessibilityState) => unknown) =>
+          selector({ ...defaultAccessibilityState, easyRead: true })
       )
       render(
         <PublicProfilePage
