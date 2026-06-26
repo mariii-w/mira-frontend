@@ -227,16 +227,16 @@ describe('<MyListingsPage />', () => {
     expect(screen.getByRole('button', { name: /Create service/ })).toBeInTheDocument()
   })
 
-  it('warns providers to set availability and links to calendar when weekly schedule is empty', async () => {
+  it('warns providers to set a weekly schedule and links to calendar when weekly schedule is empty', async () => {
     mockSuccess(makeListings([{}]))
     mockSchedule([])
 
     renderRoute()
 
     const warning = await screen.findByRole('alert')
-    expect(warning).toHaveTextContent(/No availability is set/i)
+    expect(warning).toHaveTextContent(/No weekly schedule is set\. You might want to set it\./i)
 
-    fireEvent.click(screen.getByRole('button', { name: /go to calendar/i }))
+    fireEvent.click(screen.getByRole('button', { name: /set it/i }))
 
     expect(mockNavigate).toHaveBeenCalledWith({ to: '/calendar' })
   })
