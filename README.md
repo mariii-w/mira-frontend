@@ -25,7 +25,8 @@ Note: The server shuts down after about 15 minutes of inactivity and may take up
 Please avoid excessive uploads or downloads, as we are using the free [Backblaze](https://www.backblaze.com/) tier. If you want to run load or limit tests, please contact us first so we can switch the S3 configuration to your own setup.
 
 > Render: https://mira-uni-deploy.onrender.com/
-> Stripe testing info
+
+## Stripe testing info
 
 ### Credit Card
 
@@ -140,7 +141,7 @@ java -jar ./backend.jar --spring.profiles.active=postgres --server.port=8081
 > **Note:** `og:url` will be incorrect in development builds.  
 > In production, the frontend and backend are served from the same server, but during development the frontend runs on a separate dev-server port.
 
->> Note: On some systems, STOMP may fail when using npm. If chat functionality does not work, try using pnpm instead by replacing npm commands with the equivalent pnpm commands.
+> > Note: On some systems, STOMP may fail when using npm. If chat functionality does not work, try using pnpm instead by replacing npm commands with the equivalent pnpm commands.
 
 ```sh
 VITE_API_BASE_URL=http://localhost:8081
