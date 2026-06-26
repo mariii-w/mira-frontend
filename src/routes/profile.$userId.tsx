@@ -1,180 +1,231 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ProfilePageContent } from "../components/ProfilePageContent";
+import { useQuery } from "@tanstack/react-query";
+import { PrivateProfilePage } from "../components/PrivateProfilePage";
+import { PublicProfilePage } from "../components/PublicProfilePage";
 import {
-  ProfilePageLoading,
-  ProfilePageError,
+    ProfilePageLoading,
+    ProfilePageError,
 } from "../components/ProfilePageLoadingError";
-import { type ServiceCardEditProps } from "../components/ServiceCardEdit.tsx";
 import { type ServiceCardProps } from "../components/ServiceCard";
 import { ensureAuthInitialized, useAuthStore } from "../stores/auth";
-import { useQuery } from "@tanstack/react-query";
 import { mediaUrl } from "../lib/mediaUrl";
 import { createPageMeta } from "../lib/headers";
 
 import {
-  getPrivateUserProfile,
-  getPublicProfile,
-  getAuthorListings,
-  getPublicProfileListings,
+    getPrivateUserProfile,
+    getPublicProfile,
+    getAuthorListings,
+    getPublicProfileListings,
+    getPublicProfileCredentials,
 } from "../api/mira";
+
 import type {
-  MyListingCollectionResponse,
-  MyListingSummary,
-  PublicListingCollectionResponse,
-  PublicListingSummary,
+    MyListingCollectionResponse,
+    MyListingSummary,
+    PublicListingCollectionResponse,
+    PublicListingSummary,
+    PublicProfileResponse,
+    VerifiedCredentialResponse,
 } from "../api/model";
 
 /* eslint-disable react-refresh/only-export-components */
 export const Route = createFileRoute("/profile/$userId")({
-  head: () =>
-    createPageMeta({
-      title: "Profile",
-      description:
-        "View a Mira profile with provider details, services, and trust information.",
-    }),
-  component: ProfilePage,
+    head: () =>
+        createPageMeta({
+            title: "Profile",
+            description:
+                "View a Mira profile with provider details, services, and trust information.",
+        }),
+    component: ProfilePage,
 });
 
-type ProfileProps = {
-  isProvider?: boolean;
-  isVerified?: boolean;
-  userId: string;
-};
-
 function ProfilePage() {
-  const { userId } = Route.useParams();
-  return <Profile userId={userId} />;
+    const { userId } = Route.useParams();
+
+    return <Profile userId={userId} />;
 }
 
-function Profile({ isProvider, isVerified = false, userId }: ProfileProps) {
-  const [, setActiveTab] = useState("account");
-  const navigate = useNavigate();
-  const currentUser = useAuthStore((s) => s.user);
-  const isOwner = currentUser?.userId === userId;
+function Profile({ userId }: { userId: string }) {
+    const navigate = useNavigate();
+    const currentUser = useAuthStore((s) => s.user);
+    const isOwner = currentUser?.userId === userId;
 
-  // Wait for auth to settle before fetching, so logged-out visitors aren't stuck loading forever.
-  const [authReady, setAuthReady] = useState(false);
-  useEffect(() => {
-    void ensureAuthInitialized().finally(() => setAuthReady(true));
-  }, []);
+    const [authReady, setAuthReady] = useState(false);
 
-  const {
-    data: user,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["user", userId, isOwner],
-    queryFn: async () => {
-      if (isOwner) {
-        const response = await getPrivateUserProfile(userId);
-        if (response.status !== 200) throw response.data;
-        return response.data;
-      }
+    useEffect(() => {
+        void ensureAuthInitialized().finally(() => setAuthReady(true));
+    }, []);
 
-      const response = await getPublicProfile(userId);
-      if (response.status !== 200) throw response.data;
-      return response.data;
-    },
-    enabled: authReady,
-  });
-  const pictureUrl = user?.profileMedia
-    ? mediaUrl(user.profileMedia.url)
-    : user?.profileMedia
-      ? mediaUrl(user.profileMedia.url)
-      : undefined;
-  const isProviderType = user?.userType === "PROVIDER";
-  isProvider = isProviderType;
+    const {
+        data: user,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ["user", userId, isOwner],
+        queryFn: async () => {
+            if (isOwner) {
+                const response = await getPrivateUserProfile(userId);
 
-  const { data: listingsResponse } = useQuery<
-    MyListingCollectionResponse | PublicListingCollectionResponse
-  >({
-    queryKey: ["listings", userId, isOwner],
-    queryFn: async () => {
-      if (isOwner && isProviderType) {
-        const response = await getAuthorListings(userId);
-        if (response.status !== 200) throw response.data;
-        return response.data;
-      }
+                if (response.status !== 200) {
+                    throw response.data;
+                }
 
-      if (isProviderType) {
-        const response = await getPublicProfileListings(userId);
-        if (response.status !== 200) throw response.data;
-        return response.data;
-      }
+                return response.data;
+            }
 
-      return { items: [], cursor: { limit: 0, next: null } };
-    },
-    enabled: isProviderType,
-  });
+            const response = await getPublicProfile(userId);
 
-  if (isLoading) return <ProfilePageLoading />;
-  if (error) return <ProfilePageError />;
+            if (response.status !== 200) {
+                throw response.data;
+            }
 
-  const userDescription = user?.selfSummary ?? "No description provided.";
-  const userFirstName = user?.firstName ?? "";
-  const userLastName = user?.lastName ?? "";
+            return response.data;
+        },
+        enabled: authReady,
+    });
 
-  const city = user
-    ? "privateAddress" in user
-      ? (user.privateAddress?.city ?? "")
-      : (user.city ?? "")
-    : "";
+    const isProviderType = user?.userType === "PROVIDER";
 
-  const serviceListings: ServiceCardEditProps[] =
-    isOwner && isProviderType
-      ? ((listingsResponse?.items ?? []) as MyListingSummary[]).map(
-          (listing) => ({
-            link: `/service/${listing.listingId}`,
-            pictureLink:
-              listing.primaryMedia?.url || "./pic/ServiceExample1.png",
-            label: listing.title,
-            description: listing.description,
-            status: listing.publicationStatus === "DRAFT" ? "draft" : "active",
-          }),
+    const { data: listingsResponse } = useQuery<
+        MyListingCollectionResponse | PublicListingCollectionResponse
+    >({
+        queryKey: ["listings", userId, isOwner, isProviderType],
+        queryFn: async () => {
+            if (!isProviderType) {
+                return { items: [], cursor: { limit: 0, next: null } };
+            }
+
+            if (isOwner) {
+                const response = await getAuthorListings(userId);
+
+                if (response.status !== 200) {
+                    throw response.data;
+                }
+
+                return response.data;
+            }
+
+            const response = await getPublicProfileListings(userId);
+
+            if (response.status !== 200) {
+                throw response.data;
+            }
+
+            return response.data;
+        },
+        enabled: authReady && !!user && isProviderType,
+    });
+
+    const { data: credentialsResponse } = useQuery({
+        queryKey: ["public-credentials", userId],
+        queryFn: async () => {
+            const response = await getPublicProfileCredentials(userId);
+
+            if (response.status !== 200) {
+                return [];
+            }
+
+            return response.data.items;
+        },
+        enabled: authReady && !isOwner && !!user,
+    });
+
+    if (!authReady || isLoading) return <ProfilePageLoading />;
+    if (error) return <ProfilePageError />;
+
+    const userFirstName = user?.firstName ?? "";
+    const userLastName = user?.lastName ?? "";
+    const pictureUrl = user?.profileMedia
+        ? mediaUrl(user.profileMedia.url)
+        : undefined;
+    const selfSummary = user?.selfSummary ?? "";
+
+    const city = user
+        ? "privateAddress" in user
+            ? user.privateAddress?.city ?? ""
+            : user.city ?? ""
+        : "";
+
+    if (isOwner) {
+        const ownerListings: MyListingSummary[] = isProviderType
+            ? ((listingsResponse?.items ?? []) as MyListingSummary[])
+                .filter((listing) => listing.publicationStatus === "ACTIVE")
+                .slice(0, 5)
+            : [];
+
+        return (
+            <>
+                <PrivateProfilePage
+                    userFirstName={userFirstName}
+                    userLastName={userLastName}
+                    selfSummary={selfSummary}
+                    bio={user?.bio ?? null}
+                    city={city}
+                    pictureUrl={pictureUrl}
+                    isProvider={isProviderType}
+                    ownerListings={ownerListings}
+                    onEditClick={() =>
+                        navigate({ to: "/profile/$userId/edit", params: { userId } })
+                    }
+                    onEditListing={(listingId) =>
+                        navigate({
+                            to: "/edit-listing/$listingId",
+                            params: { listingId },
+                        })
+                    }
+                />
+                <Outlet />
+            </>
+        );
+    }
+
+    const credentials: VerifiedCredentialResponse[] = credentialsResponse ?? [];
+    const publicProfile = user as PublicProfileResponse | undefined;
+    const verified = publicProfile?.verified ?? false;
+
+    const publicServiceListings: ServiceCardProps[] = isProviderType
+        ? ((listingsResponse?.items ?? []) as PublicListingSummary[]).map(
+            (listing) => ({
+                link: `/listings/${listing.listingId}`,
+                pictureLink: listing.primaryMedia
+                    ? mediaUrl(listing.primaryMedia.url)
+                    : undefined,
+                pictureAltText: listing.primaryMedia?.altText,
+                pictureAltTextStatus: listing.primaryMedia?.altTextStatus,
+                location: `${listing.location.city}${
+                    listing.location.postalCode
+                        ? ", " + listing.location.postalCode
+                        : ""
+                }`,
+                providerFirstName: listing.author.name,
+                providerLastName: listing.author.surname,
+                varified: verified,
+                label: listing.title,
+                description: listing.description,
+                tags: listing.tags,
+                hourRate: listing.price,
+            }),
         )
-      : [];
+        : [];
 
-  const publicServiceListings: ServiceCardProps[] =
-    !isOwner && isProviderType
-      ? ((listingsResponse?.items ?? []) as PublicListingSummary[]).map(
-          (listing) => ({
-            link: `/service/${listing.listingId}`,
-            pictureLink:
-              listing.primaryMedia?.url || "./pic/ServiceExample1.png",
-            location: `${listing.location.city}${listing.location.postalCode ? ", " + listing.location.postalCode : ""}`,
-            providerFirstName: listing.author.name,
-            providerLastName: listing.author.surname,
-            varified: false,
-            label: listing.title,
-            description: listing.description,
-            tags: listing.tags,
-            hourRate: listing.price,
-            distance: listing.location.serviceRadiusKm,
-          }),
-        )
-      : [];
-
-  return (
-    <>
-      <ProfilePageContent
-        userId={userId}
-        isProvider={isProvider}
-        isVerified={isVerified}
-        isOwner={isOwner}
-        userFirstName={userFirstName}
-        userLastName={userLastName}
-        userDescription={userDescription}
-        city={city}
-        pictureUrl={pictureUrl}
-        serviceListings={serviceListings}
-        publicServiceListings={publicServiceListings}
-        onEditClick={() =>
-          navigate({ to: "/profile/$userId/edit", params: { userId } })
-        }
-        onActiveTabChange={setActiveTab}
-      />
-      <Outlet />
-    </>
-  );
+    return (
+        <>
+            <PublicProfilePage
+                userFirstName={userFirstName}
+                userLastName={userLastName}
+                username={user?.username ?? ""}
+                selfSummary={selfSummary}
+                bio={user?.bio ?? null}
+                simplifiedBio={user?.simplifiedBio ?? null}
+                city={city}
+                pictureUrl={pictureUrl}
+                isProvider={isProviderType}
+                verified={verified}
+                credentials={credentials}
+                publicServiceListings={publicServiceListings}
+            />
+            <Outlet />
+        </>
+    );
 }

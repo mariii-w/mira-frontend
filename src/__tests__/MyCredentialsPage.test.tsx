@@ -125,6 +125,12 @@ async function selectCredentialType(name: RegExp) {
   fireEvent.click(await screen.findByRole('option', { name }))
 }
 
+function getEvidenceInput() {
+  const input = document.querySelector<HTMLInputElement>('#credential-evidence-input')
+  expect(input).toBeInTheDocument()
+  return input!
+}
+
 import { MyCredentialsRoute } from '../routes/my-credentials'
 
 beforeEach(() => {
@@ -154,7 +160,7 @@ describe('<MyCredentialsPage />', () => {
   it('shows loading state on mount', () => {
     mockGetCredentials.mockReturnValue(new Promise(() => {}))
     renderRoute()
-    expect(screen.getByRole('status')).toBeInTheDocument()
+    expect(screen.getByText('Loading…')).toBeInTheDocument()
   })
 
   it('renders a card for each credential after fetch', async () => {
@@ -163,7 +169,7 @@ describe('<MyCredentialsPage />', () => {
       makeCredential({ credentialId: 'cred-2', name: 'Master Plumber' }),
     ])
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
     expect(screen.getByRole('heading', { name: 'Student Status' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Master Plumber' })).toBeInTheDocument()
   })
@@ -206,7 +212,7 @@ describe('<MyCredentialsPage />', () => {
   it('opens the Add credential modal listing the fetched catalog', async () => {
     mockCredentialsSuccess([makeCredential()])
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
 
     fireEvent.click(screen.getByRole('button', { name: /add credential/i }))
     openCredentialTypeDropdown()
@@ -234,12 +240,12 @@ describe('<MyCredentialsPage />', () => {
     } as Awaited<ReturnType<typeof postV1UsersUserIdCredentialsCredentialIdVerifications>>)
 
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
 
     fireEvent.click(screen.getByRole('button', { name: /add credential/i }))
     await selectCredentialType(/master plumber/i)
     const file = new File(['evidence'], 'evidence.png', { type: 'image/png' })
-    fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
+    fireEvent.change(getEvidenceInput(), { target: { files: [file] } })
 
     mockCredentialsSuccess([makeCredential()])
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
@@ -248,9 +254,7 @@ describe('<MyCredentialsPage />', () => {
       expect(mockPost).toHaveBeenCalledWith('user-1', { credentialType: 'MASTER_PLUMBER', file }),
     )
     await waitFor(() => expect(mockStartVerification).toHaveBeenCalledWith('user-1', 'cred-new'))
-    expect(screen.getByRole('status', { name: 'credential-submission-status' })).toHaveTextContent(
-      'Verification started.',
-    )
+    expect(screen.getByText('Verification started.')).toBeInTheDocument()
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   })
 
@@ -287,12 +291,12 @@ describe('<MyCredentialsPage />', () => {
     } as Awaited<ReturnType<typeof getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId>>)
 
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
 
     fireEvent.click(screen.getByRole('button', { name: /add credential/i }))
     await selectCredentialType(/master plumber/i)
-    const file = new File(['evidence'], 'evidence.pdf', { type: 'application/pdf' })
-    fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
+    const file = new File(['evidence'], 'evidence.png', { type: 'image/png' })
+    fireEvent.change(getEvidenceInput(), { target: { files: [file] } })
     mockCredentialsSuccess([makeCredential({ credentialId: 'cred-new' })])
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
 
@@ -381,22 +385,18 @@ describe('<MyCredentialsPage />', () => {
     } as Awaited<ReturnType<typeof getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId>>)
 
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
 
     fireEvent.click(screen.getByRole('button', { name: /add credential/i }))
     await selectCredentialType(/master plumber/i)
-    const file = new File(['evidence'], 'evidence.pdf', { type: 'application/pdf' })
-    fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
+    const file = new File(['evidence'], 'evidence.png', { type: 'image/png' })
+    fireEvent.change(getEvidenceInput(), { target: { files: [file] } })
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
 
     await waitFor(() => expect(mockGetCredentials).toHaveBeenCalledTimes(2))
 
     await waitFor(() => expect(mockGetCredentials).toHaveBeenCalledTimes(3), { timeout: 3500 })
-    await waitFor(() =>
-      expect(screen.getByRole('status', { name: 'credential-submission-status' })).toHaveTextContent(
-        'Credential approved.',
-      ),
-    )
+    await waitFor(() => expect(screen.getByText('Credential approved.')).toBeInTheDocument())
   })
 
   it('toggles credential visibility', async () => {
@@ -408,9 +408,9 @@ describe('<MyCredentialsPage />', () => {
     } as Awaited<ReturnType<typeof patchV1UsersUserIdCredentialsCredentialId>>)
 
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
 
-    fireEvent.click(screen.getByRole('switch', { name: 'Visible' }))
+    fireEvent.click(screen.getByRole('switch', { name: /show student status on public profile/i }))
 
     await waitFor(() =>
       expect(mockPatch).toHaveBeenCalledWith('user-1', 'cred-1', { isVisible: false }),
@@ -432,9 +432,9 @@ describe('<MyCredentialsPage />', () => {
     } as Awaited<ReturnType<typeof patchV1UsersUserIdCredentialsCredentialId>>)
 
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
 
-    fireEvent.click(screen.getByRole('switch', { name: 'Visible' }))
+    fireEvent.click(screen.getByRole('switch', { name: /show student status on public profile/i }))
 
     await waitFor(() =>
       expect(screen.getByRole('alert')).toHaveTextContent('Expired credentials cannot be made public.'),
@@ -448,7 +448,7 @@ describe('<MyCredentialsPage />', () => {
     >)
 
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
 
     fireEvent.click(screen.getByRole('button', { name: /delete "student status"/i }))
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }))

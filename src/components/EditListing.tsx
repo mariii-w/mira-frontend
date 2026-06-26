@@ -137,12 +137,20 @@ export function EditListing({
   const [tagError, setTagError] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [actionSubmitting, setActionSubmitting] = useState(false);
   const [deleteConfirming, setDeleteConfirming] = useState(false);
   const [previewing, setPreviewing] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const priceRef = useRef<HTMLInputElement>(null);
+  const streetRef = useRef<HTMLInputElement>(null);
+  const houseNumberRef = useRef<HTMLInputElement>(null);
+  const postalCodeRef = useRef<HTMLInputElement>(null);
+  const cityRef = useRef<HTMLInputElement>(null);
   const easyRead = useAccessibilityStore((s) => s.easyRead);
 
   const hasVlmPending = existingImages.some(
@@ -238,8 +246,8 @@ export function EditListing({
     const addressStarted = street.trim() || houseNumber.trim();
     const sErr = addressStarted ? validateStreet(street) : null;
     const hErr = addressStarted ? validateHouseNumber(houseNumber) : null;
-    const pcErr = addressStarted ? validatePostalCode(postalCode) : null;
-    const cErr = addressStarted ? validateCity(city) : null;
+    const pcErr = validatePostalCode(postalCode);
+    const cErr = validateCity(city);
     const tagErr =
       selectedTagIds.length === 0 ? "Select at least one tag." : null;
 
@@ -252,7 +260,19 @@ export function EditListing({
     setCityError(cErr);
     setTagError(tagErr);
 
-    if (tErr || dErr || pErr || sErr || hErr || pcErr || cErr || tagErr) return;
+    if (tErr || dErr || pErr || sErr || hErr || pcErr || cErr || tagErr) {
+      const firstInvalid =
+        tErr ? titleRef.current :
+        dErr ? descriptionRef.current :
+        pErr ? priceRef.current :
+        sErr ? streetRef.current :
+        hErr ? houseNumberRef.current :
+        pcErr ? postalCodeRef.current :
+        cErr ? cityRef.current :
+        null;
+      firstInvalid?.focus();
+      return;
+    }
 
     setSubmitting(true);
     setServerError(null);
@@ -276,6 +296,8 @@ export function EditListing({
       }
 
       await onSubmit(values);
+      setSaveSuccess(true);
+      void onBack();
     } catch (err) {
       setServerError((err as Error).message);
       setSubmitting(false);
@@ -467,6 +489,7 @@ export function EditListing({
               Title
             </Label>
             <Input
+              ref={titleRef}
               id="listing-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -485,6 +508,7 @@ export function EditListing({
               Description
             </Label>
             <Textarea
+              ref={descriptionRef}
               id="listing-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -507,6 +531,7 @@ export function EditListing({
               Hourly rate (€)
             </Label>
             <Input
+              ref={priceRef}
               id="listing-price"
               type="number"
               min={0}
@@ -642,12 +667,15 @@ export function EditListing({
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="listing-street">Street</Label>
                 <Input
+                  ref={streetRef}
                   id="listing-street"
                   value={street}
                   onChange={(e) => setStreet(e.target.value)}
-                  onBlur={() =>
-                    streetError && setStreetError(validateStreet(street))
-                  }
+                  onBlur={() => {
+                    if (!isEditable) return;
+                    const started = !!(street.trim() || houseNumber.trim());
+                    setStreetError(started ? validateStreet(street) : null);
+                  }}
                   placeholder="Street name"
                   error={streetError}
                   disabled={!isEditable}
@@ -656,13 +684,15 @@ export function EditListing({
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="listing-house">No.</Label>
                 <Input
+                  ref={houseNumberRef}
                   id="listing-house"
                   value={houseNumber}
                   onChange={(e) => setHouseNumber(e.target.value)}
-                  onBlur={() =>
-                    houseNumberError &&
-                    setHouseNumberError(validateHouseNumber(houseNumber))
-                  }
+                  onBlur={() => {
+                    if (!isEditable) return;
+                    const started = !!(street.trim() || houseNumber.trim());
+                    setHouseNumberError(started ? validateHouseNumber(houseNumber) : null);
+                  }}
                   placeholder="12a"
                   error={houseNumberError}
                   disabled={!isEditable}
@@ -674,15 +704,13 @@ export function EditListing({
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="listing-postal">Postal code</Label>
                 <Input
+                  ref={postalCodeRef}
                   id="listing-postal"
                   value={postalCode}
                   onChange={(e) =>
                     setPostalCode(e.target.value.replace(/\D/g, ""))
                   }
-                  onBlur={() =>
-                    postalCodeError &&
-                    setPostalCodeError(validatePostalCode(postalCode))
-                  }
+                  onBlur={() => isEditable && setPostalCodeError(validatePostalCode(postalCode))}
                   inputMode="numeric"
                   maxLength={5}
                   placeholder="12345"
@@ -693,10 +721,11 @@ export function EditListing({
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="listing-city">City</Label>
                 <Input
+                  ref={cityRef}
                   id="listing-city"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  onBlur={() => cityError && setCityError(validateCity(city))}
+                  onBlur={() => isEditable && setCityError(validateCity(city))}
                   placeholder="Berlin"
                   error={cityError}
                   disabled={!isEditable}
@@ -783,8 +812,8 @@ export function EditListing({
                   >
                     Delete service
                   </Button>
-                  <span aria-live="polite" className="text-small text-muted">
-                    {submitting ? "Saving…" : ""}
+                  <span role="status" aria-live="polite" className="text-small text-muted">
+                    {submitting ? "Saving…" : saveSuccess ? "Saved!" : ""}
                   </span>
                 </div>
               ) : (

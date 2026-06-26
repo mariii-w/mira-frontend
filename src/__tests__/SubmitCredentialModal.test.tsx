@@ -36,6 +36,12 @@ async function selectTypeOption(name: RegExp) {
   })
 }
 
+function getEvidenceInput() {
+  const input = document.querySelector<HTMLInputElement>('#credential-evidence-input')
+  expect(input).toBeInTheDocument()
+  return input!
+}
+
 const defaultProps = {
   open: true,
   onClose: vi.fn(),
@@ -79,17 +85,17 @@ describe('<SubmitCredentialModal />', () => {
     expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
 
     const file = new File(['evidence'], 'evidence.png', { type: 'image/png' })
-    fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
+    fireEvent.change(getEvidenceInput(), { target: { files: [file] } })
     expect(screen.getByRole('button', { name: 'Submit' })).toBeEnabled()
   })
 
-  it('accepts jpg, png, and pdf evidence files', () => {
+  it('accepts jpg and png evidence files', () => {
     render(<SubmitCredentialModal {...defaultProps} />)
-    expect(screen.getByLabelText('Choose file')).toHaveAttribute(
+    expect(getEvidenceInput()).toHaveAttribute(
       'accept',
-      'image/jpeg,image/png,application/pdf',
+      'image/jpeg,image/png',
     )
-    expect(screen.getByText('JPG, PNG, or PDF.')).toBeInTheDocument()
+    expect(screen.getByText('JPG or PNG.')).toBeInTheDocument()
   })
 
   it('marks the selected type as selected and shows it on the trigger', async () => {
@@ -111,7 +117,7 @@ describe('<SubmitCredentialModal />', () => {
 
     await openTypeDropdown()
     await selectTypeOption(/master plumber/i)
-    fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
+    fireEvent.change(getEvidenceInput(), { target: { files: [file] } })
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
 
     expect(onSubmit).toHaveBeenCalledWith('MASTER_PLUMBER', file)
@@ -124,9 +130,9 @@ describe('<SubmitCredentialModal />', () => {
     await openTypeDropdown()
     await selectTypeOption(/master plumber/i)
     const file = new File(['evidence'], 'evidence.gif', { type: 'image/gif' })
-    fireEvent.change(screen.getByLabelText('Choose file'), { target: { files: [file] } })
+    fireEvent.change(getEvidenceInput(), { target: { files: [file] } })
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Choose a JPG, PNG, or PDF file.')
+    expect(screen.getByRole('alert')).toHaveTextContent('Choose a JPG or PNG file.')
     expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
     expect(onSubmit).not.toHaveBeenCalled()

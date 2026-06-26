@@ -194,6 +194,7 @@ export function ListingDetailPage({
           <ListingProviderCard
             authorName={listing.author?.name ?? "Unknown"}
             authorSurname={listing.author?.surname ?? ""}
+            authorId={listing.author?.userId ?? ""}
             price={listing.price}
             city={listing.location.city}
             availableToday={availableToday}

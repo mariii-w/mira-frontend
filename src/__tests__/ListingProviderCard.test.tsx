@@ -4,6 +4,16 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { ListingProviderCard } from '../components/ListingProviderCard'
 import type { VerifiedCredentialResponse } from '../api/model'
 
+vi.mock('@tanstack/react-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@tanstack/react-router')>()
+  return {
+    ...actual,
+    Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+      <a href={String(to)}>{children}</a>
+    ),
+  }
+})
+
 const tags = [
   { tagId: 'tag-1', name: 'PC & Laptop', isBarrierefrei: false, isActive: true },
   { tagId: 'tag-2', name: 'Wheelchair accessible', isBarrierefrei: true, isActive: true },
@@ -32,6 +42,7 @@ describe('<ListingProviderCard />', () => {
       <ListingProviderCard
         authorName="Klaus"
         authorSurname="Mueller"
+        authorId="user-1"
         price={20}
         city="Berlin"
         tags={tags}
@@ -50,6 +61,7 @@ describe('<ListingProviderCard />', () => {
       <ListingProviderCard
         authorName="Klaus"
         authorSurname="Mueller"
+        authorId="user-1"
         price={20}
         city="Berlin"
         tags={tags}
@@ -65,6 +77,7 @@ describe('<ListingProviderCard />', () => {
       <ListingProviderCard
         authorName="Klaus"
         authorSurname="Mueller"
+        authorId="user-1"
         price={20}
         city="Berlin"
         tags={tags}
@@ -78,6 +91,7 @@ describe('<ListingProviderCard />', () => {
       <ListingProviderCard
         authorName="Klaus"
         authorSurname="Mueller"
+        authorId="user-1"
         price={20}
         city="Berlin"
         tags={tags}
@@ -93,6 +107,7 @@ describe('<ListingProviderCard />', () => {
       <ListingProviderCard
         authorName="Klaus"
         authorSurname="Mueller"
+        authorId="user-1"
         price={20}
         city="Berlin"
         tags={tags}
@@ -112,6 +127,7 @@ describe('<ListingProviderCard />', () => {
       <ListingProviderCard
         authorName="Klaus"
         authorSurname="Mueller"
+        authorId="user-1"
         price={20}
         city="Berlin"
         tags={tags}
@@ -125,6 +141,7 @@ describe('<ListingProviderCard />', () => {
       <ListingProviderCard
         authorName="Klaus"
         authorSurname="Mueller"
+        authorId="user-1"
         price={20}
         city="Berlin"
         tags={tags}
@@ -141,6 +158,7 @@ describe('<ListingProviderCard />', () => {
       <ListingProviderCard
         authorName="Klaus"
         authorSurname="Mueller"
+        authorId="user-1"
         price={20}
         city="Berlin"
         tags={tags}
@@ -156,6 +174,7 @@ describe('<ListingProviderCard />', () => {
       <ListingProviderCard
         authorName="Klaus"
         authorSurname="Mueller"
+        authorId="user-1"
         price={20}
         city="Berlin"
         tags={tags}

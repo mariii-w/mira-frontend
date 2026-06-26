@@ -67,11 +67,10 @@ export function CredentialDocumentViewer({
           </p>
         )}
         {!error && !imageUrl && (
-          <Loader2
-            size={28}
-            className="animate-spin motion-reduce:animate-none text-muted"
-            aria-label="Loading document"
-          />
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 size={28} aria-hidden="true" className="animate-spin motion-reduce:animate-none text-muted" />
+            <p role="status" aria-live="polite" className="sr-only">Loading document…</p>
+          </div>
         )}
         {!error && imageUrl && (
           <img

@@ -9,27 +9,7 @@ import type {
 } from "../api/model";
 import { useAuthStore } from "../stores/auth";
 
-export type UserType = "CUSTOMER" | "PROVIDER";
-export type AccessibilityPreference = "EASY_LANGUAGE" | "REDUCED_MOTION";
-
-export interface PatchAddressPayload {
-  street: string;
-  houseNumber: string;
-  city: string;
-  postalCode: string;
-}
-
-export interface PatchUserPayload {
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  userType?: UserType;
-  privateAddress?: PatchAddressPayload;
-  bio?: string;
-  selfSummary?: string;
-  isPublic?: boolean;
-  accessibilityPreferences?: AccessibilityPreference[];
-}
+export type { PatchUserProfileRequest as PatchUserPayload };
 
 export interface RegisterPatchError {
   field: "server" | "username";
@@ -47,7 +27,7 @@ function getDetail(data: ProblemDetailsResponse | unknown): string | undefined {
     : undefined;
 }
 
-export async function patchUser(payload: PatchUserPayload): Promise<void> {
+export async function patchUser(payload: PatchUserProfileRequest): Promise<void> {
   const user = useAuthStore.getState().user;
   if (!user) {
     throw {
@@ -56,10 +36,7 @@ export async function patchUser(payload: PatchUserPayload): Promise<void> {
     } satisfies RegisterPatchError;
   }
 
-  const res = await patchUserProfile(
-    user.userId,
-    payload satisfies PatchUserProfileRequest,
-  );
+  const res = await patchUserProfile(user.userId, payload);
 
   if (res.status !== 200) {
     if (res.status === 409) {

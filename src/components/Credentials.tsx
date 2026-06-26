@@ -70,16 +70,13 @@ export function Credentials({
             <AddCredentialButton onClick={onAddCredential} />
           </div>
 
-          {submissionStatus && (
-            <p
-              role="status"
-              aria-label="credential-submission-status"
-              aria-live="polite"
-              className="mb-4 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 text-small font-medium text-accent"
-            >
-              {submissionStatus}
-            </p>
-          )}
+          <p
+            role="status"
+            aria-live="polite"
+            className={`mb-4 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 text-small font-medium text-accent${submissionStatus ? '' : ' sr-only'}`}
+          >
+            {submissionStatus ?? ''}
+          </p>
 
           {actionError && (
             <p role="alert" className="mb-4 text-small text-red-600">

@@ -86,14 +86,13 @@ describe('<MyListingsPage />', () => {
   it('shows loading state on mount', () => {
     mockGetListings.mockReturnValue(new Promise(() => {})) // never resolves
     renderRoute()
-    expect(screen.getByRole('status')).toBeInTheDocument()
     expect(screen.getByText('Loading…')).toBeInTheDocument()
   })
 
   it('renders a card for each listing after fetch', async () => {
     mockSuccess(makeListings([{ title: 'PC Help' }, { title: 'Smartphone Setup' }]))
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
     expect(screen.getByRole('heading', { name: /PC Help/ })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /Smartphone Setup/ })).toBeInTheDocument()
   })
@@ -101,7 +100,7 @@ describe('<MyListingsPage />', () => {
   it('list has role="list" and accessible label', async () => {
     mockSuccess(makeListings([{}]))
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
     const list = screen.getByRole('list', { name: 'Your services' })
     expect(list).toBeInTheDocument()
   })
@@ -148,7 +147,7 @@ describe('<MyListingsPage />', () => {
   it('does not show pagination controls when there is only one page', async () => {
     mockSuccess(makeListings([{}]))
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
     expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /previous/i })).not.toBeInTheDocument()
   })
@@ -156,7 +155,7 @@ describe('<MyListingsPage />', () => {
   it('shows Next button when there is a next cursor', async () => {
     mockGetListings.mockResolvedValue(makeListingsResponse(makeListings([{}]), 'cursor-abc'))
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
     expect(screen.getByRole('button', { name: /next/i })).toBeEnabled()
     expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled()
   })
@@ -211,7 +210,7 @@ describe('<MyListingsPage />', () => {
   it('Create service button is always visible', async () => {
     mockSuccess(makeListings([{}]))
     renderRoute()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
     expect(screen.getByRole('button', { name: /Create service/ })).toBeInTheDocument()
   })
 
@@ -219,7 +218,7 @@ describe('<MyListingsPage />', () => {
     it('renders all five filter buttons', async () => {
       mockSuccess([])
       renderRoute()
-      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+      await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
       const group = screen.getByRole('group', { name: /filter services by status/i })
       expect(group).toBeInTheDocument()
       for (const label of ['All', 'Active', 'Draft', 'Paused', 'Deleted']) {
@@ -230,7 +229,7 @@ describe('<MyListingsPage />', () => {
     it('"All" is selected by default', async () => {
       mockSuccess([])
       renderRoute()
-      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+      await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
       expect(screen.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true')
       for (const label of ['Active', 'Draft', 'Paused', 'Deleted']) {
         expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'false')
@@ -251,7 +250,7 @@ describe('<MyListingsPage />', () => {
     it('appends publicationStatus param when a specific filter is selected', async () => {
       mockSuccess([])
       renderRoute()
-      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+      await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
 
       mockSuccess([])
       fireEvent.click(screen.getByRole('button', { name: 'Draft' }))
@@ -267,7 +266,7 @@ describe('<MyListingsPage />', () => {
     it('marks the selected filter as pressed and deselects the previous one', async () => {
       mockSuccess([])
       renderRoute()
-      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+      await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
 
       fireEvent.click(screen.getByRole('button', { name: 'Active' }))
 
@@ -304,7 +303,7 @@ describe('<MyListingsPage />', () => {
     it('shows filter-specific empty state when a filter returns no results', async () => {
       mockSuccess([])
       renderRoute()
-      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+      await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
 
       mockGetListings.mockClear()
       mockSuccess([])

@@ -54,7 +54,7 @@ export const INFO_PAGES = {
         title: "What you can contact us about",
         body: [
           "You can contact the Mira team about the project, accounts, services, bookings, credential information, confusing flows, or feedback about the experience.",
-          { text: "Support contact:", email: "support@mira.com" },
+          { text: "Support contact:", email: "mira.support@gmail.com" },
           "If something on Mira feels unclear, incomplete, or difficult to use, a short description of what happened is already helpful.",
         ],
       },
@@ -70,10 +70,7 @@ export const INFO_PAGES = {
         body: [
           "If your message is about an accessibility barrier, please contact the accessibility contact directly.",
           "Useful details include the page, the action you were trying to complete, the device or browser you used, and any assistive technology involved.",
-          {
-            text: "Accessibility Contact Person:",
-            email: "accessibility@mira.com",
-          },
+          { text: "Accessibility Contact Person:", email: "mira.accessibility@gmail.com" },
         ],
       },
       {
@@ -86,48 +83,60 @@ export const INFO_PAGES = {
     ],
   },
   accessibility: {
-    title: "Accessibility at Mira",
+    title: "Accessibility Statement for Mira",
     intro:
-      "Mira is designed to be easy to use for as many people as possible. Accessibility is part of the way the project is built, not something that is added only at the end. This page explains how Mira supports you when you use the platform and what options are available to make the experience clearer and more comfortable.",
+      "Mira is designed to be accessible and usable for as many people as possible. Accessibility is considered throughout the development process and is not treated only as a final addition. This statement describes the current accessibility status of Mira, the accessibility features that have already been implemented, known limitations, and how users can contact us if they experience barriers.",
     sections: [
       {
-        title: "How Mira supports accessibility",
+        title: "Current accessibility status",
         body: [
-          "When you use Mira, you should be able to understand the content, move through the interface, and complete important actions without unnecessary barriers. For this reason, Mira supports different ways of interaction, including keyboard navigation, screen readers, pointer devices, and touch input. Important forms, dialogs, menus, filters, and booking steps are designed with clear labels, helpful error messages, and predictable focus handling. Accessibility tests are also used for important flows to help keep these parts of the platform reliable.",
+          "Mira currently supports several accessibility features that are intended to make the platform easier to use with different devices, input methods, and assistive technologies. Important parts of the platform, such as forms, dialogs, menus, filters, profile pages, listing pages, and booking-related flows, are designed with clear labels, understandable error messages, keyboard accessibility, predictable focus handling, and screen reader support.",
+          "The platform also supports different ways of interaction, including keyboard navigation, screen readers, pointer devices, and touch input. Accessibility tests are used for important user flows to help detect and prevent barriers during development.",
         ],
       },
       {
         title: "Accessibility panel",
         body: [
-          "You can find the accessibility panel directly in the navigation bar. From there, you can turn on Easy Language and Reduced Motion without searching through a separate settings page. These settings are placed in the main interface because accessibility options should be easy to find when you need them.",
+          "Mira provides an accessibility panel in the navigation bar. This panel allows users to activate accessibility-related settings directly from the main interface. The purpose of this design is to make accessibility options easy to find without requiring users to search through a separate settings page.",
         ],
       },
       {
         title: "Easy Language",
         body: [
-          "Mira also gives you options to adjust how information is presented. Some service descriptions and user bios can be shown in Easy Language. This means that you can switch to simpler wording when you want content to be easier to read and understand.",
+          "Some service descriptions and user biographies can be displayed in Easy Language. This feature helps users understand content more easily by presenting information in simpler wording. The feature is intended to reduce cognitive barriers and make service information more accessible.",
         ],
       },
       {
         title: "Reduced Motion",
         body: [
-          "If motion makes the interface distracting or uncomfortable for you, you can use Reduced Motion. This setting reduces unnecessary animations and helps create a calmer experience while keeping the platform fully usable.",
+          "Mira includes a Reduced Motion setting. Users can activate this option if animations or moving interface elements are distracting, uncomfortable, or difficult to use. When Reduced Motion is enabled, unnecessary animations are reduced while the platform remains fully usable.",
         ],
       },
       {
         title: "Image descriptions",
         body: [
-          "Images are also part of the accessibility concept. Service images can receive AI-supported alternative text descriptions. These descriptions help screen readers explain what is shown in an image, so visual service content becomes easier to access if you cannot view or interpret the image directly.",
+          "Service images can receive AI-supported alternative text descriptions. These descriptions help screen reader users understand the content and purpose of images. This makes visual service content more accessible for users who cannot see the image or cannot easily interpret it visually.",
         ],
       },
       {
-        title: "Accessibility contact",
+        title: "Known accessibility limitations",
         body: [
-          {
-            text: "Accessibility Contact Person:",
-            email: "accessibility@mira.com",
-          },
-          "If something is hard to use, confusing, or does not work well with your assistive technology, please contact us. You can help us understand the issue better by including the page where it happened, what you were trying to do, your device or browser, and the assistive technology you used.",
+          "Mira is still under development, and not all accessibility features may be complete in every part of the platform. Some AI-supported image descriptions may not always be fully accurate and may require further improvement. Some service descriptions or user-generated content may not yet be available in Easy Language. In addition, individual interface areas may still need further testing with assistive technologies, different browsers, and different devices.",
+          "We are aware that accessibility is an ongoing process. Known issues will be reviewed and improved as the project continues.",
+        ],
+      },
+      {
+        title: "Feedback and contact",
+        body: [
+          "If you experience an accessibility barrier while using Mira, or if something is hard to understand, difficult to operate, or does not work well with your assistive technology, please contact us.",
+          { text: "Accessibility contact:", email: "mira.accessibility@gmail.com" },
+          "To help us understand and fix the issue, please include the page where the problem occurred, what you were trying to do, your device or browser, and the assistive technology you used, if applicable.",
+        ],
+      },
+      {
+        title: "Update date",
+        body: [
+          "This accessibility statement was last updated on 26 June 2026.",
         ],
       },
     ],
