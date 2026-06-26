@@ -44,30 +44,27 @@ E-Mail: user@example.com
 
 ## Accessibility
 
-The project follows WCAG 2.1 AA as a baseline:
+The project follows WCAG 2.1 AA as a baseline.
 
-- Focus-visible styles applied globally via `:focus-visible`, with a fallback for older browsers
-- `prefers-reduced-motion` media query disables all animations, with an in-app override toggle
-- User-facing accessibility toggles — **Leichte Sprache** (easy-read German) and **Reduce motion** — accessible from the header `AccessibilityPanel`
-- Preferences are persisted via the Zustand store (`stores/accessibility.ts`) and mirrored onto `<html data-easy-read>` / `<html data-reduced-motion>` so CSS reacts
-- Custom `Popover`, `Switch`, and `Modal` primitives include full keyboard navigation (Tab, Shift+Tab, Escape) and ARIA wiring
-- `Modal` traps focus inside the dialog while open, so Tab cycling stays within it, and restores focus to the triggering element on close. `Popover` follows the same pattern
-- The booking `CalendarGrid` implements roving tabindex, so arrow keys, Home, and End move focus between date cells without leaving the grid
-- Booking status and duration updates use `aria-live="polite"`. Credential visibility toggles and loading states use `role="status"` with `aria-live="polite"`
-- Verified-credential badges (chat header, booking page, provider cards) use a `role="tooltip"` plus `aria-describedby` pattern, triggered by hover, focus, and keyboard alike
-- `Input` and `Textarea` mark invalid fields with `aria-invalid`, link error text via `aria-describedby`, and announce errors with `role="alert"`. Required fields are flagged on `Label`
-- Icon-only buttons require `aria-label` (enforced by a dev-mode warning), and decorative icons are marked `aria-hidden`
-- Loading state uses `aria-busy` and a visually-hidden "Loading…" text. `sr-only` utility text supplements visual-only context throughout (dates, toggles, form labels)
-- Semantic HTML throughout: `<nav>`, `<main>`, `<section>`, `<article>`, `<ul>`/`<li>` lists with `aria-labelledby` on every section
-- Heading fonts use [Atkinson Hyperlegible](https://brailleinstitute.org/freefont), designed for low-vision readers
+| Area              | Implementation                                                                                                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Visual & motion    | Global `:focus-visible` styles (with a fallback for older browsers); `prefers-reduced-motion` disables animations; heading font is [Atkinson Hyperlegible](https://brailleinstitute.org/freefont), built for low-vision readers |
+| User preferences  | **Leichte Sprache** (easy-read German) and **Reduce motion** toggles in the header `AccessibilityPanel`, persisted via Zustand (`stores/accessibility.ts`) and mirrored onto `<html data-easy-read>` / `<html data-reduced-motion>` |
+| Keyboard & focus   | `Modal`, `Popover`, and `Switch` support full keyboard navigation (Tab, Shift+Tab, Escape); `Modal` traps focus while open and restores it on close; the booking `CalendarGrid` uses roving tabindex (arrow keys, Home, End) |
+| Live updates       | Booking status and duration updates use `aria-live="polite"`; credential loading states use `role="status"` with `aria-live="polite"`                                            |
+| Tooltips           | Verified-credential badges use a `role="tooltip"` plus `aria-describedby` pattern, reachable by hover, focus, and keyboard alike                                                    |
+| Forms              | `Input` and `Textarea` mark errors with `aria-invalid` and `aria-describedby`, announced via `role="alert"`; required fields are flagged on `Label`                                |
+| Icons & loading    | Icon-only buttons require `aria-label` (a dev-mode warning catches missing ones); decorative icons are `aria-hidden`; loading states use `aria-busy` plus visually-hidden `sr-only` text |
+| Semantic HTML      | `<nav>`, `<main>`, `<section>`, and `<article>` throughout, with labelled `<ul>`/`<li>` lists and `aria-labelledby` on every section                                                 |
 
 ### Automated Accessibility Testing
 
-Accessibility is not just checked by hand. The CI pipeline runs an automated [`axe-core`](https://github.com/dequelabs/axe-core) scan on every push and merge request:
+Accessibility isn't only checked by hand. The CI pipeline runs an automated [`axe-core`](https://github.com/dequelabs/axe-core) scan on every push and merge request, as its own `accessibility` stage alongside the regular unit tests.
 
-- A dedicated suite (`src/__tests__/components.a11y.test.tsx`) runs axe checks against 20+ component states, including `CalendarGrid`, `Modal`, `BookingCard`, `BookingPage`, `Home`, and `CreateListing`
-- It runs under its own Vitest config (`vite.a11y.config.ts`) via `npm run test:a11y`, as a separate `accessibility` stage in the pipeline alongside the regular unit tests
-- A second pipeline stage, `accessibility-route-check`, fails the build if a route component renders raw HTML elements instead of the shared component library. This keeps markup running through the accessible, tested primitives instead of bypassing them
+| Check                        | What it does                                                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `npm run test:a11y`          | Runs `src/__tests__/components.a11y.test.tsx`, which scans 20+ component states with axe, under its own Vitest config (`vite.a11y.config.ts`) |
+| `npm run check:routes-no-html` | A separate `accessibility-route-check` stage that fails the build if a route renders raw HTML instead of the shared, tested component library |
 
 ## Design System
 
