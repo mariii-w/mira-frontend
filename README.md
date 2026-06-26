@@ -8,8 +8,9 @@ React + TypeScript frontend for the Mira platform. Built with Vite, Tailwind CSS
 
 Bei Problemen oder Unklarheiten können Sie uns jederzeit kontaktieren:
 
-Telefon:
-E-Mail:
+Telefon: +49 173 8694827
+
+E-Mail: eganscha@hof-university.de
 
 ## Design
 
