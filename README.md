@@ -79,9 +79,10 @@ Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `b
 
 ---
 
-<details>
+## Developer Docs
 
-<summary>## Developer Docs</summary>
+<details>
+<summary>More Info</summary>
 
 
 ### Tech Stack
