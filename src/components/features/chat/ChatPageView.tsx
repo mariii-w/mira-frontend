@@ -186,7 +186,7 @@ export function ChatPageView({
                                 </div>
                             </div>
                         </section>
-                        <section className="hidden lg:block lg:w-1/4 border-l-2 border-border" aria-labelledby="about-service-heading">
+                        <section className="w-full lg:w-1/4 border-t-2 lg:border-t-0 lg:border-l-2 border-border" aria-labelledby="about-service-heading">
                             <h2 id="about-service-heading" className="text-primary text-xl font-semibold-xl m-5">ABOUT THIS SERVICE</h2>
                             <div className="m-4  border-border">
                                 {listing ? (
