@@ -429,7 +429,7 @@ export function CalendarPage({
                         (isBlocked || hasExtra || isNonWorking) && (
                           <span className="flex flex-wrap gap-0.5 justify-end">
                             {isNonWorking && !isBlocked && (
-                              <span className="rounded-full bg-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold text-foreground/70 leading-none">
+                              <span className="rounded-full bg-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold text-foreground leading-none">
                                 OFF
                               </span>
                             )}
