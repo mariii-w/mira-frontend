@@ -195,9 +195,10 @@ export function BookingPage({
       value: "AT_PROVIDER" as LocationType,
       label: "At provider's place",
       Icon: MapPin,
-      detail: listing
-        ? `${listing.location.postalCode} ${listing.location.city}`
-        : "—",
+      detail:
+        listing && listing.location
+          ? `${listing.location.postalCode} ${listing.location.city}`
+          : "—",
     },
   ];
 
@@ -297,7 +298,7 @@ export function BookingPage({
                   </p>
                   <p className="flex items-center gap-1 text-xs text-primary-foreground">
                     <MapPinned size={11} aria-hidden="true" />
-                    {listing.location.city}
+                    {listing.location?.city ?? "Location unavailable"}
                   </p>
                 </div>
               </div>

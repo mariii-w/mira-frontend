@@ -65,7 +65,16 @@ export async function authFetch<T>(
 ): Promise<T> {
   const requestInit = await getRequestInit(input, init);
   const res = await fetch(input, requestInit);
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const noContent = [204, 205, 304].includes(res.status);
+  const body = noContent ? null : await res.text();
+
+  if (!noContent && !body) {
+    const url = typeof input === "string" ? input : input.toString();
+    throw new Error(
+      `Request to ${url} returned ${res.status} with an empty body`,
+    );
+  }
+
   const data = body ? JSON.parse(body) : {};
 
   return { data, status: res.status, headers: res.headers } as T;
