@@ -57,7 +57,7 @@ function StatusFilterBar({
             aria-pressed={selected}
             aria-label={filter.label}
             onClick={() => onChange(filter.value)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-small font-semibold transition-colors ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-small font-semibold transition-colors cursor-pointer ${
               selected
                 ? "bg-foreground text-cream"
                 : "border border-foreground/25 text-foreground hover:bg-black/5"
