@@ -16,7 +16,7 @@ Email: eganscha@hof-university.de
 
 <!-- Add Figma link here -->
 
-> Figma: https://www.figma.com/design/DDBQZwK4QjCup1GH4OblFu/Design?node-id=240-1053&t=Mxw89tVCKZcrnzMo-1
+> Figma: https://www.figma.com/team_invite/redeem/QpoqAiznfHhkXj0RcFp3mA?t=LY7aTlrFqH8Q7oG3-21
 
 ## Demo
 
