@@ -91,6 +91,18 @@ Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `b
 <details>
 <summary>More Info</summary>
 
+### Getting Started
+
+> **Note:** `og:url` will be incorrect in development builds.  
+> In production, the frontend and backend are served from the same server, but during development the frontend runs on a separate dev-server port.
+
+```sh
+VITE_API_BASE_URL=http://localhost:8081
+npm install
+npm run openapi
+npm run dev
+```
+
 ### Tech Stack
 
 | Tool                                                                                                 | Version | Purpose                                                             |
