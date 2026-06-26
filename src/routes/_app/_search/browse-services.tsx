@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SearchServicesPage } from "../../../components/search/pages/SearchServicesPage.tsx";
-import { browseServicesSearchSchema } from "../../../components/search/searchSchemas";
+import { SearchServicesPage } from "../../../components/features/search/SearchServicesPage.tsx";
+import { browseServicesSearchSchema } from "../../../components/features/search/searchSchemas";
 import { createPageMeta } from "../../../lib/headers";
 
 export const Route = createFileRoute("/_app/_search/browse-services")({

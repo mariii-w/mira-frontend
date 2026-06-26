@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   browseServicesSearchSchema,
   browseUsersSearchSchema,
-} from '../components/search/searchSchemas'
+} from '../components/features/search/searchSchemas'
 
 describe('search cursor validation', () => {
   it.each([

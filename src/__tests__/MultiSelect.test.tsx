@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { MultiSelect } from '../components/MultiSelect'
-import type { SelectOption } from '../components/MultiSelect'
+import { MultiSelect } from '../components/common/ui/MultiSelect'
+import type { SelectOption } from '../components/common/ui/MultiSelect'
 
 const OPTIONS: SelectOption[] = [
   { id: '1', label: 'Web Design', variant: 'default' },

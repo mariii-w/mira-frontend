@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Home } from "../../components/Home";
+import { Home } from "../../components/features/home/Home";
 import { createPageMeta } from "../../lib/headers";
 
 export const Route = createFileRoute("/_app/")({

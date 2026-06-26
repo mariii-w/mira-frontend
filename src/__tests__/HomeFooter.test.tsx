@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { Footer } from '../components/Footer'
+import { Footer } from '../components/common/layout/Footer'
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tanstack/react-router')>()

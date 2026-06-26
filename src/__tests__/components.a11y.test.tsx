@@ -16,77 +16,77 @@ import {
   getServiceTags,
 } from "../api/mira";
 import type { PublicListingSummary } from "../api/model";
-import { AccessibilityPanel } from "../components/AccessibilityPanel";
-import { AvatarIcon } from "../components/AvatarIcon";
-import { Badge } from "../components/Badge";
-import { Breadcrumb } from "../components/BreadCrumb";
+import { AccessibilityPanel } from "../components/common/layout/AccessibilityPanel";
+import { AvatarIcon } from "../components/common/ui/AvatarIcon";
+import { Badge } from "../components/common/ui/Badge";
+import { Breadcrumb } from "../components/common/layout/BreadCrumb";
 import {
   BookingCard,
   type BookingDetails,
   type BookingSummary,
-} from "../components/BookingCard";
-import { BookingPage } from "../components/BookingPage";
-import { Button } from "../components/Button";
-import { CalendarGrid } from "../components/CalendarGrid";
-import { CalendarPage } from "../components/CalendarPage";
-import { CategoryCard } from "../components/CategoryCard";
-import { CreateListing } from "../components/CreateListing";
-import { CredentialCard } from "../components/CredentialCard";
-import { CredentialDocumentViewer } from "../components/CredentialDocumentViewer";
-import { Credentials } from "../components/Credentials";
-import { EditListing } from "../components/EditListing";
+} from "../components/features/bookings/BookingCard";
+import { BookingPage } from "../components/features/bookings/BookingPage";
+import { Button } from "../components/common/ui/Button";
+import { CalendarGrid } from "../components/features/bookings/CalendarGrid";
+import { CalendarPage } from "../components/features/bookings/CalendarPage";
+import { CategoryCard } from "../components/features/home/CategoryCard";
+import { CreateListing } from "../components/features/listings/CreateListing";
+import { CredentialCard } from "../components/features/credentials/CredentialCard";
+import { CredentialDocumentViewer } from "../components/features/credentials/CredentialDocumentViewer";
+import { Credentials } from "../components/features/credentials/Credentials";
+import { EditListing } from "../components/features/listings/EditListing";
 import type {
   CredentialResponse,
   ListingDetails,
   PublicListingDetails,
   PublicProfileResponse,
 } from "../api/model";
-import { ExceptionModal } from "../components/ExceptionModal";
-import { FilterBar } from "../components/FilterBar";
-import { FilterDrawer } from "../components/FilterDrawer";
-import { Home } from "../components/Home";
-import { InfoPage } from "../components/InfoPage";
-import { Input } from "../components/Input";
-import { Label } from "../components/Label";
-import { ListingDetailPage } from "../components/ListingDetailPage";
-import { ListingProviderCard } from "../components/ListingProviderCard";
-import { LoginCallback } from "../components/LoginCallback";
-import { Logo } from "../components/Logo";
-import { Modal } from "../components/Modal";
-import { MultiSelect } from "../components/MultiSelect";
-import { MyBookings } from "../components/MyBookings";
+import { ExceptionModal } from "../components/features/bookings/ExceptionModal";
+import { FilterBar } from "../components/features/search/FilterBar";
+import { FilterDrawer } from "../components/features/search/FilterDrawer";
+import { Home } from "../components/features/home/Home";
+import { InfoPage } from "../components/common/InfoPage";
+import { Input } from "../components/common/ui/Input";
+import { Label } from "../components/common/ui/Label";
+import { ListingDetailPage } from "../components/features/listings/ListingDetailPage";
+import { ListingProviderCard } from "../components/features/listings/ListingProviderCard";
+import { LoginCallback } from "../components/features/auth/LoginCallback";
+import { Logo } from "../components/common/ui/Logo";
+import { Modal } from "../components/common/ui/Modal";
+import { MultiSelect } from "../components/common/ui/MultiSelect";
+import { MyBookings } from "../components/features/bookings/MyBookings";
 import {
   MyListingCard,
   type MyListingSummary,
-} from "../components/MyListingCard";
-import { MyListings } from "../components/MyListings";
-import { Navbar } from "../components/Navbar";
-import { Pagination } from "../components/Pagination";
-import { PaymentReturnPage } from "../components/PaymentReturnPage";
-import * as Popover from "../components/Popover";
-import { RegisterAbout } from "../components/RegisterAbout";
-import { RegisterAddress } from "../components/RegisterAddress";
-import { RegisterDone } from "../components/RegisterDone";
-import { RegisterLayout } from "../components/RegisterLayout";
-import { RegisterName } from "../components/RegisterName";
-import { RegisterPhoto } from "../components/RegisterPhoto";
-import { RegisterRole } from "../components/RegisterRole";
-import { SearchBar } from "../components/search/SearchBar";
-import { ServiceCard } from "../components/ServiceCard";
-import { ServiceUserToggle } from "../components/search/ServiceUserToggle.tsx";
-import { SearchRootPage } from "../components/search/pages/SearchRootPage.tsx";
-import { SearchServicesPage } from "../components/search/pages/SearchServicesPage.tsx";
-import { SearchUsersPage } from "../components/search/pages/SearchUsersPage.tsx";
-import { UserTypeFilter } from "../components/search/UserTypeFilter.tsx";
-import { Slider } from "../components/Slider";
-import { SubmitCredentialModal } from "../components/SubmitCredentialModal";
-import * as Switch from "../components/Switch";
-import { Textarea } from "../components/Textarea";
-import { UserMenu } from "../components/UserMenu";
-import { UserCard } from "../components/search/cards/UserCard";
-import { WeeklyScheduleModal } from "../components/WeeklyScheduleModal";
-import { PrivateProfilePage } from "../components/PrivateProfilePage";
-import { PublicProfilePage } from "../components/PublicProfilePage";
+} from "../components/features/listings/MyListingCard";
+import { MyListings } from "../components/features/listings/MyListings";
+import { Navbar } from "../components/common/layout/Navbar";
+import { Pagination } from "../components/common/layout/Pagination";
+import { PaymentReturnPage } from "../components/features/payments/PaymentReturnPage";
+import * as Popover from "../components/common/ui/Popover";
+import { RegisterAbout } from "../components/features/register/RegisterAbout";
+import { RegisterAddress } from "../components/features/register/RegisterAddress";
+import { RegisterDone } from "../components/features/register/RegisterDone";
+import { RegisterLayout } from "../components/features/register/RegisterLayout";
+import { RegisterName } from "../components/features/register/RegisterName";
+import { RegisterPhoto } from "../components/features/register/RegisterPhoto";
+import { RegisterRole } from "../components/features/register/RegisterRole";
+import { SearchBar } from "../components/features/search/SearchBar";
+import { ServiceCard } from "../components/features/listings/ServiceCard";
+import { ServiceUserToggle } from "../components/features/search/ServiceUserToggle.tsx";
+import { SearchRootPage } from "../components/features/search/SearchRootPage.tsx";
+import { SearchServicesPage } from "../components/features/search/SearchServicesPage.tsx";
+import { SearchUsersPage } from "../components/features/search/SearchUsersPage.tsx";
+import { UserTypeFilter } from "../components/features/search/UserTypeFilter.tsx";
+import { Slider } from "../components/common/ui/Slider";
+import { SubmitCredentialModal } from "../components/features/credentials/SubmitCredentialModal";
+import * as Switch from "../components/common/ui/Switch";
+import { Textarea } from "../components/common/ui/Textarea";
+import { UserMenu } from "../components/common/layout/UserMenu";
+import { UserCard } from "../components/features/search/UserCard";
+import { WeeklyScheduleModal } from "../components/features/bookings/WeeklyScheduleModal";
+import { PrivateProfilePage } from "../components/features/profiles/PrivateProfilePage";
+import { PublicProfilePage } from "../components/features/profiles/PublicProfilePage";
 import { useAuthStore, type User } from "../stores/auth";
 import type { VerifiedCredentialResponse } from "../api/model";
 

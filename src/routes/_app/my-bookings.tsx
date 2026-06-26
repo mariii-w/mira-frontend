@@ -9,8 +9,8 @@ import type {
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
 } from "../../api/model";
-import { MyBookings } from "../../components/MyBookings";
-import type { AllowedAction, BookingDetails } from "../../components/BookingCard";
+import { MyBookings } from "../../components/features/bookings/MyBookings";
+import type { AllowedAction, BookingDetails } from "../../components/features/bookings/BookingCard";
 import { executeBookingAction } from "../../lib/bookingActions";
 import { useAuthStore } from "../../stores/auth";
 import { requireAuth } from "../../lib/requireAuth";

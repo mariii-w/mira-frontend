@@ -9,7 +9,7 @@ import {
   within,
 } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { Navbar } from "../components/Navbar";
+import { Navbar } from "../components/common/layout/Navbar";
 import { useAuthStore, type User } from "../stores/auth";
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {

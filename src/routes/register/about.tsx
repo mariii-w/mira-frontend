@@ -4,7 +4,7 @@ import type { PatchUserProfileRequest } from "../../api/model";
 import {
   RegisterAbout,
   type RegisterAboutSubmitValues,
-} from "../../components/RegisterAbout";
+} from "../../components/features/register/RegisterAbout";
 import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 

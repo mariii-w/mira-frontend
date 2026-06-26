@@ -18,7 +18,7 @@ import type {
   ReplaceWeeklyScheduleRequest,
   UpdateScheduleExceptionRequest,
 } from "../../api/model";
-import { CalendarPage } from "../../components/CalendarPage";
+import { CalendarPage } from "../../components/features/bookings/CalendarPage";
 import { get_access_token, useAuthStore } from "../../stores/auth";
 import { requireAuth } from "../../lib/requireAuth";
 import { createPageMeta } from "../../lib/headers";

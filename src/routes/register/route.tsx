@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
-import { RegisterLayout } from "../../components/RegisterLayout";
+import { RegisterLayout } from "../../components/features/register/RegisterLayout";
 import { useAuthStore } from "../../stores/auth";
 import { requireAuth } from "../../lib/requireAuth";
 import { createPageMeta } from "../../lib/headers";

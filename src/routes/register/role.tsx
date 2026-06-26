@@ -8,7 +8,7 @@ import {
   RegisterRole,
   type RegisterRoleSubmitError,
   type RegisterRoleSubmitValues,
-} from "../../components/RegisterRole";
+} from "../../components/features/register/RegisterRole";
 import { createPageMeta } from "../../lib/headers";
 import { exchangeRefreshForAccess, useAuthStore } from "../../stores/auth";
 

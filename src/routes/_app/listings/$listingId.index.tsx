@@ -11,7 +11,7 @@ import {
   useCreateChat,
   useGetPublicListing,
 } from "../../../api/mira";
-import { ListingDetailPage } from "../../../components/ListingDetailPage";
+import { ListingDetailPage } from "../../../components/features/listings/ListingDetailPage";
 import { useAccessibilityStore } from "../../../stores/accessibility";
 import { useAuthStore } from "../../../stores/auth";
 import { createPageMeta } from "../../../lib/headers";

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { InfoPage } from "../../components/InfoPage";
-import { INFO_PAGES } from "../../components/infoPages";
+import { InfoPage } from "../../components/common/InfoPage";
+import { INFO_PAGES } from "../../components/common/infoPages";
 import { createPageMeta } from "../../lib/headers";
 
 export const Route = createFileRoute("/_app/privacy-policy")({

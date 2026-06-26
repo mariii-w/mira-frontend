@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import { computeAccessibleDescription } from 'dom-accessibility-api'
 import { describe, expect, it, vi } from 'vitest'
-import { UserCard } from '../components/search/cards/UserCard'
+import { UserCard } from '../components/features/search/UserCard'
 import type { PublicProfileResponse } from '../api/model'
 import type { ProviderServiceSummary } from '../lib/providerServiceSummary'
 

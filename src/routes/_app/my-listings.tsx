@@ -7,8 +7,8 @@ import type {
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
 } from "../../api/model";
-import { MyListings, type StatusFilter } from "../../components/MyListings";
-import type { MyListingSummary } from "../../components/MyListingCard";
+import { MyListings, type StatusFilter } from "../../components/features/listings/MyListings";
+import type { MyListingSummary } from "../../components/features/listings/MyListingCard";
 import { useAuthStore } from "../../stores/auth";
 import { requireProvider } from "../../lib/requireAuth";
 import { createPageMeta } from "../../lib/headers";

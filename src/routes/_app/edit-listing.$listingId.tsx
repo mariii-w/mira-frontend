@@ -4,7 +4,7 @@ import {
   EditListing,
   type EditListingFormValues,
   type EditListingStatusAction,
-} from "../../components/EditListing";
+} from "../../components/features/listings/EditListing";
 import {
   deleteListing,
   deleteListingMedia,

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { PaymentReturnPage } from "../../../../components/PaymentReturnPage";
+import { PaymentReturnPage } from "../../../../components/features/payments/PaymentReturnPage";
 import { requireAuth } from "../../../../lib/requireAuth";
 import { createPageMeta } from "../../../../lib/headers";
 

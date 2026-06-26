@@ -13,7 +13,7 @@ import type {
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
 } from "../../../api/model";
-import { BookingPage } from "../../../components/BookingPage";
+import { BookingPage } from "../../../components/features/bookings/BookingPage";
 import { requireConsumer } from "../../../lib/requireAuth";
 import { createPageMeta } from "../../../lib/headers";
 

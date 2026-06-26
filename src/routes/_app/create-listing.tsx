@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   CreateListing,
   type CreateListingFormValues,
-} from "../../components/CreateListing";
+} from "../../components/features/listings/CreateListing";
 import {
   getServiceTags,
   getCreateListingUrl,

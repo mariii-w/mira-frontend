@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { FilterBar } from '../components/FilterBar'
+import { FilterBar } from '../components/features/search/FilterBar'
 
 const baseTags = [
   { tagId: 'a', name: 'Cleaning' },

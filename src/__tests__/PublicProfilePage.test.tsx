@@ -1,9 +1,9 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { PublicProfilePage } from '../components/PublicProfilePage'
+import { PublicProfilePage } from '../components/features/profiles/PublicProfilePage'
 import { useAccessibilityStore } from '../stores/accessibility'
-import type { ServiceCardProps } from '../components/ServiceCard'
+import type { ServiceCardProps } from '../components/features/listings/ServiceCard'
 import type { VerifiedCredentialResponse } from '../api/model'
 
 type MockAccessibilityState = {

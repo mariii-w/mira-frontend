@@ -17,8 +17,8 @@ import type {
     CredentialType,
     CredentialVerificationResponse,
 } from "../../api/model";
-import { Credentials } from "../../components/Credentials";
-import { SubmitCredentialModal } from "../../components/SubmitCredentialModal";
+import { Credentials } from "../../components/features/credentials/Credentials";
+import { SubmitCredentialModal } from "../../components/features/credentials/SubmitCredentialModal";
 import { useAuthStore } from "../../stores/auth";
 import { requireProvider } from "../../lib/requireAuth";
 import { createPageMeta } from "../../lib/headers";

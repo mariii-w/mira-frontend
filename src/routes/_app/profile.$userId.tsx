@@ -1,13 +1,13 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { PrivateProfilePage } from "../../components/PrivateProfilePage";
-import { PublicProfilePage } from "../../components/PublicProfilePage";
+import { PrivateProfilePage } from "../../components/features/profiles/PrivateProfilePage";
+import { PublicProfilePage } from "../../components/features/profiles/PublicProfilePage";
 import {
     ProfilePageLoading,
     ProfilePageError,
-} from "../../components/ProfilePageLoadingError";
-import { type ServiceCardProps } from "../../components/ServiceCard";
+} from "../../components/features/profiles/ProfilePageLoadingError";
+import { type ServiceCardProps } from "../../components/features/listings/ServiceCard";
 import { ensureAuthInitialized, useAuthStore } from "../../stores/auth";
 import { mediaUrl } from "../../lib/mediaUrl";
 import { createPageMeta } from "../../lib/headers";

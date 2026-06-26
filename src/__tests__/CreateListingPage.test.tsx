@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import type { ComponentProps } from "react";
 
-vi.mock("../components/MultiSelect", () => ({
+vi.mock("../components/common/ui/MultiSelect", () => ({
   MultiSelect: ({
     onChange,
     id,
@@ -23,8 +23,8 @@ vi.mock("../components/MultiSelect", () => ({
   ),
 }));
 
-import { CreateListing } from "../components/CreateListing";
-import type { MultiSelectProps } from "../components/MultiSelect";
+import { CreateListing } from "../components/features/listings/CreateListing";
+import type { MultiSelectProps } from "../components/common/ui/MultiSelect";
 
 const availableTags = [
   {

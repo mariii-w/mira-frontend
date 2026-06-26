@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import source from "../components/RegisterLayout.tsx?raw";
+import source from "../components/features/register/RegisterLayout.tsx?raw";
 
 describe("RegisterLayout", () => {
   it("keeps fetching and route state out of the component", () => {

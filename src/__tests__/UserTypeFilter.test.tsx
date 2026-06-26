@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { UserTypeFilter } from '../components/search/UserTypeFilter'
+import { UserTypeFilter } from '../components/features/search/UserTypeFilter'
 
 describe('<UserTypeFilter />', () => {
   it('shows current-page counts and marks Everyone as selected', () => {

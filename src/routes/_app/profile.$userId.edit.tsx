@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { EditProfileForm } from "../../components/EditProfileForm";
+import { EditProfileForm } from "../../components/features/profiles/EditProfileForm";
 import { useAuthStore } from "../../stores/auth";
 import {
     patchUser,

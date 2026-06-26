@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import type { ChatMessage } from "../../components/ChatBubble.tsx";
-import type { ChatPreview } from "../../components/ChatInbox.tsx";
-import { ChatPageView } from "../../components/ChatPageView.tsx";
+import type { ChatMessage } from "../../components/features/chat/ChatBubble.tsx";
+import type { ChatPreview } from "../../components/features/chat/ChatInbox.tsx";
+import { ChatPageView } from "../../components/features/chat/ChatPageView.tsx";
 import {
   disconnectChatSocket,
   publishChatText,

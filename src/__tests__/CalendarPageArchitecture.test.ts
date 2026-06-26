@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import source from "../components/CalendarPage.tsx?raw";
+import source from "../components/features/bookings/CalendarPage.tsx?raw";
 import routeSource from "../routes/_app/calendar.tsx?raw";
 
 describe("calendar page architecture", () => {

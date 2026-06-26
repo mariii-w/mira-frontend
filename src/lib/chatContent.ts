@@ -1,5 +1,5 @@
 import type { ChatOverviewResponse } from "../api/model";
-import type { ChatPreview } from "../components/ChatInbox.tsx";
+import type { ChatPreview } from "../components/features/chat/ChatInbox.tsx";
 
 // ChatMessageContent has no discriminant field; variants are told apart by which fields exist.
 export function describeMessageContent(content: unknown): string {
