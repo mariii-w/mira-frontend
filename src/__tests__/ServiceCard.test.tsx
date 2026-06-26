@@ -41,9 +41,9 @@ describe('<ServiceCard variant="compact" />', () => {
     expect(root).not.toHaveClass('border-border')
   })
 
-  it('renders "View Listing" without an underline', () => {
+  it('renders "View Service" without an underline', () => {
     render(<ServiceCard {...baseProps} variant="compact" />)
-    const viewLink = screen.getByRole('link', { name: `View listing for ${baseProps.label}` })
+    const viewLink = screen.getByRole('link', { name: `View service for ${baseProps.label}` })
     expect(viewLink).toHaveClass('no-underline')
   })
 

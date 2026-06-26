@@ -80,10 +80,10 @@ export function ServiceCard(
                     <span id={priceId} className="self-end text-body font-bold text-primary">from {hourRate}€/hr</span>
                     <Link
                         to={link}
-                        aria-label={`View listing for ${label}`}
+                        aria-label={`View service for ${label}`}
                         className="relative inline-flex items-center justify-center font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 w-full px-4 text-body bg-primary text-primary-foreground no-underline hover:bg-primary-hover active:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                     >
-                        View Listing
+                        View Service
                     </Link>
                 </div>
             </div>
