@@ -172,7 +172,7 @@ describe('<PrivateProfilePage />', () => {
     it('calls onEditListing with the correct listingId when an Edit button is clicked', () => {
       const onEditListing = vi.fn()
       render(<PrivateProfilePage {...baseProps} ownerListings={[baseListing]} onEditListing={onEditListing} />)
-      fireEvent.click(screen.getByRole('button', { name: /edit "Home Cleaning"/i }))
+      fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
       expect(onEditListing).toHaveBeenCalledOnce()
       expect(onEditListing).toHaveBeenCalledWith('listing-1')
     })
