@@ -63,23 +63,20 @@ function validateSelfSummary(value: string): string | null {
     return null;
 }
 
-// "Kleiber Weg 5" -> { street: "Kleiber Weg", houseNumber: "5" }
-function parseAddressLine(
-    value: string,
-): { street: string; houseNumber: string } | null {
-    const match = value.trim().match(/^(.+?)\s+(\d+\s*[a-zA-Z]?)$/);
-    if (!match) return null;
-
-    return {
-        street: match[1].trim(),
-        houseNumber: match[2].replace(/\s+/g, ""),
-    };
+function validateStreet(value: string): string | null {
+    if (!value.trim()) return "Required.";
+    if (value.length > 100) return "Maximum 100 characters.";
+    if (!/^[A-Za-zÄÖÜäöüß\s]+$/.test(value.trim())) {
+        return "No digits or special characters.";
+    }
+    return null;
 }
 
-function validateAddressLine(value: string): string | null {
+function validateHouseNumber(value: string): string | null {
     if (!value.trim()) return "Required.";
-    if (!parseAddressLine(value)) {
-        return 'Please enter street and house number, e.g. "Kleiber Weg 5".';
+    if (value.length > 10) return "Maximum 10 characters.";
+    if (!/^[0-9]+[a-zA-Z]?$/.test(value.trim())) {
+        return "Must be a number, optionally followed by a letter (e.g. 43a).";
     }
     return null;
 }
@@ -121,10 +118,11 @@ function EditProfilePage() {
         currentUser?.selfSummary ?? "",
     );
 
-    const [addressLine, setAddressLine] = useState(
-        currentUser?.privateAddress
-            ? `${currentUser.privateAddress.street} ${currentUser.privateAddress.houseNumber}`.trim()
-            : "",
+    const [street, setStreet] = useState(
+        currentUser?.privateAddress?.street ?? "",
+    );
+    const [houseNumber, setHouseNumber] = useState(
+        currentUser?.privateAddress?.houseNumber ?? "",
     );
 
     const [postalCode, setPostalCode] = useState(
@@ -137,7 +135,8 @@ function EditProfilePage() {
     const [lastNameError, setLastNameError] = useState<string | null>(null);
     const [usernameError, setUsernameError] = useState<string | null>(null);
     const [selfSummaryError, setSelfSummaryError] = useState<string | null>(null);
-    const [addressLineError, setAddressLineError] = useState<string | null>(null);
+    const [streetError, setStreetError] = useState<string | null>(null);
+    const [houseNumberError, setHouseNumberError] = useState<string | null>(null);
     const [postalCodeError, setPostalCodeError] = useState<string | null>(null);
     const [cityError, setCityError] = useState<string | null>(null);
 
@@ -208,7 +207,8 @@ function EditProfilePage() {
         const lnErr = validateName(lastName);
         const unErr = validateUsername(username);
         const ssErr = validateSelfSummary(selfSummary);
-        const alErr = validateAddressLine(addressLine);
+        const sErr = validateStreet(street);
+        const hErr = validateHouseNumber(houseNumber);
         const pErr = validatePostalCode(postalCode);
         const cErr = validateCity(city);
 
@@ -216,18 +216,12 @@ function EditProfilePage() {
         setLastNameError(lnErr);
         setUsernameError(unErr);
         setSelfSummaryError(ssErr);
-        setAddressLineError(alErr);
+        setStreetError(sErr);
+        setHouseNumberError(hErr);
         setPostalCodeError(pErr);
         setCityError(cErr);
 
-        if (fnErr || lnErr || unErr || ssErr || alErr || pErr || cErr) return;
-
-        const parsedAddress = parseAddressLine(addressLine);
-
-        if (!parsedAddress) {
-            setAddressLineError(validateAddressLine(addressLine));
-            return;
-        }
+        if (fnErr || lnErr || unErr || ssErr || sErr || hErr || pErr || cErr) return;
 
         setSubmitting(true);
         setServerError(null);
@@ -237,8 +231,8 @@ function EditProfilePage() {
             lastName: lastName.trim(),
             username,
             privateAddress: {
-                street: parsedAddress.street,
-                houseNumber: parsedAddress.houseNumber,
+                street: street.trim(),
+                houseNumber: houseNumber.trim(),
                 postalCode,
                 city: city.trim(),
             },
@@ -275,7 +269,8 @@ function EditProfilePage() {
             lastName={lastName}
             username={username}
             selfSummary={selfSummary}
-            addressLine={addressLine}
+            street={street}
+            houseNumber={houseNumber}
             postalCode={postalCode}
             city={city}
             isPublic={isPublic}
@@ -283,7 +278,8 @@ function EditProfilePage() {
             lastNameError={lastNameError}
             usernameError={usernameError}
             selfSummaryError={selfSummaryError}
-            addressLineError={addressLineError}
+            streetError={streetError}
+            houseNumberError={houseNumberError}
             postalCodeError={postalCodeError}
             cityError={cityError}
             serverError={serverError}
@@ -298,11 +294,13 @@ function EditProfilePage() {
             pendingPhotoPreviewUrl={pendingPhoto?.previewUrl}
             uploadingPhoto={uploadingPhoto}
             photoError={photoError}
+            fileError={photoError}
             onFirstNameChange={setFirstName}
             onLastNameChange={setLastName}
             onUsernameChange={setUsername}
             onSelfSummaryChange={setSelfSummary}
-            onAddressLineChange={setAddressLine}
+            onStreetChange={setStreet}
+            onHouseNumberChange={setHouseNumber}
             onPostalCodeChange={setPostalCode}
             onCityChange={setCity}
             onIsPublicChange={setIsPublic}
@@ -312,8 +310,9 @@ function EditProfilePage() {
             onSelfSummaryBlur={() =>
                 setSelfSummaryError(validateSelfSummary(selfSummary))
             }
-            onAddressLineBlur={() =>
-                setAddressLineError(validateAddressLine(addressLine))
+            onStreetBlur={() => setStreetError(validateStreet(street))}
+            onHouseNumberBlur={() =>
+                setHouseNumberError(validateHouseNumber(houseNumber))
             }
             onPostalCodeBlur={() =>
                 setPostalCodeError(validatePostalCode(postalCode))
