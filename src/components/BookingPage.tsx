@@ -289,13 +289,13 @@ export function BookingPage({
                   {initials(listing.author.name, listing.author.surname)}
                 </div>
                 <div>
-                  <p className="text-xs text-primary-foreground/60 uppercase tracking-wide font-semibold mb-1">
+                  <p className="text-xs text-primary-foreground uppercase tracking-wide font-semibold mb-1">
                     You're booking
                   </p>
                   <p className="text-body font-bold text-primary-foreground mb-1">
                     {listing.title}
                   </p>
-                  <p className="flex items-center gap-1 text-xs text-primary-foreground/60">
+                  <p className="flex items-center gap-1 text-xs text-primary-foreground">
                     <MapPinned size={11} aria-hidden="true" />
                     {listing.location.city}
                   </p>
@@ -305,7 +305,7 @@ export function BookingPage({
                 <span className="text-2xl font-bold text-primary-foreground">
                   {listing.price}€
                 </span>
-                <span className="text-xs text-primary-foreground/60">
+                <span className="text-xs text-primary-foreground">
                   {" "}
                   / hr
                 </span>
