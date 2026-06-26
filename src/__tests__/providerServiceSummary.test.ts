@@ -75,10 +75,10 @@ describe('summarizeProviderServices', () => {
     expect(result.topTags.map(t => t.name)).toEqual(['Alpha Service', 'Zeta Service'])
   })
 
-  it('caps the result at four tags', () => {
+  it('caps the result at three tags', () => {
     const tags = Array.from({ length: 6 }, (_, i) => tag({ tagId: `t${i}`, name: `Tag ${i}` }))
     const result = summarizeProviderServices([listing({ listingId: 'l1', price: 20, tags })])
-    expect(result.topTags).toHaveLength(4)
+    expect(result.topTags).toHaveLength(3)
   })
 
   it('preserves the isBarrierefrei flag per tag', () => {

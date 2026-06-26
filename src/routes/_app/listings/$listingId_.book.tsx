@@ -2,11 +2,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  getGetPublicListingQueryKey,
   getGetAvailabilityQueryKey,
   getGetPublicProfileCredentialsQueryKey,
   getAvailability,
-  getPublicListing,
+  useGetPublicListing,
   getPublicProfileCredentials,
   createBooking,
 } from "../../../api/mira";
@@ -73,21 +72,8 @@ function BookingRoute() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: listing } = useQuery({
-    queryKey: getGetPublicListingQueryKey(listingId),
-    queryFn: async () => {
-      const response = await getPublicListing(listingId);
-
-      if (response.status !== 200) {
-        throw new Error(
-          getErrorDetail(response.data) ?? "Failed to load listing.",
-        );
-      }
-
-      return response.data;
-    },
-    staleTime: 10 * 60 * 1000,
-  });
+  const { data: listingResponse } = useGetPublicListing(listingId);
+  const listing = listingResponse?.status === 200 ? listingResponse.data : undefined;
 
   const authorId = listing?.author?.userId ?? "";
   const { data: publicCredentialsData } = useQuery({

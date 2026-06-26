@@ -1,7 +1,6 @@
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { usePageTitle } from "../../../hooks/usePageTitle.ts";
 import { SearchBar } from "./SearchBar.tsx";
 import { Breadcrumb } from "../../common/layout/BreadCrumb.tsx";
 import { Pagination } from "../../common/layout/Pagination.tsx";
@@ -87,8 +86,6 @@ async function fetchAllProviderListings(
 // Browse Users Page
 
 export function SearchUsersPage() {
-  usePageTitle("Browse Users");
-
   const search = routeApi.useSearch();
   const navigate = useNavigate({ from: "/browse-users" });
   const easyRead = useAccessibilityStore((state) => state.easyRead);
@@ -250,10 +247,6 @@ export function SearchUsersPage() {
                 aria-labelledby="user-results-heading"
                 className="flex flex-col gap-4 focus-visible:outline-none"
             >
-              <h1 id="user-results-heading" className="sr-only">
-                Users
-              </h1>
-
               {profilesQuery.isSuccess ? (
                   <UserTypeFilter
                       selected={search.role}
@@ -263,7 +256,7 @@ export function SearchUsersPage() {
                   />
               ) : (
                   <div>
-                    <h2 className="font-heading text-h1 font-bold text-foreground">
+                    <h2 id="user-results-heading" className="font-heading text-h1 font-bold text-foreground">
                       Users
                     </h2>
                     <p className="text-body text-foreground mt-1">

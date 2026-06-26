@@ -103,7 +103,7 @@ export function ServiceCard(
                         <img
                             src={pictureLink}
                             alt={pictureAltTextStatus === 'COMPLETED' && pictureAltText ? pictureAltText : label}
-                            className="w-full h-48 lg:w-48 lg:h-full rounded-lg object-cover"
+                            className="w-full h-48 lg:w-48 lg:h-48 rounded-lg object-cover"
                         />
                     </div>
                 )}
@@ -133,7 +133,7 @@ export function ServiceCard(
                     </div>
                     {description && (
                         <div>
-                            <p id={descriptionId}>{description}</p>
+                            <p id={descriptionId} className="line-clamp-3">{description}</p>
                         </div>
                     )}
                     <div className="flex gap-2 flex-wrap items-center">
