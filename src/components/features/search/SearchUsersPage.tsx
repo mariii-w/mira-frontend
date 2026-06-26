@@ -247,10 +247,6 @@ export function SearchUsersPage() {
                 aria-labelledby="user-results-heading"
                 className="flex flex-col gap-4 focus-visible:outline-none"
             >
-              <h1 id="user-results-heading" className="sr-only">
-                Users
-              </h1>
-
               {profilesQuery.isSuccess ? (
                   <UserTypeFilter
                       selected={search.role}
@@ -260,7 +256,7 @@ export function SearchUsersPage() {
                   />
               ) : (
                   <div>
-                    <h2 className="font-heading text-h1 font-bold text-foreground">
+                    <h2 id="user-results-heading" className="font-heading text-h1 font-bold text-foreground">
                       Users
                     </h2>
                     <p className="text-body text-foreground mt-1">
