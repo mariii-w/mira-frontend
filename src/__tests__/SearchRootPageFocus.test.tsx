@@ -60,9 +60,9 @@ function renderApp(initialPath: string) {
 describe('search root page toggle focus across navigation', () => {
   it('activates the violet search palette on the users page', async () => {
     renderApp('/browse-users')
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Users' })).toBeInTheDocument())
+    await waitFor(() => expect(document.querySelector('[data-search-variant="users"]')).toBeInTheDocument())
 
-    expect(document.querySelector('main')).toHaveAttribute('data-search-variant', 'users')
+    expect(document.querySelector('[data-search-variant="users"]')).toBeInTheDocument()
   })
 
   it('renders exactly one toggle and one navbar on the services page', async () => {
@@ -82,7 +82,7 @@ describe('search root page toggle focus across navigation', () => {
 
     fireEvent.click(toggle)
 
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Users' })).toBeInTheDocument())
+    await waitFor(() => expect(document.querySelector('[data-search-variant="users"]')).toBeInTheDocument())
     expect(document.activeElement).toBe(toggle)
   })
 

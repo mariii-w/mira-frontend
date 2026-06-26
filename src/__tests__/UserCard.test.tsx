@@ -157,10 +157,9 @@ describe('<UserCard /> provider enrichment', () => {
 })
 
 describe('<UserCard /> accessible focus group', () => {
-  it('is a single tabbable group labelled by the display name', () => {
+  it('is a group labelled by the display name', () => {
     render(<UserCard profile={profile({ firstName: 'Patrick', lastName: 'Smith' })} easyRead={false} />)
-    const group = screen.getByRole('group', { name: 'Patrick Smith' })
-    expect(group).toHaveAttribute('tabindex', '0')
+    expect(screen.getByRole('group', { name: 'Patrick Smith' })).toBeInTheDocument()
   })
 
   it('describes role and city for a consumer card with no enrichment, and excludes price', () => {

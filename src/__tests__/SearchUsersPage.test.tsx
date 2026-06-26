@@ -17,7 +17,9 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
     ...actual,
     getRouteApi: () => ({ useSearch: () => mockSearch }),
     useNavigate: () => mockNavigate,
-    Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
+    Link: ({ children, to, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { children: React.ReactNode; to: string }) => (
+      <a href={to} {...props}>{children}</a>
+    ),
   }
 })
 
@@ -98,6 +100,19 @@ beforeEach(() => {
 afterEach(() => onlineManager.setOnline(true))
 
 describe('<SearchUsersPage /> role filtering', () => {
+  it('places skip-link focus on Users before tabbing to the first user card', async () => {
+    mockSuccess()
+    renderPage()
+
+    await screen.findByText('Patrick User')
+    const main = document.querySelector('#main-content')
+    expect(main).toHaveAccessibleName('Users')
+    expect(main).toHaveAttribute('tabindex', '-1')
+
+    const firstTabStop = main?.querySelector('a')
+    expect(firstTabStop).toHaveAccessibleName('View profile of Patrick User')
+  })
+
   it('shows counts for the current backend page', async () => {
     mockSuccess()
     renderPage()

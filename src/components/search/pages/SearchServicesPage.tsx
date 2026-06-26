@@ -1,5 +1,6 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { usePageTitle } from '../../../hooks/usePageTitle.ts'
 import { useQuery } from '@tanstack/react-query'
 import { X } from 'lucide-react'
 import { SearchBar } from '../SearchBar.tsx'
@@ -51,6 +52,7 @@ async function fetchServiceTags(): Promise<ServiceTag[]> {
 
 // Search Page
 export function SearchServicesPage() {
+  usePageTitle('Browse Services')
   const search = routeApi.useSearch()
   const navigate = useNavigate({ from: '/browse-services' })
   const easyRead = useAccessibilityStore(state => state.easyRead)
@@ -260,30 +262,36 @@ export function SearchServicesPage() {
 
           {/* ── Results ── */}
           <div className="flex-1 flex flex-col gap-4 min-w-0">
+            <div className="lg:hidden flex justify-end">
+              <FilterDrawer
+                tags={allTags}
+                selectedTagIds={pendingTagIds}
+                onTagToggle={handleTagToggle}
+                distanceKm={pendingRadius}
+                onDistanceChange={setPendingRadius}
+                maxPrice={pendingMaxPrice}
+                onMaxPriceChange={setPendingMaxPrice}
+                onApply={commitFilters}
+                resultCount={listingsQuery.isSuccess ? listings.length : undefined}
+                activeCount={activeCount}
+              />
+            </div>
 
             {/* Results header */}
-            <div className="flex items-center justify-between gap-4">
+            <main
+              id="main-content"
+              tabIndex={-1}
+              aria-labelledby="services-results-heading"
+              className="flex flex-col gap-4 focus-visible:outline-none"
+            >
+            <div>
               <div>
-                <h1 className="font-heading text-h1 font-bold text-foreground">
+                <h1 id="services-results-heading" className="font-heading text-h1 font-bold text-foreground">
                   {search.q ? `Services for "${search.q}"` : 'Services'}
                 </h1>
                 {subtitleParts.length > 0 && (
                   <p className="text-small text-muted mt-1">{subtitleParts.join(' · ')}</p>
                 )}
-              </div>
-              <div className="lg:hidden shrink-0">
-                <FilterDrawer
-                  tags={allTags}
-                  selectedTagIds={pendingTagIds}
-                  onTagToggle={handleTagToggle}
-                  distanceKm={pendingRadius}
-                  onDistanceChange={setPendingRadius}
-                  maxPrice={pendingMaxPrice}
-                  onMaxPriceChange={setPendingMaxPrice}
-                  onApply={commitFilters}
-                  resultCount={listingsQuery.isSuccess ? listings.length : undefined}
-                  activeCount={activeCount}
-                />
               </div>
             </div>
 
@@ -355,6 +363,7 @@ export function SearchServicesPage() {
                 )}
               </>
             )}
+            </main>
           </div>
         </div>
         </div>

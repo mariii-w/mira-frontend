@@ -26,8 +26,7 @@ export function SearchRootPage() {
   return (
     <>
       <Navbar />
-      <main
-        id="main-content"
+      <div
         data-search-variant={isUsersPage ? 'users' : undefined}
         className="min-h-[calc(100vh-4rem)] bg-background"
       >
@@ -47,7 +46,7 @@ export function SearchRootPage() {
           </div>
         </div>
         <Outlet />
-      </main>
+      </div>
     </>
   )
 }

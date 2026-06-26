@@ -51,7 +51,6 @@ export function UserCard({ profile, easyRead, providerSummary }: UserCardProps) 
   return (
     <div
       role="group"
-      tabIndex={0}
       aria-labelledby={nameId}
       aria-describedby={describedBy}
       className="bg-linen rounded-2xl flex flex-col p-3 gap-3 border border-border w-full h-full"

@@ -16,6 +16,7 @@ const API_BASE_URL =
 
 const COMMON_NAV_LINKS = [
   { label: "Browse Services", to: "/browse-services" },
+  { label: "Find Users", to: "/browse-users" },
   { label: "Calendar", to: "/calendar" },
   { label: "Chat", to: "/chat" },
 ] as const;
@@ -30,12 +31,11 @@ export function Navbar() {
     : undefined;
   const navLinks = [
     COMMON_NAV_LINKS[0],
-    isProvider
-      ? { label: "My Services", to: "/my-listings" as const }
-      : { label: "Find Users", to: "/browse-users" as const },
+    COMMON_NAV_LINKS[1],
+    ...(isProvider ? [{ label: "My Services", to: "/my-listings" as const }] : []),
     // Calendar and Chat require an account, so don't even show them to
     // logged-out visitors.
-    ...(user ? [COMMON_NAV_LINKS[1], COMMON_NAV_LINKS[2]] : []),
+    ...(user ? [COMMON_NAV_LINKS[2], COMMON_NAV_LINKS[3]] : []),
   ];
 
   return (
