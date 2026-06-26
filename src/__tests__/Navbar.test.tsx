@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom/vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   act,
@@ -8,9 +9,11 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import type { ReactNode } from "react";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { Navbar } from "../components/common/layout/Navbar";
 import { useAuthStore, type User } from "../stores/auth";
+import { listMyBookings } from "../api/mira";
+import type { BookingSummary } from "../api/model";
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual =
@@ -24,6 +27,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
       activeProps,
       inactiveProps,
       onClick,
+      ...rest
     }: {
       children: ReactNode;
       to: string;
@@ -31,13 +35,14 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
       activeProps?: { className?: string };
       inactiveProps?: { className?: string };
       onClick?: () => void;
-    }) => (
+    } & AnchorHTMLAttributes<HTMLAnchorElement>) => (
       <a
         href={to}
         className={
           className ?? inactiveProps?.className ?? activeProps?.className
         }
         onClick={onClick}
+        {...rest}
       >
         {children}
       </a>
@@ -48,6 +53,10 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 
 vi.mock("../api/mira", () => ({
   logout: vi.fn().mockResolvedValue({ status: 204, data: undefined }),
+  getListMyBookingsQueryKey: vi.fn((userId: string) => ["bookings", userId]),
+  listMyBookings: vi
+    .fn()
+    .mockResolvedValue({ status: 200, data: { items: [] } }),
 }));
 
 const providerUser = {
@@ -73,18 +82,66 @@ const consumerUser = {
 
 afterEach(() => {
   useAuthStore.getState().clear();
+  vi.mocked(listMyBookings).mockResolvedValue({
+    status: 200,
+    data: { items: [] },
+    headers: new Headers(),
+  } as Awaited<ReturnType<typeof listMyBookings>>);
 });
 
+function renderNavbar() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <Navbar />
+    </QueryClientProvider>,
+  );
+}
+
+function makeBooking(
+  bookingId: string,
+  status: BookingSummary["status"],
+): BookingSummary {
+  return {
+    bookingId,
+    listingId: `listing-${bookingId}`,
+    listing: { title: "Grocery pickup" },
+    counterparty: { userId: "user-2", name: "Mira", surname: "Muster" },
+    status,
+    serviceAddress: {
+      street: "Main Street",
+      houseNumber: "12",
+      city: "Berlin",
+      postalCode: "10115",
+    },
+    totalPrice: 48,
+    bookedStart: "2026-07-20T09:00:00.000Z",
+    bookedEnd: "2026-07-20T11:00:00.000Z",
+    createdAt: "2026-06-15T10:00:00.000Z",
+  };
+}
+
 describe("<Navbar />", () => {
+  it("renders the home logo link with pointer cursor and non-selectable text behavior", () => {
+    renderNavbar();
+    expect(screen.getByRole("link", { name: /mira home/i })).toHaveClass(
+      "cursor-pointer",
+      "select-none",
+    );
+  });
+
   it("renders the hamburger trigger, closed, with no drawer in the document", () => {
-    render(<Navbar />);
+    renderNavbar();
     const trigger = screen.getByRole("button", { name: /open menu/i });
     expect(trigger).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("opens the drawer and flips aria-expanded when the hamburger is clicked", () => {
-    render(<Navbar />);
+    renderNavbar();
     fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     // Radix marks background content aria-hidden while the modal is open, so the
@@ -96,7 +153,7 @@ describe("<Navbar />", () => {
   });
 
   it("logged out: drawer shows nav links but no account rows or logout", () => {
-    render(<Navbar />);
+    renderNavbar();
     fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
     const dialog = within(screen.getByRole("dialog"));
     expect(
@@ -125,7 +182,7 @@ describe("<Navbar />", () => {
 
   it("logged in: drawer shows Calendar and Chat links", () => {
     useAuthStore.getState().setUser(providerUser);
-    render(<Navbar />);
+    renderNavbar();
     fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
     const dialog = within(screen.getByRole("dialog"));
     expect(dialog.getByRole("link", { name: /calendar/i })).toBeInTheDocument();
@@ -133,7 +190,7 @@ describe("<Navbar />", () => {
   });
 
   it("logged out: Login stays in the header (not moved into the drawer) while it is open", () => {
-    render(<Navbar />);
+    renderNavbar();
     expect(screen.getByRole("link", { name: /^login$/i })).toHaveAttribute(
       "href",
       "http://localhost:8081/auth/login/google",
@@ -148,7 +205,7 @@ describe("<Navbar />", () => {
 
   it("logged in (provider): drawer shows account rows and logout, scoped to the dialog", () => {
     useAuthStore.getState().setUser(providerUser);
-    render(<Navbar />);
+    renderNavbar();
     fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
     const dialog = within(screen.getByRole("dialog"));
     expect(
@@ -168,7 +225,7 @@ describe("<Navbar />", () => {
 
   it("logged in (non-provider): drawer omits My Services and My Credentials", () => {
     useAuthStore.getState().setUser(consumerUser);
-    render(<Navbar />);
+    renderNavbar();
     fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
     const dialog = within(screen.getByRole("dialog"));
     expect(
@@ -181,14 +238,14 @@ describe("<Navbar />", () => {
 
   it("logged in: the drawer trigger does not duplicate the desktop user-menu trigger", () => {
     useAuthStore.getState().setUser(providerUser);
-    render(<Navbar />);
+    renderNavbar();
     expect(screen.getAllByRole("button", { name: /mira m\./i })).toHaveLength(
       1,
     );
   });
 
   it("drawer has an accessible name and a labeled navigation landmark for the nav links", () => {
-    render(<Navbar />);
+    renderNavbar();
     fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
     const dialog = screen.getByRole("dialog", { name: /menu/i });
     expect(
@@ -197,7 +254,7 @@ describe("<Navbar />", () => {
   });
 
   it("closes the drawer when the close button is clicked and returns focus to the trigger", async () => {
-    render(<Navbar />);
+    renderNavbar();
     const trigger = screen.getByRole("button", { name: /open menu/i });
     fireEvent.click(trigger);
     fireEvent.click(screen.getByRole("button", { name: /close menu/i }));
@@ -208,7 +265,7 @@ describe("<Navbar />", () => {
   });
 
   it("closes the drawer on Escape", () => {
-    render(<Navbar />);
+    renderNavbar();
     fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
     fireEvent.keyDown(screen.getByRole("dialog"), {
       key: "Escape",
@@ -218,7 +275,7 @@ describe("<Navbar />", () => {
   });
 
   it("closes the drawer after clicking a nav link inside it", () => {
-    render(<Navbar />);
+    renderNavbar();
     fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
     fireEvent.click(
       within(screen.getByRole("dialog")).getByRole("link", {
@@ -229,7 +286,7 @@ describe("<Navbar />", () => {
   });
 
   it("keeps the Accessibility trigger reachable regardless of auth state", () => {
-    const { rerender } = render(<Navbar />);
+    renderNavbar();
     expect(
       screen.getByRole("button", { name: /accessibility/i }),
     ).toBeInTheDocument();
@@ -237,9 +294,53 @@ describe("<Navbar />", () => {
     act(() => {
       useAuthStore.getState().setUser(providerUser);
     });
-    rerender(<Navbar />);
     expect(
       screen.getByRole("button", { name: /accessibility/i }),
     ).toBeInTheDocument();
+  });
+
+  it("shows the actionable booking notification count on the desktop user icon", async () => {
+    useAuthStore.getState().setUser(providerUser);
+    vi.mocked(listMyBookings).mockResolvedValue({
+      status: 200,
+      data: {
+        items: [
+          makeBooking("pending-1", "PENDING"),
+          makeBooking("pay-1", "CONFIRMED"),
+          makeBooking("done-1", "COMPLETED"),
+        ],
+      },
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof listMyBookings>>);
+
+    renderNavbar();
+
+    const userButton = screen.getByRole("button", {
+      name: /mira m\./i,
+    });
+    await waitFor(() =>
+      expect(
+        within(userButton).getByLabelText("2 notifications"),
+      ).toHaveClass("bg-red-600"),
+    );
+  });
+
+  it("does not show a user icon notification when only done bookings exist", async () => {
+    useAuthStore.getState().setUser(providerUser);
+    vi.mocked(listMyBookings).mockResolvedValue({
+      status: 200,
+      data: {
+        items: [
+          makeBooking("done-1", "COMPLETED"),
+          makeBooking("cancelled-1", "CANCELLED"),
+        ],
+      },
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof listMyBookings>>);
+
+    renderNavbar();
+
+    await waitFor(() => expect(listMyBookings).toHaveBeenCalledWith("user-1"));
+    expect(screen.queryByLabelText(/notification/i)).not.toBeInTheDocument();
   });
 });

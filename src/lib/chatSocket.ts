@@ -4,7 +4,8 @@ import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { get_access_token } from "../stores/auth";
 
-const API_BASE_URL = "http://localhost:8081";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
 
 export type ChatTopicMessage = {
   id: number;
@@ -109,7 +110,10 @@ export async function subscribeToChat(
 }
 
 // Fire-and-forget - server echoes the saved message back on the topic.
-export async function publishChatText(cid: string, content: string): Promise<void> {
+export async function publishChatText(
+  cid: string,
+  content: string,
+): Promise<void> {
   const activeClient = await connectChatSocket();
   activeClient.publish({
     destination: `/app/${cid}/text`,

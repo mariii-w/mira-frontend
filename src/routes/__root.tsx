@@ -1,5 +1,6 @@
 import {
   createRootRoute,
+  HeadContent,
   Outlet,
   useLocation,
   useNavigate,
@@ -56,7 +57,12 @@ function RootComponent() {
     navigate({ to: "/register" });
   }, [user, location.pathname, navigate]);
 
-  return <Outlet />;
+  return (
+    <>
+      <HeadContent />
+      <Outlet />
+    </>
+  );
 }
 
 export const Route = createRootRoute({

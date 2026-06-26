@@ -2,6 +2,11 @@
 // Logged-in variant
 
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import {
+  listMyBookings,
+} from "../../../api/mira";
+import type { BookingStatus } from "../../../api/model";
 import { Logo } from "../ui/Logo";
 import { AccessibilityPanel } from "./AccessibilityPanel";
 import { UserMenu } from "./UserMenu";
@@ -19,8 +24,15 @@ const COMMON_NAV_LINKS = [
   { label: "Chat", to: "/chat" },
 ] as const;
 
+const ACTIONABLE_BOOKING_STATUSES = new Set<BookingStatus>([
+  "PENDING",
+  "CONFIRMED",
+]);
+
 export function Navbar() {
   const user = useAuthStore((s) => s.user);
+  const userId = user?.userId;
+  const [notificationCount, setNotificationCount] = useState(0);
   const firstName = user?.firstName ?? "";
   const lastName = user?.lastName ?? "";
   const isProvider = user?.userType === "PROVIDER";
@@ -35,6 +47,37 @@ export function Navbar() {
     // logged-out visitors.
     ...(user ? [COMMON_NAV_LINKS[2], COMMON_NAV_LINKS[3]] : []),
   ];
+  const visibleNotificationCount = userId ? notificationCount : 0;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!userId) return;
+
+    const currentUserId = userId;
+
+    async function loadNotificationCount() {
+      const response = await listMyBookings(currentUserId);
+      if (cancelled) return;
+
+      if (response.status !== 200) {
+        setNotificationCount(0);
+        return;
+      }
+
+      setNotificationCount(
+        response.data.items.filter((booking) =>
+          ACTIONABLE_BOOKING_STATUSES.has(booking.status),
+        ).length,
+      );
+    }
+
+    void loadNotificationCount();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-charcoal">
@@ -48,7 +91,11 @@ export function Navbar() {
         className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 lg:gap-8 lg:px-6"
         aria-label="Main navigation"
       >
-        <Link to="/" aria-label="Mira home" className="shrink-0">
+        <Link
+          to="/"
+          aria-label="Mira home"
+          className="shrink-0 cursor-pointer select-none"
+        >
           <Logo variant="primary" height={36} />
         </Link>
 
@@ -89,6 +136,7 @@ export function Navbar() {
                 lastName={lastName}
                 isProvider={isProvider}
                 pictureUrl={pictureUrl}
+                notificationCount={visibleNotificationCount}
               />
             </div>
           ) : (
@@ -107,6 +155,7 @@ export function Navbar() {
             isLoggedIn={!!user}
             isProvider={isProvider}
             pictureUrl={pictureUrl}
+            notificationCount={visibleNotificationCount}
           />
         </div>
       </nav>

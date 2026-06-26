@@ -205,7 +205,7 @@ export function EditProfileForm({
                   aria-label={`Profile picture: ${userPictureUrl ? `${userFirstName} ${userLastName} avatar` : 'no photo set'}. Activate to change.`}
                   aria-describedby={fileError ? "photo-file-error" : undefined}
                   onClick={openPhotoPicker}
-                  className="relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-full"
+                  className="relative cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-full"
                 >
                   <AvatarIcon
                     size={112}

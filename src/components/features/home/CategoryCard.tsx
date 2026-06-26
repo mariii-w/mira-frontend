@@ -13,7 +13,7 @@ export function CategoryCard({ name, imageSrc, className, ...rest }: CategoryCar
     <button
       type="button"
       className={cn(
-        'group relative aspect-square w-full overflow-hidden rounded-2xl',
+        'group relative aspect-square w-full cursor-pointer overflow-hidden rounded-2xl',
         'border border-border bg-linen',
         'transition-transform duration-150',
         'hover:scale-[1.02] active:scale-[0.99]',

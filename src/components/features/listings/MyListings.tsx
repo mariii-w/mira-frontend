@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { AlertTriangle, Plus } from "lucide-react";
 import { Button } from "../../common/ui/Button";
 import {
   MyListingCard,
@@ -28,8 +28,10 @@ interface MyListingsProps {
   onStatusFilterChange: (value: StatusFilter) => void;
   onCreate: () => void;
   onEdit: (listingId: string) => void;
+  onSetAvailability: () => void;
   onNextPage: () => void;
   onPreviousPage: () => void;
+  showMissingAvailabilityWarning: boolean;
 }
 
 function StatusFilterBar({
@@ -112,8 +114,10 @@ export function MyListings({
   onStatusFilterChange,
   onCreate,
   onEdit,
+  onSetAvailability,
   onNextPage,
   onPreviousPage,
+  showMissingAvailabilityWarning,
 }: MyListingsProps) {
   return (
     <>
@@ -146,6 +150,30 @@ export function MyListings({
               counts={statusCounts}
             />
           </div>
+
+          {showMissingAvailabilityWarning && (
+            <div
+              role="alert"
+              className="mb-6 flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+            >
+              <AlertTriangle
+                size={18}
+                className="shrink-0 text-amber-700"
+                aria-hidden="true"
+              />
+              <p>
+                No weekly schedule is set. You might want to{" "}
+                <button
+                  type="button"
+                  onClick={onSetAvailability}
+                  className="font-semibold text-amber-950 underline underline-offset-2 hover:text-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:ring-offset-2"
+                >
+                  set it
+                </button>
+                .
+              </p>
+            </div>
+          )}
 
           <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
             {!loading && !error

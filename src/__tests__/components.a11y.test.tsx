@@ -139,6 +139,7 @@ vi.mock("../api/mira", () => ({
   getServiceTags: vi.fn(),
   getPublicListings: vi.fn(),
   getPublicProfilesCollection: vi.fn(),
+  listMyBookings: vi.fn().mockResolvedValue({ status: 200, data: { items: [] } }),
   logout: vi.fn().mockResolvedValue({ status: 204, data: undefined }),
 }));
 
@@ -180,6 +181,29 @@ function renderWithQuery(ui: ReactElement) {
   return render(
     <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
   );
+}
+
+function mockScrollableCarousels(scrollBy: ReturnType<typeof vi.fn>) {
+  Object.defineProperty(HTMLElement.prototype, "scrollBy", {
+    configurable: true,
+    value: scrollBy,
+  });
+  Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+    configurable: true,
+    get() {
+      return this.id === "categories-list" || this.id === "listings-list"
+        ? 320
+        : 0;
+    },
+  });
+  Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+    configurable: true,
+    get() {
+      return this.id === "categories-list" || this.id === "listings-list"
+        ? 960
+        : 0;
+    },
+  });
 }
 
 beforeEach(() => {
@@ -863,8 +887,10 @@ describe("component accessibility", () => {
           onStatusFilterChange={vi.fn()}
           onCreate={vi.fn()}
           onEdit={vi.fn()}
+          onSetAvailability={vi.fn()}
           onNextPage={vi.fn()}
           onPreviousPage={vi.fn()}
+          showMissingAvailabilityWarning={false}
         />,
       );
 
@@ -2301,11 +2327,14 @@ describe("component accessibility", () => {
 
   it("Home fallback data and carousel controls have no automated accessibility violations", async () => {
     const scrollBy = vi.fn();
-    Object.defineProperty(HTMLElement.prototype, "scrollBy", {
-      configurable: true,
-      value: scrollBy,
-    });
+    mockScrollableCarousels(scrollBy);
     const { container } = renderHome();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /scroll categories right/i }),
+      ).toBeEnabled();
+    });
 
     await act(async () => {
       fireEvent.change(screen.getByLabelText(/search for a service/i), {
@@ -2313,9 +2342,6 @@ describe("component accessibility", () => {
       });
       fireEvent.click(
         screen.getByRole("button", { name: /scroll categories right/i }),
-      );
-      fireEvent.click(
-        screen.getByRole("button", { name: /scroll listings left/i }),
       );
     });
 
@@ -2882,8 +2908,10 @@ describe("component accessibility", () => {
         onStatusFilterChange={onStatusFilterChange}
         onCreate={vi.fn()}
         onEdit={vi.fn()}
+        onSetAvailability={vi.fn()}
         onNextPage={vi.fn()}
         onPreviousPage={vi.fn()}
+        showMissingAvailabilityWarning={false}
       />,
     );
 
@@ -3008,11 +3036,14 @@ describe("component accessibility", () => {
 
   it("Home remaining controls have no automated accessibility violations", async () => {
     const scrollBy = vi.fn();
-    Object.defineProperty(HTMLElement.prototype, "scrollBy", {
-      configurable: true,
-      value: scrollBy,
-    });
+    mockScrollableCarousels(scrollBy);
     const { container } = renderHome([]);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /scroll listings right/i }),
+      ).toBeEnabled();
+    });
 
     await act(async () => {
       fireEvent.submit(screen.getByRole("search"));
@@ -3933,10 +3964,7 @@ describe("component accessibility", () => {
 
   it("Home loading, category, and provider navigation states have no automated accessibility violations", async () => {
     const scrollBy = vi.fn();
-    Object.defineProperty(HTMLElement.prototype, "scrollBy", {
-      configurable: true,
-      value: scrollBy,
-    });
+    mockScrollableCarousels(scrollBy);
     useAuthStore.getState().setUser(user);
     mockGetServiceTags.mockResolvedValue({
       data: [
@@ -3979,6 +4007,11 @@ describe("component accessibility", () => {
     const { container } = renderWithQuery(<Home />);
     await waitFor(() => {
       expect(screen.getByText(/cleaning/i)).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /scroll listings right/i }),
+      ).toBeEnabled();
     });
 
     await act(async () => {
