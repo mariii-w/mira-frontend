@@ -251,7 +251,6 @@ export function SearchServicesPage() {
               maxPrice={pendingMaxPrice}
               onMaxPriceChange={setPendingMaxPrice}
               onApply={commitFilters}
-              resultCount={listingsQuery.isSuccess ? listings.length : undefined}
               activeCount={activeCount}
             />
           </aside>
@@ -268,7 +267,6 @@ export function SearchServicesPage() {
                 maxPrice={pendingMaxPrice}
                 onMaxPriceChange={setPendingMaxPrice}
                 onApply={commitFilters}
-                resultCount={listingsQuery.isSuccess ? listings.length : undefined}
                 activeCount={activeCount}
               />
             </div>

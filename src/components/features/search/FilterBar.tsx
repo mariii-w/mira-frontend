@@ -19,7 +19,6 @@ interface FilterBarProps {
   maxPrice: number
   onMaxPriceChange: (v: number) => void
   onApply: () => void
-  resultCount?: number
   activeCount?: number
 }
 
@@ -81,7 +80,6 @@ export function FilterBar({
   maxPrice,
   onMaxPriceChange,
   onApply,
-  resultCount,
   activeCount = 0,
 }: FilterBarProps) {
   const [search, setSearch] = useState('')
@@ -183,11 +181,7 @@ export function FilterBar({
 
       <div className="w-full h-px bg-border" />
       <div className="mx-auto">
-        <Button type="submit">
-          {resultCount !== undefined
-            ? `Show ${resultCount} results`
-            : 'Show results'}
-        </Button>
+        <Button type="submit">Show results</Button>
       </div>
     </form>
   )
