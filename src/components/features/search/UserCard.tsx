@@ -100,7 +100,7 @@ export function UserCard({ profile, easyRead, providerSummary }: UserCardProps) 
             </div>
           )}
 
-          {bio && <p id={bioId} className="text-small text-foreground line-clamp-2">{bio}</p>}
+          {bio && <p id={bioId} className="text-small text-foreground line-clamp-1">{bio}</p>}
 
           {isProvider && providerSummary && (
             <div id={servicesId}>

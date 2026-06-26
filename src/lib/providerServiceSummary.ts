@@ -14,7 +14,7 @@ export type ProviderServiceSummary = {
   topTags: ProviderServiceTagSummary[]
 }
 
-const MAX_TAGS = 4
+const MAX_TAGS = 3
 
 export function summarizeProviderServices(listings: PublicListingSummary[]): ProviderServiceSummary {
   const serviceCount = listings.length
