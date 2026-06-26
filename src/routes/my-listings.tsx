@@ -13,9 +13,11 @@ import type {
 import { MyListings, type StatusFilter } from "../components/MyListings";
 import type { MyListingSummary } from "../components/MyListingCard";
 import { useAuthStore } from "../stores/auth";
+import { requireProvider } from "../lib/requireAuth";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/my-listings")({
+  beforeLoad: requireProvider,
   component: MyListingsRoute,
 });
 

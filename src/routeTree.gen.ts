@@ -18,6 +18,7 @@ import { Route as MyBookingsRouteImport } from './routes/my-bookings'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as ContactUsRouteImport } from './routes/contact-us'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as AboutRouteImport } from './routes/about'
@@ -31,10 +32,12 @@ import { Route as RegisterNameRouteImport } from './routes/register/name'
 import { Route as RegisterDoneRouteImport } from './routes/register/done'
 import { Route as RegisterAddressRouteImport } from './routes/register/address'
 import { Route as RegisterAboutRouteImport } from './routes/register/about'
+import { Route as ProfileUserIdRouteImport } from './routes/profile.$userId'
 import { Route as EditListingListingIdRouteImport } from './routes/edit-listing.$listingId'
 import { Route as SearchBrowseUsersRouteImport } from './routes/_search/browse-users'
 import { Route as SearchBrowseServicesRouteImport } from './routes/_search/browse-services'
 import { Route as ListingsListingIdIndexRouteImport } from './routes/listings/$listingId.index'
+import { Route as ProfileUserIdEditRouteImport } from './routes/profile.$userId.edit'
 import { Route as ListingsListingIdBookRouteImport } from './routes/listings/$listingId_.book'
 import { Route as BookingsPaymentSuccessRouteImport } from './routes/bookings/payment/success'
 import { Route as BookingsPaymentCancelledRouteImport } from './routes/bookings/payment/cancelled'
@@ -82,6 +85,11 @@ const CreateListingRoute = CreateListingRouteImport.update({
 const ContactUsRoute = ContactUsRouteImport.update({
   id: '/contact-us',
   path: '/contact-us',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendarRoute = CalendarRouteImport.update({
@@ -148,6 +156,11 @@ const RegisterAboutRoute = RegisterAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => RegisterRouteRoute,
 } as any)
+const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
+  id: '/profile/$userId',
+  path: '/profile/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EditListingListingIdRoute = EditListingListingIdRouteImport.update({
   id: '/edit-listing/$listingId',
   path: '/edit-listing/$listingId',
@@ -167,6 +180,11 @@ const ListingsListingIdIndexRoute = ListingsListingIdIndexRouteImport.update({
   id: '/listings/$listingId/',
   path: '/listings/$listingId/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileUserIdEditRoute = ProfileUserIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => ProfileUserIdRoute,
 } as any)
 const ListingsListingIdBookRoute = ListingsListingIdBookRouteImport.update({
   id: '/listings/$listingId_/book',
@@ -191,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
   '/calendar': typeof CalendarRoute
+  '/chat': typeof ChatRoute
   '/contact-us': typeof ContactUsRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
@@ -203,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/browse-services': typeof SearchBrowseServicesRoute
   '/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
+  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -213,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/bookings/payment/cancelled': typeof BookingsPaymentCancelledRoute
   '/bookings/payment/success': typeof BookingsPaymentSuccessRoute
   '/listings/$listingId/book': typeof ListingsListingIdBookRoute
+  '/profile/$userId/edit': typeof ProfileUserIdEditRoute
   '/listings/$listingId/': typeof ListingsListingIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -220,6 +241,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
   '/calendar': typeof CalendarRoute
+  '/chat': typeof ChatRoute
   '/contact-us': typeof ContactUsRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
@@ -232,6 +254,7 @@ export interface FileRoutesByTo {
   '/browse-services': typeof SearchBrowseServicesRoute
   '/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
+  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -242,6 +265,7 @@ export interface FileRoutesByTo {
   '/bookings/payment/cancelled': typeof BookingsPaymentCancelledRoute
   '/bookings/payment/success': typeof BookingsPaymentSuccessRoute
   '/listings/$listingId/book': typeof ListingsListingIdBookRoute
+  '/profile/$userId/edit': typeof ProfileUserIdEditRoute
   '/listings/$listingId': typeof ListingsListingIdIndexRoute
 }
 export interface FileRoutesById {
@@ -252,6 +276,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
   '/calendar': typeof CalendarRoute
+  '/chat': typeof ChatRoute
   '/contact-us': typeof ContactUsRoute
   '/create-listing': typeof CreateListingRoute
   '/login': typeof LoginRoute
@@ -264,6 +289,7 @@ export interface FileRoutesById {
   '/_search/browse-services': typeof SearchBrowseServicesRoute
   '/_search/browse-users': typeof SearchBrowseUsersRoute
   '/edit-listing/$listingId': typeof EditListingListingIdRoute
+  '/profile/$userId': typeof ProfileUserIdRouteWithChildren
   '/register/about': typeof RegisterAboutRoute
   '/register/address': typeof RegisterAddressRoute
   '/register/done': typeof RegisterDoneRoute
@@ -274,6 +300,7 @@ export interface FileRoutesById {
   '/bookings/payment/cancelled': typeof BookingsPaymentCancelledRoute
   '/bookings/payment/success': typeof BookingsPaymentSuccessRoute
   '/listings/$listingId_/book': typeof ListingsListingIdBookRoute
+  '/profile/$userId/edit': typeof ProfileUserIdEditRoute
   '/listings/$listingId/': typeof ListingsListingIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -284,6 +311,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/accessibility'
     | '/calendar'
+    | '/chat'
     | '/contact-us'
     | '/create-listing'
     | '/login'
@@ -296,6 +324,7 @@ export interface FileRouteTypes {
     | '/browse-services'
     | '/browse-users'
     | '/edit-listing/$listingId'
+    | '/profile/$userId'
     | '/register/about'
     | '/register/address'
     | '/register/done'
@@ -306,6 +335,7 @@ export interface FileRouteTypes {
     | '/bookings/payment/cancelled'
     | '/bookings/payment/success'
     | '/listings/$listingId/book'
+    | '/profile/$userId/edit'
     | '/listings/$listingId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -313,6 +343,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/accessibility'
     | '/calendar'
+    | '/chat'
     | '/contact-us'
     | '/create-listing'
     | '/login'
@@ -325,6 +356,7 @@ export interface FileRouteTypes {
     | '/browse-services'
     | '/browse-users'
     | '/edit-listing/$listingId'
+    | '/profile/$userId'
     | '/register/about'
     | '/register/address'
     | '/register/done'
@@ -335,6 +367,7 @@ export interface FileRouteTypes {
     | '/bookings/payment/cancelled'
     | '/bookings/payment/success'
     | '/listings/$listingId/book'
+    | '/profile/$userId/edit'
     | '/listings/$listingId'
   id:
     | '__root__'
@@ -344,6 +377,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/accessibility'
     | '/calendar'
+    | '/chat'
     | '/contact-us'
     | '/create-listing'
     | '/login'
@@ -356,6 +390,7 @@ export interface FileRouteTypes {
     | '/_search/browse-services'
     | '/_search/browse-users'
     | '/edit-listing/$listingId'
+    | '/profile/$userId'
     | '/register/about'
     | '/register/address'
     | '/register/done'
@@ -366,6 +401,7 @@ export interface FileRouteTypes {
     | '/bookings/payment/cancelled'
     | '/bookings/payment/success'
     | '/listings/$listingId_/book'
+    | '/profile/$userId/edit'
     | '/listings/$listingId/'
   fileRoutesById: FileRoutesById
 }
@@ -376,6 +412,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AccessibilityRoute: typeof AccessibilityRoute
   CalendarRoute: typeof CalendarRoute
+  ChatRoute: typeof ChatRoute
   ContactUsRoute: typeof ContactUsRoute
   CreateListingRoute: typeof CreateListingRoute
   LoginRoute: typeof LoginRoute
@@ -386,6 +423,7 @@ export interface RootRouteChildren {
   StyleguideRoute: typeof StyleguideRoute
   TermsOfUseRoute: typeof TermsOfUseRoute
   EditListingListingIdRoute: typeof EditListingListingIdRoute
+  ProfileUserIdRoute: typeof ProfileUserIdRouteWithChildren
   BookingsPaymentCancelledRoute: typeof BookingsPaymentCancelledRoute
   BookingsPaymentSuccessRoute: typeof BookingsPaymentSuccessRoute
   ListingsListingIdBookRoute: typeof ListingsListingIdBookRoute
@@ -455,6 +493,13 @@ declare module '@tanstack/react-router' {
       path: '/contact-us'
       fullPath: '/contact-us'
       preLoaderRoute: typeof ContactUsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calendar': {
@@ -548,6 +593,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterAboutRouteImport
       parentRoute: typeof RegisterRouteRoute
     }
+    '/profile/$userId': {
+      id: '/profile/$userId'
+      path: '/profile/$userId'
+      fullPath: '/profile/$userId'
+      preLoaderRoute: typeof ProfileUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/edit-listing/$listingId': {
       id: '/edit-listing/$listingId'
       path: '/edit-listing/$listingId'
@@ -575,6 +627,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/listings/$listingId/'
       preLoaderRoute: typeof ListingsListingIdIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/profile/$userId/edit': {
+      id: '/profile/$userId/edit'
+      path: '/edit'
+      fullPath: '/profile/$userId/edit'
+      preLoaderRoute: typeof ProfileUserIdEditRouteImport
+      parentRoute: typeof ProfileUserIdRoute
     }
     '/listings/$listingId_/book': {
       id: '/listings/$listingId_/book'
@@ -638,6 +697,18 @@ const RegisterRouteRouteWithChildren = RegisterRouteRoute._addFileChildren(
   RegisterRouteRouteChildren,
 )
 
+interface ProfileUserIdRouteChildren {
+  ProfileUserIdEditRoute: typeof ProfileUserIdEditRoute
+}
+
+const ProfileUserIdRouteChildren: ProfileUserIdRouteChildren = {
+  ProfileUserIdEditRoute: ProfileUserIdEditRoute,
+}
+
+const ProfileUserIdRouteWithChildren = ProfileUserIdRoute._addFileChildren(
+  ProfileUserIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SearchRouteRoute: SearchRouteRouteWithChildren,
@@ -645,6 +716,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AccessibilityRoute: AccessibilityRoute,
   CalendarRoute: CalendarRoute,
+  ChatRoute: ChatRoute,
   ContactUsRoute: ContactUsRoute,
   CreateListingRoute: CreateListingRoute,
   LoginRoute: LoginRoute,
@@ -655,6 +727,7 @@ const rootRouteChildren: RootRouteChildren = {
   StyleguideRoute: StyleguideRoute,
   TermsOfUseRoute: TermsOfUseRoute,
   EditListingListingIdRoute: EditListingListingIdRoute,
+  ProfileUserIdRoute: ProfileUserIdRouteWithChildren,
   BookingsPaymentCancelledRoute: BookingsPaymentCancelledRoute,
   BookingsPaymentSuccessRoute: BookingsPaymentSuccessRoute,
   ListingsListingIdBookRoute: ListingsListingIdBookRoute,

@@ -19,6 +19,7 @@ import {
   resumeListing,
 } from "../api/mira";
 import { useAuthStore } from "../stores/auth";
+import { requireProvider } from "../lib/requireAuth";
 import type {
   ListingDetails,
   ListingMediaPreview,
@@ -29,6 +30,7 @@ import type {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/edit-listing/$listingId")({
+  beforeLoad: requireProvider,
   component: EditListingPage,
 });
 

@@ -20,6 +20,11 @@ export interface ListingDetailPageProps {
   otherListings: PublicListingSummary[];
   publicVerifiedCredentials?: VerifiedCredentialResponse[];
   onBookNow: () => void;
+  canBook?: boolean;
+  onMessage?: () => void;
+  canMessage?: boolean;
+  messagePending?: boolean;
+  messageError?: string | null;
   banner?: ReactNode;
 }
 
@@ -33,6 +38,11 @@ export function ListingDetailPage({
   otherListings,
   publicVerifiedCredentials = [],
   onBookNow,
+  canBook,
+  onMessage,
+  canMessage,
+  messagePending,
+  messageError,
   banner,
 }: ListingDetailPageProps) {
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
@@ -59,7 +69,7 @@ export function ListingDetailPage({
     );
   }
 
-  const media = [...listing.media].sort((a, b) => a.position - b.position);
+  const media = [...(listing.media ?? [])].sort((a, b) => a.position - b.position);
   const activeMedia = media[activeMediaIndex] ?? media[0];
 
   return (
@@ -145,7 +155,7 @@ export function ListingDetailPage({
                   id="other-services-heading"
                   className="text-label font-semibold tracking-widest text-muted uppercase mb-4"
                 >
-                  Other services from {listing.author.name}
+                  Other services from {listing.author?.name ?? "this provider"}
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {otherListings.map((item, index) => (
@@ -182,8 +192,8 @@ export function ListingDetailPage({
           </div>
 
           <ListingProviderCard
-            authorName={listing.author.name}
-            authorSurname={listing.author.surname}
+            authorName={listing.author?.name ?? "Unknown"}
+            authorSurname={listing.author?.surname ?? ""}
             price={listing.price}
             city={listing.location.city}
             availableToday={availableToday}
@@ -191,6 +201,11 @@ export function ListingDetailPage({
             tags={listing.tags}
             publicVerifiedCredentials={publicVerifiedCredentials}
             onBookNow={onBookNow}
+            canBook={canBook}
+            onMessage={onMessage}
+            canMessage={canMessage}
+            messagePending={messagePending}
+            messageError={messageError}
             className="animate-fade-in-up"
             style={{ animationDelay: "180ms" }}
           />

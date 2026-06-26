@@ -8,13 +8,17 @@ import { Logo } from "./Logo";
 import { Button } from "./Button";
 import { AccessibilityPanel } from "./AccessibilityPanel";
 import { UserMenu } from "./UserMenu";
+import { MobileNavDrawer } from "./MobileNavDrawer";
 import { useAuthStore } from "../stores/auth";
 import { mediaUrl } from "../lib/mediaUrl";
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
+
 const COMMON_NAV_LINKS = [
   { label: "Browse Services", to: "/browse-services" },
   { label: "Calendar", to: "/calendar" },
+  { label: "Chat", to: "/chat" },
 ] as const;
 
 export function Navbar() {
@@ -30,7 +34,9 @@ export function Navbar() {
     isProvider
       ? { label: "My Services", to: "/my-listings" as const }
       : { label: "Find Users", to: "/browse-users" as const },
-    COMMON_NAV_LINKS[1],
+    // Calendar and Chat require an account, so don't even show them to
+    // logged-out visitors.
+    ...(user ? [COMMON_NAV_LINKS[1], COMMON_NAV_LINKS[2]] : []),
   ];
 
   function handleGoogleLogin() {
@@ -46,16 +52,14 @@ export function Navbar() {
         Skip to main content
       </a>
       <nav
-        className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-6"
+        className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 lg:gap-8 lg:px-6"
         aria-label="Main navigation"
       >
-        {/* Logo */}
         <Link to="/" aria-label="Mira home" className="shrink-0">
           <Logo variant="primary" height={36} />
         </Link>
 
-        {/* Nav links */}
-        <ul className="flex items-center gap-6 list-none m-0 p-0">
+        <ul className="m-0 hidden list-none items-center gap-6 p-0 lg:flex">
           {navLinks.map(({ label, to }) => (
             <li key={label}>
               <Link
@@ -73,32 +77,46 @@ export function Navbar() {
             <Link
               to="/"
               hash="how-it-works"
-              className="text-cream/80 text-small font-medium no-underline hover:text-cream transition-colors duration-150"
+              className="text-cream/80 text-small font-medium no-underline transition-colors duration-150 hover:text-cream"
             >
               How it works
             </Link>
           </li>
         </ul>
 
-        {/* Right side */}
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2 lg:gap-3">
           <AccessibilityPanel />
 
-          {/* Divider */}
           <div className="h-6 w-px bg-cream/20" aria-hidden="true" />
 
           {user ? (
-            <UserMenu
-              firstName={firstName}
-              lastName={lastName}
-              isProvider={isProvider}
-              pictureUrl={pictureUrl}
-            />
+            <div className="hidden lg:block">
+              <UserMenu
+                firstName={firstName}
+                lastName={lastName}
+                isProvider={isProvider}
+                pictureUrl={pictureUrl}
+              />
+            </div>
           ) : (
-            <Button variant="primary" size="md" onClick={handleGoogleLogin}>
+            <Button
+              variant="primary"
+              size="md"
+              className="px-3 lg:px-5"
+              onClick={handleGoogleLogin}
+            >
               Login
             </Button>
           )}
+
+          <MobileNavDrawer
+            navLinks={navLinks}
+            firstName={firstName}
+            lastName={lastName}
+            isLoggedIn={!!user}
+            isProvider={isProvider}
+            pictureUrl={pictureUrl}
+          />
         </div>
       </nav>
     </header>

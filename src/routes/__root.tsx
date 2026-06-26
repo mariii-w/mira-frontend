@@ -1,6 +1,6 @@
 import { createRootRoute, Outlet, useLocation, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { exchangeRefreshForAccess, useAuthStore } from '../stores/auth'
+import { ensureAuthInitialized, useAuthStore } from '../stores/auth'
 
 // Steps that should redirect to "/" once registration is complete.
 // about/photo/done stay excluded so the flow can still show them.
@@ -26,14 +26,14 @@ function RootComponent() {
   const user = useAuthStore((s) => s.user)
 
   useEffect(() => {
-    exchangeRefreshForAccess()
+    ensureAuthInitialized()
   }, [])
 
   useEffect(() => {
     if (!user) return
 
     if (user.registrationComplete) {
-      // Only bounce from required steps — let about/photo/done stay reachable.
+      // Only bounce from required steps - let about/photo/done stay reachable.
       if (isRequiredRegistrationStep(location.pathname)) {
         navigate({ to: '/' })
       }

@@ -1,4 +1,4 @@
-import { ArrowRight, Check, MapPin, MessageCircle } from 'lucide-react'
+import { ArrowRight, Check, MapPin } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useId } from 'react'
 import { AvatarIcon } from '../../AvatarIcon'
@@ -62,7 +62,7 @@ export function UserCard({ profile, easyRead, providerSummary }: UserCardProps) 
             firstName={profile.firstName}
             lastName={profile.lastName}
             picture={profile.profileMedia ? mediaUrl(profile.profileMedia.url) : undefined}
-            size={64}
+            size={80}
             bgColorClassName={isProvider ? 'bg-forest' : 'bg-accent'}
           />
           {verified && (
@@ -109,17 +109,10 @@ export function UserCard({ profile, easyRead, providerSummary }: UserCardProps) 
             </div>
           )}
 
-          <div className="border-t border-border pt-2 grid grid-cols-[1fr_1.4fr] gap-2 mt-auto">
+          <div className="border-t border-border pt-2 mt-auto">
             <Link
-              to="/"
-              aria-label={`Message ${displayName}`}
-              className="relative inline-flex w-full items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body border border-border bg-cream text-foreground no-underline hover:bg-foreground/5 [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
-            >
-              <MessageCircle aria-hidden="true" />
-              Message
-            </Link>
-            <Link
-              to="/"
+              to="/profile/$userId"
+              params={{ userId: profile.userId }}
               aria-label={`View profile of ${displayName}`}
               className={`relative inline-flex w-full items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body no-underline [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${actionBg}`}
             >

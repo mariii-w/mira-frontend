@@ -1,5 +1,8 @@
 default:
   image: node:22-alpine
+  tags:
+    - docker
+    - frontend
   cache:
     key:
       files:

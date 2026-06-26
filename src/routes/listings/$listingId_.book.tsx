@@ -14,8 +14,10 @@ import type {
   UnauthorizedErrorResponse,
 } from "../../api/model";
 import { BookingPage } from "../../components/BookingPage";
+import { requireConsumer } from "../../lib/requireAuth";
 
 export const Route = createFileRoute("/listings/$listingId_/book")({
+  beforeLoad: requireConsumer,
   component: BookingRoute,
 });
 

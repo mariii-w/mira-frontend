@@ -10,11 +10,21 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({
     children,
     to,
+    params,
     className,
     'aria-label': ariaLabel,
-  }: { children: React.ReactNode; to: string; className?: string; 'aria-label'?: string }) => (
-    <a href={to} className={className} aria-label={ariaLabel}>{children}</a>
-  ),
+  }: {
+    children: React.ReactNode
+    to: string
+    params?: Record<string, string>
+    className?: string
+    'aria-label'?: string
+  }) => {
+    const href = params
+      ? Object.entries(params).reduce((path, [key, value]) => path.replace(`$${key}`, value), to)
+      : to
+    return <a href={href} className={className} aria-label={ariaLabel}>{children}</a>
+  },
 }))
 
 function profile(overrides: Partial<PublicProfileResponse> = {}): PublicProfileResponse {
@@ -93,12 +103,11 @@ describe('<UserCard /> content', () => {
 })
 
 describe('<UserCard /> links', () => {
-  it('renders Message and View Profile as distinct links pointing to "/"', () => {
-    render(<UserCard profile={profile({ firstName: 'Patrick', lastName: 'Smith' })} easyRead={false} />)
-    const message = screen.getByRole('link', { name: 'Message Patrick Smith' })
+  it('renders only the View Profile link, pointing to the profile route', () => {
+    render(<UserCard profile={profile({ userId: 'user-1', firstName: 'Patrick', lastName: 'Smith' })} easyRead={false} />)
     const viewProfile = screen.getByRole('link', { name: 'View profile of Patrick Smith' })
-    expect(message).toHaveAttribute('href', '/')
-    expect(viewProfile).toHaveAttribute('href', '/')
+    expect(viewProfile).toHaveAttribute('href', '/profile/user-1')
+    expect(screen.queryByRole('link', { name: 'Message Patrick Smith' })).not.toBeInTheDocument()
   })
 })
 

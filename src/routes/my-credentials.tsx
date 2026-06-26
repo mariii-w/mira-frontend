@@ -16,9 +16,11 @@ import type { CredentialResponse, CredentialType, CredentialVerificationResponse
 import { Credentials } from "../components/Credentials";
 import { SubmitCredentialModal } from "../components/SubmitCredentialModal";
 import { useAuthStore } from "../stores/auth";
+import { requireProvider } from "../lib/requireAuth";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/my-credentials")({
+  beforeLoad: requireProvider,
   component: MyCredentialsRoute,
 });
 
