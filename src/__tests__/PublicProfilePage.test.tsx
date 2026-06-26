@@ -20,9 +20,6 @@ const defaultAccessibilityState: MockAccessibilityState = {
   setReducedMotion: vi.fn(),
 }
 
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
 
 vi.mock('../stores/accessibility', () => ({
   useAccessibilityStore: vi.fn((selector: (s: MockAccessibilityState) => unknown) =>

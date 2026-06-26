@@ -1,6 +1,5 @@
 import type { KeyboardEvent, RefObject } from "react";
 import { ArrowRight } from "lucide-react";
-import { Navbar } from "./Navbar";
 import { Button } from "./Button";
 import { AvatarIcon } from "./AvatarIcon";
 import { Input } from "./Input.tsx";
@@ -59,7 +58,6 @@ export function ChatPageView({
 }: ChatPageViewProps) {
     return (
         <>
-            <Navbar/>
             <main id="main-content">
                 <section className=" mt-30">
                     <div className="container mx-auto -mt-20 lg:h-200 bg bg-linen rounded-2xl border-2 border-border flex flex-col lg:flex-row">

@@ -1,20 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { getGetAuthorListingsQueryKey, getAuthorListings } from "../api/mira";
+import { getGetAuthorListingsQueryKey, getAuthorListings } from "../../api/mira";
 import type {
   GetAuthorListingsParams,
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
-} from "../api/model";
-import { MyListings, type StatusFilter } from "../components/MyListings";
-import type { MyListingSummary } from "../components/MyListingCard";
-import { useAuthStore } from "../stores/auth";
-import { requireProvider } from "../lib/requireAuth";
-import { createPageMeta } from "../lib/headers";
+} from "../../api/model";
+import { MyListings, type StatusFilter } from "../../components/MyListings";
+import type { MyListingSummary } from "../../components/MyListingCard";
+import { useAuthStore } from "../../stores/auth";
+import { requireProvider } from "../../lib/requireAuth";
+import { createPageMeta } from "../../lib/headers";
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const Route = createFileRoute("/my-listings")({
+export const Route = createFileRoute("/_app/my-listings")({
   head: () =>
       createPageMeta({
         title: "My Services",

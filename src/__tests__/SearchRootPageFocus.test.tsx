@@ -6,9 +6,6 @@ import { RouterProvider, createRouter, createMemoryHistory } from '@tanstack/rea
 import { routeTree } from '../routeTree.gen'
 import { getPublicListings, getServiceTags, getPublicProfilesCollection } from '../api/mira'
 
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
 
 vi.mock('../api/mira', () => ({
   getPublicListings: vi.fn(),
@@ -65,11 +62,10 @@ describe('search root page toggle focus across navigation', () => {
     expect(document.querySelector('[data-search-variant="users"]')).toBeInTheDocument()
   })
 
-  it('renders exactly one toggle and one navbar on the services page', async () => {
+  it('renders exactly one toggle on the services page', async () => {
     renderApp('/browse-services')
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Services' })).toBeInTheDocument())
     expect(screen.getAllByRole('switch')).toHaveLength(1)
-    expect(screen.getAllByTestId('navbar')).toHaveLength(1)
   })
 
   it('keeps focus on the toggle after switching from Services to Users', async () => {

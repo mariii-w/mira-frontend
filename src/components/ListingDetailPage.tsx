@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Navbar } from "./Navbar";
 import { Breadcrumb } from "./BreadCrumb";
 import { ListingProviderCard } from "./ListingProviderCard";
 import { mediaUrl } from "../lib/mediaUrl";
@@ -50,7 +49,6 @@ export function ListingDetailPage({
   if (loading) {
     return (
       <div className="min-h-dvh bg-background">
-        <Navbar />
         {banner}
         <p className="max-w-7xl mx-auto px-6 py-16 text-muted">Loading…</p>
       </div>
@@ -60,7 +58,6 @@ export function ListingDetailPage({
   if (error || !listing) {
     return (
       <div className="min-h-dvh bg-background">
-        <Navbar />
         {banner}
         <p className="max-w-7xl mx-auto px-6 py-16 text-destructive" role="alert">
           {error ?? "Listing not found."}
@@ -74,7 +71,6 @@ export function ListingDetailPage({
 
   return (
     <div className="min-h-dvh bg-background">
-      <Navbar />
       {banner}
       <main id="main-content" className="max-w-7xl mx-auto px-6 py-8">
         <Breadcrumb

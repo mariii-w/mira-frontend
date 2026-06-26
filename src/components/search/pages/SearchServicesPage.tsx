@@ -19,7 +19,7 @@ import type {
   ServiceTag,
 } from '../../../api/model'
 
-const routeApi = getRouteApi('/_search/browse-services')
+const routeApi = getRouteApi('/_app/_search/browse-services')
 
 // Helper — map UI search state to the generated client's params.
 // The listings endpoint has no free-text param, so `q` is not sent here;

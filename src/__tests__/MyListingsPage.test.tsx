@@ -28,9 +28,6 @@ vi.mock('../api/mira', () => ({
   getAuthorListings: vi.fn(),
 }))
 
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
 
 const mockGetListings = vi.mocked(getAuthorListings)
 
@@ -76,7 +73,7 @@ function mockSuccess(items: object[]) {
   mockGetListings.mockResolvedValue(makeListingsResponse(items))
 }
 
-import { MyListingsRoute } from '../routes/my-listings'
+import { MyListingsRoute } from '../routes/_app/my-listings'
 
 beforeEach(() => {
   vi.clearAllMocks()

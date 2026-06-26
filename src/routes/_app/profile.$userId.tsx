@@ -1,16 +1,16 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { PrivateProfilePage } from "../components/PrivateProfilePage";
-import { PublicProfilePage } from "../components/PublicProfilePage";
+import { PrivateProfilePage } from "../../components/PrivateProfilePage";
+import { PublicProfilePage } from "../../components/PublicProfilePage";
 import {
     ProfilePageLoading,
     ProfilePageError,
-} from "../components/ProfilePageLoadingError";
-import { type ServiceCardProps } from "../components/ServiceCard";
-import { ensureAuthInitialized, useAuthStore } from "../stores/auth";
-import { mediaUrl } from "../lib/mediaUrl";
-import { createPageMeta } from "../lib/headers";
+} from "../../components/ProfilePageLoadingError";
+import { type ServiceCardProps } from "../../components/ServiceCard";
+import { ensureAuthInitialized, useAuthStore } from "../../stores/auth";
+import { mediaUrl } from "../../lib/mediaUrl";
+import { createPageMeta } from "../../lib/headers";
 
 import {
     getPrivateUserProfile,
@@ -18,7 +18,7 @@ import {
     getAuthorListings,
     getPublicProfileListings,
     getPublicProfileCredentials,
-} from "../api/mira";
+} from "../../api/mira";
 
 import type {
     MyListingCollectionResponse,
@@ -27,10 +27,10 @@ import type {
     PublicListingSummary,
     PublicProfileResponse,
     VerifiedCredentialResponse,
-} from "../api/model";
+} from "../../api/model";
 
 /* eslint-disable react-refresh/only-export-components */
-export const Route = createFileRoute("/profile/$userId")({
+export const Route = createFileRoute("/_app/profile/$userId")({
     head: () =>
         createPageMeta({
             title: "Profile",

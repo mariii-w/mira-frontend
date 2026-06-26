@@ -4,7 +4,6 @@ import {
   type AllowedAction,
   type BookingDetails,
 } from "./BookingCard";
-import { Navbar } from "./Navbar";
 import type { BookingStatus, BookingSummary } from "../api/model";
 
 type BookingFilter = "ALL" | "REQUESTS" | "TO_PAY" | "ACTIVE" | "PAST";
@@ -130,7 +129,6 @@ export function MyBookings({
 
   return (
     <>
-      <Navbar />
       <main
         id="main-content"
         className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"

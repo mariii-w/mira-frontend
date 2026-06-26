@@ -11,20 +11,20 @@ import {
     patchV1UsersUserIdCredentialsCredentialId,
     postV1UsersUserIdCredentials,
     postV1UsersUserIdCredentialsCredentialIdVerifications,
-} from "../api/mira";
+} from "../../api/mira";
 import type {
     CredentialResponse,
     CredentialType,
     CredentialVerificationResponse,
-} from "../api/model";
-import { Credentials } from "../components/Credentials";
-import { SubmitCredentialModal } from "../components/SubmitCredentialModal";
-import { useAuthStore } from "../stores/auth";
-import { requireProvider } from "../lib/requireAuth";
-import { createPageMeta } from "../lib/headers";
+} from "../../api/model";
+import { Credentials } from "../../components/Credentials";
+import { SubmitCredentialModal } from "../../components/SubmitCredentialModal";
+import { useAuthStore } from "../../stores/auth";
+import { requireProvider } from "../../lib/requireAuth";
+import { createPageMeta } from "../../lib/headers";
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const Route = createFileRoute("/my-credentials")({
+export const Route = createFileRoute("/_app/my-credentials")({
     head: () =>
         createPageMeta({
             title: "My Credentials",

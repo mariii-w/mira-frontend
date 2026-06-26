@@ -10,9 +10,6 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }))
 
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
 
 const baseListing: MyListingSummary = {
   listingId: 'listing-1',

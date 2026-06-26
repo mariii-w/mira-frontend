@@ -1,19 +1,19 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { EditProfileForm } from "../components/EditProfileForm";
-import { useAuthStore } from "../stores/auth";
+import { EditProfileForm } from "../../components/EditProfileForm";
+import { useAuthStore } from "../../stores/auth";
 import {
     patchUser,
     uploadProfilePhoto,
     type PatchUserPayload,
     type RegisterPatchError,
     type UploadPhotoError,
-} from "../lib/patchUser";
-import { mediaUrl } from "../lib/mediaUrl";
-import { createPageMeta } from "../lib/headers";
+} from "../../lib/patchUser";
+import { mediaUrl } from "../../lib/mediaUrl";
+import { createPageMeta } from "../../lib/headers";
 
-export const Route = createFileRoute("/profile/$userId/edit")({
+export const Route = createFileRoute("/_app/profile/$userId/edit")({
     head: () =>
         createPageMeta({
             title: "Edit Profile",

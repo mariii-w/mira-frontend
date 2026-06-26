@@ -12,18 +12,18 @@ import {
   listExceptions,
   replaceWeeklySchedule,
   updateException,
-} from "../api/mira";
+} from "../../api/mira";
 import type {
   CreateScheduleExceptionRequest,
   ReplaceWeeklyScheduleRequest,
   UpdateScheduleExceptionRequest,
-} from "../api/model";
-import { CalendarPage } from "../components/CalendarPage";
-import { get_access_token, useAuthStore } from "../stores/auth";
-import { requireAuth } from "../lib/requireAuth";
-import { createPageMeta } from "../lib/headers";
+} from "../../api/model";
+import { CalendarPage } from "../../components/CalendarPage";
+import { get_access_token, useAuthStore } from "../../stores/auth";
+import { requireAuth } from "../../lib/requireAuth";
+import { createPageMeta } from "../../lib/headers";
 
-export const Route = createFileRoute("/calendar")({
+export const Route = createFileRoute("/_app/calendar")({
   head: () =>
     createPageMeta({
       title: "Calendar",

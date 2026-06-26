@@ -1,6 +1,5 @@
 import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Wrench, Users } from 'lucide-react'
-import { Navbar } from '../../Navbar.tsx'
 import { ServiceUserToggle } from '../ServiceUserToggle.tsx'
 
 export function SearchRootPage() {
@@ -25,7 +24,6 @@ export function SearchRootPage() {
 
   return (
     <>
-      <Navbar />
       <div
         data-search-variant={isUsersPage ? 'users' : undefined}
         className="min-h-[calc(100vh-4rem)] bg-background"

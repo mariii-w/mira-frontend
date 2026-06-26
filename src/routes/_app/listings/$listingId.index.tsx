@@ -10,13 +10,13 @@ import {
   getAvailability,
   useCreateChat,
   useGetPublicListing,
-} from "../../api/mira";
-import { ListingDetailPage } from "../../components/ListingDetailPage";
-import { useAccessibilityStore } from "../../stores/accessibility";
-import { useAuthStore } from "../../stores/auth";
-import { createPageMeta } from "../../lib/headers";
+} from "../../../api/mira";
+import { ListingDetailPage } from "../../../components/ListingDetailPage";
+import { useAccessibilityStore } from "../../../stores/accessibility";
+import { useAuthStore } from "../../../stores/auth";
+import { createPageMeta } from "../../../lib/headers";
 
-export const Route = createFileRoute("/listings/$listingId/")({
+export const Route = createFileRoute("/_app/listings/$listingId/")({
   head: () =>
       createPageMeta({
         title: "Service Details",

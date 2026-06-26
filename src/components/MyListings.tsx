@@ -5,7 +5,6 @@ import {
   type MyListingSummary,
   type PublicationStatus,
 } from "./MyListingCard";
-import { Navbar } from "./Navbar";
 import { Pagination } from "./Pagination";
 
 export type StatusFilter = "ALL" | PublicationStatus;
@@ -118,7 +117,6 @@ export function MyListings({
 }: MyListingsProps) {
   return (
     <>
-      <Navbar />
       <main
         id="main-content"
         className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"

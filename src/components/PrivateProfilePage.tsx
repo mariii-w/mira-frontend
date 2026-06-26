@@ -1,7 +1,6 @@
 import { Briefcase, Calendar, Check, ClipboardPen, Mail, MapPin, Plus } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { Navbar } from './Navbar'
 import { Button } from './Button'
 import { AvatarIcon } from './AvatarIcon'
 import { MyListingCard, type MyListingSummary } from './MyListingCard'
@@ -60,7 +59,6 @@ export function PrivateProfilePage({
 }: PrivateProfilePageProps) {
   return (
     <>
-      <Navbar />
       <main id="main-content">
         <div aria-hidden="true" className="bg-linear-to-r from-primary to-accent h-40 sm:h-50 w-full" />
         <section aria-label="Profile">

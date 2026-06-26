@@ -18,9 +18,6 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   }
 })
 
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
 
 const baseListing: PublicListingDetails = {
   listingId: 'listing-1',
@@ -216,7 +213,7 @@ describe('<ListingDetailPage />', () => {
     expect(screen.queryByText(/Other services from/)).not.toBeInTheDocument()
   })
 
-  it('renders the banner under the navbar when provided', () => {
+  it('renders the banner when provided', () => {
     render(
       <ListingDetailPage
         listing={baseListing}

@@ -16,7 +16,6 @@ import type {
   PublicListingDetails,
   ProviderAvailabilityResponse,
 } from "../api/model";
-import { Navbar } from "./Navbar";
 import { CalendarGrid } from "./CalendarGrid";
 
 interface TimeWindow {
@@ -261,7 +260,6 @@ export function BookingPage({
 
   return (
     <div className="min-h-dvh bg-background pb-28">
-      <Navbar />
       <main className="max-w-4xl mx-auto px-4 py-8">
         <button
           type="button"

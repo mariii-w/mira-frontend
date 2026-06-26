@@ -47,9 +47,6 @@ vi.mock('../api/mira', () => ({
   deleteV1UsersUserIdCredentialsCredentialId: vi.fn(),
 }))
 
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
 
 vi.mock('../components/CredentialDocumentViewer', () => ({
   CredentialDocumentViewer: () => null,
@@ -131,7 +128,7 @@ function getEvidenceInput() {
   return input!
 }
 
-import { MyCredentialsRoute } from '../routes/my-credentials'
+import { MyCredentialsRoute } from '../routes/_app/my-credentials'
 
 beforeEach(() => {
   vi.clearAllMocks()

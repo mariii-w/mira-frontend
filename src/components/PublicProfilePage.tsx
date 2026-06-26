@@ -1,6 +1,5 @@
 import { useId, useState } from 'react'
 import { Check, MapPin } from 'lucide-react'
-import { Navbar } from './Navbar'
 import { AvatarIcon } from './AvatarIcon'
 import type { ServiceCardProps } from './ServiceCard'
 import { useAccessibilityStore } from '../stores/accessibility'
@@ -75,7 +74,6 @@ export function PublicProfilePage({
 
   return (
     <>
-      <Navbar />
       <main id="main-content">
         <div aria-hidden="true" className="bg-linear-to-r from-primary to-accent h-40 sm:h-50 w-full" />
         <section aria-label="Profile">

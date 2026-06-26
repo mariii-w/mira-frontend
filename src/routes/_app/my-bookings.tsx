@@ -4,19 +4,19 @@ import {
   getListMyBookingsQueryKey,
   getBooking,
   listMyBookings,
-} from "../api/mira";
+} from "../../api/mira";
 import type {
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
-} from "../api/model";
-import { MyBookings } from "../components/MyBookings";
-import type { AllowedAction, BookingDetails } from "../components/BookingCard";
-import { executeBookingAction } from "../lib/bookingActions";
-import { useAuthStore } from "../stores/auth";
-import { requireAuth } from "../lib/requireAuth";
-import { createPageMeta } from "../lib/headers";
+} from "../../api/model";
+import { MyBookings } from "../../components/MyBookings";
+import type { AllowedAction, BookingDetails } from "../../components/BookingCard";
+import { executeBookingAction } from "../../lib/bookingActions";
+import { useAuthStore } from "../../stores/auth";
+import { requireAuth } from "../../lib/requireAuth";
+import { createPageMeta } from "../../lib/headers";
 
-export const Route = createFileRoute("/my-bookings")({
+export const Route = createFileRoute("/_app/my-bookings")({
   head: () =>
     createPageMeta({
       title: "My Bookings",

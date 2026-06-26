@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { InfoPage } from "../components/InfoPage";
-import { INFO_PAGES } from "../components/infoPages";
-import { createPageMeta } from "../lib/headers";
+import { InfoPage } from "../../components/InfoPage";
+import { INFO_PAGES } from "../../components/infoPages";
+import { createPageMeta } from "../../lib/headers";
 
-export const Route = createFileRoute("/terms-of-use")({
+export const Route = createFileRoute("/_app/terms-of-use")({
   head: () =>
     createPageMeta({
       title: "Terms of Use",

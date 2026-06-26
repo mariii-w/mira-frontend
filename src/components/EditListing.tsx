@@ -6,7 +6,6 @@ import {
   type ChangeEvent,
 } from "react";
 import { Plus, X, ArrowLeft } from "lucide-react";
-import { Navbar } from "./Navbar";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { Label } from "./Label";
@@ -330,7 +329,6 @@ export function EditListing({
   if (!listing && !loadError) {
     return (
       <>
-        <Navbar />
         <main
           id="main-content"
           className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
@@ -350,7 +348,6 @@ export function EditListing({
   if (loadError) {
     return (
       <>
-        <Navbar />
         <main
           id="main-content"
           className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
@@ -401,7 +398,6 @@ export function EditListing({
 
   return (
     <>
-      <Navbar />
       <main
         id="main-content"
         className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"

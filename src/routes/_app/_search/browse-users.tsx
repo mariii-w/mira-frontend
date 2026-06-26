@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SearchUsersPage } from "../../components/search/pages/SearchUsersPage.tsx";
-import { browseUsersSearchSchema } from "../../components/search/searchSchemas";
-import { createPageMeta } from "../../lib/headers";
+import { SearchUsersPage } from "../../../components/search/pages/SearchUsersPage.tsx";
+import { browseUsersSearchSchema } from "../../../components/search/searchSchemas";
+import { createPageMeta } from "../../../lib/headers";
 
-export const Route = createFileRoute("/_search/browse-users")({
+export const Route = createFileRoute("/_app/_search/browse-users")({
   head: () =>
     createPageMeta({
       title: "Browse Users",

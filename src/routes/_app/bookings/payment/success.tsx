@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { PaymentReturnPage } from "../../../components/PaymentReturnPage";
-import { requireAuth } from "../../../lib/requireAuth";
-import { createPageMeta } from "../../../lib/headers";
+import { PaymentReturnPage } from "../../../../components/PaymentReturnPage";
+import { requireAuth } from "../../../../lib/requireAuth";
+import { createPageMeta } from "../../../../lib/headers";
 
-export const Route = createFileRoute("/bookings/payment/success")({
+export const Route = createFileRoute("/_app/bookings/payment/success")({
   head: () =>
     createPageMeta({
       title: "Payment Successful",

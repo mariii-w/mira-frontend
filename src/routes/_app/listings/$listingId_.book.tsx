@@ -7,17 +7,17 @@ import {
   getAvailability,
   getPublicListing,
   createBooking,
-} from "../../api/mira";
+} from "../../../api/mira";
 import type {
   CreateBookingRequest,
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
-} from "../../api/model";
-import { BookingPage } from "../../components/BookingPage";
-import { requireConsumer } from "../../lib/requireAuth";
-import { createPageMeta } from "../../lib/headers";
+} from "../../../api/model";
+import { BookingPage } from "../../../components/BookingPage";
+import { requireConsumer } from "../../../lib/requireAuth";
+import { createPageMeta } from "../../../lib/headers";
 
-export const Route = createFileRoute("/listings/$listingId_/book")({
+export const Route = createFileRoute("/_app/listings/$listingId_/book")({
   head: () =>
     createPageMeta({
       title: "Book Service",

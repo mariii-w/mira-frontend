@@ -1,20 +1,20 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import type { ChatMessage } from "../components/ChatBubble.tsx";
-import type { ChatPreview } from "../components/ChatInbox.tsx";
-import { ChatPageView } from "../components/ChatPageView.tsx";
+import type { ChatMessage } from "../../components/ChatBubble.tsx";
+import type { ChatPreview } from "../../components/ChatInbox.tsx";
+import { ChatPageView } from "../../components/ChatPageView.tsx";
 import {
   disconnectChatSocket,
   publishChatText,
   subscribeToChat,
-} from "../lib/chatSocket.ts";
-import { describeMessageContent, toChatPreview } from "../lib/chatContent.ts";
-import { useAuthStore } from "../stores/auth";
-import { requireAuth } from "../lib/requireAuth";
-import { createPageMeta } from "../lib/headers";
-import { useGetPublicListing, useHistory, useListChats } from "../api/mira.ts";
+} from "../../lib/chatSocket.ts";
+import { describeMessageContent, toChatPreview } from "../../lib/chatContent.ts";
+import { useAuthStore } from "../../stores/auth";
+import { requireAuth } from "../../lib/requireAuth";
+import { createPageMeta } from "../../lib/headers";
+import { useGetPublicListing, useHistory, useListChats } from "../../api/mira.ts";
 
-export const Route = createFileRoute("/chat")({
+export const Route = createFileRoute("/_app/chat")({
   head: () =>
     createPageMeta({
       title: "Messages",

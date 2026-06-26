@@ -1,5 +1,4 @@
 import { Check, ClipboardPen, MapPin, Briefcase, Plus, Calendar, Mail } from 'lucide-react'
-import { Navbar } from './Navbar'
 import { Button } from './Button'
 import { AvatarIcon } from './AvatarIcon'
 import { MyListingCard, type MyListingSummary } from './MyListingCard'
@@ -41,7 +40,6 @@ export function ProfilePageContent({
 
   return (
     <>
-      <Navbar />
       <main id="main-content">
         <section>
           <div className="bg-linear-to-r from-primary to-accent h-50 w-full" />

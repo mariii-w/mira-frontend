@@ -1,6 +1,5 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "./Button";
-import { Navbar } from "./Navbar";
 
 interface PaymentReturnPageProps {
   status: "success" | "cancelled";
@@ -16,7 +15,6 @@ export function PaymentReturnPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <main className="mx-auto flex max-w-xl flex-col items-center px-6 py-20 text-center">
         <Icon
           aria-hidden="true"

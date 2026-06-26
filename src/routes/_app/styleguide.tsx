@@ -10,25 +10,25 @@ import {
   ChevronRight,
   X,
 } from 'lucide-react'
-import { Logo, type LogoVariant } from '../components/Logo.tsx'
-import { Button, type ButtonVariant, type ButtonSize } from '../components/Button.tsx'
-import { Label } from '../components/Label.tsx';
-import { Input } from '../components/Input.tsx';
-import { Textarea } from '../components/Textarea.tsx';
-import { AccessibilityPanel } from '../components/AccessibilityPanel.tsx';
-import { CategoryCard } from '../components/CategoryCard.tsx';
+import { Logo, type LogoVariant } from '../../components/Logo.tsx'
+import { Button, type ButtonVariant, type ButtonSize } from '../../components/Button.tsx'
+import { Label } from '../../components/Label.tsx';
+import { Input } from '../../components/Input.tsx';
+import { Textarea } from '../../components/Textarea.tsx';
+import { AccessibilityPanel } from '../../components/AccessibilityPanel.tsx';
+import { CategoryCard } from '../../components/CategoryCard.tsx';
 import { useState } from 'react';
-import { Pagination } from '../components/Pagination';
-import { AvatarIcon } from '../components/AvatarIcon.tsx';
-import { UserMenu } from '../components/UserMenu.tsx';
-import { SearchBar } from '../components/search/SearchBar.tsx';
-import { Badge } from '../components/Badge.tsx';
-import { Breadcrumb } from '../components/BreadCrumb.tsx';
-import { FilterBar } from '../components/FilterBar.tsx';
-import { ServiceCard } from '../components/ServiceCard.tsx';
-import { BookingCard, type BookingSummary, type BookingDetails } from '../components/BookingCard.tsx';
-import { CalendarGrid } from '../components/CalendarGrid.tsx';
-import { ServiceUserToggle } from '../components/search/ServiceUserToggle.tsx';
+import { Pagination } from '../../components/Pagination';
+import { AvatarIcon } from '../../components/AvatarIcon.tsx';
+import { UserMenu } from '../../components/UserMenu.tsx';
+import { SearchBar } from '../../components/search/SearchBar.tsx';
+import { Badge } from '../../components/Badge.tsx';
+import { Breadcrumb } from '../../components/BreadCrumb.tsx';
+import { FilterBar } from '../../components/FilterBar.tsx';
+import { ServiceCard } from '../../components/ServiceCard.tsx';
+import { BookingCard, type BookingSummary, type BookingDetails } from '../../components/BookingCard.tsx';
+import { CalendarGrid } from '../../components/CalendarGrid.tsx';
+import { ServiceUserToggle } from '../../components/search/ServiceUserToggle.tsx';
 
 
 
@@ -183,7 +183,7 @@ function CalDay({ date, calToday, selectedDay, onSelect }: CalDayProps) {
   )
 }
 
-export const Route = createFileRoute('/styleguide')({ component: Styleguide })
+export const Route = createFileRoute('/_app/styleguide')({ component: Styleguide })
 
 function Styleguide() {
   const [checked, setChecked] = useState(false)

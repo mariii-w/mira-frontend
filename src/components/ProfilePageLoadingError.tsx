@@ -1,9 +1,7 @@
-import { Navbar } from './Navbar'
 
 export function ProfilePageLoading() {
   return (
     <>
-      <Navbar />
       <main id="main-content">
         <section>
           <div className="container mx-auto max-w-6xl p-4">
@@ -18,7 +16,6 @@ export function ProfilePageLoading() {
 export function ProfilePageError() {
   return (
     <>
-      <Navbar />
       <main id="main-content">
         <section>
           <div className="container mx-auto max-w-6xl p-4">

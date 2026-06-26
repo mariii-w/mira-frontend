@@ -3,23 +3,23 @@ import { useEffect, useState } from "react";
 import {
   CreateListing,
   type CreateListingFormValues,
-} from "../components/CreateListing";
+} from "../../components/CreateListing";
 import {
   getServiceTags,
   getCreateListingUrl,
   publishListing,
-} from "../api/mira";
-import { authFetch, type FetchResponse } from "../lib/authFetch";
-import { createListingActions } from "../lib/createListingActions";
-import { requireProvider } from "../lib/requireAuth";
-import { createPageMeta } from "../lib/headers";
+} from "../../api/mira";
+import { authFetch, type FetchResponse } from "../../lib/authFetch";
+import { createListingActions } from "../../lib/createListingActions";
+import { requireProvider } from "../../lib/requireAuth";
+import { createPageMeta } from "../../lib/headers";
 import type {
   ListingDetails,
   ProblemDetailsResponse,
   ServiceTag,
-} from "../api/model";
+} from "../../api/model";
 
-export const Route = createFileRoute("/create-listing")({
+export const Route = createFileRoute("/_app/create-listing")({
   head: () =>
     createPageMeta({
       title: "Create Service",
