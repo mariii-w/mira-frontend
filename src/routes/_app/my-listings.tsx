@@ -1,7 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { getGetAuthorListingsQueryKey, getAuthorListings } from "../../api/mira";
+import {
+  getGetAuthorListingsQueryKey,
+  getGetWeeklyScheduleQueryKey,
+  getAuthorListings,
+  getWeeklySchedule,
+} from "../../api/mira";
 import type {
   GetAuthorListingsParams,
   ProblemDetailsResponse,
@@ -112,6 +117,29 @@ export function MyListingsRoute() {
     refetchOnMount: "always",
   });
 
+  const { data: scheduleResponse } = useQuery({
+    queryKey: userId
+      ? getGetWeeklyScheduleQueryKey(userId)
+      : ["my-listings", "weekly-schedule"],
+    queryFn: async () => {
+      if (!userId) throw new Error("You must be signed in to view services.");
+
+      const response = await getWeeklySchedule(userId);
+
+      if (response.status !== 200) {
+        throw new Error("Failed to load weekly schedule.");
+      }
+
+      return response;
+    },
+    enabled: !!userId,
+    refetchOnMount: "always",
+  });
+
+  const showMissingAvailabilityWarning =
+    scheduleResponse?.status === 200 &&
+    scheduleResponse.data.entries.length === 0;
+
   const hasPrev = prevCursors.length > 0;
   const nextCursor = data?.cursor?.next ?? null;
 
@@ -157,8 +185,10 @@ export function MyListingsRoute() {
                 params: { listingId },
               })
           }
+          onSetAvailability={() => navigate({ to: "/calendar" })}
           onNextPage={handleNext}
           onPreviousPage={handlePrev}
+          showMissingAvailabilityWarning={showMissingAvailabilityWarning}
       />
   );
 }

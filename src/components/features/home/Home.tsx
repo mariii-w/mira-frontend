@@ -468,7 +468,7 @@ export function Home() {
                     onClick={() => scroll(categoryRef, "left")}
                     aria-label="Scroll categories left"
                     aria-controls="categories-list"
-                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                    className="w-10 h-10 cursor-pointer rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
                   >
                     <ChevronLeft size={18} aria-hidden="true" />
                   </button>
@@ -477,7 +477,7 @@ export function Home() {
                     onClick={() => scroll(categoryRef, "right")}
                     aria-label="Scroll categories right"
                     aria-controls="categories-list"
-                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                    className="w-10 h-10 cursor-pointer rounded-full border border-border flex items-center justify-center text-foreground hover:bg-linen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
                   >
                     <ChevronRight size={18} aria-hidden="true" />
                   </button>
