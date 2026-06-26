@@ -12,14 +12,26 @@ import {
   postV1UsersUserIdCredentials,
   postV1UsersUserIdCredentialsCredentialIdVerifications,
 } from "../api/mira";
-import type { CredentialResponse, CredentialType, CredentialVerificationResponse } from "../api/model";
+import type {
+  CredentialResponse,
+  CredentialType,
+  CredentialVerificationResponse,
+} from "../api/model";
 import { Credentials } from "../components/Credentials";
 import { SubmitCredentialModal } from "../components/SubmitCredentialModal";
 import { useAuthStore } from "../stores/auth";
 import { requireProvider } from "../lib/requireAuth";
+import { createPageMeta } from "../lib/headers";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/my-credentials")({
+  head: () =>
+    createPageMeta({
+      title: "My Credentials",
+      description:
+        "Manage provider credentials, evidence uploads, verification status, and visibility.",
+      path: "/my-credentials",
+    }),
   beforeLoad: requireProvider,
   component: MyCredentialsRoute,
 });
@@ -35,10 +47,14 @@ function isSuccessStatus(status: number) {
 }
 
 function isTerminalVerification(verification?: CredentialVerificationResponse) {
-  return verification?.status === "COMPLETED" || verification?.status === "FAILED";
+  return (
+    verification?.status === "COMPLETED" || verification?.status === "FAILED"
+  );
 }
 
-function getVerificationStatusMessage(verification: CredentialVerificationResponse) {
+function getVerificationStatusMessage(
+  verification: CredentialVerificationResponse,
+) {
   if (verification.status === "COMPLETED") {
     return verification.result === "APPROVED"
       ? "Credential approved."
@@ -52,8 +68,9 @@ function findCredentialVerification(
   credentials: CredentialResponse[] | undefined,
   credentialId: string,
 ) {
-  return credentials?.find((credential) => credential.credentialId === credentialId)
-    ?.latestVerification;
+  return credentials?.find(
+    (credential) => credential.credentialId === credentialId,
+  )?.latestVerification;
 }
 
 export function MyCredentialsRoute() {
@@ -74,9 +91,10 @@ export function MyCredentialsRoute() {
   } | null>(null);
 
   const credentialsQueryKey = useMemo(
-    () => userId
-      ? getGetV1UsersUserIdCredentialsQueryKey(userId)
-      : ["my-credentials"],
+    () =>
+      userId
+        ? getGetV1UsersUserIdCredentialsQueryKey(userId)
+        : ["my-credentials"],
     [userId],
   );
 
@@ -175,7 +193,8 @@ export function MyCredentialsRoute() {
         );
       if (response.status !== 200) {
         throw new Error(
-          getErrorDetail(response.data) ?? "Failed to load verification status.",
+          getErrorDetail(response.data) ??
+            "Failed to load verification status.",
         );
       }
       return response.data;
@@ -231,7 +250,8 @@ export function MyCredentialsRoute() {
         queryClient.invalidateQueries({ queryKey: credentialsQueryKey });
       } else {
         setActionError(
-          getErrorDetail(response.data) ?? "Failed to update credential visibility.",
+          getErrorDetail(response.data) ??
+            "Failed to update credential visibility.",
         );
       }
     },
@@ -252,14 +272,15 @@ export function MyCredentialsRoute() {
 
   const submitErrorMessage = submitMutation.isError
     ? "Failed to submit credential."
-    : submitMutation.data && !isSuccessStatus(submitMutation.data.submitResponse.status)
-      ? getErrorDetail(submitMutation.data.submitResponse.data) ??
-        "Failed to submit credential."
+    : submitMutation.data &&
+        !isSuccessStatus(submitMutation.data.submitResponse.status)
+      ? (getErrorDetail(submitMutation.data.submitResponse.data) ??
+        "Failed to submit credential.")
       : submitMutation.data?.verificationResponse &&
           !isSuccessStatus(submitMutation.data.verificationResponse.status)
-        ? getErrorDetail(submitMutation.data.verificationResponse.data) ??
-          "Credential submitted, but verification could not be started."
-      : null;
+        ? (getErrorDetail(submitMutation.data.verificationResponse.data) ??
+          "Credential submitted, but verification could not be started.")
+        : null;
 
   return (
     <>

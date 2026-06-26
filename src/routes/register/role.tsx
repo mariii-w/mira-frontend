@@ -9,9 +9,17 @@ import {
   type RegisterRoleSubmitError,
   type RegisterRoleSubmitValues,
 } from "../../components/RegisterRole";
+import { createPageMeta } from "../../lib/headers";
 import { exchangeRefreshForAccess, useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/role")({
+  head: () =>
+    createPageMeta({
+      title: "Choose Account Type",
+      description:
+        "Choose whether you want to use Mira as a customer or provider.",
+      path: "/register/role",
+    }),
   component: RegisterRoleRoute,
 });
 

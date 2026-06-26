@@ -14,8 +14,15 @@ import {
 import { ListingDetailPage } from "../../components/ListingDetailPage";
 import { useAccessibilityStore } from "../../stores/accessibility";
 import { useAuthStore } from "../../stores/auth";
+import { createPageMeta } from "../../lib/headers";
 
 export const Route = createFileRoute("/listings/$listingId/")({
+  head: () =>
+    createPageMeta({
+      title: "Service Details",
+      description:
+        "View a Mira service listing with provider information, availability, and booking options.",
+    }),
   component: ListingDetailRoute,
 });
 
@@ -47,7 +54,8 @@ function ListingDetailRoute() {
     isLoading,
     error,
   } = useGetPublicListing(listingId);
-  const listing = listingResponse?.status === 200 ? listingResponse.data : undefined;
+  const listing =
+    listingResponse?.status === 200 ? listingResponse.data : undefined;
 
   const authorId = listing?.author?.userId;
   const queryAuthorId = authorId ?? "";
@@ -55,7 +63,9 @@ function ListingDetailRoute() {
   const { data: otherListingsData } = useQuery({
     queryKey: getGetPublicProfileListingsQueryKey(queryAuthorId, { limit: 5 }),
     queryFn: async () => {
-      const response = await getPublicProfileListings(queryAuthorId, { limit: 5 });
+      const response = await getPublicProfileListings(queryAuthorId, {
+        limit: 5,
+      });
 
       // A 404 means the author has no publicly eligible profile (not public yet,
       // or registration incomplete) — treat that as "no other listings" rather
@@ -65,7 +75,9 @@ function ListingDetailRoute() {
       }
 
       if (response.status !== 200) {
-        throw new Error(response.data.detail ?? "Failed to load other listings.");
+        throw new Error(
+          response.data.detail ?? "Failed to load other listings.",
+        );
       }
 
       return response.data;
@@ -83,7 +95,9 @@ function ListingDetailRoute() {
       }
 
       if (response.status !== 200) {
-        throw new Error(response.data.detail ?? "Failed to load provider credentials.");
+        throw new Error(
+          response.data.detail ?? "Failed to load provider credentials.",
+        );
       }
 
       return response.data;
@@ -111,7 +125,9 @@ function ListingDetailRoute() {
   });
 
   const description = listing
-    ? (easyRead && listing.easyDescription ? listing.easyDescription : listing.description)
+    ? easyRead && listing.easyDescription
+      ? listing.easyDescription
+      : listing.description
     : undefined;
 
   const nextAvailableDay = [...(availability?.days ?? [])]
@@ -149,7 +165,9 @@ function ListingDetailRoute() {
     <ListingDetailPage
       listing={listing}
       loading={isLoading}
-      error={error ? (error instanceof Error ? error.message : error.detail) : null}
+      error={
+        error ? (error instanceof Error ? error.message : error.detail) : null
+      }
       description={description ?? undefined}
       availableToday={availableToday}
       nextAvailableDate={nextAvailableDate}

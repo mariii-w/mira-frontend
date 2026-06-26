@@ -21,8 +21,15 @@ import type {
 import { CalendarPage } from "../components/CalendarPage";
 import { get_access_token, useAuthStore } from "../stores/auth";
 import { requireAuth } from "../lib/requireAuth";
+import { createPageMeta } from "../lib/headers";
 
 export const Route = createFileRoute("/calendar")({
+  head: () =>
+    createPageMeta({
+      title: "Calendar",
+      description: "Manage appointments & weekly schedules",
+      path: "/calendar",
+    }),
   beforeLoad: requireAuth,
   component: CalendarRoute,
 });
@@ -222,11 +229,15 @@ function CalendarRoute() {
       onSelectedDateChange={setSelectedDate}
       onToday={goToday}
       onSaveSchedule={(schedule) => saveSchedule.mutate(schedule)}
-      onCreateException={(exception) => createExceptionMutation.mutate(exception)}
+      onCreateException={(exception) =>
+        createExceptionMutation.mutate(exception)
+      }
       onUpdateException={(exceptionId, exception) =>
         updateExceptionMutation.mutate({ exceptionId, exception })
       }
-      onDeleteException={(exceptionId) => deleteExceptionMutation.mutate(exceptionId)}
+      onDeleteException={(exceptionId) =>
+        deleteExceptionMutation.mutate(exceptionId)
+      }
       onCreateListing={() => navigate({ to: "/create-listing" })}
     />
   );

@@ -6,9 +6,17 @@ import {
   type RegisterNameSubmitError,
   type RegisterNameSubmitValues,
 } from "../../components/RegisterName";
+import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/name")({
+  head: () =>
+    createPageMeta({
+      title: "Set Your Name",
+      description:
+        "Add your name and username to continue your Mira profile setup.",
+      path: "/register/name",
+    }),
   component: RegisterNameRoute,
 });
 

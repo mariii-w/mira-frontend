@@ -15,8 +15,14 @@ import type {
 } from "../../api/model";
 import { BookingPage } from "../../components/BookingPage";
 import { requireConsumer } from "../../lib/requireAuth";
+import { createPageMeta } from "../../lib/headers";
 
 export const Route = createFileRoute("/listings/$listingId_/book")({
+  head: () =>
+    createPageMeta({
+      title: "Book Service",
+      description: "Choose a time and request a Mira service booking.",
+    }),
   beforeLoad: requireConsumer,
   component: BookingRoute,
 });
@@ -49,13 +55,10 @@ function BookingRoute() {
       to: toLocalDate(to),
     }),
     queryFn: async () => {
-      const response = await getAvailability(
-        listingId,
-        {
-          from: toLocalDate(from),
-          to: toLocalDate(to),
-        },
-      );
+      const response = await getAvailability(listingId, {
+        from: toLocalDate(from),
+        to: toLocalDate(to),
+      });
 
       if (response.status !== 200) {
         throw new Error(
