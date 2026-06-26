@@ -30,7 +30,7 @@ export function MobileNavDrawer({
   const navigate = useNavigate()
   const fullName = `${firstName} ${lastName}`.trim()
   const navRoutes = new Set(navLinks.map((link) => link.to))
-  const accountLinks = getAccountLinks(isProvider).filter((link) => !navRoutes.has(link.to))
+  const accountLinks = getAccountLinks(isProvider, '/', notificationCount).filter((link) => !navRoutes.has(link.to))
 
   async function handleLogout() {
     await signOut()

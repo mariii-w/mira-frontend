@@ -13,13 +13,19 @@ interface UserMenuProps {
     notificationCount?: number
 }
 
-function NotificationBadge({ count }: { count: number }) {
+function NotificationBadge({
+    count,
+    className = "absolute left-10 top-1 ring-cream",
+}: {
+    count: number
+    className?: string
+}) {
     if (count <= 0) return null
 
     return (
         <span
             aria-label={`${count} ${count === 1 ? 'notification' : 'notifications'}`}
-            className="absolute left-10 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold leading-none text-white ring-2 ring-cream"
+            className={`${className} flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold leading-none text-white ring-2`}
         >
             {count}
         </span>
@@ -59,7 +65,7 @@ export function UserMenu({ firstName, lastName, isProvider, pictureUrl, notifica
                     sideOffset={8}
                     className="z-50 w-56 rounded-xl border border-border bg-surface p-2 shadow-lg"
                 >
-                    {getAccountLinks(isProvider, profilePath).map((link) => (
+                    {getAccountLinks(isProvider, profilePath, notificationCount).map((link) => (
                         <Row key={link.to} {...link} />
                     ))}
 
@@ -76,25 +82,32 @@ interface RowProps {
     icon: React.ReactNode
     title: string
     to: string
+    notificationCount?: number
 }
 
-export function Row({ icon, title, to }: RowProps) {
+export function Row({ icon, title, to, notificationCount = 0 }: RowProps) {
     return (
         <Link
             to={to}
             className="flex items-center gap-3 p-3 rounded-lg hover:bg-linen transition-colors no-underline"
         >
-            <span className="text-muted shrink-0">{icon}</span>
+            <span className="relative text-muted shrink-0">
+                {icon}
+                <NotificationBadge
+                    count={notificationCount}
+                    className="absolute -right-2 -top-2 ring-surface"
+                />
+            </span>
             <span className="text-small font-semibold text-foreground">{title}</span>
         </Link>
     )
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function getAccountLinks(isProvider?: boolean, profilePath = '/'): RowProps[] {
+export function getAccountLinks(isProvider?: boolean, profilePath = '/', bookingNotificationCount = 0): RowProps[] {
     return [
         { icon: <UserRound size={15} />, title: 'View Profile', to: profilePath },
-        { icon: <CalendarCheck size={15} />, title: 'My Bookings', to: '/my-bookings' },
+        { icon: <CalendarCheck size={15} />, title: 'My Bookings', to: '/my-bookings', notificationCount: bookingNotificationCount },
         ...(isProvider
             ? [{ icon: <LayoutList size={15} />, title: 'My Services', to: '/my-listings' }]
             : []),
