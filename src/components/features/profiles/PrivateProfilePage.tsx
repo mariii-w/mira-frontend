@@ -1,4 +1,4 @@
-import { Briefcase, Calendar, Check, ClipboardPen, Mail, MapPin, Plus } from 'lucide-react'
+import { Briefcase, Calendar, Check, ClipboardPen, Mail, MapPin, MessageCircle, Plus, Search } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { Button } from '../../common/ui/Button'
@@ -98,32 +98,53 @@ export function PrivateProfilePage({
             </div>
 
             {/* Quick Actions — on mobile renders after user info, on desktop sticks to right column */}
-            {isProvider && (
-              <nav aria-label="Quick actions" className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 animate-fade-in-up [animation-delay:150ms]">
-                <h2 className="text-h1 font-bold">Quick Actions</h2>
-                <div className="w-full mx-auto h-px bg-border my-5" />
-                <div className="flex flex-col w-full gap-3">
-                  <QuickActionLink to="/my-listings" variant="primary" icon={<Briefcase />}>
-                    My Services
-                  </QuickActionLink>
-                  <QuickActionLink to="/create-listing" variant="accent" icon={<Plus />}>
-                    Create Service
-                  </QuickActionLink>
-                  <QuickActionLink to="/calendar" variant="secondary" icon={<Calendar />}>
-                    Calendar
-                  </QuickActionLink>
-                  <QuickActionLink to="/my-bookings" variant="secondary" icon={<Mail />}>
-                    My Bookings
-                  </QuickActionLink>
-                </div>
-                <div className="w-full mx-auto h-px bg-border my-5" />
-                <div className="flex flex-col w-full">
-                  <QuickActionLink to="/my-credentials" variant="primary" icon={<Check />}>
-                    Get Verified
-                  </QuickActionLink>
-                </div>
-              </nav>
-            )}
+            <nav aria-label="Quick actions" className="lg:col-start-3 lg:row-start-2 lg:row-span-3 bg-linen border border-border rounded-2xl p-6 animate-fade-in-up [animation-delay:150ms]">
+              <h2 className="text-h1 font-bold">Quick Actions</h2>
+              <div className="w-full mx-auto h-px bg-border my-5" />
+              <div className="flex flex-col w-full gap-3">
+                {isProvider ? (
+                  <>
+                    <QuickActionLink to="/my-listings" variant="primary" icon={<Briefcase />}>
+                      My Services
+                    </QuickActionLink>
+                    <QuickActionLink to="/create-listing" variant="accent" icon={<Plus />}>
+                      Create Service
+                    </QuickActionLink>
+                    <QuickActionLink to="/calendar" variant="secondary" icon={<Calendar />}>
+                      Calendar
+                    </QuickActionLink>
+                    <QuickActionLink to="/my-bookings" variant="secondary" icon={<Mail />}>
+                      My Bookings
+                    </QuickActionLink>
+                  </>
+                ) : (
+                  <>
+                    <QuickActionLink to="/browse-services" variant="primary" icon={<Search />}>
+                      Browse Services
+                    </QuickActionLink>
+                    <QuickActionLink to="/my-bookings" variant="accent" icon={<Mail />}>
+                      My Bookings
+                    </QuickActionLink>
+                    <QuickActionLink to="/calendar" variant="secondary" icon={<Calendar />}>
+                      Calendar
+                    </QuickActionLink>
+                    <QuickActionLink to="/chat" variant="secondary" icon={<MessageCircle />}>
+                      Chat
+                    </QuickActionLink>
+                  </>
+                )}
+              </div>
+              {isProvider && (
+                <>
+                  <div className="w-full mx-auto h-px bg-border my-5" />
+                  <div className="flex flex-col w-full">
+                    <QuickActionLink to="/my-credentials" variant="primary" icon={<Check />}>
+                      Get Verified
+                    </QuickActionLink>
+                  </div>
+                </>
+              )}
+            </nav>
 
             {/* About */}
             <section aria-labelledby="private-about-heading" className="col-span-1 lg:col-span-2 lg:row-start-2 bg-linen border border-border rounded-2xl p-6 flex flex-col gap-3 animate-fade-in-up [animation-delay:250ms]">

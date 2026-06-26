@@ -96,9 +96,13 @@ describe('<PrivateProfilePage />', () => {
       expect(screen.getByRole('link', { name: /get verified/i })).toHaveAttribute('href', '/my-credentials')
     })
 
-    it('does not render Quick Actions for consumer accounts', () => {
+    it('links to Browse Services, My Bookings, Calendar, and Chat for consumer accounts', () => {
       render(<PrivateProfilePage {...baseProps} isProvider={false} />)
-      expect(screen.queryByRole('navigation', { name: /quick actions/i })).not.toBeInTheDocument()
+      expect(screen.getByRole('navigation', { name: /quick actions/i })).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /browse services/i })).toHaveAttribute('href', '/browse-services')
+      expect(screen.getByRole('link', { name: /my bookings/i })).toHaveAttribute('href', '/my-bookings')
+      expect(screen.getByRole('link', { name: /calendar/i })).toHaveAttribute('href', '/calendar')
+      expect(screen.getByRole('link', { name: /chat/i })).toHaveAttribute('href', '/chat')
     })
   })
 
