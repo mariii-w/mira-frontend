@@ -31,6 +31,7 @@ const ACTIONABLE_BOOKING_STATUSES = new Set<BookingStatus>([
 
 const PROVIDER_ACTIONABLE_BOOKING_STATUSES = new Set<BookingStatus>([
   "PENDING",
+  "CONFIRMED",
 ]);
 
 function isActionableBookingStatus(status: BookingStatus, isProvider: boolean) {
