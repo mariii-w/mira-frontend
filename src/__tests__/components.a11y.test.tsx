@@ -6,6 +6,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import axe from "axe-core";
@@ -4152,7 +4153,10 @@ describe("component accessibility", () => {
         target: { value: "Hamburg" },
       });
       fireEvent.click(screen.getByRole("checkbox", { name: /errands/i }));
-      fireEvent.click(screen.getByRole("button", { name: /show 1 results/i }));
+      fireEvent.click(
+        within(screen.getByRole("form", { name: /filter services/i }))
+          .getByRole("button", { name: /show results/i }),
+      );
       fireEvent.click(screen.getByRole("button", { name: /next/i }));
     });
     await waitFor(() => {
