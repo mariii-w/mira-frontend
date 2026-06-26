@@ -14,7 +14,7 @@ import {
   type RefObject,
   type SetStateAction,
 } from "react";
-import { usePageTitle } from "../../../hooks/usePageTitle";
+
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "../../common/ui/Button";
@@ -174,7 +174,6 @@ function toListingCards(listings: PublicListingSummary[], easyRead: boolean) {
 }
 
 export function Home() {
-  usePageTitle('Home')
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const categoryRef = useRef<HTMLUListElement>(null);
@@ -753,7 +752,6 @@ export function Home() {
           </div>
         </section>
       </main>
-
     </>
   );
 }
