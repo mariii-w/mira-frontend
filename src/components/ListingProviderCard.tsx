@@ -16,6 +16,7 @@ export interface ListingProviderCardProps {
   tags: ServiceTag[];
   publicVerifiedCredentials?: VerifiedCredentialResponse[];
   onBookNow: () => void;
+  canBook?: boolean;
   onMessage?: () => void;
   canMessage?: boolean;
   messagePending?: boolean;
@@ -45,6 +46,7 @@ export function ListingProviderCard({
   tags,
   publicVerifiedCredentials = [],
   onBookNow,
+  canBook = true,
   onMessage,
   canMessage = true,
   messagePending = false,
@@ -108,15 +110,17 @@ export function ListingProviderCard({
         <span className="text-small text-primary-foreground/60"> /hr</span>
       </div>
 
-      <Button
-        variant="primary"
-        size="lg"
-        fullWidth
-        onClick={onBookNow}
-        className="bg-cream text-primary hover:bg-cream/90 active:bg-cream/90"
-      >
-        Book Now
-      </Button>
+      {canBook && (
+        <Button
+          variant="primary"
+          size="lg"
+          fullWidth
+          onClick={onBookNow}
+          className="bg-cream text-primary hover:bg-cream/90 active:bg-cream/90"
+        >
+          Book Now
+        </Button>
+      )}
       {canMessage && (
         <>
           <Button

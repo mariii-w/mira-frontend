@@ -125,6 +125,8 @@ function ListingDetailRoute() {
   );
 
   const isOwnListing = !!currentUserId && authorId === currentUserId;
+  // Only consumers can book; providers can still view the listing.
+  const isProvider = useAuthStore((s) => s.user?.userType) === "PROVIDER";
 
   function handleMessage() {
     setMessageError(null);
@@ -156,6 +158,7 @@ function ListingDetailRoute() {
       onBookNow={() =>
         navigate({ to: "/listings/$listingId/book", params: { listingId } })
       }
+      canBook={!isProvider}
       onMessage={handleMessage}
       canMessage={!isOwnListing}
       messagePending={createChat.isPending}

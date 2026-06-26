@@ -20,6 +20,7 @@ export interface ListingDetailPageProps {
   otherListings: PublicListingSummary[];
   publicVerifiedCredentials?: VerifiedCredentialResponse[];
   onBookNow: () => void;
+  canBook?: boolean;
   onMessage?: () => void;
   canMessage?: boolean;
   messagePending?: boolean;
@@ -37,6 +38,7 @@ export function ListingDetailPage({
   otherListings,
   publicVerifiedCredentials = [],
   onBookNow,
+  canBook,
   onMessage,
   canMessage,
   messagePending,
@@ -199,6 +201,7 @@ export function ListingDetailPage({
             tags={listing.tags}
             publicVerifiedCredentials={publicVerifiedCredentials}
             onBookNow={onBookNow}
+            canBook={canBook}
             onMessage={onMessage}
             canMessage={canMessage}
             messagePending={messagePending}
