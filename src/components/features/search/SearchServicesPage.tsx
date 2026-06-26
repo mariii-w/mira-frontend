@@ -21,14 +21,12 @@ import type {
 
 const routeApi = getRouteApi('/_app/_search/browse-services')
 
-// Helper — map UI search state to the generated client's params.
-// The listings endpoint has no free-text param, so `q` is not sent here;
-// it only drives the heading and the search box.
-
 function toListingsParams(params: BrowseServicesSearch): GetPublicListingsParams {
   const city = params.city.trim()
+  const q = params.q.trim()
   return {
     limit: 10,
+    ...(q ? { q } : {}),
     ...(city ? { city } : {}),
     ...(city && params.radiusKm != null ? { radiusKm: params.radiusKm } : {}),
     ...(params.minPrice != null ? { minPrice: params.minPrice } : {}),
