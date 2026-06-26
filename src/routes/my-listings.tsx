@@ -1,10 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import {
-  getGetAuthorListingsQueryKey,
-  getAuthorListings,
-} from "../api/mira";
+import { getGetAuthorListingsQueryKey, getAuthorListings } from "../api/mira";
 import type {
   GetAuthorListingsParams,
   ProblemDetailsResponse,
@@ -14,9 +11,16 @@ import { MyListings, type StatusFilter } from "../components/MyListings";
 import type { MyListingSummary } from "../components/MyListingCard";
 import { useAuthStore } from "../stores/auth";
 import { requireProvider } from "../lib/requireAuth";
+import { createPageMeta } from "../lib/headers";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/my-listings")({
+  head: () =>
+    createPageMeta({
+      title: "My Services",
+      description: "Review, filter, and manage your Mira service listings.",
+      path: "/my-listings",
+    }),
   beforeLoad: requireProvider,
   component: MyListingsRoute,
 });
@@ -73,10 +77,7 @@ export function MyListingsRoute() {
     queryFn: async () => {
       if (!userId) throw new Error("You must be signed in to view services.");
 
-      const response = await getAuthorListings(
-        userId,
-        params,
-      );
+      const response = await getAuthorListings(userId, params);
 
       if (response.status !== 200) {
         throw new Error(
@@ -97,10 +98,7 @@ export function MyListingsRoute() {
     queryFn: async () => {
       if (!userId) throw new Error("You must be signed in to view services.");
 
-      const response = await getAuthorListings(
-        userId,
-        { limit: 100 },
-      );
+      const response = await getAuthorListings(userId, { limit: 100 });
 
       if (response.status !== 200) {
         throw new Error(

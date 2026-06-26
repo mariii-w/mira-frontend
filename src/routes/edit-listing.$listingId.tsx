@@ -20,6 +20,7 @@ import {
 } from "../api/mira";
 import { useAuthStore } from "../stores/auth";
 import { requireProvider } from "../lib/requireAuth";
+import { createPageMeta } from "../lib/headers";
 import type {
   ListingDetails,
   ListingMediaPreview,
@@ -30,6 +31,12 @@ import type {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/edit-listing/$listingId")({
+  head: () =>
+    createPageMeta({
+      title: "Edit Service",
+      description:
+        "Update a Mira service listing, media, availability, and publication status.",
+    }),
   beforeLoad: requireProvider,
   component: EditListingPage,
 });
@@ -58,17 +65,18 @@ export function EditListingPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [availableTags, setAvailableTags] = useState<ServiceTag[]>([]);
   const [tagsLoading, setTagsLoading] = useState(true);
-  const [nextAvailableDate, setNextAvailableDate] = useState<string | undefined>();
+  const [nextAvailableDate, setNextAvailableDate] = useState<
+    string | undefined
+  >();
   const [availableToday, setAvailableToday] = useState(false);
-  const [otherListings, setOtherListings] = useState<PublicListingSummary[]>([]);
+  const [otherListings, setOtherListings] = useState<PublicListingSummary[]>(
+    [],
+  );
 
   const refreshListing = useCallback(async (): Promise<ListingDetails> => {
     if (!userId) throw new Error("You must be signed in to edit this listing.");
 
-    const response = await getAuthorListing(
-      userId,
-      listingId,
-    );
+    const response = await getAuthorListing(userId, listingId);
 
     if (response.status !== 200) {
       throw new Error(
@@ -185,16 +193,13 @@ export function EditListingPage() {
   }, []);
 
   async function handleSubmit(values: EditListingFormValues) {
-    const updateResponse = await updateListing(
-      listingId,
-      {
-        title: values.title,
-        description: values.description,
-        price: values.price,
-        tagIds: values.tagIds,
-        location: values.location,
-      },
-    );
+    const updateResponse = await updateListing(listingId, {
+      title: values.title,
+      description: values.description,
+      price: values.price,
+      tagIds: values.tagIds,
+      location: values.location,
+    });
 
     if (updateResponse.status !== 200) {
       throw new Error(
@@ -204,10 +209,9 @@ export function EditListingPage() {
     }
 
     if (values.imageFiles.length > 0) {
-      const mediaResponse = await uploadListingMedia(
-        listingId,
-        { files: values.imageFiles },
-      );
+      const mediaResponse = await uploadListingMedia(listingId, {
+        files: values.imageFiles,
+      });
 
       if (mediaResponse.status !== 200) {
         throw new Error(
@@ -221,10 +225,7 @@ export function EditListingPage() {
   }
 
   async function handleRemoveImage(mediaId: string) {
-    const response = await deleteListingMedia(
-      listingId,
-      mediaId,
-    );
+    const response = await deleteListingMedia(listingId, mediaId);
 
     if (response.status !== 204) {
       throw new Error(
