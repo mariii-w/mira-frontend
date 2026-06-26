@@ -76,7 +76,7 @@ export function MyListingCard({ listing, onEdit }: MyListingCardProps) {
               {badge.label}
             </span>
           </div>
-          <p className="text-small text-muted line-clamp-3">{listing.description}</p>
+          <p id={`listing-desc-${listing.listingId}`} className="text-small text-muted line-clamp-3">{listing.description}</p>
         </div>
         <div className="flex justify-end">
           <Button

@@ -61,12 +61,12 @@ describe('<CredentialCard />', () => {
   it('shows "Verified" and a Visible toggle when approved and visible', () => {
     render(<CredentialCard {...defaultProps} credential={makeCredential({ isVisible: true })} />)
     expect(screen.getByText('Verified')).toBeInTheDocument()
-    expect(screen.getByRole('switch', { name: 'Visible' })).toBeChecked()
+    expect(screen.getByRole('switch', { name: /show student status on public profile/i })).toBeChecked()
   })
 
   it('shows an unchecked Visible toggle when approved but hidden', () => {
     render(<CredentialCard {...defaultProps} credential={makeCredential({ isVisible: false })} />)
-    expect(screen.getByRole('switch', { name: 'Visible' })).not.toBeChecked()
+    expect(screen.getByRole('switch', { name: /show student status on public profile/i })).not.toBeChecked()
   })
 
   it('shows "Pending" and no toggle when there is no verification yet', () => {
@@ -196,7 +196,7 @@ describe('<CredentialCard />', () => {
         credential={makeCredential({ isVisible: true })}
       />,
     )
-    fireEvent.click(screen.getByRole('switch', { name: 'Visible' }))
+    fireEvent.click(screen.getByRole('switch', { name: /show student status on public profile/i }))
     expect(onVisibilityChange).toHaveBeenCalledWith('cred-1', false)
   })
 

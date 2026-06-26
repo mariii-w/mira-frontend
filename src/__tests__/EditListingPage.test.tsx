@@ -15,6 +15,9 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
       useParams: () => ({ listingId: "listing-1" }),
     }),
     useNavigate: () => mockNavigate,
+    Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+      <a href={String(to)}>{children}</a>
+    ),
   };
 });
 
@@ -175,7 +178,7 @@ function renderPage() {
 
 async function waitForLoad() {
   await waitFor(() =>
-    expect(screen.queryByRole("status")).not.toBeInTheDocument(),
+    expect(screen.queryByText("Loading…")).not.toBeInTheDocument(),
   );
   await waitFor(() => expect(screen.getByLabelText(/title/i)).toHaveValue("PC Help"));
 }

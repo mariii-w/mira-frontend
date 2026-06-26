@@ -6,7 +6,7 @@ type ServiceStatus = 'active' | 'inactive' | 'draft'
 
 export interface ServiceCardEditProps {
     link: string
-    pictureLink: string
+    pictureLink?: string
     label: string
     description: string
     status: ServiceStatus
@@ -46,9 +46,11 @@ export function ServiceCardEdit({
     return (
         <div className="bg-cream rounded-2xl flex flex-col p-5 gap-4 border border-border w-full">
             <div className='flex gap-4 items-stretch'>
-                <div className='m-1 shrink-0'>
-                    <img src={pictureLink} className="w-50 h-40 rounded-xl object-cover" />
-                </div>
+                {pictureLink && (
+                  <div className='m-1 shrink-0'>
+                    <img src={pictureLink} alt={label} className="w-50 h-40 rounded-xl object-cover" />
+                  </div>
+                )}
                 <div className='flex flex-col gap-2 my-3 flex-1'>
                     <div>
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-md font-medium ${className}`}>

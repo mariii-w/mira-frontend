@@ -1,5 +1,6 @@
 import { useId, useState, type CSSProperties } from "react";
 import { Check, MessageCircle } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { AvatarIcon } from "./AvatarIcon";
 import { Badge } from "./Badge";
 import { Button } from "./Button";
@@ -9,6 +10,7 @@ import type { ServiceTag, VerifiedCredentialResponse } from "../api/model";
 export interface ListingProviderCardProps {
   authorName: string;
   authorSurname: string;
+  authorId: string;
   price: number;
   city: string;
   availableToday?: boolean;
@@ -39,6 +41,7 @@ function formatAvailability(availableToday?: boolean, nextAvailableDate?: string
 export function ListingProviderCard({
   authorName,
   authorSurname,
+  authorId,
   price,
   city,
   availableToday,
@@ -74,7 +77,13 @@ export function ListingProviderCard({
           bgColorClassName="bg-primary"
           className="ring-2 ring-primary-foreground/70"
         />
-        <p className="font-semibold">{displayName}</p>
+        <Link
+          to="/profile/$userId"
+          params={{ userId: authorId }}
+          className="font-semibold no-underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/80"
+        >
+          {displayName}
+        </Link>
         {hasPublicVerifiedCredentials && (
           <span className="relative inline-flex">
             <span

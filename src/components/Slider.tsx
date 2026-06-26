@@ -142,10 +142,10 @@ export function Slider({
             "relative z-10 w-full appearance-none bg-transparent cursor-pointer",
             // Thumb — webkit
             "[&::-webkit-slider-thumb]:appearance-none",
-            "[&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5",
+            "[&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6",
             "[&::-webkit-slider-thumb]:rounded-full",
-            "[&::-webkit-slider-thumb]:bg-[--color-primary]",
-            "[&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[--color-primary]",
+            "[&::-webkit-slider-thumb]:bg-primary",
+            "[&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white",
             "[&::-webkit-slider-thumb]:shadow-md",
             "[&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:duration-100",
             "[&:hover::-webkit-slider-thumb]:scale-110",
@@ -155,11 +155,11 @@ export function Slider({
             "[&:focus-visible::-webkit-slider-thumb]:ring-offset-2",
             // Thumb — moz
             "[&::-moz-range-thumb]:appearance-none",
-            "[&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5",
+            "[&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:h-7",
             "[&::-moz-range-thumb]:rounded-full",
-            "[&::-moz-range-thumb]:bg-[--color-primary]",
+            "[&::-moz-range-thumb]:bg-primary",
+            "[&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white",
             "[&::-moz-range-thumb]:shadow-md",
-            "[&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[--color-primary]",
             // Remove moz inner track styling
             "[&::-moz-range-track]:bg-transparent",
           ].join(" ")}

@@ -72,11 +72,12 @@ export function CredentialCard({
 
       <button
         type="button"
+        aria-label={`View document for "${credential.name}"`}
         onClick={() => setViewerOpen(true)}
         className="flex w-28 sm:w-32 shrink-0 flex-col items-center justify-center gap-1.5 bg-linen p-3 text-center text-label font-medium text-muted hover:bg-linen/70 transition-colors"
       >
         <FileText size={22} aria-hidden="true" />
-        View document
+        <span aria-hidden="true">View document</span>
       </button>
 
       <div className="flex flex-1 flex-wrap items-center justify-between gap-4 p-5">
@@ -104,7 +105,8 @@ export function CredentialCard({
             {canToggleVisibility && (
               <div className="flex items-center gap-2">
                 <label htmlFor={visibilityToggleId} className="text-small font-medium text-foreground cursor-pointer">
-                  Visible
+                  <span aria-hidden="true">Visible</span>
+                  <span className="sr-only">Show {credential.name} on public profile</span>
                 </label>
                 <Switch.Root
                   id={visibilityToggleId}
@@ -115,6 +117,9 @@ export function CredentialCard({
                 >
                   <Switch.Thumb className="block h-5 w-5 rounded-full bg-surface shadow translate-x-0.5 data-[state=checked]:translate-x-[22px] transition-transform duration-150" />
                 </Switch.Root>
+                <span role="status" aria-live="polite" className="sr-only">
+                  {isUpdatingVisibility ? 'Updating visibility…' : ''}
+                </span>
               </div>
             )}
             <Button
