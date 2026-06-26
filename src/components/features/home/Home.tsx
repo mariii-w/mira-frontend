@@ -621,7 +621,7 @@ export function Home() {
                         >
                           <ServiceCard
                             variant="compact"
-                            link="#"
+                            link={`/listings/${listing.listingId}`}
                             label={listing.label}
                             providerFirstName={listing.providerFirstName}
                             providerLastName={listing.providerLastName}
