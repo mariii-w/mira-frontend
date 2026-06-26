@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { RegisterDone } from "../components/RegisterDone";
+import { RegisterDone } from "../features/register/RegisterDone";
 import type { PrivateUserProfileResponse } from "../api/model";
-import source from "../components/RegisterDone.tsx?raw";
+import source from "../features/register/RegisterDone.tsx?raw";
 
 const user = {
   firstName: "Mira",

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Heart, Search } from "lucide-react";
-import type { UserType } from "../api/model";
+import type { UserType } from "../../api/model";
 
 export interface RegisterRoleSubmitValues {
   userType: UserType;

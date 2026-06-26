@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
-import { RegisterLayout } from "../../components/RegisterLayout";
+import { RegisterLayout } from "../../features/register/RegisterLayout";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register")({

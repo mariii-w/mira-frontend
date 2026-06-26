@@ -4,7 +4,7 @@ import type { ProblemDetailsResponse } from "../../api/model";
 import {
   RegisterPhoto,
   type RegisterPhotoSubmitError,
-} from "../../components/RegisterPhoto";
+} from "../../features/register/RegisterPhoto";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/photo")({

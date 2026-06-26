@@ -8,7 +8,7 @@ import {
   RegisterRole,
   type RegisterRoleSubmitError,
   type RegisterRoleSubmitValues,
-} from "../../components/RegisterRole";
+} from "../../features/register/RegisterRole";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/role")({

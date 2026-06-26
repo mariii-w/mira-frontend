@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { Button } from "../common/ui/Button";
-import { Input } from "../common/ui/Input";
-import { Label } from "../common/ui/Label";
-import { Textarea } from "../common/ui/Textarea";
+import { Button } from "../../common/ui/Button";
+import { Input } from "../../common/ui/Input";
+import { Label } from "../../common/ui/Label";
+import { Textarea } from "../../common/ui/Textarea";
 
 export interface RegisterAboutInitialValues {
   userType: "CUSTOMER" | "PROVIDER" | null;
