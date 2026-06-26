@@ -52,7 +52,13 @@ export function ServiceCard(
 
     if (variant === 'compact') {
         return (
-            <div className="bg-surface rounded-2xl flex flex-col p-4 gap-3 w-full h-full">
+            <div
+                role="group"
+                tabIndex={0}
+                aria-labelledby={titleId}
+                aria-describedby={describedBy}
+                className="bg-surface rounded-2xl flex flex-col p-4 gap-3 w-full h-full"
+            >
                 <div className="flex items-center gap-3">
                     <AvatarIcon firstName={providerFirstName} lastName={providerLastName} picture="" size={56} bgColorClassName="bg-forest" />
                     <div className="flex flex-col min-w-0">
@@ -75,8 +81,7 @@ export function ServiceCard(
                     <span id={priceId} className="self-end text-body font-bold text-primary">from {hourRate}€/hr</span>
                     <Link
                         to={link}
-                        aria-labelledby={titleId}
-                        aria-describedby={describedBy}
+                        aria-label={`View listing for ${label}`}
                         className="relative inline-flex items-center justify-center font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 w-full px-4 text-body bg-primary text-primary-foreground no-underline hover:bg-primary-hover active:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                     >
                         View Listing
@@ -87,7 +92,13 @@ export function ServiceCard(
     }
 
     return(
-        <div className="bg-linen rounded-2xl flex flex-col p-3 gap-3 border border-border w-full">
+        <div
+            role="group"
+            tabIndex={0}
+            aria-labelledby={titleId}
+            aria-describedby={describedBy}
+            className="bg-linen rounded-2xl flex flex-col p-3 gap-3 border border-border w-full"
+        >
             <div className='flex flex-col lg:flex-row gap-3'>
                 {pictureLink && (
                     <div className='shrink-0 lg:self-stretch'>
@@ -134,8 +145,7 @@ export function ServiceCard(
                         <div className='ml-auto shrink-0 flex items-center gap-3'>
                             <Link
                                 to={link}
-                                aria-labelledby={titleId}
-                                aria-describedby={describedBy}
+                                aria-label={`View service for ${label}`}
                                 className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body bg-primary text-primary-foreground no-underline hover:bg-primary-hover active:bg-primary-hover [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                             >
                                 View service

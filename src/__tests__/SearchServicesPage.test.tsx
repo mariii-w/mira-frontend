@@ -211,7 +211,7 @@ describe('<SearchServicesPage />', () => {
       expect(main).toHaveAttribute('tabindex', '-1')
       expect(screen.getByRole('heading', { name: 'Services' })).toBeInTheDocument()
 
-      const firstTabStop = main?.querySelector('a[href="/listings/listing-1"]')
+      const firstTabStop = main?.querySelector('[role="group"]')
       expect(firstTabStop).toHaveAccessibleName('Laptop Setup')
     })
   })

@@ -43,7 +43,7 @@ describe('<ServiceCard variant="compact" />', () => {
 
   it('renders "View Listing" without an underline', () => {
     render(<ServiceCard {...baseProps} variant="compact" />)
-    const viewLink = screen.getByRole('link', { name: 'Friendly home cleaning in Berlin' })
+    const viewLink = screen.getByRole('link', { name: `View listing for ${baseProps.label}` })
     expect(viewLink).toHaveClass('no-underline')
   })
 
@@ -57,12 +57,12 @@ describe('<ServiceCard variant="compact" />', () => {
     expect(avatarTwo).toHaveClass('bg-forest')
   })
 
-  it('puts the full listing context on the navigation link, without exposing a duplicate article', () => {
+  it('puts the full listing context on the card group, without exposing a duplicate article', () => {
     render(<ServiceCard {...baseProps} variant="compact" />)
     expect(screen.queryByRole('article')).not.toBeInTheDocument()
 
-    const link = screen.getByRole('link', { name: 'Friendly home cleaning in Berlin' })
-    const description = computeAccessibleDescription(link)
+    const group = screen.getByRole('group', { name: baseProps.label })
+    const description = computeAccessibleDescription(group)
     expect(description).toContain('by Lena Hoffmann')
     expect(description).toContain('Berlin')
     expect(description).toContain('from 28€/hr')
@@ -71,12 +71,12 @@ describe('<ServiceCard variant="compact" />', () => {
 })
 
 describe('<ServiceCard /> (default)', () => {
-  it('puts the full listing context on the navigation link, without exposing a duplicate article', () => {
+  it('puts the full listing context on the card group, without exposing a duplicate article', () => {
     render(<ServiceCard {...baseProps} />)
     expect(screen.queryByRole('article')).not.toBeInTheDocument()
 
-    const link = screen.getByRole('link', { name: 'Friendly home cleaning in Berlin' })
-    const description = computeAccessibleDescription(link)
+    const group = screen.getByRole('group', { name: baseProps.label })
+    const description = computeAccessibleDescription(group)
     expect(description).toContain('by Lena Hoffmann')
     expect(description).toContain('Berlin')
     expect(description).toContain('28€ per hour')
@@ -85,7 +85,7 @@ describe('<ServiceCard /> (default)', () => {
 
   it('renders "View service" without an underline', () => {
     render(<ServiceCard {...baseProps} />)
-    const viewLink = screen.getByRole('link', { name: 'Friendly home cleaning in Berlin' })
+    const viewLink = screen.getByRole('link', { name: `View service for ${baseProps.label}` })
     expect(viewLink).toHaveClass('no-underline')
   })
 })
