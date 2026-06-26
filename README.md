@@ -46,11 +46,11 @@ The project follows WCAG 2.1 AA as a baseline:
 - Semantic HTML throughout: `<nav>`, `<main>`, `<section>`, `<article>`, `<ul>`/`<li>` lists with `aria-labelledby` on every section
 - Heading fonts use [Atkinson Hyperlegible](https://brailleinstitute.org/freefont), designed for low-vision readers
 
-### Design Tokens
+## Design Tokens
 
 Design tokens are defined in `src/globals.css` using Tailwind CSS v4's `@theme` block and are available as Tailwind utilities throughout the app.
 
-#### Colors
+### Colors
 
 | Token        | Hex       | Role                |
 | ------------ | --------- | ------------------- |
@@ -67,7 +67,7 @@ Design tokens are defined in `src/globals.css` using Tailwind CSS v4's `@theme` 
 
 Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `border`, `muted`) are also defined.
 
-#### Typography
+### Typography
 
 | Token   | Size       | Font                        |
 | ------- | ---------- | --------------------------- |
