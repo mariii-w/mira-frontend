@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { Logo } from "./Logo";
-import { Navbar } from "./Navbar";
+import { Logo } from "../common/ui/Logo";
+import { Navbar } from "../common/layout/Navbar";
 import type { User } from "../stores/auth";
 
 const STEPS = [

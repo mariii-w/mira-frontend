@@ -1,6 +1,6 @@
 import { createRef } from 'react';
 import { render, screen } from '@testing-library/react';
-import { Textarea } from '../components/Textarea';
+import { Textarea } from '../common/ui/Textarea';
 
 describe('Textarea', () => {
   it('renders a textarea element', () => {

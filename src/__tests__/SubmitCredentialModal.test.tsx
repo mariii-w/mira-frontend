@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { act, type ReactNode } from 'react'
-import { SubmitCredentialModal } from '../components/SubmitCredentialModal'
+import { SubmitCredentialModal } from '../features/credentials/SubmitCredentialModal'
 import type { CredentialTypeResponse } from '../api/model'
 
 // Headless UI's Listbox uses ResizeObserver to position the options popover, which jsdom doesn't implement.
@@ -14,7 +14,7 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
   }
 }
 
-vi.mock('../components/Modal', () => ({
+vi.mock('../common/ui/Modal', () => ({
   Modal: ({ open, children, title }: { open: boolean; children: ReactNode; title: string }) =>
     open ? <div role="dialog" aria-label={title}>{children}</div> : null,
 }))

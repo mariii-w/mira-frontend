@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { Button } from "./Button";
-import { Input } from "./Input";
-import { Label } from "./Label";
+import { Button } from "../common/ui/Button";
+import { Input } from "../common/ui/Input";
+import { Label } from "../common/ui/Label";
 
 export interface RegisterAddressInitialValues {
   privateAddress: RegisterAddressSubmitValues | null;

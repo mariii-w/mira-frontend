@@ -3,17 +3,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { CalendarPage, type CalendarPageProps } from '../components/CalendarPage'
+import { CalendarPage, type CalendarPageProps } from '../features/bookings/CalendarPage'
 import type { BookingSummary, ScheduleExceptionResponse } from '../api/model'
 
 
-vi.mock('../components/CalendarGrid', () => ({
+vi.mock('../features/bookings/CalendarGrid', () => ({
   CalendarGrid: ({ renderDay }: { renderDay: (d: Date) => ReactNode }) => (
     <div data-testid="calendar-grid">{renderDay(new Date(2026, 5, 10))}</div>
   ),
 }))
 
-vi.mock('../components/WeeklyScheduleModal', () => ({
+vi.mock('../features/bookings/WeeklyScheduleModal', () => ({
   WeeklyScheduleModal: ({ open, entries, onSave }: { open: boolean; entries: unknown[]; onSave: (value: unknown) => void }) =>
     open ? (
       <div data-testid="weekly-schedule-modal" role="dialog">
@@ -23,7 +23,7 @@ vi.mock('../components/WeeklyScheduleModal', () => ({
     ) : null,
 }))
 
-vi.mock('../components/ExceptionModal', () => ({
+vi.mock('../features/bookings/ExceptionModal', () => ({
   ExceptionModal: ({
     open,
     exceptions,
@@ -47,7 +47,7 @@ vi.mock('../components/ExceptionModal', () => ({
     ) : null,
 }))
 
-vi.mock('../components/BookingCard', () => ({
+vi.mock('../features/bookings/BookingCard', () => ({
   StatusBadge: ({ status }: { status: string }) => <span data-testid="status-badge">{status}</span>,
 }))
 

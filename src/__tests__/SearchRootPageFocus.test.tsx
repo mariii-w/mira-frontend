@@ -6,7 +6,7 @@ import { RouterProvider, createRouter, createMemoryHistory } from '@tanstack/rea
 import { routeTree } from '../routeTree.gen'
 import { getPublicListings, getServiceTags, getPublicProfilesCollection } from '../api/mira'
 
-vi.mock('../components/Navbar', () => ({
+vi.mock('../common/layout/Navbar', () => ({
   Navbar: () => <nav data-testid="navbar" />,
 }))
 

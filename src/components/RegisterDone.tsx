@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import type { PrivateUserProfileResponse } from "../api/model";
-import { AvatarIcon } from "./AvatarIcon";
-import { Button } from "./Button";
+import { AvatarIcon } from "../common/ui/AvatarIcon";
+import { Button } from "../common/ui/Button";
 import { mediaUrl } from "../lib/mediaUrl";
 
 interface RegisterDoneProps {

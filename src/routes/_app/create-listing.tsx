@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   CreateListing,
   type CreateListingFormValues,
-} from "../../components/CreateListing";
+} from "../../features/listings/CreateListing";
 import { getServiceTags, getCreateListingUrl } from "../../api/mira";
 import { authFetch } from "../../lib/authFetch";
 import type { ServiceTag } from "../../api/model";

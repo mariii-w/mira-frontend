@@ -13,8 +13,8 @@ import {
   postV1UsersUserIdCredentialsCredentialIdVerifications,
 } from "../../api/mira";
 import type { CredentialResponse, CredentialType, CredentialVerificationResponse } from "../../api/model";
-import { Credentials } from "../../components/Credentials";
-import { SubmitCredentialModal } from "../../components/SubmitCredentialModal";
+import { Credentials } from "../../features/credentials/Credentials";
+import { SubmitCredentialModal } from "../../features/credentials/SubmitCredentialModal";
 import { useAuthStore } from "../../stores/auth";
 
 // eslint-disable-next-line react-refresh/only-export-components

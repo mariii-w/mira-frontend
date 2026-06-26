@@ -1,10 +1,10 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { CredentialCard } from '../components/CredentialCard'
+import { CredentialCard } from '../features/credentials/CredentialCard'
 import type { CredentialResponse } from '../api/model'
 
-vi.mock('../components/CredentialDocumentViewer', () => ({
+vi.mock('../features/credentials/CredentialDocumentViewer', () => ({
   CredentialDocumentViewer: ({ open }: { open: boolean }) =>
     open ? <div data-testid="document-viewer" /> : null,
 }))

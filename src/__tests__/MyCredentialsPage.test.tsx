@@ -48,7 +48,7 @@ vi.mock('../api/mira', () => ({
 }))
 
 
-vi.mock('../components/CredentialDocumentViewer', () => ({
+vi.mock('../features/credentials/CredentialDocumentViewer', () => ({
   CredentialDocumentViewer: () => null,
 }))
 

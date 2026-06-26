@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { ListingProviderCard } from '../components/ListingProviderCard'
+import { ListingProviderCard } from '../features/listings/ListingProviderCard'
 import type { VerifiedCredentialResponse } from '../api/model'
 
 const tags = [

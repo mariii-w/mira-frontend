@@ -12,41 +12,41 @@ import axe from "axe-core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { getPublicListings, getServiceTags } from "../api/mira";
 import type { PublicListingSummary } from "../api/model";
-import { AccessibilityPanel } from "../components/AccessibilityPanel";
-import { AvatarIcon } from "../components/AvatarIcon";
-import { Badge } from "../components/Badge";
-import { Breadcrumb } from "../components/BreadCrumb";
+import { AccessibilityPanel } from "../common/layout/AccessibilityPanel";
+import { AvatarIcon } from "../common/ui/AvatarIcon";
+import { Badge } from "../common/ui/Badge";
+import { Breadcrumb } from "../common/layout/BreadCrumb";
 import {
   BookingCard,
   type BookingDetails,
   type BookingSummary,
-} from "../components/BookingCard";
-import { BookingPage } from "../components/BookingPage";
-import { Button } from "../components/Button";
-import { CalendarGrid } from "../components/CalendarGrid";
-import { CalendarPage } from "../components/CalendarPage";
-import { CategoryCard } from "../components/CategoryCard";
-import { CreateListing } from "../components/CreateListing";
-import { EditListing } from "../components/EditListing";
+} from "../features/bookings/BookingCard";
+import { BookingPage } from "../features/bookings/BookingPage";
+import { Button } from "../common/ui/Button";
+import { CalendarGrid } from "../features/bookings/CalendarGrid";
+import { CalendarPage } from "../features/bookings/CalendarPage";
+import { CategoryCard } from "../features/home/CategoryCard";
+import { CreateListing } from "../features/listings/CreateListing";
+import { EditListing } from "../features/listings/EditListing";
 import type { ListingDetails } from "../api/model";
-import { ExceptionModal } from "../components/ExceptionModal";
-import { FilterBar } from "../components/FilterBar";
-import { Home } from "../components/Home";
-import { Input } from "../components/Input";
-import { Label } from "../components/Label";
-import { LoginCallback } from "../components/LoginCallback";
-import { Logo } from "../components/Logo";
-import { Modal } from "../components/Modal";
-import { MultiSelect } from "../components/MultiSelect";
-import { MyBookings } from "../components/MyBookings";
+import { ExceptionModal } from "../features/bookings/ExceptionModal";
+import { FilterBar } from "../features/search/FilterBar";
+import { Home } from "../features/home/Home";
+import { Input } from "../common/ui/Input";
+import { Label } from "../common/ui/Label";
+import { LoginCallback } from "../features/auth/LoginCallback";
+import { Logo } from "../common/ui/Logo";
+import { Modal } from "../common/ui/Modal";
+import { MultiSelect } from "../common/ui/MultiSelect";
+import { MyBookings } from "../features/bookings/MyBookings";
 import {
   MyListingCard,
   type MyListingSummary,
-} from "../components/MyListingCard";
-import { MyListings } from "../components/MyListings";
-import { Navbar } from "../components/Navbar";
-import { Pagination } from "../components/Pagination";
-import * as Popover from "../components/Popover";
+} from "../features/listings/MyListingCard";
+import { MyListings } from "../features/listings/MyListings";
+import { Navbar } from "../common/layout/Navbar";
+import { Pagination } from "../common/layout/Pagination";
+import * as Popover from "../common/ui/Popover";
 import { RegisterAbout } from "../components/RegisterAbout";
 import { RegisterAddress } from "../components/RegisterAddress";
 import { RegisterDone } from "../components/RegisterDone";
@@ -54,16 +54,16 @@ import { RegisterLayout } from "../components/RegisterLayout";
 import { RegisterName } from "../components/RegisterName";
 import { RegisterPhoto } from "../components/RegisterPhoto";
 import { RegisterRole } from "../components/RegisterRole";
-import { SearchBar } from "../components/search/SearchBar";
-import { ServiceCard } from "../components/ServiceCard";
-import { ServiceUserToggle } from "../components/search/ServiceUserToggle.tsx";
-import { UserTypeFilter } from "../components/search/UserTypeFilter.tsx";
-import { Slider } from "../components/Slider";
-import * as Switch from "../components/Switch";
-import { Textarea } from "../components/Textarea";
-import { UserMenu } from "../components/UserMenu";
-import { UserCard } from "../components/search/cards/UserCard";
-import { WeeklyScheduleModal } from "../components/WeeklyScheduleModal";
+import { SearchBar } from "../features/search/SearchBar";
+import { ServiceCard } from "../features/listings/ServiceCard";
+import { ServiceUserToggle } from "../features/search/ServiceUserToggle";
+import { UserTypeFilter } from "../features/search/UserTypeFilter";
+import { Slider } from "../common/ui/Slider";
+import * as Switch from "../common/ui/Switch";
+import { Textarea } from "../common/ui/Textarea";
+import { UserMenu } from "../common/layout/UserMenu";
+import { UserCard } from "../features/search/UserCard";
+import { WeeklyScheduleModal } from "../features/bookings/WeeklyScheduleModal";
 import { useAuthStore, type User } from "../stores/auth";
 
 vi.mock("@tanstack/react-router", () => ({

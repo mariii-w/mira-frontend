@@ -1,6 +1,6 @@
 import { createRef } from 'react';
 import { render, screen } from '@testing-library/react';
-import { Input } from '../components/Input';
+import { Input } from '../common/ui/Input';
 
 describe('Input', () => {
   it('renders an input element', () => {

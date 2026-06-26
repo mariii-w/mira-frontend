@@ -10,8 +10,8 @@ import type {
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
 } from "../../api/model";
-import { MyListings, type StatusFilter } from "../../components/MyListings";
-import type { MyListingSummary } from "../../components/MyListingCard";
+import { MyListings, type StatusFilter } from "../../features/listings/MyListings";
+import type { MyListingSummary } from "../../features/listings/MyListingCard";
 import { useAuthStore } from "../../stores/auth";
 
 // eslint-disable-next-line react-refresh/only-export-components

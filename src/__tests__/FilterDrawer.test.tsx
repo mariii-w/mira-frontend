@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { FilterDrawer } from '../components/FilterDrawer'
+import { FilterDrawer } from '../features/search/FilterDrawer'
 
 const baseProps = {
   tags: [],

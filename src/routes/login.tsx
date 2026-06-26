@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { getPrivateUserProfile, getGetAuthLoginGoogleUrl } from "../api/mira";
-import { LoginCallback } from "../components/LoginCallback";
+import { LoginCallback } from "../features/auth/LoginCallback";
 import {
   decodeJwtPayload,
   get_access_token,

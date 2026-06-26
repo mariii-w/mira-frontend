@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { InfoPage } from '../components/InfoPage'
-import { INFO_PAGES } from '../components/infoPages'
+import { InfoPage } from '../common/InfoPage'
+import { INFO_PAGES } from '../common/infoPages'
 
 
 describe('<InfoPage />', () => {

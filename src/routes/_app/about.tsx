@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { InfoPage } from "../../components/InfoPage";
-import { INFO_PAGES } from "../../components/infoPages";
+import { InfoPage } from "../../common/InfoPage";
+import { INFO_PAGES } from "../../common/infoPages";
 
 export const Route = createFileRoute("/_app/about")({
   component: AboutRoute,

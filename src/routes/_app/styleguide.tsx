@@ -10,25 +10,25 @@ import {
   ChevronRight,
   X,
 } from 'lucide-react'
-import { Logo, type LogoVariant } from '../../components/Logo.tsx'
-import { Button, type ButtonVariant, type ButtonSize } from '../../components/Button.tsx'
-import { Label } from '../../components/Label.tsx';
-import { Input } from '../../components/Input.tsx';
-import { Textarea } from '../../components/Textarea.tsx';
-import { AccessibilityPanel } from '../../components/AccessibilityPanel.tsx';
-import { CategoryCard } from '../../components/CategoryCard.tsx';
+import { Logo, type LogoVariant } from '../../common/ui/Logo.tsx'
+import { Button, type ButtonVariant, type ButtonSize } from '../../common/ui/Button.tsx'
+import { Label } from '../../common/ui/Label.tsx';
+import { Input } from '../../common/ui/Input.tsx';
+import { Textarea } from '../../common/ui/Textarea.tsx';
+import { AccessibilityPanel } from '../../common/layout/AccessibilityPanel';
+import { CategoryCard } from '../../features/home/CategoryCard.tsx';
 import { useState } from 'react';
-import { Pagination } from '../../components/Pagination';
-import { AvatarIcon } from '../../components/AvatarIcon.tsx';
-import { UserMenu } from '../../components/UserMenu.tsx';
-import { SearchBar } from '../../components/search/SearchBar.tsx';
-import { Badge } from '../../components/Badge.tsx';
-import { Breadcrumb } from '../../components/BreadCrumb.tsx';
-import { FilterBar } from '../../components/FilterBar.tsx';
-import { ServiceCard } from '../../components/ServiceCard.tsx';
-import { BookingCard, type BookingSummary, type BookingDetails } from '../../components/BookingCard.tsx';
-import { CalendarGrid } from '../../components/CalendarGrid.tsx';
-import { ServiceUserToggle } from '../../components/search/ServiceUserToggle.tsx';
+import { Pagination } from '../../common/layout/Pagination';
+import { AvatarIcon } from '../../common/ui/AvatarIcon.tsx';
+import { UserMenu } from '../../common/layout/UserMenu';
+import { SearchBar } from '../../features/search/SearchBar';
+import { Badge } from '../../common/ui/Badge.tsx';
+import { Breadcrumb } from '../../common/layout/BreadCrumb';
+import { FilterBar } from '../../features/search/FilterBar';
+import { ServiceCard } from '../../features/listings/ServiceCard.tsx';
+import { BookingCard, type BookingSummary, type BookingDetails } from '../../features/bookings/BookingCard.tsx';
+import { CalendarGrid } from '../../features/bookings/CalendarGrid.tsx';
+import { ServiceUserToggle } from '../../features/search/ServiceUserToggle';
 
 
 
