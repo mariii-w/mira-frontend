@@ -44,23 +44,35 @@ E-Mail: user@example.com
 
 ## Accessibility
 
-The project follows WCAG 2.1 AA as a baseline:
+The project follows WCAG 2.1 AA as a baseline.
 
-- Focus-visible styles applied globally via `:focus-visible`, with a fallback for older browsers
-- `prefers-reduced-motion` media query disables all animations, with an in-app override toggle
-- User-facing accessibility toggles — **Leichte Sprache** (easy-read German) and **Reduce motion** — accessible from the header `AccessibilityPanel`
-- Preferences are persisted via the Zustand store (`stores/accessibility.ts`) and mirrored onto `<html data-easy-read>` / `<html data-reduced-motion>` so CSS reacts
-- Custom `Popover` and `Switch` primitives include full keyboard navigation (Tab, Shift+Tab, Escape) and ARIA wiring
-- Icon-only buttons require `aria-label` (enforced by a dev-mode warning)
-- Loading state uses `aria-busy` and a visually-hidden "Loading…" text
-- Semantic HTML throughout: `<nav>`, `<main>`, `<section>`, `<article>`, `<ul>`/`<li>` lists with `aria-labelledby` on every section
-- Heading fonts use [Atkinson Hyperlegible](https://brailleinstitute.org/freefont), designed for low-vision readers
+| Area              | Implementation                                                                                                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Visual & motion    | Global `:focus-visible` styles (with a fallback for older browsers); `prefers-reduced-motion` disables animations; heading font is [Atkinson Hyperlegible](https://brailleinstitute.org/freefont), built for low-vision readers |
+| User preferences  | **Easy Language** (easy and simple-read text) and **Reduce motion** toggles in the header `AccessibilityPanel`, persisted via Zustand (`stores/accessibility.ts`) and mirrored onto `<html data-easy-read>` / `<html data-reduced-motion>` |
+| Keyboard & focus   | `Modal`, `Popover`, and `Switch` support full keyboard navigation (Tab, Shift+Tab, Escape); `Modal` traps focus while open and restores it on close; the booking `CalendarGrid` uses roving tabindex (arrow keys, Home, End) |
+| Live updates       | Booking status and duration updates use `aria-live="polite"`; credential loading states use `role="status"` with `aria-live="polite"`                                            |
+| Tooltips           | Verified-credential badges use a `role="tooltip"` plus `aria-describedby` pattern, reachable by hover, focus, and keyboard alike                                                    |
+| Forms              | `Input` and `Textarea` mark errors with `aria-invalid` and `aria-describedby`, announced via `role="alert"`; required fields are flagged on `Label`                                |
+| Icons & loading    | Icon-only buttons require `aria-label` (a dev-mode warning catches missing ones); decorative icons are `aria-hidden`; loading states use `aria-busy` plus visually-hidden `sr-only` text |
+| Semantic HTML      | `<nav>`, `<main>`, `<section>`, and `<article>` throughout, with labelled `<ul>`/`<li>` lists and `aria-labelledby` on every section                                                 |
 
-## Design Tokens
+### Automated Accessibility Testing
+
+Accessibility isn't only checked by hand. The CI pipeline runs an automated [`axe-core`](https://github.com/dequelabs/axe-core) scan on every push and merge request, as its own `accessibility` stage alongside the regular unit tests.
+
+| Check                        | What it does                                                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `npm run test:a11y`          | Runs `src/__tests__/components.a11y.test.tsx`, which scans 20+ component states with axe, under its own Vitest config (`vite.a11y.config.ts`) |
+| `npm run check:routes-no-html` | A separate `accessibility-route-check` stage that fails the build if a route renders raw HTML instead of the shared, tested component library |
+
+## Design System
+
+### Design Tokens
 
 Design tokens are defined in `src/globals.css` using Tailwind CSS v4's `@theme` block and are available as Tailwind utilities throughout the app.
 
-### Colors
+#### Colors
 
 | Token        | Hex       | Role                |
 | ------------ | --------- | ------------------- |
@@ -77,7 +89,7 @@ Design tokens are defined in `src/globals.css` using Tailwind CSS v4's `@theme` 
 
 Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `border`, `muted`) are also defined.
 
-### Typography
+#### Typography
 
 | Token   | Size       | Font                        |
 | ------- | ---------- | --------------------------- |
@@ -86,6 +98,16 @@ Semantic aliases (`background`, `foreground`, `primary`, `accent`, `surface`, `b
 | `body`  | `1rem`     | Lexend                      |
 | `small` | `0.875rem` | Lexend                      |
 | `label` | `0.75rem`  | Lexend (500)                |
+
+#### Shape & Spacing
+
+There is no custom spacing or radius scale in `@theme`. Both use Tailwind's default utilities, kept consistent by convention rather than a token:
+
+- Radius: `rounded-lg` for most surfaces, `rounded-full` for pills and buttons, `rounded-2xl` for cards and modals
+- Spacing: standard Tailwind scale (`p-3`/`p-4`, `gap-2`/`gap-3`, etc.)
+- Breakpoints: Tailwind defaults (`sm`/`md`/`lg`/`xl`). `lg` (1024px) is the standard mobile/desktop cutoff app-wide
+
+Icons are standardized on [lucide-react](https://lucide.dev) throughout.
 
 ---
 
@@ -169,26 +191,36 @@ npm run dev
 
 ### CI/CD Pipeline
 
-The project uses **GitLab CI** (`.gitlab-ci.yml`). The pipeline runs on every push and merge request and has two sequential stages.
+The project uses **GitLab CI** (`.gitlab-ci.yml`). The pipeline runs on every push and merge request across six sequential stages, all on the `node:22` Docker image.
 
 ```
 push / MR
     │
-    ├── build   →  npm ci && npm run build
+    ├── build                       npm run build
     │
-    └── test    →  npm ci && npm run test:ci
+    ├── test                        npm run test:ci
+    │
+    ├── accessibility-route-check   npm run check:routes-no-html
+    │
+    ├── accessibility               npm run test:a11y
+    │
+    ├── lint                        npm run lint
+    │
+    └── release (tags only)         publish
 ```
 
-Both jobs run on the `node:22` Docker image.
-
-The `feature/runner-test` branch was used to verify the GitLab Runner was connected and working before wiring up real build and test jobs.
+The `accessibility-route-check` and `accessibility` stages were added after the initial build/test setup, as part of the accessibility work described above. The `feature/runner-test` branch was used to verify the GitLab Runner was connected and working before wiring up the real jobs.
 
 #### Pipeline jobs
 
-| Job     | Stage | Command                     | Purpose                                  |
-| ------- | ----- | --------------------------- | ---------------------------------------- |
-| `build` | build | `npm ci && npm run build`   | TypeScript check + Vite production build |
-| `test`  | test  | `npm ci && npm run test:ci` | Vitest unit tests with V8 coverage       |
+| Job                          | Stage                       | Command                       | Purpose                                                      |
+| ----------------------------- | ---------------------------- | ------------------------------ | -------------------------------------------------------------- |
+| `build`                      | build                        | `npm run build`               | TypeScript check and Vite production build                    |
+| `test`                       | test                          | `npm run test:ci`             | Vitest unit tests with V8 coverage                             |
+| `accessibility-route-check`  | accessibility-route-check    | `npm run check:routes-no-html`| Fails if a route renders raw HTML instead of shared components |
+| `accessibility`              | accessibility                 | `npm run test:a11y`           | Axe-core accessibility scans, with their own coverage report  |
+| `lint`                       | lint                          | `npm run lint`                | ESLint                                                         |
+| `publish`                    | release                       | `./publish`                   | Builds and publishes a Docker image, tagged releases only     |
 
 ---
 
