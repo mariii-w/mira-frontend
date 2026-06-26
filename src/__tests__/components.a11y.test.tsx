@@ -3417,9 +3417,11 @@ describe("component accessibility", () => {
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /credential type/i }));
     });
+    const fileInput = document.querySelector<HTMLInputElement>("#credential-evidence-input");
+    expect(fileInput).toBeInTheDocument();
     await act(async () => {
       fireEvent.click(screen.getByText(/identity check/i));
-      fireEvent.change(screen.getByLabelText(/choose file/i), {
+      fireEvent.change(fileInput!, {
         target: {
           files: [new File(["bad"], "notes.txt", { type: "text/plain" })],
         },
@@ -3428,7 +3430,7 @@ describe("component accessibility", () => {
     await expectNoAxeViolations(document.body);
 
     await act(async () => {
-      fireEvent.change(screen.getByLabelText(/choose file/i), {
+      fireEvent.change(fileInput!, {
         target: {
           files: [new File(["ok"], "id.png", { type: "image/png" })],
         },
@@ -3687,7 +3689,7 @@ describe("component accessibility", () => {
     );
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("switch", { name: /visible/i }));
+      fireEvent.click(screen.getByRole("switch", { name: /show identity check on public profile/i }));
     });
     expect(onVisibilityChange).toHaveBeenCalledWith("credential-1", true);
 

@@ -13,20 +13,23 @@ describe('<InfoPage />', () => {
     render(<InfoPage page={INFO_PAGES.accessibility} />)
 
     expect(
-      screen.getByRole('heading', { name: 'Accessibility at Mira' }),
+      screen.getByRole('heading', { name: 'Accessibility Statement for Mira' }),
     ).toBeInTheDocument()
-    expect(screen.getByText(/Accessibility is part of the way the project is built/i)).toBeInTheDocument()
-    expect(screen.getByText(/How Mira supports accessibility/i)).toBeInTheDocument()
+    expect(screen.getByText(/Mira is designed to be accessible and usable/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Current accessibility status' })).toBeInTheDocument()
     expect(screen.getByText('Easy Language')).toBeInTheDocument()
     expect(screen.getByText('Reduced Motion')).toBeInTheDocument()
     expect(screen.getByText('Image descriptions')).toBeInTheDocument()
     expect(screen.getByText('Accessibility panel')).toBeInTheDocument()
-    expect(screen.getByText(/accessibility panel directly in the navigation bar/i)).toBeInTheDocument()
-    expect(screen.getByText(/service descriptions and user bios can be shown in Easy Language/i)).toBeInTheDocument()
-    expect(screen.getByText(/you can use Reduced Motion/i)).toBeInTheDocument()
+    expect(screen.getByText(/accessibility panel in the navigation bar/i)).toBeInTheDocument()
+    expect(screen.getByText(/Some service descriptions and user biographies can be displayed in Easy Language/i)).toBeInTheDocument()
+    expect(screen.getByText(/Mira includes a Reduced Motion setting/i)).toBeInTheDocument()
     expect(
       screen.getByText(/AI-supported alternative text descriptions/i),
     ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Known accessibility limitations' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Feedback and contact' })).toBeInTheDocument()
+    expect(screen.getByText('This accessibility statement was last updated on 26 June 2026.')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'mira.accessibility@gmail.com' })).toHaveAttribute(
       'href',
       'mailto:mira.accessibility@gmail.com',
