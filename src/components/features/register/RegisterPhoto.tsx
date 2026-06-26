@@ -142,15 +142,16 @@ export function RegisterPhoto({
             type="file"
             accept="image/jpeg,image/png"
             aria-label="Choose photo"
+            aria-describedby={["photo-hint", error ? "photo-error" : undefined].filter(Boolean).join(" ")}
             className="sr-only"
             onChange={handleFileChange}
           />
-          <p className="text-small text-muted">JPG or PNG, max 5 MB.</p>
+          <p id="photo-hint" className="text-small text-muted">JPG or PNG, max 5 MB.</p>
         </div>
       </div>
 
       {error && (
-        <p role="alert" className="text-small text-red-600">
+        <p id="photo-error" role="alert" className="text-small text-red-600">
           {error}
         </p>
       )}

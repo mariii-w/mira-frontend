@@ -1,4 +1,4 @@
-import { useState, useRef, type FormEvent, type ChangeEvent } from "react";
+import { useState, useRef, useEffect, type FormEvent, type ChangeEvent } from "react";
 import { Plus, X, ArrowLeft } from "lucide-react";
 import { Button } from "../../common/ui/Button";
 import { Input } from "../../common/ui/Input";
@@ -28,41 +28,41 @@ interface CreateListingProps {
 type SubmitAction = "save" | "publish";
 
 function validateTitle(v: string) {
-  if (!v.trim()) return "Required.";
-  if (v.trim().length < 3) return "At least 3 characters.";
-  if (v.length > 120) return "Maximum 120 characters.";
+  if (!v.trim()) return "Title is required.";
+  if (v.trim().length < 3) return "Title must be at least 3 characters.";
+  if (v.length > 120) return "Title must be 120 characters or fewer.";
   return null;
 }
 function validateDescription(v: string) {
-  if (!v.trim()) return "Required.";
-  if (v.trim().length < 10) return "At least 10 characters.";
-  if (v.length > 2000) return "Maximum 2000 characters.";
+  if (!v.trim()) return "Description is required.";
+  if (v.trim().length < 10) return "Description must be at least 10 characters.";
+  if (v.length > 2000) return "Description must be 2000 characters or fewer.";
   return null;
 }
 function validatePrice(v: string) {
-  if (!v.trim()) return "Required.";
+  if (!v.trim()) return "Hourly rate is required.";
   const n = Number(v);
-  if (isNaN(n) || n < 0) return "Must be a positive number.";
+  if (isNaN(n) || n < 0) return "Hourly rate must be a positive number.";
   return null;
 }
 function validateStreet(v: string) {
-  if (!v.trim()) return "Required.";
-  if (v.length > 120) return "Maximum 120 characters.";
+  if (!v.trim()) return "Street is required.";
+  if (v.length > 120) return "Street must be 120 characters or fewer.";
   return null;
 }
 function validateHouseNumber(v: string) {
-  if (!v.trim()) return "Required.";
-  if (v.length > 20) return "Maximum 20 characters.";
+  if (!v.trim()) return "House number is required.";
+  if (v.length > 20) return "House number must be 20 characters or fewer.";
   return null;
 }
 function validatePostalCode(v: string) {
-  if (!v) return "Required.";
-  if (!/^\d{5}$/.test(v)) return "Must be exactly 5 digits.";
+  if (!v) return "Postal code is required.";
+  if (!/^\d{5}$/.test(v)) return "Postal code must be exactly 5 digits.";
   return null;
 }
 function validateCity(v: string) {
-  if (!v.trim()) return "Required.";
-  if (v.length > 120) return "Maximum 120 characters.";
+  if (!v.trim()) return "City is required.";
+  if (v.length > 120) return "City must be 120 characters or fewer.";
   return null;
 }
 
@@ -105,6 +105,15 @@ export function CreateListing({
   const houseNumberRef = useRef<HTMLInputElement>(null);
   const postalCodeRef = useRef<HTMLInputElement>(null);
   const cityRef = useRef<HTMLInputElement>(null);
+  const tagErrorRef = useRef<HTMLParagraphElement>(null);
+  const focusTagError = useRef(false);
+
+  useEffect(() => {
+    if (focusTagError.current && tagErrorRef.current) {
+      tagErrorRef.current.focus();
+      focusTagError.current = false;
+    }
+  }, [tagError]);
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const picked = Array.from(e.target.files ?? []).slice(
@@ -155,7 +164,11 @@ export function CreateListing({
         pcErr ? postalCodeRef.current :
         cErr ? cityRef.current :
         null;
-      firstInvalid?.focus();
+      if (firstInvalid) {
+        firstInvalid.focus();
+      } else {
+        focusTagError.current = true;
+      }
       return null;
     }
 
@@ -242,6 +255,7 @@ export function CreateListing({
               onBlur={() => setTitleError(validateTitle(title))}
               maxLength={120}
               placeholder="e.g. PC support and laptop help"
+              required
               error={titleError}
             />
           </div>
@@ -262,6 +276,7 @@ export function CreateListing({
               maxLength={2000}
               rows={6}
               placeholder="Describe what you offer, your experience and availability…"
+              required
               error={descriptionError}
             />
           </div>
@@ -281,6 +296,7 @@ export function CreateListing({
               onChange={(e) => setPrice(e.target.value)}
               onBlur={() => setPriceError(validatePrice(price))}
               placeholder="e.g. 25"
+              required
               error={priceError}
               className="max-w-xs"
             />
@@ -364,6 +380,7 @@ export function CreateListing({
                   onChange={(e) => setStreet(e.target.value)}
                   onBlur={() => setStreetError(validateStreet(street))}
                   placeholder="Street name"
+                  required
                   error={streetError}
                 />
               </div>
@@ -380,6 +397,7 @@ export function CreateListing({
                     setHouseNumberError(validateHouseNumber(houseNumber))
                   }
                   placeholder="12a"
+                  required
                   error={houseNumberError}
                 />
               </div>
@@ -403,6 +421,7 @@ export function CreateListing({
                   inputMode="numeric"
                   maxLength={5}
                   placeholder="12345"
+                  required
                   error={postalCodeError}
                 />
               </div>
@@ -417,6 +436,7 @@ export function CreateListing({
                   onChange={(e) => setCity(e.target.value)}
                   onBlur={() => setCityError(validateCity(city))}
                   placeholder="Berlin"
+                  required
                   error={cityError}
                 />
               </div>
@@ -464,8 +484,10 @@ export function CreateListing({
             />
             {tagError && (
               <p
+                ref={tagErrorRef}
                 id="listing-tags-error"
                 role="alert"
+                tabIndex={-1}
                 className="text-small text-red-600"
               >
                 {tagError}

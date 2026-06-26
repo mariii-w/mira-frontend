@@ -52,41 +52,41 @@ interface EditListingProps {
 }
 
 function validateTitle(v: string) {
-  if (!v.trim()) return "Required.";
-  if (v.trim().length < 3) return "At least 3 characters.";
-  if (v.length > 120) return "Maximum 120 characters.";
+  if (!v.trim()) return "Title is required.";
+  if (v.trim().length < 3) return "Title must be at least 3 characters.";
+  if (v.length > 120) return "Title must be 120 characters or fewer.";
   return null;
 }
 function validateDescription(v: string) {
-  if (!v.trim()) return "Required.";
-  if (v.trim().length < 10) return "At least 10 characters.";
-  if (v.length > 2000) return "Maximum 2000 characters.";
+  if (!v.trim()) return "Description is required.";
+  if (v.trim().length < 10) return "Description must be at least 10 characters.";
+  if (v.length > 2000) return "Description must be 2000 characters or fewer.";
   return null;
 }
 function validatePrice(v: string) {
-  if (!v.trim()) return "Required.";
+  if (!v.trim()) return "Hourly rate is required.";
   const n = Number(v);
-  if (isNaN(n) || n < 0) return "Must be a positive number.";
+  if (isNaN(n) || n < 0) return "Hourly rate must be a positive number.";
   return null;
 }
 function validateStreet(v: string) {
-  if (!v.trim()) return "Required.";
-  if (v.length > 120) return "Maximum 120 characters.";
+  if (!v.trim()) return "Street is required.";
+  if (v.length > 120) return "Street must be 120 characters or fewer.";
   return null;
 }
 function validateHouseNumber(v: string) {
-  if (!v.trim()) return "Required.";
-  if (v.length > 20) return "Maximum 20 characters.";
+  if (!v.trim()) return "House number is required.";
+  if (v.length > 20) return "House number must be 20 characters or fewer.";
   return null;
 }
 function validatePostalCode(v: string) {
-  if (!v) return "Required.";
-  if (!/^\d{5}$/.test(v)) return "Must be exactly 5 digits.";
+  if (!v) return "Postal code is required.";
+  if (!/^\d{5}$/.test(v)) return "Postal code must be exactly 5 digits.";
   return null;
 }
 function validateCity(v: string) {
-  if (!v.trim()) return "Required.";
-  if (v.length > 120) return "Maximum 120 characters.";
+  if (!v.trim()) return "City is required.";
+  if (v.length > 120) return "City must be 120 characters or fewer.";
   return null;
 }
 
@@ -150,7 +150,16 @@ export function EditListing({
   const houseNumberRef = useRef<HTMLInputElement>(null);
   const postalCodeRef = useRef<HTMLInputElement>(null);
   const cityRef = useRef<HTMLInputElement>(null);
+  const tagErrorRef = useRef<HTMLParagraphElement>(null);
+  const focusTagError = useRef(false);
   const easyRead = useAccessibilityStore((s) => s.easyRead);
+
+  useEffect(() => {
+    if (focusTagError.current && tagErrorRef.current) {
+      tagErrorRef.current.focus();
+      focusTagError.current = false;
+    }
+  }, [tagError]);
 
   const hasVlmPending = existingImages.some(
     (img) =>
@@ -269,7 +278,11 @@ export function EditListing({
         pcErr ? postalCodeRef.current :
         cErr ? cityRef.current :
         null;
-      firstInvalid?.focus();
+      if (firstInvalid) {
+        firstInvalid.focus();
+      } else {
+        focusTagError.current = true;
+      }
       return;
     }
 
@@ -776,8 +789,10 @@ export function EditListing({
             />
             {tagError && (
               <p
+                ref={tagErrorRef}
                 id="listing-tags-error"
                 role="alert"
+                tabIndex={-1}
                 className="text-small text-red-600"
               >
                 {tagError}

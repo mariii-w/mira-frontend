@@ -593,6 +593,7 @@ export function BookingPage({
                     : "border-border",
                 ].join(" ")}
                 aria-describedby="desc-hint"
+                aria-invalid={description.length > 0 && description.length < 10 ? true : undefined}
               />
               <p
                 id="desc-hint"
@@ -660,9 +661,19 @@ export function BookingPage({
               </p>
             </div>
           </div>
+          {!canSubmit && (
+            <span id="booking-submit-hint" className="sr-only">
+              {[
+                !selectedSlot && "Select a date and time.",
+                !locationType && "Select a location type.",
+                description.length < 10 && "Description must be at least 10 characters.",
+              ].filter(Boolean).join(" ")}
+            </span>
+          )}
           <button
             type="button"
             disabled={!canSubmit || bookingPending}
+            aria-describedby={!canSubmit ? "booking-submit-hint" : undefined}
             onClick={() => {
               if (!selectedSlot || !locationType) return;
               onCreateBooking({

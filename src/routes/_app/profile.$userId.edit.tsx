@@ -23,60 +23,60 @@ export const Route = createFileRoute("/_app/profile/$userId/edit")({
     component: EditProfilePage,
 });
 
-function validateName(value: string): string | null {
+function validateName(value: string, label: string): string | null {
     const v = value.trim();
-    if (!v) return "Required.";
-    if (v.length > 100) return "Maximum 100 characters.";
+    if (!v) return `${label} is required.`;
+    if (v.length > 100) return `${label} must be 100 characters or fewer.`;
     if (!/^[A-Za-zÄÖÜäöü](?:[^0-9]*[^0-9\s])?$/.test(v)) {
-        return "No digits. Must not start or end with a space.";
+        return `${label} must not contain digits or start/end with a space.`;
     }
     return null;
 }
 
 function validateUsername(value: string): string | null {
-    if (!value) return "Required.";
-    if (value.length < 3) return "Minimum 3 characters.";
-    if (value.length > 50) return "Maximum 50 characters.";
+    if (!value) return "Username is required.";
+    if (value.length < 3) return "Username must be at least 3 characters.";
+    if (value.length > 50) return "Username must be 50 characters or fewer.";
     if (!/^[a-z0-9_]+$/.test(value)) {
-        return "Only lowercase letters, digits, and underscores.";
+        return "Username may only contain lowercase letters, digits, and underscores.";
     }
     return null;
 }
 
 function validatePostalCode(value: string): string | null {
-    if (!value) return "Required.";
-    if (!/^[0-9]{5}$/.test(value)) return "Must be exactly 5 digits.";
+    if (!value) return "Postal code is required.";
+    if (!/^[0-9]{5}$/.test(value)) return "Postal code must be exactly 5 digits.";
     return null;
 }
 
 function validateCity(value: string): string | null {
-    if (!value.trim()) return "Required.";
-    if (value.length > 100) return "Maximum 100 characters.";
+    if (!value.trim()) return "City is required.";
+    if (value.length > 100) return "City must be 100 characters or fewer.";
     if (!/^[A-Za-zÄÖÜäöüß\s-]+$/.test(value.trim())) {
-        return "No digits or special characters.";
+        return "City must not contain digits or special characters.";
     }
     return null;
 }
 
 function validateSelfSummary(value: string): string | null {
-    if (value.length > 200) return "Maximum 200 characters.";
+    if (value.length > 200) return "Profile description must be 200 characters or fewer.";
     return null;
 }
 
 function validateStreet(value: string): string | null {
-    if (!value.trim()) return "Required.";
-    if (value.length > 100) return "Maximum 100 characters.";
+    if (!value.trim()) return "Street is required.";
+    if (value.length > 100) return "Street must be 100 characters or fewer.";
     if (!/^[A-Za-zÄÖÜäöüß\s]+$/.test(value.trim())) {
-        return "No digits or special characters.";
+        return "Street must not contain digits or special characters.";
     }
     return null;
 }
 
 function validateHouseNumber(value: string): string | null {
-    if (!value.trim()) return "Required.";
-    if (value.length > 10) return "Maximum 10 characters.";
+    if (!value.trim()) return "House number is required.";
+    if (value.length > 10) return "House number must be 10 characters or fewer.";
     if (!/^[0-9]+[a-zA-Z]?$/.test(value.trim())) {
-        return "Must be a number, optionally followed by a letter (e.g. 43a).";
+        return "House number must be a number, optionally followed by a letter (e.g. 43a).";
     }
     return null;
 }
@@ -203,8 +203,8 @@ function EditProfilePage() {
 
         if (submitting) return;
 
-        const fnErr = validateName(firstName);
-        const lnErr = validateName(lastName);
+        const fnErr = validateName(firstName, 'First name');
+        const lnErr = validateName(lastName, 'Last name');
         const unErr = validateUsername(username);
         const ssErr = validateSelfSummary(selfSummary);
         const sErr = validateStreet(street);
@@ -304,8 +304,8 @@ function EditProfilePage() {
             onPostalCodeChange={setPostalCode}
             onCityChange={setCity}
             onIsPublicChange={setIsPublic}
-            onFirstNameBlur={() => setFirstNameError(validateName(firstName))}
-            onLastNameBlur={() => setLastNameError(validateName(lastName))}
+            onFirstNameBlur={() => setFirstNameError(validateName(firstName, 'First name'))}
+            onLastNameBlur={() => setLastNameError(validateName(lastName, 'Last name'))}
             onUsernameBlur={() => setUsernameError(validateUsername(username))}
             onSelfSummaryBlur={() =>
                 setSelfSummaryError(validateSelfSummary(selfSummary))
