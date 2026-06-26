@@ -4,7 +4,7 @@
 
 React + TypeScript frontend for the Mira platform. Built with Vite, Tailwind CSS v4, and TanStack Router.
 
-## Rückfragen
+## Questions
 
 If you have any problems or questions, please feel free to contact us:
 
@@ -12,7 +12,7 @@ Phone: +49 173 8694827
 
 Email: eganscha@hof-university.de
 
-## Questions
+## Figma
 
 <!-- Add Figma link here -->
 
