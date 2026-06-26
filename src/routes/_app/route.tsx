@@ -6,6 +6,7 @@ export const Route = createFileRoute("/_app")({
   component: AppLayout,
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 function AppLayout() {
   return (
     <>

@@ -1,5 +1,3 @@
-// src/components/Navbar.tsx
-//
 // Logged-out navbar variant
 // Logged-in variant
 

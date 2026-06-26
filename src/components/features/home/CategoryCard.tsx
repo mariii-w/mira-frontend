@@ -1,5 +1,3 @@
-// src/components/CategoryCard.tsx
-
 // Image with the category name overlaid
 
 import type { ButtonHTMLAttributes } from 'react';

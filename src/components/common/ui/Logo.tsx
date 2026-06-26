@@ -1,11 +1,11 @@
 import type { ImgHTMLAttributes } from 'react';
 
-import primaryUrl from '../assets/logos/primary.svg';
-import secondaryUrl from '../assets/logos/secondary.svg';
-import submarkUrl from '../assets/logos/submark.svg';
-import iconUrl from '../assets/logos/icon.svg';
-import blackUrl from '../assets/logos/black.svg';
-import whiteUrl from '../assets/logos/white.svg';
+import primaryUrl from '../../../assets/logos/primary.svg';
+import secondaryUrl from '../../../assets/logos/secondary.svg';
+import submarkUrl from '../../../assets/logos/submark.svg';
+import iconUrl from '../../../assets/logos/icon.svg';
+import blackUrl from '../../../assets/logos/black.svg';
+import whiteUrl from '../../../assets/logos/white.svg';
 
 export type LogoVariant =
   | 'primary'
