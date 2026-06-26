@@ -6,13 +6,13 @@ React + TypeScript frontend for the Mira platform. Built with Vite, Tailwind CSS
 
 ## Rückfragen
 
-Bei Problemen oder Unklarheiten können Sie uns jederzeit kontaktieren:
+If you have any problems or questions, please feel free to contact us:
 
-Telefon: +49 173 8694827
+Phone: +49 173 8694827
 
-E-Mail: eganscha@hof-university.de
+Email: eganscha@hof-university.de
 
-## Design
+## Questions
 
 <!-- Add Figma link here -->
 
@@ -20,7 +20,9 @@ E-Mail: eganscha@hof-university.de
 
 ## Demo
 
-The server shuts down after 15min inactivity and may take 1 minute to start up agin
+Note: The server shuts down after about 15 minutes of inactivity and may take up to 1 minute to start again.
+
+Please avoid excessive uploads or downloads, as we are using the free [Backblaze](https://www.backblaze.com/) tier. If you want to run load or limit tests, please contact us first so we can switch the S3 configuration to your own setup.
 
 > Render: https://mira-uni-deploy.onrender.com/
 > Stripe testing info
