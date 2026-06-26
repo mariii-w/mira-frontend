@@ -118,6 +118,7 @@ export function ServiceCard(
                         <div className='ml-auto shrink-0 flex items-center gap-3'>
                             <Link
                                 to={link}
+                                aria-label={`View service: ${label}`}
                                 className="relative inline-flex items-center justify-center gap-2 font-medium rounded-full cursor-pointer transition-colors duration-150 h-11 px-5 text-body bg-primary text-primary-foreground no-underline hover:bg-primary-hover active:bg-primary-hover [&_svg]:size-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                             >
                                 View service

@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { usePageTitle } from '../lib/usePageTitle'
 import { PrivateProfilePage } from '../components/PrivateProfilePage'
 import { PublicProfilePage } from '../components/PublicProfilePage'
 import { ProfilePageLoading, ProfilePageError } from '../components/ProfilePageLoadingError'
@@ -96,12 +97,15 @@ function Profile({ userId }: { userId: string }) {
         enabled: authReady && !isOwner && !!user,
     })
 
+    const userFirstName = user?.firstName ?? ''
+    const userLastName = user?.lastName ?? ''
+
+    usePageTitle(userFirstName && userLastName ? `${userFirstName} ${userLastName}` : '')
+
     if (!authReady || isLoading) return <ProfilePageLoading />
     if (error) return <ProfilePageError />
 
     const pictureUrl = user?.profileMedia ? mediaUrl(user.profileMedia.url) : undefined
-    const userFirstName = user?.firstName ?? ''
-    const userLastName = user?.lastName ?? ''
     const selfSummary = user?.selfSummary ?? ''
 
     const city = user

@@ -53,6 +53,7 @@ type EditProfileFormProps = {
   onCityBlur: () => void
   onSubmit: (e: FormEvent<HTMLFormElement>) => void
   onClose: () => void
+  photoSaved?: boolean
   onPhotoSelected: (e: ChangeEvent<HTMLInputElement>) => void
   onPhotoPopupClose: () => void
   onPhotoSave: () => void
@@ -85,6 +86,7 @@ export function EditProfileForm({
   uploadingPhoto,
   photoError,
   fileError,
+  photoSaved,
   onFirstNameChange,
   onLastNameChange,
   onUsernameChange,
@@ -198,30 +200,34 @@ export function EditProfileForm({
                 Edit profile
               </h1>
               <div className="flex flex-col items-center gap-1">
-                <div className="relative">
+                <button
+                  type="button"
+                  aria-label={`Profile picture: ${userPictureUrl ? `${userFirstName} ${userLastName} avatar` : 'no photo set'}. Activate to change.`}
+                  onClick={openPhotoPicker}
+                  className="relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-full"
+                >
                   <AvatarIcon
                     size={112}
                     firstName={userFirstName}
                     lastName={userLastName}
                     picture={userPictureUrl}
+                    aria-hidden
                   />
-                  <button
-                    type="button"
-                    aria-label="Change profile picture"
-                    onClick={openPhotoPicker}
-                    className="absolute -bottom-1 -right-3 inline-flex size-9 items-center justify-center rounded-full bg-charcoal text-cream border-2 border-linen"
+                  <span
+                    aria-hidden="true"
+                    className="absolute -bottom-1 -right-3 inline-flex size-9 items-center justify-center rounded-full bg-charcoal text-cream border-2 border-linen pointer-events-none"
                   >
                     <Camera size={18} />
-                  </button>
-                  <input
-                    ref={photoInputRef}
-                    type="file"
-                    accept="image/png, image/jpeg"
-                    className="hidden"
-                    onChange={onPhotoSelected}
-                  />
-                </div>
-                <span className="text-small font-medium text-foreground">Change Photo</span>
+                  </span>
+                </button>
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/png, image/jpeg"
+                  className="hidden"
+                  onChange={onPhotoSelected}
+                />
+                <span aria-hidden="true" className="text-small font-medium text-foreground">Change Photo</span>
               </div>
               {fileError && (
                 <p role="alert" className="text-small text-red-600 text-center">
@@ -375,6 +381,10 @@ export function EditProfileForm({
               </p>
             )}
 
+            <p role="status" aria-live="polite" className="sr-only">
+              {photoSaved ? "Profile photo saved." : ""}
+            </p>
+
             <div className="flex items-center justify-between pt-4 border-t border-border/30">
               <Button type="button" variant="ghost" size="md" onClick={onClose}>
                 Cancel
@@ -405,6 +415,7 @@ export function EditProfileForm({
             role="dialog"
             aria-modal="true"
             aria-labelledby="photo-popup-heading"
+            aria-describedby="photo-popup-description"
             className="relative flex w-full max-w-sm flex-col gap-5 rounded-2xl bg-linen border border-border p-6 shadow-xl"
           >
             <button
@@ -418,6 +429,10 @@ export function EditProfileForm({
             </button>
 
             <h2 id="photo-popup-heading" className="font-heading text-xl font-bold text-foreground">Profile picture</h2>
+
+            <p id="photo-popup-description" className="sr-only">
+              Preview of your selected profile picture. Save to apply or Cancel to discard.
+            </p>
 
             <img
               src={pendingPhotoPreviewUrl}
@@ -441,16 +456,21 @@ export function EditProfileForm({
               >
                 Cancel
               </Button>
-              <Button
-                type="button"
-                variant="primary"
-                size="md"
-                loading={uploadingPhoto}
-                trailingIcon={<Check />}
-                onClick={onPhotoSave}
-              >
-                Save
-              </Button>
+              <div className="flex items-center gap-3">
+                <span role="status" aria-live="polite" className="sr-only">
+                  {uploadingPhoto ? "Uploading photo…" : ""}
+                </span>
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  loading={uploadingPhoto}
+                  trailingIcon={<Check />}
+                  onClick={onPhotoSave}
+                >
+                  Save
+                </Button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { usePageTitle } from '../lib/usePageTitle'
 import { EditProfileForm } from '../components/EditProfileForm'
 import { useAuthStore } from '../stores/auth'
 import {
@@ -70,6 +71,7 @@ function validateHouseNumber(value: string): string | null {
 
 // eslint-disable-next-line react-refresh/only-export-components
 function EditProfilePage() {
+  usePageTitle('Edit Profile')
   const { userId } = Route.useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -112,6 +114,7 @@ function EditProfilePage() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [photoError, setPhotoError] = useState<string | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
+  const [photoSaved, setPhotoSaved] = useState(false)
 
   function validateFile(file: File): string | null {
     if (file.size > 5 * 1024 * 1024) return 'Image is too large. Max 5 MB.'
@@ -149,6 +152,8 @@ function EditProfilePage() {
       await uploadProfilePhoto(pendingPhoto.file)
       URL.revokeObjectURL(pendingPhoto.previewUrl)
       setPendingPhoto(null)
+      setPhotoSaved(true)
+      setTimeout(() => setPhotoSaved(false), 3000)
     } catch (e) {
       setPhotoError((e as UploadPhotoError).message)
     } finally {
@@ -241,6 +246,7 @@ function EditProfilePage() {
       uploadingPhoto={uploadingPhoto}
       photoError={photoError}
       fileError={fileError}
+      photoSaved={photoSaved}
       onFirstNameChange={setFirstName}
       onLastNameChange={setLastName}
       onUsernameChange={setUsername}

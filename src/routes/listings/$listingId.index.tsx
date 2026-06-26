@@ -14,6 +14,7 @@ import {
 import { ListingDetailPage } from "../../components/ListingDetailPage";
 import { useAccessibilityStore } from "../../stores/accessibility";
 import { useAuthStore } from "../../stores/auth";
+import { usePageTitle } from "../../lib/usePageTitle";
 
 export const Route = createFileRoute("/listings/$listingId/")({
   component: ListingDetailRoute,
@@ -48,6 +49,7 @@ function ListingDetailRoute() {
     error,
   } = useGetPublicListing(listingId);
   const listing = listingResponse?.status === 200 ? listingResponse.data : undefined;
+  usePageTitle(listing?.title ?? '')
 
   const authorId = listing?.author?.userId;
   const queryAuthorId = authorId ?? "";

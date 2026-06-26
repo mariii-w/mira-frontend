@@ -20,6 +20,7 @@ import {
 } from "../api/mira";
 import { useAuthStore } from "../stores/auth";
 import { requireProvider } from "../lib/requireAuth";
+import { usePageTitle } from "../lib/usePageTitle";
 import type {
   ListingDetails,
   ListingMediaPreview,
@@ -55,6 +56,7 @@ export function EditListingPage() {
   const user = useAuthStore((s) => s.user);
   const userId = user?.userId;
   const [listing, setListing] = useState<ListingDetails | null>(null);
+  usePageTitle(listing?.title ? `Edit – ${listing.title}` : 'Edit Service')
   const [loadError, setLoadError] = useState<string | null>(null);
   const [availableTags, setAvailableTags] = useState<ServiceTag[]>([]);
   const [tagsLoading, setTagsLoading] = useState(true);
@@ -216,8 +218,6 @@ export function EditListingPage() {
         );
       }
     }
-
-    await navigate({ to: "/my-listings" });
   }
 
   async function handleRemoveImage(mediaId: string) {

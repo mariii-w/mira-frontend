@@ -36,7 +36,6 @@ export function MyListingCard({ listing, onEdit }: MyListingCardProps) {
   return (
     <article
       aria-labelledby={headingId}
-      aria-describedby={`listing-desc-${listing.listingId}`}
       className="bg-surface rounded-2xl overflow-hidden shadow-sm border border-border/20 flex flex-col sm:flex-row"
     >
       {/* Image — full-width banner on mobile, fixed sidebar on sm+ */}

@@ -5,7 +5,7 @@ import { Modal } from './Modal'
 import { Button } from './Button'
 import type { CredentialType, CredentialTypeResponse } from '../api/model'
 
-const ALLOWED_EVIDENCE_TYPES = ['image/jpeg', 'image/png', 'application/pdf']
+const ALLOWED_EVIDENCE_TYPES = ['image/jpeg', 'image/png']
 
 interface SubmitCredentialModalProps {
   open: boolean
@@ -48,7 +48,7 @@ export function SubmitCredentialModal({
 
     if (!ALLOWED_EVIDENCE_TYPES.includes(picked.type)) {
       setFile(null)
-      setFileError('Choose a JPG, PNG, or PDF file.')
+      setFileError('Choose a JPG or PNG file.')
       return
     }
 
@@ -141,14 +141,17 @@ export function SubmitCredentialModal({
               ref={fileInputRef}
               id="credential-evidence-input"
               type="file"
-              accept="image/jpeg,image/png,application/pdf"
-              aria-label="Choose file"
+              accept="image/jpeg,image/png"
+              tabIndex={-1}
+              aria-hidden="true"
               className="sr-only"
               onChange={handleFileChange}
             />
-            {file && <p className="text-small text-muted truncate">{file.name}</p>}
+            <p role="status" aria-live="polite" className="text-small text-muted truncate">
+              {file ? file.name : ''}
+            </p>
           </div>
-          <p className="text-small text-muted">JPG, PNG, or PDF.</p>
+          <p className="text-small text-muted">JPG or PNG.</p>
         </div>
 
         {(fileError || errorMessage) && (

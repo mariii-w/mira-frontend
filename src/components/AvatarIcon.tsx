@@ -8,6 +8,7 @@ interface AvatarIconProps {
   size?: number
   bgColorClassName?: string
   className?: string
+  'aria-hidden'?: boolean | 'true' | 'false'
 }
 
 const BG_COLORS = [
@@ -33,6 +34,7 @@ export function AvatarIcon({
   size = 40,
   bgColorClassName,
   className,
+  'aria-hidden': ariaHidden,
 }: AvatarIconProps) {
   const [imgFailed, setImgFailed] = useState(false)
   const fullName = `${firstName ?? ''} ${lastName ?? ''}`.trim()
@@ -45,6 +47,7 @@ export function AvatarIcon({
         style={{ width: size, height: size }}
         className={`rounded-full object-cover block shrink-0 ${className ?? ''}`}
         onError={() => setImgFailed(true)}
+        aria-hidden={ariaHidden}
       />
     )
   }
@@ -58,7 +61,8 @@ export function AvatarIcon({
   return (
     <div
       role="img"
-      aria-label={fallbackLabel}
+      aria-label={ariaHidden ? undefined : fallbackLabel}
+      aria-hidden={ariaHidden}
       style={{
         width: size,
         height: size,

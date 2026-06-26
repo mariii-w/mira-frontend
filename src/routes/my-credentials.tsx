@@ -17,6 +17,7 @@ import { Credentials } from "../components/Credentials";
 import { SubmitCredentialModal } from "../components/SubmitCredentialModal";
 import { useAuthStore } from "../stores/auth";
 import { requireProvider } from "../lib/requireAuth";
+import { usePageTitle } from "../lib/usePageTitle";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/my-credentials")({
@@ -57,6 +58,7 @@ function findCredentialVerification(
 }
 
 export function MyCredentialsRoute() {
+  usePageTitle('My Credentials')
   const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
   const userId = user?.userId;

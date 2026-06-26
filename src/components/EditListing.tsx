@@ -137,6 +137,7 @@ export function EditListing({
   const [tagError, setTagError] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [actionSubmitting, setActionSubmitting] = useState(false);
   const [deleteConfirming, setDeleteConfirming] = useState(false);
@@ -276,6 +277,8 @@ export function EditListing({
       }
 
       await onSubmit(values);
+      setSaveSuccess(true);
+      void onBack();
     } catch (err) {
       setServerError((err as Error).message);
       setSubmitting(false);
@@ -783,8 +786,8 @@ export function EditListing({
                   >
                     Delete service
                   </Button>
-                  <span aria-live="polite" className="text-small text-muted">
-                    {submitting ? "Saving…" : ""}
+                  <span role="status" aria-live="polite" className="text-small text-muted">
+                    {submitting ? "Saving…" : saveSuccess ? "Saved!" : ""}
                   </span>
                 </div>
               ) : (

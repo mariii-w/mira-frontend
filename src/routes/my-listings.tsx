@@ -14,6 +14,7 @@ import { MyListings, type StatusFilter } from "../components/MyListings";
 import type { MyListingSummary } from "../components/MyListingCard";
 import { useAuthStore } from "../stores/auth";
 import { requireProvider } from "../lib/requireAuth";
+import { usePageTitle } from "../lib/usePageTitle";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const Route = createFileRoute("/my-listings")({
@@ -52,6 +53,7 @@ function getStatusCounts(listings: MyListingSummary[]) {
 }
 
 export function MyListingsRoute() {
+  usePageTitle('My Services')
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const userId = user?.userId;

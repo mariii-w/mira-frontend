@@ -147,6 +147,14 @@ export function MyListings({
             />
           </div>
 
+          <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+            {!loading && !error
+              ? listings.length === 0
+                ? `No${statusFilter === "ALL" ? "" : ` ${STATUS_FILTERS.find((f) => f.value === statusFilter)?.label.toLowerCase()}`} services`
+                : `${listings.length} ${statusFilter === "ALL" ? "" : `${STATUS_FILTERS.find((f) => f.value === statusFilter)?.label.toLowerCase()} `}service${listings.length === 1 ? "" : "s"}`
+              : ""}
+          </p>
+
           {loading && (
             <div
               role="status"
