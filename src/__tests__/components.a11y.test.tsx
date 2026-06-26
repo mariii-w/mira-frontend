@@ -3321,6 +3321,7 @@ describe("component accessibility", () => {
   it("ListingProviderCard standalone state has no automated accessibility violations", async () => {
     const { container } = render(
       <ListingProviderCard
+        authorId="user-1"
         authorName="Mira"
         authorSurname="Muster"
         price={24}
@@ -3719,6 +3720,7 @@ describe("component accessibility", () => {
   it("ListingProviderCard tooltip mouse and blur states have no automated accessibility violations", async () => {
     const { container } = render(
       <ListingProviderCard
+        authorId="user-1"
         authorName="Mira"
         authorSurname="Muster"
         price={24}
