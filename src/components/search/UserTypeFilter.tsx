@@ -62,7 +62,7 @@ export function UserTypeFilter({
                 <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${option.dotClassName}`} />
               )}
               <span>{option.label}</span>
-              <span className="inline-flex min-w-5 h-5 items-center justify-center rounded-full bg-grey-olive px-1.5 text-label text-cream">
+              <span className="inline-flex min-w-5 h-5 items-center justify-center rounded-full bg-muted px-1.5 text-label text-cream">
                 {counts[option.role]}
               </span>
             </button>

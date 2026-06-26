@@ -83,7 +83,7 @@ function ExceptionRow({
           <p className="text-sm font-semibold text-foreground">{formatDate(ex.date)}</p>
           <span className={[
             'mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold',
-            ex.exceptionType === 'BLOCKED' ? 'bg-plum/15 text-plum' : 'bg-forest/15 text-forest',
+            ex.exceptionType === 'BLOCKED' ? 'bg-plum/15 text-plum' : 'bg-forest/5 text-forest',
           ].join(' ')}>
             {ex.exceptionType === 'BLOCKED' ? 'Blocked' : 'Extra availability'}
           </span>

@@ -33,7 +33,7 @@ export function ChatInbox({ chats, selectedChatId, onSelectChat }: ChatInboxProp
                                 <p className={`truncate ${chat.unread ? "font-bold" : "font-medium"}`}>
                                     {chat.firstName} {chat.lastName}
                                 </p>
-                                <span className="text-xs text-black/50 shrink-0 ml-2">{chat.timestamp}</span>
+                                <span className="text-xs text-muted shrink-0 ml-2">{chat.timestamp}</span>
                             </div>
                             <p className={`text-sm truncate ${chat.unread ? "font-semibold text-black" : "text-black/60"}`}>
                                 {chat.lastMessage}

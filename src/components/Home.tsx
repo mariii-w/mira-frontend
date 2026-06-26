@@ -305,7 +305,7 @@ export function Home() {
                 Get started
               </Button>
               {isLoggedIn && (
-                <p className="text-small text-foreground/60 text-center -mt-1">
+                <p className="text-small text-foreground/70 text-center -mt-1">
                   You're already signed in.
                 </p>
               )}
