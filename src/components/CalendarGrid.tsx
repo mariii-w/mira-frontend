@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -11,11 +12,26 @@ function getFirstWeekday(year: number, month: number) {
   return day === 0 ? 6 : day - 1;
 }
 
+function dateKey(date: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`;
+}
+
+function isSameDate(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
 export interface CalendarGridProps {
   year: number;
   month: number;
+  activeDate?: Date;
   onMonthChange: (year: number, month: number) => void;
-  renderDay: (date: Date) => React.ReactNode;
+  onActiveDateChange?: (date: Date) => void;
+  renderDay: (date: Date, isActive: boolean) => React.ReactNode;
   minDate?: Date;
   maxDate?: Date;
 }
@@ -23,13 +39,87 @@ export interface CalendarGridProps {
 export function CalendarGrid({
   year,
   month,
+  activeDate,
   onMonthChange,
+  onActiveDateChange,
   renderDay,
   minDate,
   maxDate,
 }: CalendarGridProps) {
+  const gridRef = useRef<HTMLDivElement>(null);
   const daysInMonth = getDaysInMonth(year, month);
   const leadingBlanks = getFirstWeekday(year, month);
+
+  const rovingEnabled = activeDate !== undefined && onActiveDateChange !== undefined;
+
+  const effectiveActiveDate =
+    rovingEnabled && activeDate
+      ? activeDate.getFullYear() === year && activeDate.getMonth() === month - 1
+        ? activeDate
+        : new Date(year, month - 1, 1)
+      : undefined;
+
+  useEffect(() => {
+    if (!effectiveActiveDate) return;
+    if (!gridRef.current?.contains(document.activeElement)) return;
+    const target = gridRef.current.querySelector<HTMLElement>(
+      `[data-date="${dateKey(effectiveActiveDate)}"] button`,
+    );
+    target?.focus();
+  }, [year, month, effectiveActiveDate]);
+
+  function moveTo(date: Date) {
+    if (!onActiveDateChange) return;
+    if (
+      minDate &&
+      date <
+        new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())
+    )
+      return;
+    if (
+      maxDate &&
+      date >
+        new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate())
+    )
+      return;
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1) {
+      onMonthChange(date.getFullYear(), date.getMonth() + 1);
+    }
+    onActiveDateChange(date);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (!effectiveActiveDate) return;
+    let next: Date;
+    switch (e.key) {
+      case "ArrowLeft":
+        next = new Date(effectiveActiveDate);
+        next.setDate(next.getDate() - 1);
+        break;
+      case "ArrowRight":
+        next = new Date(effectiveActiveDate);
+        next.setDate(next.getDate() + 1);
+        break;
+      case "ArrowUp":
+        next = new Date(effectiveActiveDate);
+        next.setDate(next.getDate() - 7);
+        break;
+      case "ArrowDown":
+        next = new Date(effectiveActiveDate);
+        next.setDate(next.getDate() + 7);
+        break;
+      case "Home":
+        next = new Date(year, month - 1, 1);
+        break;
+      case "End":
+        next = new Date(year, month - 1, daysInMonth);
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    moveTo(next);
+  }
 
   function prevMonth() {
     if (month === 1) onMonthChange(year - 1, 12);
@@ -99,7 +189,13 @@ export function CalendarGrid({
         </button>
       </div>
 
-      <div className="flex flex-col gap-1" role="grid" aria-label={label}>
+      <div
+        ref={gridRef}
+        className="flex flex-col gap-1"
+        role="grid"
+        aria-label={`Calendar, ${label}`}
+        onKeyDown={handleKeyDown}
+      >
         <div className="grid grid-cols-7" role="row">
           {WEEKDAYS.map((d) => (
             <div
@@ -116,8 +212,20 @@ export function CalendarGrid({
           <div className="grid grid-cols-7 gap-1" role="row" key={weekIndex}>
             {week.map((date, dayIndex) =>
               date ? (
-                <div key={date.toISOString()} role="gridcell">
-                  {renderDay(date)}
+                <div
+                  key={date.toISOString()}
+                  role="gridcell"
+                  {...(effectiveActiveDate
+                    ? { "aria-selected": isSameDate(date, effectiveActiveDate) }
+                    : {})}
+                  data-date={dateKey(date)}
+                >
+                  {renderDay(
+                    date,
+                    effectiveActiveDate
+                      ? isSameDate(date, effectiveActiveDate)
+                      : false,
+                  )}
                 </div>
               ) : (
                 <div
