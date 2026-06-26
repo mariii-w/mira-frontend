@@ -29,6 +29,16 @@ const ACTIONABLE_BOOKING_STATUSES = new Set<BookingStatus>([
   "CONFIRMED",
 ]);
 
+const PROVIDER_ACTIONABLE_BOOKING_STATUSES = new Set<BookingStatus>([
+  "PENDING",
+]);
+
+function isActionableBookingStatus(status: BookingStatus, isProvider: boolean) {
+  return isProvider
+    ? PROVIDER_ACTIONABLE_BOOKING_STATUSES.has(status)
+    : ACTIONABLE_BOOKING_STATUSES.has(status);
+}
+
 export function Navbar() {
   const user = useAuthStore((s) => s.user);
   const userId = user?.userId;
@@ -67,7 +77,7 @@ export function Navbar() {
 
       setNotificationCount(
         response.data.items.filter((booking) =>
-          ACTIONABLE_BOOKING_STATUSES.has(booking.status),
+          isActionableBookingStatus(booking.status, isProvider),
         ).length,
       );
     }
@@ -77,7 +87,7 @@ export function Navbar() {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [isProvider, userId]);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-charcoal">
