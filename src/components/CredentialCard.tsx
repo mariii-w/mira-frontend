@@ -13,7 +13,7 @@ type StatusKind = 'verified' | 'verified-muted' | 'pending' | 'denied' | 'expire
 const STATUS_STYLE: Record<StatusKind, { bar: string; text: string }> = {
   verified: { bar: 'bg-forest', text: 'text-forest font-semibold' },
   'verified-muted': { bar: 'bg-grey-olive', text: 'text-muted' },
-  pending: { bar: 'bg-amber-500', text: 'text-amber-600 font-medium' },
+  pending: { bar: 'bg-amber-500', text: 'text-amber-700 font-medium' },
   denied: { bar: 'bg-red-600', text: 'text-red-600 font-semibold' },
   expired: { bar: 'bg-grey-olive', text: 'text-muted font-medium' },
 }

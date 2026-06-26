@@ -292,8 +292,8 @@ export function CalendarPage({
           </div>
         )}
 
-        <div className="flex gap-6 items-start">
-          <div className="flex-3 rounded-2xl border border-border bg-surface p-6">
+        <div className="flex flex-col lg:flex-row gap-6 lg:items-start">
+          <div className="flex-3 min-w-0 rounded-2xl border border-border bg-surface p-6">
             <div className="mb-3 flex items-center justify-between">
               {isProvider && (
                 <div
@@ -335,8 +335,10 @@ export function CalendarPage({
             <CalendarGrid
               year={year}
               month={month}
+              activeDate={selectedDate}
               onMonthChange={onMonthChange}
-              renderDay={(date) => {
+              onActiveDateChange={onSelectedDateChange}
+              renderDay={(date, isActive) => {
                 const isToday =
                   date.getDate() === today.getDate() &&
                   date.getMonth() === today.getMonth() &&
@@ -398,6 +400,7 @@ export function CalendarPage({
                       .filter(Boolean)
                       .join(". ")}
                     aria-pressed={isSelected}
+                    tabIndex={isActive ? 0 : -1}
                     className={[
                       "w-full min-h-20 p-1.5 flex flex-col items-start text-xs transition-colors rounded-lg border",
                       isSelected
@@ -426,7 +429,7 @@ export function CalendarPage({
                         (isBlocked || hasExtra || isNonWorking) && (
                           <span className="flex flex-wrap gap-0.5 justify-end">
                             {isNonWorking && !isBlocked && (
-                              <span className="rounded-full bg-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold text-foreground/70 leading-none">
+                              <span className="rounded-full bg-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold text-foreground leading-none">
                                 OFF
                               </span>
                             )}
@@ -469,7 +472,7 @@ export function CalendarPage({
             />
           </div>
 
-          <div className="flex-2 flex flex-col gap-4">
+          <div className="flex-2 min-w-0 flex flex-col gap-4">
             <div
               className="rounded-2xl border border-border bg-surface p-5"
               aria-live="polite"

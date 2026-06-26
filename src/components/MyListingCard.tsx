@@ -23,7 +23,7 @@ const STATUS_OVERLAY: Partial<Record<PublicationStatus, { label: string; bg: str
 
 const STATUS_BADGE: Record<PublicationStatus, { label: string; className: string }> = {
   ACTIVE:  { label: 'Active',  className: 'bg-green-100 text-green-800' },
-  DRAFT:   { label: 'Draft',   className: 'bg-gray-100 text-gray-500' },
+  DRAFT:   { label: 'Draft',   className: 'bg-gray-100 text-gray-600' },
   PAUSED:  { label: 'Paused',  className: 'bg-amber-100 text-amber-700' },
   DELETED: { label: 'Deleted', className: 'bg-red-100 text-red-700' },
 }

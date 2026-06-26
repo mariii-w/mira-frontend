@@ -195,9 +195,10 @@ export function BookingPage({
       value: "AT_PROVIDER" as LocationType,
       label: "At provider's place",
       Icon: MapPin,
-      detail: listing
-        ? `${listing.location.postalCode} ${listing.location.city}`
-        : "—",
+      detail:
+        listing && listing.location
+          ? `${listing.location.postalCode} ${listing.location.city}`
+          : "—",
     },
   ];
 
@@ -289,15 +290,15 @@ export function BookingPage({
                   {initials(listing.author.name, listing.author.surname)}
                 </div>
                 <div>
-                  <p className="text-xs text-primary-foreground/60 uppercase tracking-wide font-semibold mb-1">
+                  <p className="text-xs text-primary-foreground uppercase tracking-wide font-semibold mb-1">
                     You're booking
                   </p>
                   <p className="text-body font-bold text-primary-foreground mb-1">
                     {listing.title}
                   </p>
-                  <p className="flex items-center gap-1 text-xs text-primary-foreground/60">
+                  <p className="flex items-center gap-1 text-xs text-primary-foreground">
                     <MapPinned size={11} aria-hidden="true" />
-                    {listing.location.city}
+                    {listing.location?.city ?? "Location unavailable"}
                   </p>
                 </div>
               </div>
@@ -305,7 +306,7 @@ export function BookingPage({
                 <span className="text-2xl font-bold text-primary-foreground">
                   {listing.price}€
                 </span>
-                <span className="text-xs text-primary-foreground/60">
+                <span className="text-xs text-primary-foreground">
                   {" "}
                   / hr
                 </span>
@@ -328,8 +329,8 @@ export function BookingPage({
             </h2>
           </div>
 
-          <div className="flex">
-            <div className="flex-3 min-w-0 pr-6">
+          <div className="flex flex-col lg:flex-row">
+            <div className="flex-3 min-w-0 pb-6 lg:pb-0 lg:pr-6">
               <CalendarGrid
                 year={year}
                 month={month}
@@ -350,7 +351,7 @@ export function BookingPage({
             </div>
 
             <div
-              className="flex-2 border-l border-border pl-6"
+              className="flex-2 min-w-0 border-t lg:border-t-0 lg:border-l border-border pt-6 lg:pt-0 lg:pl-6"
               aria-live="polite"
             >
               {!selectedDate ? (
@@ -508,8 +509,8 @@ export function BookingPage({
             </h2>
           </div>
 
-          <div className="flex gap-8">
-            <div className="flex-1">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex-1 min-w-0">
               <p
                 id="location-label"
                 className="text-small font-medium text-foreground mb-3"
@@ -571,7 +572,7 @@ export function BookingPage({
               </div>
             </div>
 
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <label
                 htmlFor="description"
                 className="block text-small font-medium text-foreground mb-2"
@@ -622,8 +623,8 @@ export function BookingPage({
             </p>
           </div>
         )}
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-6">
-          <div className="flex gap-6 flex-1 min-w-0">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 flex-1 min-w-0">
             <div className="min-w-0">
               <p className="text-xs font-semibold text-muted uppercase tracking-wide">
                 Date & time
