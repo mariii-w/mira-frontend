@@ -335,8 +335,10 @@ export function CalendarPage({
             <CalendarGrid
               year={year}
               month={month}
+              activeDate={selectedDate}
               onMonthChange={onMonthChange}
-              renderDay={(date) => {
+              onActiveDateChange={onSelectedDateChange}
+              renderDay={(date, isActive) => {
                 const isToday =
                   date.getDate() === today.getDate() &&
                   date.getMonth() === today.getMonth() &&
@@ -398,6 +400,7 @@ export function CalendarPage({
                       .filter(Boolean)
                       .join(". ")}
                     aria-pressed={isSelected}
+                    tabIndex={isActive ? 0 : -1}
                     className={[
                       "w-full min-h-20 p-1.5 flex flex-col items-start text-xs transition-colors rounded-lg border",
                       isSelected
