@@ -29,7 +29,7 @@ export interface ListingProviderCardProps {
 
 function formatAvailability(availableToday?: boolean, nextAvailableDate?: string): string {
   if (availableToday) return "Today";
-  if (!nextAvailableDate) return "See calendar";
+  if (!nextAvailableDate) return "Contact provider for availability";
 
   return new Date(`${nextAvailableDate}T00:00:00`).toLocaleDateString("default", {
     weekday: "short",
