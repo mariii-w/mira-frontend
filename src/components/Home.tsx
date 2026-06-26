@@ -18,7 +18,8 @@ import { useAuthStore } from "../stores/auth";
 import { getServiceTags, getPublicListings } from "../api/mira";
 import type { PublicListingSummary, ServiceTag } from "../api/model";
 import { mediaUrl } from "../lib/mediaUrl";
-
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
 async function fetchServiceTags(): Promise<ServiceTag[]> {
   const response = await getServiceTags();
   if (response.status !== 200) throw new Error("Tags could not be loaded.");
@@ -125,12 +126,15 @@ function toListingCards(listings: PublicListingSummary[], easyRead: boolean) {
     providerFirstName: listing.author.name,
     providerLastName: listing.author.surname,
     location: listing.location.city,
-    description: easyRead && listing.easyDescription
-      ? listing.easyDescription
-      : listing.description,
+    description:
+      easyRead && listing.easyDescription
+        ? listing.easyDescription
+        : listing.description,
     tags: listing.tags,
     hourRate: listing.price,
-    pictureLink: listing.primaryMedia ? mediaUrl(listing.primaryMedia.url) : undefined,
+    pictureLink: listing.primaryMedia
+      ? mediaUrl(listing.primaryMedia.url)
+      : undefined,
   }));
 }
 
@@ -154,7 +158,10 @@ export function Home() {
     queryFn: fetchFeaturedListings,
   });
 
-  const listingCards = toListingCards(featuredListingsQuery.data ?? [], easyRead);
+  const listingCards = toListingCards(
+    featuredListingsQuery.data ?? [],
+    easyRead,
+  );
 
   const categories = (tagsQuery.data ?? [])
     .filter((tag) => tag.isActive && tag.name in CATEGORY_IMAGES)
@@ -220,7 +227,10 @@ export function Home() {
                 className="flex gap-2"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  navigate({ to: "/browse-services", search: { q: query, city: "", tagIds: [], from: undefined } });
+                  navigate({
+                    to: "/browse-services",
+                    search: { q: query, city: "", tagIds: [], from: undefined },
+                  });
                 }}
               >
                 <label htmlFor="hero-search" className="sr-only">
@@ -278,32 +288,42 @@ export function Home() {
                 List the services you offer, set your prices and schedule. We
                 handle bookings, payments and reviews — keep your time.
               </p>
-              <Button
-                variant="accent"
-                size="lg"
-                trailingIcon={<ArrowRight />}
-                fullWidth
-                onClick={() => {
-                  if (!user) {
-                    //TODO: replace
-                    window.location.href =
-                      "http://localhost:8081/auth/login/google";
-                    return;
-                  }
+              {!user ? (
+                <a
+                  href={`${API_BASE_URL}/auth/login/google`}
+                  className="relative inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-accent px-8 text-body font-medium text-accent-foreground no-underline transition-colors duration-150 hover:bg-accent-hover active:bg-accent-hover [&_svg]:size-5"
+                >
+                  Get started
+                  <span aria-hidden="true" className="inline-flex shrink-0">
+                    <ArrowRight />
+                  </span>
+                </a>
+              ) : (
+                <Button
+                  variant="accent"
+                  size="lg"
+                  trailingIcon={<ArrowRight />}
+                  fullWidth
+                  onClick={() => {
+                    if (user.userType === "PROVIDER") {
+                      navigate({ to: "/my-listings" });
+                      return;
+                    }
 
-                  if (user.userType === "PROVIDER") {
-                    navigate({ to: "/my-listings" });
-                    return;
-                  }
-
-                  navigate({
-                    to: "/browse-services",
-                    search: { q: "", city: "", tagIds: [], from: undefined },
-                  });
-                }}
-              >
-                Get started
-              </Button>
+                    navigate({
+                      to: "/browse-services",
+                      search: {
+                        q: "",
+                        city: "",
+                        tagIds: [],
+                        from: undefined,
+                      },
+                    });
+                  }}
+                >
+                  Get started
+                </Button>
+              )}
               {isLoggedIn && (
                 <p className="text-small text-foreground/70 text-center -mt-1">
                   You're already signed in.
@@ -509,7 +529,12 @@ export function Home() {
                           onClick={() =>
                             navigate({
                               to: "/browse-services",
-                              search: { q: "", city: "", tagIds: [cat.tagId], from: undefined },
+                              search: {
+                                q: "",
+                                city: "",
+                                tagIds: [cat.tagId],
+                                from: undefined,
+                              },
                             })
                           }
                         />
@@ -534,7 +559,8 @@ export function Home() {
                 Some of the services currently listed on Mira
               </p>
               {!featuredListingsQuery.isError &&
-                (featuredListingsQuery.isLoading || listingCards.length > 0) && (
+                (featuredListingsQuery.isLoading ||
+                  listingCards.length > 0) && (
                   <div
                     className="flex gap-2 shrink-0 ml-4"
                     role="group"
@@ -567,10 +593,14 @@ export function Home() {
               </p>
             )}
             {featuredListingsQuery.isError ? (
-              <p role="alert" className="text-small text-red-600 py-8 text-center">
+              <p
+                role="alert"
+                className="text-small text-red-600 py-8 text-center"
+              >
                 Listings could not be loaded.
               </p>
-            ) : !featuredListingsQuery.isLoading && listingCards.length === 0 ? (
+            ) : !featuredListingsQuery.isLoading &&
+              listingCards.length === 0 ? (
               <p className="text-body text-muted py-8 text-center">
                 No listings found near you yet.
               </p>
@@ -594,7 +624,10 @@ export function Home() {
                         </li>
                       ))
                     : listingCards.map((listing) => (
-                        <li key={listing.listingId} className="snap-start shrink-0 w-64 flex">
+                        <li
+                          key={listing.listingId}
+                          className="snap-start shrink-0 w-64 flex"
+                        >
                           <ServiceCard
                             variant="compact"
                             link="#"
@@ -614,7 +647,7 @@ export function Home() {
                   <div className="mt-8 text-center">
                     <Link
                       to="/browse-services"
-                      search={{ q: '', city: '', tagIds: [] }}
+                      search={{ q: "", city: "", tagIds: [] }}
                       className="inline-flex items-center gap-2 text-primary font-medium no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
                     >
                       View all listings{" "}
