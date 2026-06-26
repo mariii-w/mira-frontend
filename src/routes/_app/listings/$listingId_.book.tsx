@@ -7,15 +7,15 @@ import {
   getAvailability,
   getPublicListing,
   createBooking,
-} from "../../api/mira";
+} from "../../../api/mira";
 import type {
   CreateBookingRequest,
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
-} from "../../api/model";
-import { BookingPage } from "../../components/BookingPage";
+} from "../../../api/model";
+import { BookingPage } from "../../../components/BookingPage";
 
-export const Route = createFileRoute("/listings/$listingId_/book")({
+export const Route = createFileRoute("/_app/listings/$listingId_/book")({
   component: BookingRoute,
 });
 

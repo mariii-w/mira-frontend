@@ -8,11 +8,9 @@ import {
 import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Navbar } from "./Navbar";
 import { Button } from "./Button";
 import { CategoryCard } from "./CategoryCard";
 import { ServiceCard } from "./ServiceCard";
-import { Logo } from "./Logo";
 import { useAccessibilityStore } from "../stores/accessibility";
 import { useAuthStore } from "../stores/auth";
 import { getServiceTags, getPublicListings } from "../api/mira";
@@ -110,14 +108,6 @@ const CATEGORY_IMAGES: Record<string, string> = {
     "https://images.unsplash.com/photo-1723433892471-62f113c8c9a0?fm=jpg&q=60&w=800&auto=format&fit=crop",
 };
 
-const FOOTER_LINKS = [
-  { label: "About", to: "/about" },
-  { label: "Contact Us", to: "/contact-us" },
-  { label: "Accessibility", to: "/accessibility" },
-  { label: "Terms of Use", to: "/terms-of-use" },
-  { label: "Privacy Policy", to: "/privacy-policy" },
-] as const;
-
 function toListingCards(listings: PublicListingSummary[], easyRead: boolean) {
   return listings.map((listing) => ({
     listingId: listing.listingId,
@@ -174,9 +164,7 @@ export function Home() {
   }
 
   return (
-    <>
-      <Navbar />
-      <main id="main-content">
+    <main id="main-content">
         {/* ── Hero ── */}
         <section
           className="bg-background px-6 py-20 text-center"
@@ -612,42 +600,5 @@ export function Home() {
           </div>
         </section>
       </main>
-
-      {/* ── Footer ── */}
-      <footer className="bg-charcoal px-6 py-10">
-        <div className="mx-auto max-w-4xl flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-2 max-w-45">
-            <Logo variant="white" height={32} title="Mira" />
-            <p className="text-small text-cream/50 leading-relaxed">
-              A service marketplace connecting people with trusted local
-              helpers. Designed for everyone.
-            </p>
-          </div>
-          <nav aria-label="Footer">
-            <ul className="flex flex-wrap gap-x-4 gap-y-2 list-none m-0 p-0 justify-end">
-              {FOOTER_LINKS.map((link, i) => (
-                <li key={link.label} className="flex items-center gap-4">
-                  {i > 0 && (
-                    <span
-                      className="text-cream/30 select-none"
-                      aria-hidden="true"
-                    >
-                      ·
-                    </span>
-                  )}
-
-                  <Link
-                    to={link.to}
-                    className="text-small text-cream/70 no-underline hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream rounded transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-      </footer>
-    </>
   );
 }

@@ -9,17 +9,17 @@ import {
   cancelBooking,
   markDelivered,
   refuseBooking,
-} from "../api/mira";
+} from "../../api/mira";
 import type {
   BookingStatus,
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
-} from "../api/model";
-import { MyBookings } from "../components/MyBookings";
-import type { AllowedAction, BookingDetails } from "../components/BookingCard";
-import { useAuthStore } from "../stores/auth";
+} from "../../api/model";
+import { MyBookings } from "../../components/MyBookings";
+import type { AllowedAction, BookingDetails } from "../../components/BookingCard";
+import { useAuthStore } from "../../stores/auth";
 
-export const Route = createFileRoute("/my-bookings")({
+export const Route = createFileRoute("/_app/my-bookings")({
   component: MyBookingsRoute,
 });
 

@@ -1,5 +1,4 @@
 import { Accessibility } from "lucide-react";
-import { Navbar } from "./Navbar";
 import type { InfoPageContent } from "./infoPages";
 
 function sectionId(title: string) {
@@ -9,7 +8,6 @@ function sectionId(title: string) {
 export function InfoPage({ page }: { page: InfoPageContent }) {
   return (
     <div className="min-h-dvh bg-background">
-      <Navbar />
       <main id="main-content" className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-12">
         <header className="flex flex-col gap-4">
           <p className="text-label font-semibold uppercase tracking-widest text-primary">

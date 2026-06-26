@@ -11,14 +11,14 @@ import {
   patchV1UsersUserIdCredentialsCredentialId,
   postV1UsersUserIdCredentials,
   postV1UsersUserIdCredentialsCredentialIdVerifications,
-} from "../api/mira";
-import type { CredentialResponse, CredentialType, CredentialVerificationResponse } from "../api/model";
-import { Credentials } from "../components/Credentials";
-import { SubmitCredentialModal } from "../components/SubmitCredentialModal";
-import { useAuthStore } from "../stores/auth";
+} from "../../api/mira";
+import type { CredentialResponse, CredentialType, CredentialVerificationResponse } from "../../api/model";
+import { Credentials } from "../../components/Credentials";
+import { SubmitCredentialModal } from "../../components/SubmitCredentialModal";
+import { useAuthStore } from "../../stores/auth";
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const Route = createFileRoute("/my-credentials")({
+export const Route = createFileRoute("/_app/my-credentials")({
   component: MyCredentialsRoute,
 });
 

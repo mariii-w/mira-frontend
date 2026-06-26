@@ -12,16 +12,16 @@ import {
   listExceptions,
   replaceWeeklySchedule,
   updateException,
-} from "../api/mira";
+} from "../../api/mira";
 import type {
   CreateScheduleExceptionRequest,
   ReplaceWeeklyScheduleRequest,
   UpdateScheduleExceptionRequest,
-} from "../api/model";
-import { CalendarPage } from "../components/CalendarPage";
-import { get_access_token, useAuthStore } from "../stores/auth";
+} from "../../api/model";
+import { CalendarPage } from "../../components/CalendarPage";
+import { get_access_token, useAuthStore } from "../../stores/auth";
 
-export const Route = createFileRoute("/calendar")({
+export const Route = createFileRoute("/_app/calendar")({
   component: CalendarRoute,
 });
 

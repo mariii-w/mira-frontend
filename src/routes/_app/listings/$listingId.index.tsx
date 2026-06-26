@@ -9,11 +9,11 @@ import {
   getPublicProfileCredentials,
   getPublicProfileListings,
   getAvailability,
-} from "../../api/mira";
-import { ListingDetailPage } from "../../components/ListingDetailPage";
-import { useAccessibilityStore } from "../../stores/accessibility";
+} from "../../../api/mira";
+import { ListingDetailPage } from "../../../components/ListingDetailPage";
+import { useAccessibilityStore } from "../../../stores/accessibility";
 
-export const Route = createFileRoute("/listings/$listingId/")({
+export const Route = createFileRoute("/_app/listings/$listingId/")({
   component: ListingDetailRoute,
 });
 

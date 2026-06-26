@@ -5,7 +5,6 @@ import {
   type MyListingSummary,
   type PublicationStatus,
 } from "./MyListingCard";
-import { Navbar } from "./Navbar";
 import { Pagination } from "./Pagination";
 
 export type StatusFilter = "ALL" | PublicationStatus;
@@ -117,12 +116,10 @@ export function MyListings({
   onPreviousPage,
 }: MyListingsProps) {
   return (
-    <>
-      <Navbar />
-      <main
-        id="main-content"
-        className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
-      >
+    <main
+      id="main-content"
+      className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
+    >
         <div className="mx-auto max-w-3xl">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8 animate-fade-in-up">
             <div className="flex flex-col gap-1">
@@ -211,7 +208,6 @@ export function MyListings({
             </>
           )}
         </div>
-      </main>
-    </>
+    </main>
   );
 }

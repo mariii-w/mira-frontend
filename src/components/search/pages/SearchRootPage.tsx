@@ -1,6 +1,5 @@
 import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Wrench, Users } from 'lucide-react'
-import { Navbar } from '../../Navbar.tsx'
 import { ServiceUserToggle } from '../ServiceUserToggle.tsx'
 
 export function SearchRootPage() {
@@ -24,13 +23,11 @@ export function SearchRootPage() {
   }
 
   return (
-    <>
-      <Navbar />
-      <main
-        id="main-content"
-        data-search-variant={isUsersPage ? 'users' : undefined}
-        className="min-h-[calc(100vh-4rem)] bg-background"
-      >
+    <main
+      id="main-content"
+      data-search-variant={isUsersPage ? 'users' : undefined}
+      className="min-h-[calc(100vh-4rem)] bg-background"
+    >
         <div className="bg-background px-6 py-3">
           <div className="mx-auto max-w-6xl flex justify-center lg:justify-start">
             <div className="lg:w-64">
@@ -47,7 +44,6 @@ export function SearchRootPage() {
           </div>
         </div>
         <Outlet />
-      </main>
-    </>
+    </main>
   )
 }

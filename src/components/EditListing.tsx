@@ -6,7 +6,6 @@ import {
   type ChangeEvent,
 } from "react";
 import { Plus, X, ArrowLeft } from "lucide-react";
-import { Navbar } from "./Navbar";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { Label } from "./Label";
@@ -307,37 +306,31 @@ export function EditListing({
 
   if (!listing && !loadError) {
     return (
-      <>
-        <Navbar />
-        <main
-          id="main-content"
-          className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
+      <main
+        id="main-content"
+        className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
+      >
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex justify-center py-16"
         >
-          <div
-            role="status"
-            aria-live="polite"
-            className="flex justify-center py-16"
-          >
-            <p className="text-small text-muted">Loading…</p>
-          </div>
-        </main>
-      </>
+          <p className="text-small text-muted">Loading…</p>
+        </div>
+      </main>
     );
   }
 
   if (loadError) {
     return (
-      <>
-        <Navbar />
-        <main
-          id="main-content"
-          className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
-        >
-          <p role="alert" className="text-small text-red-600">
-            {loadError}
-          </p>
-        </main>
-      </>
+      <main
+        id="main-content"
+        className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
+      >
+        <p role="alert" className="text-small text-red-600">
+          {loadError}
+        </p>
+      </main>
     );
   }
 
@@ -378,12 +371,10 @@ export function EditListing({
   }
 
   return (
-    <>
-      <Navbar />
-      <main
-        id="main-content"
-        className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
-      >
+    <main
+      id="main-content"
+      className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
+    >
         <form
           onSubmit={handleSubmit}
           noValidate
@@ -818,7 +809,6 @@ export function EditListing({
 
           <div className="pb-8" />
         </form>
-      </main>
-    </>
+    </main>
   );
 }

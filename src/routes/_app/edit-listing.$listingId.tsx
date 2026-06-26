@@ -4,7 +4,7 @@ import {
   EditListing,
   type EditListingFormValues,
   type EditListingStatusAction,
-} from "../components/EditListing";
+} from "../../components/EditListing";
 import {
   deleteListing,
   deleteListingMedia,
@@ -17,18 +17,18 @@ import {
   pauseListing,
   publishListing,
   resumeListing,
-} from "../api/mira";
-import { useAuthStore } from "../stores/auth";
+} from "../../api/mira";
+import { useAuthStore } from "../../stores/auth";
 import type {
   ListingDetails,
   ListingMediaPreview,
   ProblemDetailsResponse,
   PublicListingSummary,
   ServiceTag,
-} from "../api/model";
+} from "../../api/model";
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const Route = createFileRoute("/edit-listing/$listingId")({
+export const Route = createFileRoute("/_app/edit-listing/$listingId")({
   component: EditListingPage,
 });
 

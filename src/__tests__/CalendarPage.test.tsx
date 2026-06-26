@@ -6,9 +6,6 @@ import type { ReactNode } from 'react'
 import { CalendarPage, type CalendarPageProps } from '../components/CalendarPage'
 import type { BookingSummary, ScheduleExceptionResponse } from '../api/model'
 
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
 
 vi.mock('../components/CalendarGrid', () => ({
   CalendarGrid: ({ renderDay }: { renderDay: (d: Date) => ReactNode }) => (
@@ -152,10 +149,9 @@ beforeEach(() => {
 })
 
 describe('<CalendarPage />', () => {
-  it('renders the page heading, navbar, and calendar grid', () => {
+  it('renders the page heading and calendar grid', () => {
     renderPage()
     expect(screen.getByRole('heading', { name: 'My Calendar' })).toBeInTheDocument()
-    expect(screen.getByTestId('navbar')).toBeInTheDocument()
     expect(screen.getByTestId('calendar-grid')).toBeInTheDocument()
   })
 

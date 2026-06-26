@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import source from "../components/CalendarPage.tsx?raw";
-import routeSource from "../routes/calendar.tsx?raw";
+import routeSource from "../routes/_app/calendar.tsx?raw";
 
 describe("calendar page architecture", () => {
   it("keeps fetching and auth out of the calendar component", () => {
@@ -14,7 +14,7 @@ describe("calendar page architecture", () => {
 
   it("keeps generated API glue in the route", () => {
     expect(routeSource).not.toMatch(/\bfetch\s*\(/);
-    expect(routeSource).toMatch(/from ['"]\.\.\/api\/mira['"]/);
+    expect(routeSource).toMatch(/from ['"]\.\.\/\.\.\/api\/mira['"]/);
     expect(routeSource).toMatch(/\bget_access_token\b/);
   });
 });

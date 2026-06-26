@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { CalendarDays, Plus, Clock, MapPin } from "lucide-react";
-import { Navbar } from "./Navbar";
 import { CalendarGrid } from "./CalendarGrid";
 import { Button } from "./Button";
 import { StatusBadge } from "./BookingCard";
@@ -219,8 +218,6 @@ export function CalendarPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-
       <main className="mx-auto max-w-7xl px-6 py-8">
         <div className="mb-6 flex items-start justify-between">
           <div>

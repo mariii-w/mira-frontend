@@ -4,7 +4,6 @@ import {
   type AllowedAction,
   type BookingDetails,
 } from "./BookingCard";
-import { Navbar } from "./Navbar";
 import type { BookingStatus, BookingSummary } from "../api/model";
 
 type BookingFilter = "ALL" | "REQUESTS" | "TO_PAY" | "ACTIVE" | "PAST";
@@ -129,12 +128,10 @@ export function MyBookings({
   };
 
   return (
-    <>
-      <Navbar />
-      <main
-        id="main-content"
-        className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
-      >
+    <main
+      id="main-content"
+      className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8"
+    >
         <div className="mx-auto max-w-3xl">
           <div className="flex flex-col gap-1 mb-8 animate-fade-in-up">
             <h1 className="font-heading text-h1 font-bold text-foreground">
@@ -210,7 +207,6 @@ export function MyBookings({
             </ul>
           )}
         </div>
-      </main>
-    </>
+    </main>
   );
 }

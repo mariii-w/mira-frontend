@@ -3,12 +3,12 @@ import { useEffect, useState } from "react";
 import {
   CreateListing,
   type CreateListingFormValues,
-} from "../components/CreateListing";
-import { getServiceTags, getCreateListingUrl } from "../api/mira";
-import { authFetch } from "../lib/authFetch";
-import type { ServiceTag } from "../api/model";
+} from "../../components/CreateListing";
+import { getServiceTags, getCreateListingUrl } from "../../api/mira";
+import { authFetch } from "../../lib/authFetch";
+import type { ServiceTag } from "../../api/model";
 
-export const Route = createFileRoute("/create-listing")({
+export const Route = createFileRoute("/_app/create-listing")({
   component: CreateListingPage,
 });
 

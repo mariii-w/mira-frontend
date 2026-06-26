@@ -18,9 +18,6 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   }
 })
 
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
 
 const baseListing: PublicListingDetails = {
   listingId: 'listing-1',

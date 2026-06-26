@@ -4,18 +4,18 @@ import { useState } from "react";
 import {
   getGetAuthorListingsQueryKey,
   getAuthorListings,
-} from "../api/mira";
+} from "../../api/mira";
 import type {
   GetAuthorListingsParams,
   ProblemDetailsResponse,
   UnauthorizedErrorResponse,
-} from "../api/model";
-import { MyListings, type StatusFilter } from "../components/MyListings";
-import type { MyListingSummary } from "../components/MyListingCard";
-import { useAuthStore } from "../stores/auth";
+} from "../../api/model";
+import { MyListings, type StatusFilter } from "../../components/MyListings";
+import type { MyListingSummary } from "../../components/MyListingCard";
+import { useAuthStore } from "../../stores/auth";
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const Route = createFileRoute("/my-listings")({
+export const Route = createFileRoute("/_app/my-listings")({
   component: MyListingsRoute,
 });
 

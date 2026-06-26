@@ -1,7 +1,6 @@
 import { Plus } from 'lucide-react'
 import { Button } from './Button'
 import { CredentialCard } from './CredentialCard'
-import { Navbar } from './Navbar'
 import type { CredentialResponse } from '../api/model'
 
 interface CredentialsProps {
@@ -56,9 +55,7 @@ export function Credentials({
   const activeCount = countActive(credentials)
 
   return (
-    <>
-      <Navbar />
-      <main id="main-content" className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8">
+    <main id="main-content" className="min-h-[calc(100vh-4rem)] bg-background px-4 sm:px-6 py-8">
         <div className="mx-auto max-w-3xl">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8 animate-fade-in-up">
             <div className="flex flex-col gap-1">
@@ -127,7 +124,6 @@ export function Credentials({
             </ul>
           )}
         </div>
-      </main>
-    </>
+    </main>
   )
 }

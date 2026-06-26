@@ -13,7 +13,7 @@ import type { GetPublicProfilesCollectionParams, PublicListingSummary, PublicPro
 import type { ProviderServiceSummary } from '../../../lib/providerServiceSummary.ts'
 import type { BrowseUsersSearch, UserRoleFilter } from '../searchSchemas.ts'
 
-const routeApi = getRouteApi('/_search/browse-users')
+const routeApi = getRouteApi('/_app/_search/browse-users')
 const LISTINGS_PAGE_SIZE = 500
 
 // Helpers — the profiles endpoint supports only free-text + cursor pagination.

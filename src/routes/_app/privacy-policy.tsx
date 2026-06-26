@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { InfoPage } from "../components/InfoPage";
-import { INFO_PAGES } from "../components/infoPages";
+import { InfoPage } from "../../components/InfoPage";
+import { INFO_PAGES } from "../../components/infoPages";
 
-export const Route = createFileRoute("/privacy-policy")({
+export const Route = createFileRoute("/_app/privacy-policy")({
   component: PrivacyPolicyRoute,
 });
 
