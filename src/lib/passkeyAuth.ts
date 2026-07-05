@@ -42,6 +42,7 @@ type PublicKeyCredentialJSON = {
   rawId: string;
   type: PublicKeyCredential["type"];
   response: AuthenticatorAssertionResponseJSON;
+  clientExtensionResults: AuthenticationExtensionsClientOutputs;
 };
 
 type AuthenticatorAttestationResponseJSON = {
@@ -127,6 +128,7 @@ function toCredentialJSON(
     id: credential.id,
     rawId: arrayBufferToBase64Url(credential.rawId),
     type: credential.type,
+    clientExtensionResults: credential.getClientExtensionResults(),
     response: {
       authenticatorData: arrayBufferToBase64Url(response.authenticatorData),
       clientDataJSON: arrayBufferToBase64Url(response.clientDataJSON),
