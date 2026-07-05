@@ -52,6 +52,7 @@ import { Label } from "../components/common/ui/Label";
 import { ListingDetailPage } from "../components/features/listings/ListingDetailPage";
 import { ListingProviderCard } from "../components/features/listings/ListingProviderCard";
 import { LoginCallback } from "../components/features/auth/LoginCallback";
+import { LoginOptionsDialog } from "../components/common/layout/LoginOptionsDialog";
 import { Logo } from "../components/common/ui/Logo";
 import { Modal } from "../components/common/ui/Modal";
 import { MultiSelect } from "../components/common/ui/MultiSelect";
@@ -142,6 +143,8 @@ vi.mock("../api/mira", () => ({
   getPublicProfilesCollection: vi.fn(),
   listMyBookings: vi.fn().mockResolvedValue({ status: 200, data: { items: [] } }),
   logout: vi.fn().mockResolvedValue({ status: 204, data: undefined }),
+  getGetAuthLoginGoogleUrl: vi.fn(() => "http://localhost:8081/auth/login/google"),
+  getPrivateUserProfile: vi.fn(),
 }));
 
 vi.mock("../lib/credentialEvidenceMedia", () => ({
@@ -1578,6 +1581,38 @@ describe("component accessibility", () => {
     );
 
     await expectNoAxeViolations(container);
+  });
+
+  it("LoginOptionsDialog closed trigger has no automated accessibility violations", async () => {
+    const { container } = render(
+      <LoginOptionsDialog>
+        <button type="button">Login</button>
+      </LoginOptionsDialog>,
+    );
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("LoginOptionsDialog open state has no automated accessibility violations", async () => {
+    render(
+      <LoginOptionsDialog>
+        <button type="button">Login</button>
+      </LoginOptionsDialog>,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^login$/i }));
+    });
+
+    const dialog = screen.getByRole("dialog", { name: /log in/i });
+    expect(
+      within(dialog).getByRole("link", { name: /continue with google/i }),
+    ).toHaveAttribute("href", "http://localhost:8081/auth/login/google");
+    expect(
+      within(dialog).getByRole("button", { name: /continue with passkey/i }),
+    ).toBeInTheDocument();
+
+    await expectNoAxeViolations(document.body);
   });
 
   it.each([
