@@ -2594,16 +2594,26 @@ describe("component accessibility", () => {
     },
   );
 
-  it("Navbar login action is an accessible link to Google OAuth", async () => {
-    const { container } = render(<Navbar />);
+  it("Navbar login action opens a popup with an accessible link to Google OAuth", async () => {
+    render(<Navbar />);
 
-    const loginLink = screen.getByRole("link", { name: /login/i });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^login$/i }));
+    });
 
-    expect(loginLink).toHaveAttribute(
+    const dialog = screen.getByRole("dialog", { name: /log in/i });
+    const googleLink = within(dialog).getByRole("link", {
+      name: /continue with google/i,
+    });
+
+    expect(googleLink).toHaveAttribute(
       "href",
       "http://localhost:8081/auth/login/google",
     );
-    await expectNoAxeViolations(container);
+    expect(
+      within(dialog).getByRole("button", { name: /continue with passkey/i }),
+    ).toBeInTheDocument();
+    await expectNoAxeViolations(document.body);
   });
 
   it("Navbar logged-in state has no automated accessibility violations", async () => {
