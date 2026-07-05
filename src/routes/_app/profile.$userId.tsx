@@ -8,7 +8,12 @@ import {
     ProfilePageError,
 } from "../../components/features/profiles/ProfilePageLoadingError";
 import { type ServiceCardProps } from "../../components/features/listings/ServiceCard";
-import { ensureAuthInitialized, useAuthStore } from "../../stores/auth";
+import { registerPasskey } from "../../lib/passkeyAuth";
+import {
+    decodeJwtPayload,
+    ensureAuthInitialized,
+    useAuthStore,
+} from "../../stores/auth";
 import { mediaUrl } from "../../lib/mediaUrl";
 import { createPageMeta } from "../../lib/headers";
 
@@ -28,6 +33,12 @@ import type {
     PublicProfileResponse,
     VerifiedCredentialResponse,
 } from "../../api/model";
+
+interface JwtClaims {
+    sub: string;
+    user_id: string;
+    scp?: string[];
+}
 
 /* eslint-disable react-refresh/only-export-components */
 export const Route = createFileRoute("/_app/profile/$userId")({
@@ -52,6 +63,9 @@ function Profile({ userId }: { userId: string }) {
     const isOwner = currentUser?.userId === userId;
 
     const [authReady, setAuthReady] = useState(false);
+    const [passkeyRegistrationStatus, setPasskeyRegistrationStatus] = useState<
+        "idle" | "loading" | "success" | "error"
+    >("idle");
 
     useEffect(() => {
         void ensureAuthInitialized().finally(() => setAuthReady(true));
@@ -154,6 +168,25 @@ function Profile({ userId }: { userId: string }) {
                 .slice(0, 5)
             : [];
 
+        async function handleRegisterPasskey() {
+            setPasskeyRegistrationStatus("loading");
+
+            try {
+                const { accessToken } = await registerPasskey();
+                const claims = decodeJwtPayload<JwtClaims>(accessToken);
+                if (claims?.sub && claims.user_id) {
+                    useAuthStore.getState().setToken({
+                        accessToken,
+                        accountId: claims.sub,
+                        permissions: claims.scp ?? [],
+                    });
+                }
+                setPasskeyRegistrationStatus("success");
+            } catch {
+                setPasskeyRegistrationStatus("error");
+            }
+        }
+
         return (
             <>
                 <PrivateProfilePage
@@ -174,6 +207,8 @@ function Profile({ userId }: { userId: string }) {
                             params: { listingId },
                         })
                     }
+                    onRegisterPasskey={() => void handleRegisterPasskey()}
+                    passkeyRegistrationStatus={passkeyRegistrationStatus}
                 />
                 <Outlet />
             </>

@@ -22,11 +22,14 @@ import { CategoryCard } from "./CategoryCard";
 import { ServiceCard } from "../listings/ServiceCard";
 import { useAccessibilityStore } from "../../../stores/accessibility";
 import { useAuthStore } from "../../../stores/auth";
-import { getServiceTags, getPublicListings } from "../../../api/mira";
+import {
+  getGetAuthLoginGoogleUrl,
+  getServiceTags,
+  getPublicListings,
+} from "../../../api/mira";
 import type { PublicListingSummary, ServiceTag } from "../../../api/model";
 import { mediaUrl } from "../../../lib/mediaUrl";
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
+
 async function fetchServiceTags(): Promise<ServiceTag[]> {
   const response = await getServiceTags();
   if (response.status !== 200) throw new Error("Tags could not be loaded.");
@@ -368,7 +371,7 @@ export function Home() {
               </p>
               {!user ? (
                 <a
-                  href={`${API_BASE_URL}/auth/login/google`}
+                  href={getGetAuthLoginGoogleUrl()}
                   className="relative inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-accent px-8 text-body font-medium text-accent-foreground no-underline transition-colors duration-150 hover:bg-accent-hover active:bg-accent-hover [&_svg]:size-5"
                 >
                   Get started
