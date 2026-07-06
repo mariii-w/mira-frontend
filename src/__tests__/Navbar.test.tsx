@@ -316,8 +316,12 @@ describe("<Navbar />", () => {
       status: 200,
       data: {
         items: [
+          // Provider-actionable: a new request to accept/refuse, and a paid
+          // booking to mark delivered. CONFIRMED (awaiting the consumer's
+          // payment) and COMPLETED are not the provider's turn to act.
           makeBooking("pending-1", "PENDING"),
-          makeBooking("pay-1", "CONFIRMED"),
+          makeBooking("delivered-1", "PAID"),
+          makeBooking("awaiting-payment-1", "CONFIRMED"),
           makeBooking("done-1", "COMPLETED"),
         ],
       },

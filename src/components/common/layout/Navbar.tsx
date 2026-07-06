@@ -2,8 +2,8 @@
 // Logged-in variant
 
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { listMyBookings } from "../../../api/mira";
+import { useQuery } from "@tanstack/react-query";
+import { getListMyBookingsQueryKey, listMyBookings } from "../../../api/mira";
 import type { BookingStatus } from "../../../api/model";
 import { Logo } from "../ui/Logo";
 import { AccessibilityPanel } from "./AccessibilityPanel";
@@ -20,26 +20,36 @@ const COMMON_NAV_LINKS = [
   { label: "Chat", to: "/chat" },
 ] as const;
 
-const ACTIONABLE_BOOKING_STATUSES = new Set<BookingStatus>([
-  "PENDING",
+// Statuses where it's the *consumer's* turn to act: pay once the provider
+// has accepted, or confirm the service was delivered once the provider has
+// marked it done.
+const CONSUMER_ACTIONABLE_BOOKING_STATUSES = new Set<BookingStatus>([
   "CONFIRMED",
+  "AWAITING_CONFIRMATION",
 ]);
 
+// Statuses where it's the *provider's* turn to act: accept/refuse a new
+// request, or mark a paid booking as delivered.
 const PROVIDER_ACTIONABLE_BOOKING_STATUSES = new Set<BookingStatus>([
   "PENDING",
-  "CONFIRMED",
+  "PAID",
 ]);
 
 function isActionableBookingStatus(status: BookingStatus, isProvider: boolean) {
   return isProvider
     ? PROVIDER_ACTIONABLE_BOOKING_STATUSES.has(status)
-    : ACTIONABLE_BOOKING_STATUSES.has(status);
+    : CONSUMER_ACTIONABLE_BOOKING_STATUSES.has(status);
 }
+
+// No websocket/push backend exists, so we poll instead. Short enough that a
+// new booking request shows up "live" within a few seconds, without hammering
+// the API. Uses the same query key as the My Bookings page, so navigating
+// there (or its own refetches) keep this in sync too.
+const BOOKING_NOTIFICATION_POLL_INTERVAL_MS = 10_000;
 
 export function Navbar() {
   const user = useAuthStore((s) => s.user);
   const userId = user?.userId;
-  const [notificationCount, setNotificationCount] = useState(0);
   const firstName = user?.firstName ?? "";
   const lastName = user?.lastName ?? "";
   const isProvider = user?.userType === "PROVIDER";
@@ -54,37 +64,23 @@ export function Navbar() {
     // logged-out visitors.
     ...(user ? [COMMON_NAV_LINKS[2], COMMON_NAV_LINKS[3]] : []),
   ];
+
+  const { data: bookingsData } = useQuery({
+    queryKey: userId ? getListMyBookingsQueryKey(userId) : ["bookings"],
+    queryFn: async () => {
+      const response = await listMyBookings(userId as string);
+      if (response.status !== 200) return { items: [] };
+      return response.data;
+    },
+    enabled: !!userId,
+    refetchInterval: BOOKING_NOTIFICATION_POLL_INTERVAL_MS,
+    refetchOnWindowFocus: true,
+  });
+
+  const notificationCount = (bookingsData?.items ?? []).filter((booking) =>
+    isActionableBookingStatus(booking.status, isProvider),
+  ).length;
   const visibleNotificationCount = userId ? notificationCount : 0;
-
-  useEffect(() => {
-    let cancelled = false;
-
-    if (!userId) return;
-
-    const currentUserId = userId;
-
-    async function loadNotificationCount() {
-      const response = await listMyBookings(currentUserId);
-      if (cancelled) return;
-
-      if (response.status !== 200) {
-        setNotificationCount(0);
-        return;
-      }
-
-      setNotificationCount(
-        response.data.items.filter((booking) =>
-          isActionableBookingStatus(booking.status, isProvider),
-        ).length,
-      );
-    }
-
-    void loadNotificationCount();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isProvider, userId]);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-charcoal">
