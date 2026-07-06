@@ -141,6 +141,107 @@ paths:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/auth/passkeys/registration/options":
+    post:
+      tags:
+        - Auth
+      operationId: startPasskeyRegistration
+      summary: Start passkey registration
+      description: Creates WebAuthn credential creation options for registering a discoverable passkey. If a bearer token is present, the authenticated account is used; otherwise the backend may use the current login/session context.
+      security:
+        - bearerHttpAuthentication: []
+        - {}
+      responses:
+        "200":
+          description: Passkey registration options created successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PasskeyOptionsResponse"
+        "401":
+          description: Unauthorized. Authentication is required when no usable login context exists.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/auth/passkeys/registration/finish":
+    post:
+      tags:
+        - Auth
+      operationId: finishPasskeyRegistration
+      summary: Finish passkey registration
+      description: Verifies the WebAuthn registration response, stores the discoverable passkey credential, and returns a fresh access token while setting the refresh cookie.
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/PasskeyFinishRequest"
+      responses:
+        "200":
+          description: Passkey registration completed successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/TokenResponse"
+        "400":
+          description: Bad Request. The challenge is unknown, expired, or the credential is not discoverable.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          description: Unauthorized. Passkey registration failed.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+  "/v1/auth/passkeys/authentication/options":
+    post:
+      tags:
+        - Auth
+      operationId: startPasskeyAuthentication
+      summary: Start passkey authentication
+      description: Creates username-less WebAuthn assertion options. The response does not include allowCredentials so the browser can discover an eligible passkey.
+      responses:
+        "200":
+          description: Passkey authentication options created successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/PasskeyOptionsResponse"
+  "/v1/auth/passkeys/authentication/finish":
+    post:
+      tags:
+        - Auth
+      operationId: finishPasskeyAuthentication
+      summary: Finish passkey authentication
+      description: Verifies the WebAuthn assertion response and returns a fresh access token while setting the refresh cookie.
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/PasskeyFinishRequest"
+      responses:
+        "200":
+          description: Passkey authentication completed successfully.
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/TokenResponse"
+        "400":
+          description: Bad Request. The challenge is unknown or expired.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "401":
+          description: Unauthorized. Passkey authentication failed.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
   "/v1/users":
     get:
       tags:
@@ -5640,6 +5741,36 @@ components:
           type: string
           description: Mira access JWT used as a bearer token for API requests.
           example: ""
+    PasskeyOptionsResponse:
+      type: object
+      required:
+        - challengeId
+        - options
+      additionalProperties: false
+      properties:
+        challengeId:
+          type: string
+          description: Server-side WebAuthn challenge identifier used to finish the passkey operation.
+          example: ""
+        options:
+          type: object
+          additionalProperties: true
+          description: Browser WebAuthn PublicKeyCredential options encoded as JSON.
+    PasskeyFinishRequest:
+      type: object
+      required:
+        - challengeId
+        - credential
+      additionalProperties: false
+      properties:
+        challengeId:
+          type: string
+          description: Challenge identifier returned by the matching passkey options endpoint.
+          example: ""
+        credential:
+          type: object
+          additionalProperties: true
+          description: Browser WebAuthn PublicKeyCredential response encoded as JSON.
     CredentialType:
       type: string
       description: Type of credential assigned to a user profile.

@@ -1,4 +1,4 @@
-import { Briefcase, Calendar, Check, ClipboardPen, Mail, MapPin, MessageCircle, Plus, Search } from 'lucide-react'
+import { Briefcase, Calendar, Check, ClipboardPen, KeyRound, Mail, MapPin, MessageCircle, Plus, Search } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { Button } from '../../common/ui/Button'
@@ -17,6 +17,8 @@ interface PrivateProfilePageProps {
   ownerListings: MyListingSummary[]
   onEditClick: () => void
   onEditListing: (listingId: string) => void
+  onRegisterPasskey?: () => void
+  passkeyRegistrationStatus?: 'idle' | 'loading' | 'success' | 'error'
 }
 
 const QUICK_ACTION_VARIANT = {
@@ -56,6 +58,8 @@ export function PrivateProfilePage({
   ownerListings,
   onEditClick,
   onEditListing,
+  onRegisterPasskey,
+  passkeyRegistrationStatus = 'idle',
 }: PrivateProfilePageProps) {
   return (
     <>
@@ -134,6 +138,32 @@ export function PrivateProfilePage({
                   </>
                 )}
               </div>
+              {onRegisterPasskey && (
+                <>
+                  <div className="w-full mx-auto h-px bg-border my-5" />
+                  <div className="flex flex-col w-full gap-2">
+                    <Button
+                      variant="secondary"
+                      fullWidth
+                      leadingIcon={<KeyRound />}
+                      loading={passkeyRegistrationStatus === 'loading'}
+                      onClick={onRegisterPasskey}
+                    >
+                      Register passkey
+                    </Button>
+                    {passkeyRegistrationStatus === 'success' && (
+                      <p className="text-small font-medium text-primary" role="status">
+                        Passkey registered for this account.
+                      </p>
+                    )}
+                    {passkeyRegistrationStatus === 'error' && (
+                      <p className="text-small font-medium text-red-600" role="alert">
+                        Passkey registration failed. Please try again.
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
               {isProvider && (
                 <>
                   <div className="w-full mx-auto h-px bg-border my-5" />

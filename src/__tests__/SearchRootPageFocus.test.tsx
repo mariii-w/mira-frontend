@@ -12,6 +12,10 @@ vi.mock('../api/mira', () => ({
   getServiceTags: vi.fn(),
   getPublicProfilesCollection: vi.fn(),
   refresh: vi.fn().mockResolvedValue({ status: 401 }),
+  getGetAuthLoginGoogleUrl: vi.fn(() => 'http://localhost:8081/auth/login/google'),
+  getPrivateUserProfile: vi.fn(),
+  listMyBookings: vi.fn().mockResolvedValue({ status: 200, data: { items: [] } }),
+  logout: vi.fn().mockResolvedValue({ status: 204, data: undefined }),
 }))
 
 const mockGetPublicListings = vi.mocked(getPublicListings)

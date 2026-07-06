@@ -3,19 +3,15 @@
 
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import {
-  listMyBookings,
-} from "../../../api/mira";
+import { listMyBookings } from "../../../api/mira";
 import type { BookingStatus } from "../../../api/model";
 import { Logo } from "../ui/Logo";
 import { AccessibilityPanel } from "./AccessibilityPanel";
 import { UserMenu } from "./UserMenu";
 import { MobileNavDrawer } from "./MobileNavDrawer";
+import { LoginOptionsDialog } from "./LoginOptionsDialog";
 import { useAuthStore } from "../../../stores/auth";
 import { mediaUrl } from "../../../lib/mediaUrl";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
 
 const COMMON_NAV_LINKS = [
   { label: "Browse Services", to: "/browse-services" },
@@ -151,12 +147,14 @@ export function Navbar() {
               />
             </div>
           ) : (
-            <a
-              href={`${API_BASE_URL}/auth/login/google`}
-              className="relative inline-flex h-11 items-center justify-center rounded-full bg-primary px-3 text-body font-medium text-primary-foreground no-underline transition-colors duration-150 hover:bg-primary-hover active:bg-primary-hover lg:px-5"
-            >
-              Login
-            </a>
+            <LoginOptionsDialog>
+              <button
+                type="button"
+                className="relative inline-flex h-11 items-center justify-center rounded-full bg-primary px-3 text-body font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:bg-primary-hover lg:px-5"
+              >
+                Login
+              </button>
+            </LoginOptionsDialog>
           )}
 
           <MobileNavDrawer
