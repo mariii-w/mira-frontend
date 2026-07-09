@@ -38,7 +38,7 @@ function RegisterAboutRoute() {
   const setUser = useAuthStore((s) => s.setUser);
 
   async function handleContinue(values: RegisterAboutSubmitValues) {
-    if (!user) throw new Error("Not logged in.");
+    if (!user || !user.userId) throw new Error("Not logged in.");
 
     const payload: PatchUserProfileRequest = {
       ...(values.bio ? { bio: values.bio } : {}),

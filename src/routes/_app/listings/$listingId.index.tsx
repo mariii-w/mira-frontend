@@ -119,7 +119,7 @@ function ListingDetailRoute() {
       });
 
       if (response.status !== 200) {
-        throw new Error(response.data.detail ?? "Failed to load availability.");
+        throw new Error(response.data?.detail ?? "Failed to load availability.");
       }
 
       return response.data;

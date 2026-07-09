@@ -118,12 +118,21 @@ function CalendarRoute() {
   const saveSchedule = useMutation({
     mutationFn: async (
       schedule: Pick<ReplaceWeeklyScheduleRequest, "entries">,
-    ) =>
-      replaceWeeklySchedule(
+    ) => {
+      // Send the ETag from the last load as If-Match, so the backend can detect conflicts.
+      const ifMatch = scheduleResponse?.headers.get("ETag");
+      return replaceWeeklySchedule(
         queryUserId,
         { entries: schedule.entries },
-        { headers: await getAuthHeaders() },
-      ),
+        {
+          headers: {
+            ...(await getAuthHeaders()),
+            ...(ifMatch ? { "If-Match": ifMatch } : {}),
+          },
+        },
+      );
+    },
+    // Fires for both 200 and 412 - either way, refetch so a retry uses current data.
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: getGetWeeklyScheduleQueryKey(queryUserId),
@@ -201,7 +210,7 @@ function CalendarRoute() {
 
   return (
     <CalendarPage
-      userId={userId}
+      userId={userId ?? undefined}
       isProvider={isProvider}
       today={today}
       year={year}
@@ -217,7 +226,12 @@ function CalendarRoute() {
       scheduleError={
         isSuccessStatus(saveSchedule.data?.status ?? 200)
           ? saveSchedule.error
-          : saveSchedule.data?.data
+          : saveSchedule.data?.status === 412
+            ? {
+                detail:
+                  "This schedule was changed elsewhere since you last loaded it. It's been refreshed - please check it and save again.",
+              }
+            : saveSchedule.data?.data
       }
       exceptionCreating={createExceptionMutation.isPending}
       exceptionError={

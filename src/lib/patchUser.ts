@@ -29,7 +29,7 @@ function getDetail(data: ProblemDetailsResponse | unknown): string | undefined {
 
 export async function patchUser(payload: PatchUserProfileRequest): Promise<void> {
   const user = useAuthStore.getState().user;
-  if (!user) {
+  if (!user || !user.userId) {
     throw {
       field: "server",
       message: "Not logged in.",
@@ -71,7 +71,7 @@ export async function patchUser(payload: PatchUserProfileRequest): Promise<void>
 
 export async function uploadProfilePhoto(file: File): Promise<void> {
   const user = useAuthStore.getState().user;
-  if (!user) {
+  if (!user || !user.userId) {
     throw {
       field: "server",
       message: "Not logged in.",
