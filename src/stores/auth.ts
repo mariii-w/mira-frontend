@@ -134,3 +134,14 @@ export async function signOut(): Promise<void> {
     useAuthStore.getState().clear();
   }
 }
+
+let authInitPromise: Promise<boolean> | null = null;
+
+// Runs the refresh-token exchange once per page load; __root and
+// requireAuth both await this instead of racing separate calls.
+export function ensureAuthInitialized(): Promise<boolean> {
+  if (!authInitPromise) {
+    authInitPromise = exchangeRefreshForAccess();
+  }
+  return authInitPromise;
+}

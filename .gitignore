@@ -29,3 +29,5 @@ coverage-a11y/
 *.sw?
 
 src/api/
+
+docs/context

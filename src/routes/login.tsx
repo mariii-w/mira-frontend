@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { getPrivateUserProfile, getGetAuthLoginGoogleUrl } from "../api/mira";
-import { LoginCallback } from "../components/LoginCallback";
+import { LoginCallback } from "../components/features/auth/LoginCallback";
+import { createPageMeta } from "../lib/headers";
 import {
   decodeJwtPayload,
   get_access_token,
@@ -10,6 +11,12 @@ import {
 } from "../stores/auth";
 
 export const Route = createFileRoute("/login")({
+  head: () =>
+    createPageMeta({
+      title: "Log In",
+      description: "Complete your Mira sign-in and continue to your account.",
+      path: "/login",
+    }),
   validateSearch: (search: Record<string, unknown>) => ({
     error: typeof search.error === "string" ? search.error : undefined,
   }),

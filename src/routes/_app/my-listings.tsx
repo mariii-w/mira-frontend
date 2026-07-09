@@ -1,0 +1,194 @@
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import {
+  getGetAuthorListingsQueryKey,
+  getGetWeeklyScheduleQueryKey,
+  getAuthorListings,
+  getWeeklySchedule,
+} from "../../api/mira";
+import type {
+  GetAuthorListingsParams,
+  ProblemDetailsResponse,
+  UnauthorizedErrorResponse,
+} from "../../api/model";
+import { MyListings, type StatusFilter } from "../../components/features/listings/MyListings";
+import type { MyListingSummary } from "../../components/features/listings/MyListingCard";
+import { useAuthStore } from "../../stores/auth";
+import { requireProvider } from "../../lib/requireAuth";
+import { createPageMeta } from "../../lib/headers";
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const Route = createFileRoute("/_app/my-listings")({
+  head: () =>
+      createPageMeta({
+        title: "My Services",
+        description: "Review, filter, and manage your Mira service listings.",
+        path: "/my-listings",
+      }),
+  beforeLoad: requireProvider,
+  component: MyListingsRoute,
+});
+
+function getErrorDetail(
+    data: ProblemDetailsResponse | UnauthorizedErrorResponse,
+) {
+  return "detail" in data ? data.detail : undefined;
+}
+
+function getListingParams(
+    statusFilter: StatusFilter,
+    currentFrom: string | null,
+): GetAuthorListingsParams {
+  return {
+    limit: 20,
+    ...(currentFrom ? { from: currentFrom } : {}),
+    ...(statusFilter !== "ALL" ? { publicationStatus: statusFilter } : {}),
+  };
+}
+
+function getStatusCounts(listings: MyListingSummary[]) {
+  const counts: Partial<Record<StatusFilter, number>> = {
+    ALL: listings.length,
+  };
+
+  for (const listing of listings) {
+    counts[listing.publicationStatus] =
+        (counts[listing.publicationStatus] ?? 0) + 1;
+  }
+
+  return counts;
+}
+
+export function MyListingsRoute() {
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
+  const userId = user?.userId;
+
+  const [currentFrom, setCurrentFrom] = useState<string | null>(null);
+  const [prevCursors, setPrevCursors] = useState<(string | null)[]>([]);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+
+  const params = getListingParams(statusFilter, currentFrom);
+
+  const {
+    data,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: userId
+        ? getGetAuthorListingsQueryKey(userId, params)
+        : ["my-listings"],
+    queryFn: async () => {
+      if (!userId) throw new Error("You must be signed in to view services.");
+
+      const response = await getAuthorListings(userId, params);
+
+      if (response.status !== 200) {
+        throw new Error(
+            getErrorDetail(response.data) ?? "Failed to load listings.",
+        );
+      }
+
+      return response.data;
+    },
+    enabled: !!userId,
+    refetchOnMount: "always",
+  });
+
+  const { data: countsData } = useQuery({
+    queryKey: userId
+        ? getGetAuthorListingsQueryKey(userId, { limit: 100 })
+        : ["my-listings", "counts"],
+    queryFn: async () => {
+      if (!userId) throw new Error("You must be signed in to view services.");
+
+      const response = await getAuthorListings(userId, { limit: 100 });
+
+      if (response.status !== 200) {
+        throw new Error(
+            getErrorDetail(response.data) ?? "Failed to load listings.",
+        );
+      }
+
+      return response.data;
+    },
+    enabled: !!userId,
+    refetchOnMount: "always",
+  });
+
+  const { data: scheduleResponse } = useQuery({
+    queryKey: userId
+      ? getGetWeeklyScheduleQueryKey(userId)
+      : ["my-listings", "weekly-schedule"],
+    queryFn: async () => {
+      if (!userId) throw new Error("You must be signed in to view services.");
+
+      const response = await getWeeklySchedule(userId);
+
+      if (response.status !== 200) {
+        throw new Error("Failed to load weekly schedule.");
+      }
+
+      return response;
+    },
+    enabled: !!userId,
+    refetchOnMount: "always",
+  });
+
+  const showMissingAvailabilityWarning =
+    scheduleResponse?.status === 200 &&
+    scheduleResponse.data.entries.length === 0;
+
+  const hasPrev = prevCursors.length > 0;
+  const nextCursor = data?.cursor?.next ?? null;
+
+  function handleFilterChange(value: StatusFilter) {
+    if (value === statusFilter) return;
+
+    setPrevCursors([]);
+    setCurrentFrom(null);
+    setStatusFilter(value);
+  }
+
+  function handleNext() {
+    if (!nextCursor) return;
+
+    setPrevCursors((prev) => [...prev, currentFrom]);
+    setCurrentFrom(nextCursor);
+  }
+
+  function handlePrev() {
+    if (!hasPrev) return;
+
+    const stack = prevCursors.slice();
+    const from = stack.pop() ?? null;
+
+    setPrevCursors(stack);
+    setCurrentFrom(from);
+  }
+
+  return (
+      <MyListings
+          listings={data?.items ?? []}
+          statusFilter={statusFilter}
+          statusCounts={getStatusCounts(countsData?.items ?? [])}
+          loading={loading}
+          error={queryError ? (queryError as Error).message : null}
+          hasPreviousPage={hasPrev}
+          hasNextPage={!!nextCursor}
+          onStatusFilterChange={handleFilterChange}
+          onCreate={() => navigate({ to: "/create-listing" })}
+          onEdit={(listingId) =>
+              navigate({
+                to: "/edit-listing/$listingId",
+                params: { listingId },
+              })
+          }
+          onSetAvailability={() => navigate({ to: "/calendar" })}
+          onNextPage={handleNext}
+          onPreviousPage={handlePrev}
+          showMissingAvailabilityWarning={showMissingAvailabilityWarning}
+      />
+  );
+}

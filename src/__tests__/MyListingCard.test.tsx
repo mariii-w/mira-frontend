@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { MyListingCard, type MyListingSummary } from '../components/MyListingCard'
+import { computeAccessibleDescription } from 'dom-accessibility-api'
+import { MyListingCard, type MyListingSummary } from '../components/features/listings/MyListingCard'
 
 const baseListing: MyListingSummary = {
   listingId: 'abc-123',
@@ -10,7 +11,7 @@ const baseListing: MyListingSummary = {
   price: 25,
   publicationStatus: 'ACTIVE',
   moderationStatus: 'VISIBLE',
-  author: { name: 'Klaus', surname: 'M' },
+  author: { userId: 'user-1', name: 'Klaus', surname: 'M' },
   publishedAt: '2024-01-01T00:00:00Z',
   location: { city: 'Berlin', postalCode: '10115', serviceRadiusKm: 15 },
   tags: [],
@@ -28,6 +29,12 @@ describe('<MyListingCard />', () => {
     const heading = screen.getByRole('heading', { name: /PC Support & Laptop Help/ })
     const article = screen.getByRole('article')
     expect(article).toHaveAttribute('aria-labelledby', heading.id)
+  })
+
+  it('describes the article with the listing description', () => {
+    render(<MyListingCard listing={baseListing} onEdit={() => {}} />)
+    const article = screen.getByRole('article')
+    expect(computeAccessibleDescription(article)).toContain('Whether your computer is running slowly')
   })
 
   it('renders image with explicit altText when provided', () => {
@@ -48,6 +55,18 @@ describe('<MyListingCard />', () => {
     expect(screen.getByRole('img', { name: baseListing.title })).toBeInTheDocument()
   })
 
+  it('resolves a relative media url against the API origin', () => {
+    const listing = {
+      ...baseListing,
+      primaryMedia: { mediaId: 'm1', url: '/v1/listing-media/m1/content', altText: 'A laptop', altTextStatus: 'COMPLETED' as const },
+    }
+    render(<MyListingCard listing={listing} onEdit={() => {}} />)
+    expect(screen.getByRole('img', { name: 'A laptop' })).toHaveAttribute(
+      'src',
+      'http://localhost:8081/v1/listing-media/m1/content',
+    )
+  })
+
   it('renders no image when primaryMedia is absent', () => {
     render(<MyListingCard listing={baseListing} onEdit={() => {}} />)
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
@@ -61,17 +80,13 @@ describe('<MyListingCard />', () => {
   it('appends "(DRAFT)" to the heading accessible name for draft listings', () => {
     const listing = { ...baseListing, publicationStatus: 'DRAFT' as const }
     render(<MyListingCard listing={listing} onEdit={() => {}} />)
-    expect(
-      screen.getByRole('heading', { name: /PC Support & Laptop Help.*DRAFT/ })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /PC Support & Laptop Help.*DRAFT/ })).toBeInTheDocument()
   })
 
   it('appends "(PAUSED)" to the heading accessible name for paused listings', () => {
     const listing = { ...baseListing, publicationStatus: 'PAUSED' as const }
     render(<MyListingCard listing={listing} onEdit={() => {}} />)
-    expect(
-      screen.getByRole('heading', { name: /PC Support & Laptop Help.*PAUSED/ })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /PC Support & Laptop Help.*PAUSED/ })).toBeInTheDocument()
   })
 
   it('hides the visual status overlay from assistive technology', () => {
@@ -81,18 +96,49 @@ describe('<MyListingCard />', () => {
     expect(overlay).toHaveAttribute('aria-hidden', 'true')
   })
 
-  it('Edit button aria-label identifies which listing is being edited', () => {
+  it('Edit button has a short label and is a distinct tab stop', () => {
     render(<MyListingCard listing={baseListing} onEdit={() => {}} />)
-    expect(
-      screen.getByRole('button', { name: 'Edit "PC Support & Laptop Help"' })
-    ).toBeInTheDocument()
+    const button = screen.getByRole('button', { name: 'Edit' })
+    expect(button).toBeInTheDocument()
+    expect(button).not.toHaveAttribute('tabindex', '-1')
   })
 
-  it('calls onEdit with the correct listingId when Edit is clicked', () => {
+  it('calls onEdit when the Edit button is clicked', () => {
     const onEdit = vi.fn()
     render(<MyListingCard listing={baseListing} onEdit={onEdit} />)
-    fireEvent.click(screen.getByRole('button', { name: /Edit/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
     expect(onEdit).toHaveBeenCalledOnce()
+    expect(onEdit).toHaveBeenCalledWith('abc-123')
+  })
+
+  it('calls onEdit when the card is clicked', () => {
+    const onEdit = vi.fn()
+    render(<MyListingCard listing={baseListing} onEdit={onEdit} />)
+    fireEvent.click(screen.getByRole('article'))
+    expect(onEdit).toHaveBeenCalledOnce()
+    expect(onEdit).toHaveBeenCalledWith('abc-123')
+  })
+
+  it('does not double-fire when the Edit button is clicked', () => {
+    const onEdit = vi.fn()
+    render(<MyListingCard listing={baseListing} onEdit={onEdit} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
+    expect(onEdit).toHaveBeenCalledOnce()
+  })
+
+  it('calls onEdit when Enter is pressed on the article', () => {
+    const onEdit = vi.fn()
+    render(<MyListingCard listing={baseListing} onEdit={onEdit} />)
+    const article = screen.getByRole('article')
+    fireEvent.keyDown(article, { key: 'Enter', target: article })
+    expect(onEdit).toHaveBeenCalledWith('abc-123')
+  })
+
+  it('calls onEdit when Space is pressed on the article', () => {
+    const onEdit = vi.fn()
+    render(<MyListingCard listing={baseListing} onEdit={onEdit} />)
+    const article = screen.getByRole('article')
+    fireEvent.keyDown(article, { key: ' ', target: article })
     expect(onEdit).toHaveBeenCalledWith('abc-123')
   })
 })

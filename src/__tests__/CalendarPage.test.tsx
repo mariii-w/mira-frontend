@@ -3,20 +3,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { CalendarPage, type CalendarPageProps } from '../components/CalendarPage'
+import { CalendarPage, type CalendarPageProps } from '../components/features/bookings/CalendarPage'
 import type { BookingSummary, ScheduleExceptionResponse } from '../api/model'
 
-vi.mock('../components/Navbar', () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}))
-
-vi.mock('../components/CalendarGrid', () => ({
+vi.mock('../components/features/bookings/CalendarGrid', () => ({
   CalendarGrid: ({ renderDay }: { renderDay: (d: Date) => ReactNode }) => (
     <div data-testid="calendar-grid">{renderDay(new Date(2026, 5, 10))}</div>
   ),
 }))
 
-vi.mock('../components/WeeklyScheduleModal', () => ({
+vi.mock('../components/features/bookings/WeeklyScheduleModal', () => ({
   WeeklyScheduleModal: ({ open, entries, onSave }: { open: boolean; entries: unknown[]; onSave: (value: unknown) => void }) =>
     open ? (
       <div data-testid="weekly-schedule-modal" role="dialog">
@@ -26,7 +22,7 @@ vi.mock('../components/WeeklyScheduleModal', () => ({
     ) : null,
 }))
 
-vi.mock('../components/ExceptionModal', () => ({
+vi.mock('../components/features/bookings/ExceptionModal', () => ({
   ExceptionModal: ({
     open,
     exceptions,
@@ -50,7 +46,7 @@ vi.mock('../components/ExceptionModal', () => ({
     ) : null,
 }))
 
-vi.mock('../components/BookingCard', () => ({
+vi.mock('../components/features/bookings/BookingCard', () => ({
   StatusBadge: ({ status }: { status: string }) => <span data-testid="status-badge">{status}</span>,
 }))
 
@@ -123,6 +119,7 @@ function makeProps(overrides: Partial<CalendarPageProps> = {}): CalendarPageProp
     onCreateException: vi.fn(),
     onUpdateException: vi.fn(),
     onDeleteException: vi.fn(),
+    onCreateListing: vi.fn(),
     ...overrides,
   }
 }
@@ -152,10 +149,9 @@ beforeEach(() => {
 })
 
 describe('<CalendarPage />', () => {
-  it('renders the page heading, navbar, and calendar grid', () => {
+  it('renders the page heading and calendar grid', () => {
     renderPage()
     expect(screen.getByRole('heading', { name: 'My Calendar' })).toBeInTheDocument()
-    expect(screen.getByTestId('navbar')).toBeInTheDocument()
     expect(screen.getByTestId('calendar-grid')).toBeInTheDocument()
   })
 
