@@ -56,7 +56,7 @@ function RegisterNameRoute() {
   const setUser = useAuthStore((s) => s.setUser);
 
   async function handleContinue(values: RegisterNameSubmitValues) {
-    if (!user?.userId) throw new Error("Not logged in.");
+    if (!user || !user.userId) throw new Error("Not logged in.");
 
     const payload: PatchUserProfileRequest = values;
 

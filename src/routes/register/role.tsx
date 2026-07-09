@@ -45,7 +45,7 @@ function RegisterRoleRoute() {
   const setUser = useAuthStore((s) => s.setUser);
 
   async function handleContinue(values: RegisterRoleSubmitValues) {
-    if (!user?.userId) {
+    if (!user || !user.userId) {
       throw {
         field: "server",
         message: "Not logged in.",

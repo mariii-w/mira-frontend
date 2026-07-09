@@ -34,9 +34,9 @@ function toLocalDate(date: Date): string {
 }
 
 function getErrorDetail(
-  data: ProblemDetailsResponse | UnauthorizedErrorResponse,
+  data: ProblemDetailsResponse | UnauthorizedErrorResponse | void,
 ) {
-  return "detail" in data ? data.detail : undefined;
+  return data && "detail" in data ? data.detail : undefined;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

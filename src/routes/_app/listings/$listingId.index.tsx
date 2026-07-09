@@ -11,6 +11,7 @@ import {
   useCreateChat,
   useGetPublicListing,
 } from "../../../api/mira";
+import type { PublicListingDetails } from "../../../api/model";
 import { ListingDetailPage } from "../../../components/features/listings/ListingDetailPage";
 import { useAccessibilityStore } from "../../../stores/accessibility";
 import { useAuthStore } from "../../../stores/auth";
@@ -35,6 +36,12 @@ function addDays(date: Date, days: number): Date {
   const d = new Date(date);
   d.setDate(d.getDate() + days);
   return d;
+}
+
+// The API only includes the chat HAL link when the request is authenticated,
+// so it doubles as the signal for whether messaging is available at all.
+export function canStartListingChat(listing?: PublicListingDetails): boolean {
+  return !!listing?._links?.chat;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -119,7 +126,7 @@ function ListingDetailRoute() {
       });
 
       if (response.status !== 200) {
-        throw new Error(response.data.detail ?? "Failed to load availability.");
+        throw new Error(response.data?.detail ?? "Failed to load availability.");
       }
 
       return response.data;
@@ -145,10 +152,6 @@ function ListingDetailRoute() {
 
   const isOwnListing = !!currentUserId && authorId === currentUserId;
 
-  // The API only includes the chat HAL link when the request is authenticated,
-  // so it doubles as the signal for whether messaging is available at all.
-  const canMessage = !isOwnListing && !!listing?._links?.chat;
-
   // Only consumers can book; providers can still view the listing.
   const isProvider = useAuthStore((s) => s.user?.userType) === "PROVIDER";
 
@@ -171,25 +174,25 @@ function ListingDetailRoute() {
   }
 
   return (
-      <ListingDetailPage
-          listing={listing}
-          loading={isLoading}
-          error={
-            error ? (error instanceof Error ? error.message : error.detail) : null
-          }
-          description={description ?? undefined}
-          availableToday={availableToday}
-          nextAvailableDate={nextAvailableDate}
-          otherListings={otherListings}
-          publicVerifiedCredentials={publicCredentialsData?.items ?? []}
-          onBookNow={() =>
-              navigate({ to: "/listings/$listingId/book", params: { listingId } })
-          }
-          canBook={!isProvider}
-          onMessage={handleMessage}
-          canMessage={canMessage}
-          messagePending={createChat.isPending}
-          messageError={messageError}
-      />
+    <ListingDetailPage
+      listing={listing}
+      loading={isLoading}
+      error={
+        error ? (error instanceof Error ? error.message : error.detail) : null
+      }
+      description={description ?? undefined}
+      availableToday={availableToday}
+      nextAvailableDate={nextAvailableDate}
+      otherListings={otherListings}
+      publicVerifiedCredentials={publicCredentialsData?.items ?? []}
+      onBookNow={() =>
+        navigate({ to: "/listings/$listingId/book", params: { listingId } })
+      }
+      canBook={!isProvider}
+      onMessage={handleMessage}
+      canMessage={!isOwnListing && canStartListingChat(listing)}
+      messagePending={createChat.isPending}
+      messageError={messageError}
+    />
   );
 }

@@ -37,7 +37,7 @@ function RegisterAddressRoute() {
   const setUser = useAuthStore((s) => s.setUser);
 
   async function handleContinue(values: RegisterAddressSubmitValues) {
-    if (!user?.userId) throw new Error("Not logged in.");
+    if (!user || !user.userId) throw new Error("Not logged in.");
 
     const payload: PatchUserProfileRequest = {
       privateAddress: values,
