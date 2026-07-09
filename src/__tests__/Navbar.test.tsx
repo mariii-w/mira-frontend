@@ -191,15 +191,15 @@ describe("<Navbar />", () => {
 
   it("logged out: Login stays in the header (not moved into the drawer) while it is open", () => {
     renderNavbar();
-    expect(screen.getByRole("link", { name: /^login$/i })).toHaveAttribute(
-      "href",
-      "http://localhost:8081/auth/login/google",
+    expect(screen.getByRole("button", { name: /^login$/i })).toHaveAttribute(
+      "type",
+      "button",
     );
     fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
     // Still in the DOM behind the modal (correctly aria-hidden, not unmounted) —
     // confirms Login wasn't duplicated/moved into the drawer's markup.
     expect(
-      screen.getByRole("link", { name: /^login$/i, hidden: true }),
+      screen.getByRole("button", { name: /^login$/i, hidden: true }),
     ).toBeInTheDocument();
   });
 

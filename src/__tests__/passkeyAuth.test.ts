@@ -43,6 +43,7 @@ describe("passkey auth", () => {
         signature: bytes("signature").buffer,
         userHandle: bytes("user-handle").buffer,
       };
+      getClientExtensionResults = () => ({});
     }
     Object.defineProperty(window, "PublicKeyCredential", {
       configurable: true,
@@ -101,6 +102,7 @@ describe("passkey auth", () => {
             signature: base64Url("signature"),
             userHandle: base64Url("user-handle"),
           },
+          clientExtensionResults: {},
         },
       },
       { credentials: "include" },
