@@ -101,6 +101,9 @@ paths:
               required: false
               schema:
                 type: string
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. The callback query parameters are invalid.
   "/v1/auth/refresh":
     post:
       tags:
@@ -210,6 +213,9 @@ paths:
             "application/json":
               schema:
                 "$ref": "#/components/schemas/PasskeyOptionsResponse"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. The passkey authentication options request is invalid.
   "/v1/auth/passkeys/authentication/finish":
     post:
       tags:
@@ -470,7 +476,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
               example:
-                type: "https://api.mira.example/problems/unauthorized"
+                type: "https://api.mira.example/problems/authentication-required"
                 title: "Unauthorized"
                 status: 401
                 detail: "Full authentication is required to access this resource"
@@ -567,7 +573,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
               example:
-                type: "https://api.mira.example/problems/unauthorized"
+                type: "https://api.mira.example/problems/authentication-required"
                 title: "Unauthorized"
                 status: 401
                 detail: "Full authentication is required to access this resource"
@@ -620,11 +626,8 @@ paths:
         "304":
           description: Not Modified. The client's cached profile picture content is still current.
         "400":
-          description: Bad Request. One or more path parameters are invalid.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. The userId path parameter is invalid.
         "404":
           description: Not Found. The user has no current profile picture or its stored content is unavailable.
           content:
@@ -1236,6 +1239,12 @@ paths:
             type: integer
             minimum: 1
             maximum: 100
+        - name: q
+          in: query
+          required: false
+          description: Free-text search over listing title and description.
+          schema:
+            type: string
         - "$ref": "#/components/parameters/LimitQueryParam"
         - "$ref": "#/components/parameters/FromQueryParam"
       responses:
@@ -1528,6 +1537,9 @@ paths:
                     _links:
                       chat:
                         href: "/v1/chats"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. The listingId path parameter is invalid.
         "404":
           description: Not Found. No resource exists for the given identifier.
           content:
@@ -1699,9 +1711,9 @@ paths:
                         width: 1280
                         height: 720
                         createdAt: "2026-04-20T16:10:00Z"
-                    _links:
-                      chat:
-                        href: "/v1/chats"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more path parameters are invalid.
         "404":
           description: Not Found. No public profile listing exists for the given identifiers.
           content:
@@ -1866,6 +1878,9 @@ paths:
       responses:
         "204":
           description: Listing deleted successfully.
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -2032,6 +2047,12 @@ paths:
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
+        "403":
+          "$ref": "#/components/responses/ForbiddenError"
+          description: Forbidden. The authenticated account is not allowed to access this user's listings.
+        "404":
+          "$ref": "#/components/responses/NotFoundError"
+          description: Not Found. No user profile exists for the given userId.
   "/v1/users/{userId}/listings/{listingId}":
     parameters:
       - "$ref": "#/components/parameters/UserIdPathParam"
@@ -2086,9 +2107,15 @@ paths:
                         width: 1280
                         height: 720
                         createdAt: "2026-04-20T16:10:00Z"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more path parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
+        "403":
+          "$ref": "#/components/responses/ForbiddenError"
+          description: Forbidden. The authenticated account is not allowed to access this listing.
         "404":
           description: Not Found. No resource exists for the given identifier.
           content:
@@ -2156,6 +2183,9 @@ paths:
                         width: 1280
                         height: 720
                         createdAt: "2026-04-20T16:10:00Z"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -2276,6 +2306,9 @@ paths:
                         width: 1280
                         height: 720
                         createdAt: "2026-04-20T16:10:00Z"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -2365,6 +2398,9 @@ paths:
                       city: Berlin
                       postalCode: "10115"
                       serviceRadiusKm: 15
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -2444,6 +2480,9 @@ paths:
                       width: 1280
                       height: 720
                       createdAt: "2026-04-20T16:10:00Z"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -2801,6 +2840,9 @@ paths:
       responses:
         "204":
           description: Listing media deleted successfully.
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -2870,11 +2912,8 @@ paths:
         "304":
           description: Not Modified. The client's cached listing media content is still current.
         "400":
-          description: Bad Request. One or more path parameters are invalid.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. The mediaId path parameter is invalid.
         "404":
           description: Not Found. The media item does not exist or its stored content is unavailable.
           content:
@@ -3213,9 +3252,15 @@ paths:
           headers:
             ETag:
               "$ref": "#/components/headers/ETag"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
+        "403":
+          "$ref": "#/components/responses/ForbiddenError"
+          description: Forbidden. The authenticated account is not allowed to perform this action.
         "404":
           description: Not Found. No resource exists for the given identifier.
           content:
@@ -3366,6 +3411,9 @@ paths:
                     status: CANCELLED
                     paidAt: null
                     cancelledAt: "2026-05-01T09:00:00Z"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -3466,6 +3514,9 @@ paths:
                     paidAt: null
                     cancelledAt: null
                     expiresAt: "2026-04-30T10:30:00Z"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -3657,6 +3708,9 @@ paths:
             "application/json":
               schema:
                 "$ref": "#/components/schemas/CheckoutSessionResponse"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
         "403":
@@ -3768,6 +3822,9 @@ paths:
                     paidAt: null
                     cancelledAt: null
                     expiresAt: "2026-04-30T10:30:00Z"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -3904,6 +3961,9 @@ paths:
                     paidAt: null
                     cancelledAt: null
                     expiresAt: "2026-04-30T10:30:00Z"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -4112,6 +4172,9 @@ paths:
           headers:
             ETag:
               "$ref": "#/components/headers/ETag"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
           description: Unauthorized. Authentication is required.
@@ -4286,6 +4349,18 @@ paths:
           headers:
             ETag:
               "$ref": "#/components/headers/ETag"
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+              examples:
+                staleSchedule:
+                  value:
+                    type: "https://api.mira.example/problems/resource-conflict"
+                    title: Precondition Failed
+                    status: 412
+                    detail: The schedule has changed since it was last read
+                    instance: /v1/users/22bb22bb-2222-2222-2222-bbbbbbbbbbbb/schedule
         "422":
           description: Unprocessable Entity. The request is formally valid but violates one or more business rules.
           content:
@@ -4342,6 +4417,9 @@ paths:
                         endTime: "14:00"
                         createdAt: "2026-04-11T09:00:00Z"
                         updatedAt: "2026-04-11T09:00:00Z"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
         "403":
@@ -4484,7 +4562,7 @@ paths:
               examples:
                 duplicateDate:
                   value:
-                    type: "https://api.mira.example/problems/conflict"
+                    type: "https://api.mira.example/problems/resource-conflict"
                     title: Conflict
                     status: 409
                     detail: A schedule exception already exists for this date
@@ -4585,6 +4663,9 @@ paths:
       responses:
         "204":
           description: Schedule exception deleted successfully.
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
         "403":
@@ -4730,6 +4811,9 @@ paths:
             "application/json":
               schema:
                 "$ref": "#/components/schemas/ChatOverviewResponse"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
         "403":
@@ -4772,8 +4856,14 @@ paths:
             "application/hal+json":
               schema:
                 "$ref": "#/components/schemas/ChatHistoryResponse"
+        "400":
+          "$ref": "#/components/responses/BadRequestError"
+          description: Bad Request. One or more request parameters are invalid.
         "401":
           "$ref": "#/components/responses/UnauthorizedError"
+        "404":
+          "$ref": "#/components/responses/NotFoundError"
+          description: Not Found. No chat exists for the given cid.
 components:
   securitySchemes:
     bearerHttpAuthentication:
@@ -6101,17 +6191,6 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/ListingMediaItem"
-        _links:
-          "$ref": "#/components/schemas/PublicListingDetailsLinks"
-    PublicListingDetailsLinks:
-      type: object
-      additionalProperties: false
-      description: Conditional listing affordances. Links are omitted when the current request is not allowed to perform the action.
-      properties:
-        chat:
-          allOf:
-            - "$ref": "#/components/schemas/HalLink"
-          description: Present when the authenticated user may start or open a chat for this listing.
     MyListingSummary:
       type: object
       required:
@@ -6936,13 +7015,226 @@ components:
           schema:
             "$ref": "#/components/schemas/ProblemDetailsResponse"
           examples:
-            unauthorized:
+            authenticationRequired:
               value:
                 type: "https://api.mira.example/problems/authentication-required"
                 title: Unauthorized
                 status: 401
                 detail: Authentication is required
                 instance: /v1/listings/{listingId}
+            invalidRefreshToken:
+              value:
+                type: "https://api.mira.example/problems/invalid-refresh-token"
+                title: Unauthorized
+                status: 401
+                detail: Refresh token is missing, expired, or invalid
+                instance: /v1/auth/refresh
+            passkeyAuthenticationFailed:
+              value:
+                type: "https://api.mira.example/problems/passkey-authentication-failed"
+                title: Unauthorized
+                status: 401
+                detail: Passkey authentication failed
+                instance: /v1/auth/passkeys/authentication/finish
+    BadRequestError:
+      description: Bad Request. The request cannot be parsed or validated.
+      content:
+        "application/problem+json":
+          schema:
+            "$ref": "#/components/schemas/ProblemDetailsResponse"
+          examples:
+            validationError:
+              value:
+                type: "https://api.mira.example/problems/validation-error"
+                title: Bad Request
+                status: 400
+                detail: Request validation failed
+                instance: /v1/listings
+            invalidRequestParameter:
+              value:
+                type: "https://api.mira.example/problems/invalid-request-parameter"
+                title: Bad Request
+                status: 400
+                detail: Path parameter 'listingId' must be a UUID
+                instance: /v1/listings/not-a-uuid
+            invalidQueryParameter:
+              value:
+                type: "https://api.mira.example/problems/invalid-query-parameter"
+                title: Bad Request
+                status: 400
+                detail: Query parameter 'sortby' is not supported
+                instance: /v1/chats
+            unknownPasskeyChallenge:
+              value:
+                type: "https://api.mira.example/problems/unknown-passkey-challenge"
+                title: Bad Request
+                status: 400
+                detail: Passkey challenge is unknown or expired
+                instance: /v1/auth/passkeys/registration/finish
+            passkeyCredentialNotDiscoverable:
+              value:
+                type: "https://api.mira.example/problems/passkey-credential-not-discoverable"
+                title: Bad Request
+                status: 400
+                detail: Passkey credential must be discoverable
+                instance: /v1/auth/passkeys/registration/finish
+            chatUserRequired:
+              value:
+                type: "https://api.mira.example/problems/chat-user-required"
+                title: Bad Request
+                status: 400
+                detail: Query parameter 'user' is required
+                instance: /v1/chats
+            chatSortUnsupported:
+              value:
+                type: "https://api.mira.example/problems/chat-sort-unsupported"
+                title: Bad Request
+                status: 400
+                detail: Chat sort value is not supported
+                instance: /v1/chats
+    ForbiddenError:
+      description: Forbidden. The authenticated account is not allowed to perform this action.
+      content:
+        "application/problem+json":
+          schema:
+            "$ref": "#/components/schemas/ProblemDetailsResponse"
+          examples:
+            forbidden:
+              value:
+                type: "https://api.mira.example/problems/forbidden"
+                title: Forbidden
+                status: 403
+                detail: You are not allowed to access this resource
+                instance: /v1/users/{userId}
+            insufficientPermissions:
+              value:
+                type: "https://api.mira.example/problems/insufficient-permissions"
+                title: Forbidden
+                status: 403
+                detail: Only providers can manage this resource
+                instance: /v1/users/{userId}/schedule
+            chatOwnerCannotInitiate:
+              value:
+                type: "https://api.mira.example/problems/chat-owner-cannot-initiate"
+                title: Forbidden
+                status: 403
+                detail: Listing owners cannot initiate a chat for their own listing
+                instance: /v1/chats
+    NotFoundError:
+      description: Not Found. No resource exists for the given identifier.
+      content:
+        "application/problem+json":
+          schema:
+            "$ref": "#/components/schemas/ProblemDetailsResponse"
+          examples:
+            resourceNotFound:
+              value:
+                type: "https://api.mira.example/problems/resource-not-found"
+                title: Not Found
+                status: 404
+                detail: Resource with the given identifier was not found
+                instance: /v1/listings/{listingId}
+            userNotFound:
+              value:
+                type: "https://api.mira.example/problems/user-not-found"
+                title: Not Found
+                status: 404
+                detail: User with the given identifier was not found
+                instance: /v1/users/{userId}
+            publicProfileNotFound:
+              value:
+                type: "https://api.mira.example/problems/public-profile-not-found"
+                title: Not Found
+                status: 404
+                detail: Public profile with the given identifier was not found
+                instance: /v1/public-profiles/{userId}
+            mediaNotFound:
+              value:
+                type: "https://api.mira.example/problems/media-not-found"
+                title: Not Found
+                status: 404
+                detail: Media with the given identifier was not found
+                instance: /v1/listing-media/{mediaId}/content
+            chatResourceNotFound:
+              value:
+                type: "https://api.mira.example/problems/chat-resource-not-found"
+                title: Not Found
+                status: 404
+                detail: Chat with the given identifier was not found
+                instance: /v1/chats/{cid}/messages
+    ConflictError:
+      description: Conflict. The request conflicts with the current resource state.
+      content:
+        "application/problem+json":
+          schema:
+            "$ref": "#/components/schemas/ProblemDetailsResponse"
+          examples:
+            resourceConflict:
+              value:
+                type: "https://api.mira.example/problems/resource-conflict"
+                title: Conflict
+                status: 409
+                detail: Resource state conflicts with the requested operation
+                instance: /v1/bookings/{bookingId}
+            usernameAlreadyExists:
+              value:
+                type: "https://api.mira.example/problems/username-already-exists"
+                title: Conflict
+                status: 409
+                detail: Username is already taken
+                instance: /v1/users/{userId}
+    UnprocessableEntityError:
+      description: Unprocessable Entity. The request is syntactically valid but violates business or media validation rules.
+      content:
+        "application/problem+json":
+          schema:
+            "$ref": "#/components/schemas/ProblemDetailsResponse"
+          examples:
+            businessRuleViolation:
+              value:
+                type: "https://api.mira.example/problems/business-rule-violation"
+                title: Unprocessable Entity
+                status: 422
+                detail: Business validation failed
+                instance: /v1/listings/{listingId}/publish
+                errors:
+                  - field: publicationStatus
+                    message: listing must be a draft before it can be published
+            invalidImageDimensions:
+              value:
+                type: "https://api.mira.example/problems/invalid-image-dimensions"
+                title: Unprocessable Entity
+                status: 422
+                detail: Image dimensions 150x100 are below the minimum allowed size 200x200
+                instance: /v1/listings/{listingId}/media/{mediaId}
+    PayloadTooLargeError:
+      description: Payload Too Large. Uploaded media exceeds the configured file size limit.
+      content:
+        "application/problem+json":
+          schema:
+            "$ref": "#/components/schemas/ProblemDetailsResponse"
+          examples:
+            mediaFileTooLarge:
+              value:
+                type: "https://api.mira.example/problems/media-file-too-large"
+                title: Payload Too Large
+                status: 413
+                detail: Uploaded media size 6291456 exceeds maximum allowed size 5242880
+                instance: /v1/users/{userId}/profile-picture
+    UnsupportedMediaTypeError:
+      description: Unsupported Media Type. Uploaded media uses a MIME type that is not accepted.
+      content:
+        "application/problem+json":
+          schema:
+            "$ref": "#/components/schemas/ProblemDetailsResponse"
+          examples:
+            unsupportedMediaType:
+              value:
+                type: "https://api.mira.example/problems/unsupported-media-type"
+                title: Unsupported Media Type
+                status: 415
+                detail: "Media type image/gif is not supported. Allowed types: image/jpeg, image/png"
+                instance: /v1/users/{userId}/profile-picture
     ExternalServiceUnavailableError:
       description: Service Unavailable. A required downstream service is temporarily unavailable.
       content:

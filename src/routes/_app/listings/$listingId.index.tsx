@@ -11,7 +11,7 @@ import {
   useCreateChat,
   useGetPublicListing,
 } from "../../../api/mira";
-import type { PublicListingDetails } from "../../../api/model";
+import type { PublicListingDetailsEntityModel } from "../../../api/model";
 import { ListingDetailPage } from "../../../components/features/listings/ListingDetailPage";
 import { useAccessibilityStore } from "../../../stores/accessibility";
 import { useAuthStore } from "../../../stores/auth";
@@ -40,7 +40,9 @@ function addDays(date: Date, days: number): Date {
 
 // The API only includes the chat HAL link when the request is authenticated,
 // so it doubles as the signal for whether messaging is available at all.
-export function canStartListingChat(listing?: PublicListingDetails): boolean {
+export function canStartListingChat(
+  listing?: PublicListingDetailsEntityModel,
+): boolean {
   return !!listing?._links?.chat;
 }
 
