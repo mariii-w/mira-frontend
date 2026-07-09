@@ -1447,6 +1447,9 @@ paths:
                         width: 1280
                         height: 720
                         createdAt: "2026-04-20T16:10:00Z"
+                    _links:
+                      chat:
+                        href: "/v1/chats"
         "404":
           description: Not Found. No resource exists for the given identifier.
           content:
@@ -1613,6 +1616,9 @@ paths:
                         width: 1280
                         height: 720
                         createdAt: "2026-04-20T16:10:00Z"
+                    _links:
+                      chat:
+                        href: "/v1/chats"
         "404":
           description: Not Found. No public profile listing exists for the given identifiers.
           content:
@@ -6403,6 +6409,17 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/ListingMediaItem"
+        _links:
+          "$ref": "#/components/schemas/PublicListingDetailsLinks"
+    PublicListingDetailsLinks:
+      type: object
+      additionalProperties: false
+      description: Conditional listing affordances. Links are omitted when the current request is not allowed to perform the action.
+      properties:
+        chat:
+          allOf:
+            - "$ref": "#/components/schemas/HalLink"
+          description: Present when the authenticated user may start or open a chat for this listing.
     MyListingSummary:
       type: object
       required:

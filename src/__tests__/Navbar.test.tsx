@@ -191,28 +191,39 @@ describe("<Navbar />", () => {
     expect(dialog.getByRole("link", { name: /chat/i })).toBeInTheDocument();
   });
 
-  it("logged out: Login stays in the header (not moved into the drawer) while it is open", () => {
-    renderNavbar();
-    fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
-    // Still in the DOM behind the modal (correctly aria-hidden, not unmounted) —
-    // confirms Login wasn't duplicated/moved into the drawer's markup.
-    expect(
-      screen.getByRole("button", { name: /^login$/i, hidden: true }),
-    ).toBeInTheDocument();
-  });
 
-  it("logged out: Login opens a popup with Google and Passkey options", () => {
-    renderNavbar();
-    fireEvent.click(screen.getByRole("button", { name: /^login$/i }));
+it("logged out: Login stays in the header (not moved into the drawer) while it is open", () => {
+  renderNavbar();
 
-    const dialog = screen.getByRole("dialog", { name: /log in/i });
-    expect(
-      within(dialog).getByRole("link", { name: /continue with google/i }),
-    ).toHaveAttribute("href", "http://localhost:8081/auth/login/google");
-    expect(
-      within(dialog).getByRole("button", { name: /continue with passkey/i }),
-    ).toBeInTheDocument();
-  });
+  expect(screen.getByRole("button", { name: /^login$/i })).toHaveAttribute(
+    "type",
+    "button",
+  );
+
+  fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+
+  // Still in the DOM behind the modal (correctly aria-hidden, not unmounted) —
+  // confirms Login wasn't duplicated/moved into the drawer's markup.
+  expect(
+    screen.getByRole("button", { name: /^login$/i, hidden: true }),
+  ).toBeInTheDocument();
+});
+
+it("logged out: Login opens a popup with Google and Passkey options", () => {
+  renderNavbar();
+
+  fireEvent.click(screen.getByRole("button", { name: /^login$/i }));
+
+  const dialog = screen.getByRole("dialog", { name: /log in/i });
+
+  expect(
+    within(dialog).getByRole("link", { name: /continue with google/i }),
+  ).toHaveAttribute("href", "http://localhost:8081/auth/login/google");
+
+  expect(
+    within(dialog).getByRole("button", { name: /continue with passkey/i }),
+  ).toBeInTheDocument();
+});
 
   it("logged in (provider): drawer shows account rows and logout, scoped to the dialog", () => {
     useAuthStore.getState().setUser(providerUser);
