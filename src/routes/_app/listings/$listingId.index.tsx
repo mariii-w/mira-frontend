@@ -11,6 +11,7 @@ import {
   useCreateChat,
   useGetPublicListing,
 } from "../../../api/mira";
+import type { PublicListingDetails } from "../../../api/model";
 import { ListingDetailPage } from "../../../components/features/listings/ListingDetailPage";
 import { useAccessibilityStore } from "../../../stores/accessibility";
 import { useAuthStore } from "../../../stores/auth";
@@ -35,6 +36,10 @@ function addDays(date: Date, days: number): Date {
   const d = new Date(date);
   d.setDate(d.getDate() + days);
   return d;
+}
+
+export function canStartListingChat(listing?: PublicListingDetails): boolean {
+  return !!listing?._links?.chat;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -167,25 +172,25 @@ function ListingDetailRoute() {
   }
 
   return (
-      <ListingDetailPage
-          listing={listing}
-          loading={isLoading}
-          error={
-            error ? (error instanceof Error ? error.message : error.detail) : null
-          }
-          description={description ?? undefined}
-          availableToday={availableToday}
-          nextAvailableDate={nextAvailableDate}
-          otherListings={otherListings}
-          publicVerifiedCredentials={publicCredentialsData?.items ?? []}
-          onBookNow={() =>
-              navigate({ to: "/listings/$listingId/book", params: { listingId } })
-          }
-          canBook={!isProvider}
-          onMessage={handleMessage}
-          canMessage={!isOwnListing}
-          messagePending={createChat.isPending}
-          messageError={messageError}
-      />
+    <ListingDetailPage
+      listing={listing}
+      loading={isLoading}
+      error={
+        error ? (error instanceof Error ? error.message : error.detail) : null
+      }
+      description={description ?? undefined}
+      availableToday={availableToday}
+      nextAvailableDate={nextAvailableDate}
+      otherListings={otherListings}
+      publicVerifiedCredentials={publicCredentialsData?.items ?? []}
+      onBookNow={() =>
+        navigate({ to: "/listings/$listingId/book", params: { listingId } })
+      }
+      canBook={!isProvider}
+      onMessage={handleMessage}
+      canMessage={!isOwnListing && canStartListingChat(listing)}
+      messagePending={createChat.isPending}
+      messageError={messageError}
+    />
   );
 }
