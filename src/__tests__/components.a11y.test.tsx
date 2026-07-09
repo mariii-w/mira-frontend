@@ -6,60 +6,107 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import axe from "axe-core";
-import { AccessibilityPanel } from "../components/AccessibilityPanel";
-import { AvatarIcon } from "../components/AvatarIcon";
-import { Badge } from "../components/Badge";
-import { Breadcrumb } from "../components/BreadCrumb";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  getPublicListings,
+  getPublicProfilesCollection,
+  getServiceTags,
+} from "../api/mira";
+import type { PublicListingSummary } from "../api/model";
+import { AccessibilityPanel } from "../components/common/layout/AccessibilityPanel";
+import { AvatarIcon } from "../components/common/ui/AvatarIcon";
+import { Badge } from "../components/common/ui/Badge";
+import { Breadcrumb } from "../components/common/layout/BreadCrumb";
 import {
   BookingCard,
   type BookingDetails,
   type BookingSummary,
-} from "../components/BookingCard";
-import { BookingPage } from "../components/BookingPage";
-import { Button } from "../components/Button";
-import { CalendarGrid } from "../components/CalendarGrid";
-import { CalendarPage } from "../components/CalendarPage";
-import { CategoryCard } from "../components/CategoryCard";
-import { CreateListing } from "../components/CreateListing";
-import { EditListing, type EditListingDetails } from "../components/EditListing";
-import { ExceptionModal } from "../components/ExceptionModal";
-import { FilterBar } from "../components/FilterBar";
-import { Home } from "../components/Home";
-import { Input } from "../components/Input";
-import { Label } from "../components/Label";
-import { LoginCallback } from "../components/LoginCallback";
-import { Logo } from "../components/Logo";
-import { Modal } from "../components/Modal";
-import { MultiSelect } from "../components/MultiSelect";
-import { MyBookings } from "../components/MyBookings";
+} from "../components/features/bookings/BookingCard";
+import { BookingPage } from "../components/features/bookings/BookingPage";
+import { Button } from "../components/common/ui/Button";
+import { CalendarGrid } from "../components/features/bookings/CalendarGrid";
+import { CalendarPage } from "../components/features/bookings/CalendarPage";
+import { CategoryCard } from "../components/features/home/CategoryCard";
+import { CreateListing } from "../components/features/listings/CreateListing";
+import { CredentialCard } from "../components/features/credentials/CredentialCard";
+import { CredentialDocumentViewer } from "../components/features/credentials/CredentialDocumentViewer";
+import { Credentials } from "../components/features/credentials/Credentials";
+import { EditListing } from "../components/features/listings/EditListing";
+import type {
+  CredentialResponse,
+  ListingDetails,
+  PublicListingDetails,
+  PublicProfileResponse,
+} from "../api/model";
+import { ExceptionModal } from "../components/features/bookings/ExceptionModal";
+import { FilterBar } from "../components/features/search/FilterBar";
+import { FilterDrawer } from "../components/features/search/FilterDrawer";
+import { Home } from "../components/features/home/Home";
+import { InfoPage } from "../components/common/InfoPage";
+import { Input } from "../components/common/ui/Input";
+import { Label } from "../components/common/ui/Label";
+import { ListingDetailPage } from "../components/features/listings/ListingDetailPage";
+import { ListingProviderCard } from "../components/features/listings/ListingProviderCard";
+import { LoginCallback } from "../components/features/auth/LoginCallback";
+import { LoginOptionsDialog } from "../components/common/layout/LoginOptionsDialog";
+import { Logo } from "../components/common/ui/Logo";
+import { Modal } from "../components/common/ui/Modal";
+import { MultiSelect } from "../components/common/ui/MultiSelect";
+import { MyBookings } from "../components/features/bookings/MyBookings";
 import {
   MyListingCard,
   type MyListingSummary,
-} from "../components/MyListingCard";
-import { MyListings } from "../components/MyListings";
-import { Navbar } from "../components/Navbar";
-import { Pagination } from "../components/Pagination";
-import * as Popover from "../components/Popover";
-import { ProviderCard } from "../components/ProviderCard";
-import { RegisterAbout } from "../components/RegisterAbout";
-import { RegisterAddress } from "../components/RegisterAddress";
-import { RegisterDone } from "../components/RegisterDone";
-import { RegisterLayout } from "../components/RegisterLayout";
-import { RegisterName } from "../components/RegisterName";
-import { RegisterPhoto } from "../components/RegisterPhoto";
-import { RegisterRole } from "../components/RegisterRole";
-import { SearchBar } from "../components/SearchBar";
-import { ServiceCard } from "../components/ServiceCard";
-import { ServiceUserToggle } from "../components/ServiceUserToggle";
-import { Slider } from "../components/Slider";
-import * as Switch from "../components/Switch";
-import { Textarea } from "../components/Textarea";
-import { UserMenu } from "../components/UserMenu";
-import { WeeklyScheduleModal } from "../components/WeeklyScheduleModal";
+} from "../components/features/listings/MyListingCard";
+import { MyListings } from "../components/features/listings/MyListings";
+import { Navbar } from "../components/common/layout/Navbar";
+import { Pagination } from "../components/common/layout/Pagination";
+import { PaymentReturnPage } from "../components/features/payments/PaymentReturnPage";
+import * as Popover from "../components/common/ui/Popover";
+import { RegisterAbout } from "../components/features/register/RegisterAbout";
+import { RegisterAddress } from "../components/features/register/RegisterAddress";
+import { RegisterDone } from "../components/features/register/RegisterDone";
+import { RegisterLayout } from "../components/features/register/RegisterLayout";
+import { RegisterName } from "../components/features/register/RegisterName";
+import { RegisterPhoto } from "../components/features/register/RegisterPhoto";
+import { RegisterRole } from "../components/features/register/RegisterRole";
+import { SearchBar } from "../components/features/search/SearchBar";
+import { ServiceCard } from "../components/features/listings/ServiceCard";
+import { ServiceUserToggle } from "../components/features/search/ServiceUserToggle.tsx";
+import { SearchRootPage } from "../components/features/search/SearchRootPage.tsx";
+import { SearchServicesPage } from "../components/features/search/SearchServicesPage.tsx";
+import { SearchUsersPage } from "../components/features/search/SearchUsersPage.tsx";
+import { UserTypeFilter } from "../components/features/search/UserTypeFilter.tsx";
+import { Slider } from "../components/common/ui/Slider";
+import { SubmitCredentialModal } from "../components/features/credentials/SubmitCredentialModal";
+import * as Switch from "../components/common/ui/Switch";
+import { Textarea } from "../components/common/ui/Textarea";
+import { UserMenu } from "../components/common/layout/UserMenu";
+import { UserCard } from "../components/features/search/UserCard";
+import { WeeklyScheduleModal } from "../components/features/bookings/WeeklyScheduleModal";
+import { PrivateProfilePage } from "../components/features/profiles/PrivateProfilePage";
+import { PublicProfilePage } from "../components/features/profiles/PublicProfilePage";
 import { useAuthStore, type User } from "../stores/auth";
+import type { VerifiedCredentialResponse } from "../api/model";
+
+const routerMocks = vi.hoisted(() => ({
+  navigate: vi.fn(),
+  location: {
+    pathname: "/browse-services",
+    search: {
+      q: "shopping",
+      city: "Berlin",
+      radiusKm: 20 as number | undefined,
+      tagIds: ["tag-1"],
+      maxPrice: 50 as number | undefined,
+      role: "everyone",
+      from: undefined as string | undefined,
+    },
+  },
+}));
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
@@ -78,10 +125,108 @@ vi.mock("@tanstack/react-router", () => ({
       {children}
     </a>
   ),
-  useNavigate: () => vi.fn(),
+  Outlet: () => <section aria-label="Search content">Search outlet</section>,
+  getRouteApi: () => ({
+    useSearch: () => routerMocks.location.search,
+  }),
+  useNavigate: () => routerMocks.navigate,
+  useRouterState: ({
+    select,
+  }: {
+    select: (state: { location: typeof routerMocks.location }) => unknown;
+  }) => select({ location: routerMocks.location }),
 }));
 
+vi.mock("../api/mira", () => ({
+  getServiceTags: vi.fn(),
+  getPublicListings: vi.fn(),
+  getPublicProfilesCollection: vi.fn(),
+  listMyBookings: vi.fn().mockResolvedValue({ status: 200, data: { items: [] } }),
+  getListMyBookingsQueryKey: vi.fn((userId: string) => ["bookings", userId]),
+  logout: vi.fn().mockResolvedValue({ status: 204, data: undefined }),
+  getStartGoogleLoginUrl: vi.fn(() => "http://localhost:8081/auth/login/google"),
+  getPrivateUserProfile: vi.fn(),
+}));
+
+vi.mock("../lib/credentialEvidenceMedia", () => ({
+  fetchCredentialEvidenceMediaUrl: vi
+    .fn()
+    .mockResolvedValue("blob:credential-document"),
+}));
+
+const mockGetServiceTags = vi.mocked(getServiceTags);
+const mockGetPublicListings = vi.mocked(getPublicListings);
+const mockGetPublicProfilesCollection = vi.mocked(getPublicProfilesCollection);
+
+function renderHome(listings: PublicListingSummary[] = []) {
+  mockGetServiceTags.mockResolvedValue({
+    data: [],
+    status: 200,
+    headers: new Headers(),
+  } as never);
+  mockGetPublicListings.mockResolvedValue({
+    data: { items: listings, cursor: { limit: 8, next: null } },
+    status: 200,
+    headers: new Headers(),
+  } as never);
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <Home />
+    </QueryClientProvider>,
+  );
+}
+
+function renderWithQuery(ui: ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+  );
+}
+
+function mockScrollableCarousels(scrollBy: ReturnType<typeof vi.fn>) {
+  Object.defineProperty(HTMLElement.prototype, "scrollBy", {
+    configurable: true,
+    value: scrollBy,
+  });
+  Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+    configurable: true,
+    get() {
+      return this.id === "categories-list" || this.id === "listings-list"
+        ? 320
+        : 0;
+    },
+  });
+  Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+    configurable: true,
+    get() {
+      return this.id === "categories-list" || this.id === "listings-list"
+        ? 960
+        : 0;
+    },
+  });
+}
+
 beforeEach(() => {
+  routerMocks.navigate.mockClear();
+  routerMocks.location.pathname = "/browse-services";
+  routerMocks.location.search = {
+    q: "shopping",
+    city: "Berlin",
+    radiusKm: 20,
+    tagIds: ["tag-1"],
+    maxPrice: 50,
+    role: "everyone",
+    from: undefined,
+  };
+  Object.defineProperty(URL, "revokeObjectURL", {
+    configurable: true,
+    value: vi.fn(),
+  });
   vi.stubGlobal(
     "ResizeObserver",
     class ResizeObserver {
@@ -117,7 +262,7 @@ const listing: MyListingSummary = {
   price: 24,
   publicationStatus: "ACTIVE",
   moderationStatus: "VISIBLE",
-  author: { name: "Mira", surname: "Muster" },
+  author: { userId: "user-1", name: "Mira", surname: "Muster" },
   publishedAt: "2026-06-01T12:00:00Z",
   location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 10 },
   primaryMedia: {
@@ -175,20 +320,31 @@ const serviceTags = [
   { tagId: "tag-2", name: "Accessible", isBarrierefrei: true, isActive: true },
 ];
 
-const editListing: EditListingDetails = {
+const editListing: ListingDetails = {
   listingId: "listing-1",
   title: "Grocery pickup",
   description: "Weekly pickup and drop-off support.",
   price: 24,
   publicationStatus: "ACTIVE",
+  moderationStatus: "VISIBLE",
+  author: { userId: "user-1", name: "Mira", surname: "Muster" },
+  publishedAt: "2026-01-01T00:00:00Z",
+  createdAt: "2026-01-01T00:00:00Z",
+  updatedAt: "2026-01-01T00:00:00Z",
   tags: serviceTags,
   location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 20 },
   media: [
     {
       mediaId: "media-1",
+      position: 0,
       url: "/listing.jpg",
       altText: "Shopping bags",
       altTextStatus: "COMPLETED",
+      mimeType: "image/jpeg",
+      size: 1000,
+      width: 800,
+      height: 600,
+      createdAt: "2026-01-01T00:00:00Z",
     },
   ],
 };
@@ -259,6 +415,95 @@ const publicListing = {
   createdAt: "2026-06-01T12:00:00.000Z",
   updatedAt: "2026-06-02T12:00:00.000Z",
   media: [],
+};
+
+const credential: CredentialResponse = {
+  credentialId: "credential-1",
+  credentialType: "IDENTITY_VERIFIED",
+  name: "Identity check",
+  description: "Government ID verification",
+  expiresAt: "2027-01-01T00:00:00.000Z",
+  isVisible: true,
+  evidenceMedia: {
+    mediaId: "evidence-1",
+    url: "/credential.jpg",
+    altTextStatus: "COMPLETED",
+    mimeType: "image/jpeg",
+    size: 1200,
+    width: 800,
+    height: 600,
+    createdAt: "2026-06-01T00:00:00.000Z",
+  },
+  createdAt: "2026-06-01T00:00:00.000Z",
+  latestVerification: {
+    verificationId: "verification-1",
+    status: "COMPLETED",
+    result: "APPROVED",
+    feedback: null,
+    createdAt: "2026-06-01T00:00:00.000Z",
+    completedAt: "2026-06-02T00:00:00.000Z",
+  },
+};
+
+const deniedCredential: CredentialResponse = {
+  ...credential,
+  credentialId: "credential-2",
+  name: "Student status",
+  credentialType: "STUDENT_VERIFIED",
+  isVisible: false,
+  latestVerification: {
+    verificationId: "verification-2",
+    status: "COMPLETED",
+    result: "DENIED",
+    feedback: "The uploaded document is unreadable.",
+    createdAt: "2026-06-03T00:00:00.000Z",
+    completedAt: "2026-06-04T00:00:00.000Z",
+  },
+};
+
+const publicProfile: PublicProfileResponse = {
+  userId: "provider-1",
+  username: "mira.provider",
+  firstName: "Mira",
+  lastName: "Muster",
+  userType: "PROVIDER",
+  bio: "Friendly local support.",
+  simplifiedBio: "I can help with errands.",
+  selfSummary: "Errands and tech help.",
+  accessibilityPreferences: [],
+  profileMedia: null,
+  city: "Berlin",
+  verified: true,
+};
+
+const listingDetails: PublicListingDetails = {
+  ...publicListing,
+  media: [
+    {
+      mediaId: "media-1",
+      position: 0,
+      url: "/listing-1.jpg",
+      altText: "Shopping bags",
+      altTextStatus: "COMPLETED",
+      mimeType: "image/jpeg",
+      size: 1000,
+      width: 800,
+      height: 600,
+      createdAt: "2026-01-01T00:00:00Z",
+    },
+    {
+      mediaId: "media-2",
+      position: 1,
+      url: "/listing-2.jpg",
+      altText: null,
+      altTextStatus: "FAILED",
+      mimeType: "image/jpeg",
+      size: 1000,
+      width: 800,
+      height: 600,
+      createdAt: "2026-01-01T00:00:00Z",
+    },
+  ],
 };
 
 const scheduleEntries = [
@@ -342,17 +587,6 @@ const componentCases: Array<[string, ReactElement]> = [
       </Popover.Portal>
     </Popover.Root>,
   ],
-  [
-    "ProviderCard",
-    <ProviderCard
-      firstName="Mira"
-      lastName="Muster"
-      distanceKm={2}
-      bio="Friendly local support."
-      pricePerHour={20}
-      services={[{ name: "Shopping", price: 20 }]}
-    />,
-  ],
   ["SearchBar", <SearchBar aria-label="Search services" city="Berlin" />],
   [
     "ServiceCard",
@@ -365,7 +599,14 @@ const componentCases: Array<[string, ReactElement]> = [
       varified
       label="Shopping help"
       description="Help with weekly shopping."
-      tags={[{ tagId: "errands", name: "Errands", isBarrierefrei: false }]}
+      tags={[
+        {
+          tagId: "errands",
+          name: "Errands",
+          isBarrierefrei: false,
+          isActive: true,
+        },
+      ]}
       hourRate={20}
     />,
   ],
@@ -398,13 +639,102 @@ const componentCases: Array<[string, ReactElement]> = [
     </>,
   ],
   ["UserMenu", <UserMenu firstName="Mira" lastName="Muster" isProvider />],
+  [
+    "UserTypeFilter",
+    <UserTypeFilter
+      selected="everyone"
+      providerCount={4}
+      consumerCount={4}
+      onChange={vi.fn()}
+    />,
+  ],
+  [
+    "UserCard (consumer)",
+    <UserCard
+      profile={{
+        userId: "user-1",
+        username: "anna.w",
+        firstName: "Anna",
+        lastName: "Weber",
+        userType: "CUSTOMER",
+        city: "Berlin",
+        bio: "I use Mira to find friendly help with my laptop and phone.",
+        simplifiedBio: null,
+        selfSummary: null,
+        accessibilityPreferences: [],
+        profileMedia: null,
+        verified: true,
+      }}
+      easyRead={false}
+    />,
+  ],
+  [
+    "UserCard (provider, base)",
+    <UserCard
+      profile={{
+        userId: "user-2",
+        username: "patrick.s",
+        firstName: "Patrick",
+        lastName: "Smith",
+        userType: "PROVIDER",
+        city: "Berlin",
+        bio: "Five years helping friends and neighbours with everyday tech.",
+        simplifiedBio: null,
+        selfSummary: null,
+        accessibilityPreferences: [],
+        profileMedia: null,
+        verified: true,
+      }}
+      easyRead={false}
+    />,
+  ],
+  [
+    "UserCard (provider, enriched)",
+    <UserCard
+      profile={{
+        userId: "user-2",
+        username: "patrick.s",
+        firstName: "Patrick",
+        lastName: "Smith",
+        userType: "PROVIDER",
+        city: "Berlin",
+        bio: "Five years helping friends and neighbours with everyday tech.",
+        simplifiedBio: null,
+        selfSummary: null,
+        accessibilityPreferences: [],
+        profileMedia: null,
+        verified: true,
+      }}
+      easyRead={false}
+      providerSummary={{
+        serviceCount: 4,
+        startingPrice: 20,
+        topTags: [
+          {
+            tagId: "wifi",
+            name: "Laptop & Wi-Fi Setup",
+            usageCount: 2,
+            isBarrierefrei: false,
+            minPrice: 22,
+          },
+          {
+            tagId: "a11y",
+            name: "Accessible tech help",
+            usageCount: 1,
+            isBarrierefrei: true,
+            minPrice: 28,
+          },
+        ],
+      }}
+    />,
+  ],
 ];
 
 describe("component accessibility", () => {
   it.each(componentCases)(
     "%s has no automated accessibility violations",
     async (_name, ui) => {
-      const { container } = render(ui);
+      const { container } = renderWithQuery(ui);
       await expectNoAxeViolations(container);
     },
   );
@@ -463,7 +793,9 @@ describe("component accessibility", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /previous month/i })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /previous month/i }),
+    ).toBeDisabled();
     expect(screen.getByRole("button", { name: /next month/i })).toBeDisabled();
 
     rerender(
@@ -560,8 +892,10 @@ describe("component accessibility", () => {
           onStatusFilterChange={vi.fn()}
           onCreate={vi.fn()}
           onEdit={vi.fn()}
+          onSetAvailability={vi.fn()}
           onNextPage={vi.fn()}
           onPreviousPage={vi.fn()}
+          showMissingAvailabilityWarning={false}
         />,
       );
 
@@ -575,7 +909,8 @@ describe("component accessibility", () => {
         availableTags={serviceTags}
         tagsLoading={false}
         onBack={vi.fn()}
-        onSubmit={vi.fn()}
+        onSave={vi.fn()}
+        onPublish={vi.fn()}
       />,
     );
 
@@ -610,7 +945,9 @@ describe("component accessibility", () => {
 
       if (state.listing) {
         await waitFor(() => {
-          expect(screen.getByDisplayValue(/grocery pickup/i)).toBeInTheDocument();
+          expect(
+            screen.getByDisplayValue(/grocery pickup/i),
+          ).toBeInTheDocument();
         });
       }
 
@@ -619,24 +956,23 @@ describe("component accessibility", () => {
   );
 
   it("Home has no automated accessibility violations", async () => {
-    const { container } = render(
-      <Home
-        featuredListings={[
-          {
-            listingId: "listing-1",
-            tags: serviceTags,
-            title: "Grocery pickup",
-            description: "Weekly pickup and drop-off support.",
-            easyDescriptionStatus: "COMPLETED",
-            price: 24,
-            author: { name: "Mira", surname: "Muster" },
-            publishedAt: "2026-06-01T12:00:00.000Z",
-            location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 5 },
-          },
-        ]}
-      />,
-    );
+    const { container } = renderHome([
+      {
+        listingId: "listing-1",
+        tags: serviceTags,
+        title: "Grocery pickup",
+        description: "Weekly pickup and drop-off support.",
+        easyDescriptionStatus: "COMPLETED",
+        price: 24,
+        author: { userId: "user-1", name: "Mira", surname: "Muster" },
+        publishedAt: "2026-06-01T12:00:00.000Z",
+        location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 5 },
+      } as PublicListingSummary,
+    ]);
 
+    await waitFor(() => {
+      expect(screen.getByText(/mira m\./i)).toBeInTheDocument();
+    });
     await expectNoAxeViolations(container);
   });
 
@@ -660,7 +996,9 @@ describe("component accessibility", () => {
       fireEvent.click(screen.getByRole("button", { name: /monday, july 20/i }));
     });
     await waitFor(() => {
-      expect(screen.getByRole("option", { name: /11:00/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: /11:00/i }),
+      ).toBeInTheDocument();
     });
 
     await act(async () => {
@@ -671,7 +1009,7 @@ describe("component accessibility", () => {
           name: /tell the provider what you need/i,
         }),
         {
-        target: { value: "Please pick up groceries from the market." },
+          target: { value: "Please pick up groceries from the market." },
         },
       );
     });
@@ -733,7 +1071,9 @@ describe("component accessibility", () => {
       fireEvent.click(screen.getByRole("button", { name: /monday, july 20/i }));
     });
     await waitFor(() => {
-      expect(screen.getByRole("option", { name: /08:00/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: /08:00/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("option", { name: /08:00/i }));
@@ -744,13 +1084,17 @@ describe("component accessibility", () => {
       ).toBeInTheDocument();
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /increase duration/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /increase duration/i }),
+      );
     });
     await waitFor(() => {
       expect(screen.getAllByText("2h").length).toBeGreaterThan(0);
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /decrease duration/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /decrease duration/i }),
+      );
     });
     await waitFor(() => {
       expect(screen.getAllByText("1h").length).toBeGreaterThan(0);
@@ -763,7 +1107,9 @@ describe("component accessibility", () => {
         }),
         { target: { value: "Set up the printer and home Wi-Fi." } },
       );
-      fireEvent.click(screen.getByRole("button", { name: /send booking request/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /send booking request/i }),
+      );
     });
 
     expect(onCreateBooking).toHaveBeenCalledWith({
@@ -802,9 +1148,7 @@ describe("component accessibility", () => {
     );
 
     expect(screen.getByText(/no availability this month/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /sending/i }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: /sending/i })).toBeDisabled();
     await expectNoAxeViolations(container);
   });
 
@@ -846,6 +1190,7 @@ describe("component accessibility", () => {
         onCreateException={vi.fn()}
         onUpdateException={vi.fn()}
         onDeleteException={vi.fn()}
+        onCreateListing={vi.fn()}
       />,
     );
 
@@ -906,12 +1251,15 @@ describe("component accessibility", () => {
         onCreateException={onCreateException}
         onUpdateException={vi.fn()}
         onDeleteException={vi.fn()}
+        onCreateListing={vi.fn()}
       />,
     );
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /today/i }));
-      fireEvent.click(screen.getByRole("button", { name: /tuesday, july 21/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /tuesday, july 21/i }),
+      );
     });
     expect(onToday).toHaveBeenCalled();
     expect(onSelectedDateChange).toHaveBeenCalled();
@@ -1080,10 +1428,14 @@ describe("component accessibility", () => {
       ).toHaveLength(2);
     });
     await act(async () => {
-      fireEvent.click(screen.getAllByRole("button", { name: /delete exception/i })[0]);
+      fireEvent.click(
+        screen.getAllByRole("button", { name: /delete exception/i })[0],
+      );
     });
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /^cancel$/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /^cancel$/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /^cancel$/i }));
@@ -1094,10 +1446,14 @@ describe("component accessibility", () => {
       ).toHaveLength(2);
     });
     await act(async () => {
-      fireEvent.click(screen.getAllByRole("button", { name: /delete exception/i })[1]);
+      fireEvent.click(
+        screen.getAllByRole("button", { name: /delete exception/i })[1],
+      );
     });
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /^delete$/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /^delete$/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
@@ -1135,11 +1491,15 @@ describe("component accessibility", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /add extra availability/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /add extra availability/i }),
+      );
       fireEvent.change(screen.getByLabelText(/date/i), {
         target: { value: "2026-08-01" },
       });
-      fireEvent.click(screen.getByRole("button", { name: /add availability/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /add availability/i }),
+      );
     });
     expect(onCreate).toHaveBeenLastCalledWith({
       date: "2026-08-01",
@@ -1224,6 +1584,38 @@ describe("component accessibility", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("LoginOptionsDialog closed trigger has no automated accessibility violations", async () => {
+    const { container } = render(
+      <LoginOptionsDialog>
+        <button type="button">Login</button>
+      </LoginOptionsDialog>,
+    );
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("LoginOptionsDialog open state has no automated accessibility violations", async () => {
+    render(
+      <LoginOptionsDialog>
+        <button type="button">Login</button>
+      </LoginOptionsDialog>,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^login$/i }));
+    });
+
+    const dialog = screen.getByRole("dialog", { name: /log in/i });
+    expect(
+      within(dialog).getByRole("link", { name: /continue with google/i }),
+    ).toHaveAttribute("href", "http://localhost:8081/auth/login/google");
+    expect(
+      within(dialog).getByRole("button", { name: /continue with passkey/i }),
+    ).toBeInTheDocument();
+
+    await expectNoAxeViolations(document.body);
+  });
+
   it.each([
     [
       "RegisterLayout",
@@ -1234,7 +1626,11 @@ describe("component accessibility", () => {
     [
       "RegisterName",
       <RegisterName
-        initialValues={{ firstName: "Mira", lastName: "Muster", username: "mira" }}
+        initialValues={{
+          firstName: "Mira",
+          lastName: "Muster",
+          username: "mira",
+        }}
         onBack={vi.fn()}
         onContinue={vi.fn()}
       />,
@@ -1261,20 +1657,21 @@ describe("component accessibility", () => {
     ],
     [
       "RegisterPhoto",
-      <RegisterPhoto initialValues={user} onBack={vi.fn()} onContinue={vi.fn()} />,
+      <RegisterPhoto
+        initialValues={user}
+        onBack={vi.fn()}
+        onContinue={vi.fn()}
+      />,
     ],
     [
       "RegisterRole",
       <RegisterRole currentUserType="PROVIDER" onContinue={vi.fn()} />,
     ],
-    [
-      "RegisterDone",
-      <RegisterDone user={user} onFindServices={vi.fn()} />,
-    ],
+    ["RegisterDone", <RegisterDone user={user} onContinue={vi.fn()} />],
   ] satisfies Array<[string, ReactElement]>)(
     "%s has no automated accessibility violations",
     async (_name, ui) => {
-      const { container } = render(ui);
+      const { container } = renderWithQuery(ui);
       await expectNoAxeViolations(container);
     },
   );
@@ -1285,7 +1682,11 @@ describe("component accessibility", () => {
       .mockRejectedValueOnce({ field: "username", message: "Taken." })
       .mockRejectedValueOnce(new Error("Could not save profile."));
     const { container } = render(
-      <RegisterName initialValues={null} onBack={vi.fn()} onContinue={onContinue} />,
+      <RegisterName
+        initialValues={null}
+        onBack={vi.fn()}
+        onContinue={onContinue}
+      />,
     );
 
     await act(async () => {
@@ -1392,7 +1793,11 @@ describe("component accessibility", () => {
       .mockImplementation(() => {});
     const onContinue = vi.fn().mockRejectedValue(new Error("Upload failed."));
     const { container, unmount } = render(
-      <RegisterPhoto initialValues={null} onBack={vi.fn()} onContinue={onContinue} />,
+      <RegisterPhoto
+        initialValues={null}
+        onBack={vi.fn()}
+        onContinue={onContinue}
+      />,
     );
     const input = screen.getByLabelText(/choose photo/i);
 
@@ -1450,13 +1855,14 @@ describe("component accessibility", () => {
     const revokeObjectURL = vi
       .spyOn(URL, "revokeObjectURL")
       .mockImplementation(() => {});
-    const onSubmit = vi.fn().mockRejectedValue(new Error("Create failed."));
+    const onSave = vi.fn().mockRejectedValue(new Error("Create failed."));
     const { container } = render(
       <CreateListing
         availableTags={serviceTags}
         tagsLoading={false}
         onBack={vi.fn()}
-        onSubmit={onSubmit}
+        onSave={onSave}
+        onPublish={vi.fn()}
       />,
     );
 
@@ -1533,7 +1939,8 @@ describe("component accessibility", () => {
         availableTags={serviceTags}
         tagsLoading
         onBack={onBack}
-        onSubmit={vi.fn()}
+        onSave={vi.fn()}
+        onPublish={vi.fn()}
       />,
     );
 
@@ -1590,7 +1997,9 @@ describe("component accessibility", () => {
   });
 
   it("EditListing destructive and media states have no automated accessibility violations", async () => {
-    const onRemoveImage = vi.fn().mockRejectedValue(new Error("Remove failed."));
+    const onRemoveImage = vi
+      .fn()
+      .mockRejectedValue(new Error("Remove failed."));
     const { container } = render(
       <EditListing
         listing={editListing}
@@ -1611,7 +2020,9 @@ describe("component accessibility", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /remove image: shopping bags/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /remove image: shopping bags/i }),
+      );
     });
     await waitFor(() =>
       expect(screen.getByText(/remove failed/i)).toBeInTheDocument(),
@@ -1715,7 +2126,9 @@ describe("component accessibility", () => {
       fireEvent.blur(screen.getByLabelText(/city/i));
       fireEvent.change(container.querySelector('input[type="file"]')!, {
         target: {
-          files: [new File(["image"], "new-listing.png", { type: "image/png" })],
+          files: [
+            new File(["image"], "new-listing.png", { type: "image/png" }),
+          ],
         },
       });
     });
@@ -1726,7 +2139,9 @@ describe("component accessibility", () => {
       fireEvent.click(screen.getByRole("button", { name: /delete service/i }));
     });
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /^cancel$/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /^cancel$/i }),
+      ).toBeInTheDocument();
     });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /^cancel$/i }));
@@ -1769,7 +2184,9 @@ describe("component accessibility", () => {
   ])(
     "EditListing %s status state has no automated accessibility violations",
     async (_name, state) => {
-      const onStatusAction = vi.fn().mockRejectedValue(new Error(state.error ?? ""));
+      const onStatusAction = vi
+        .fn()
+        .mockRejectedValue(new Error(state.error ?? ""));
       const { container } = render(
         <EditListing
           listing={state.listing}
@@ -1831,7 +2248,9 @@ describe("component accessibility", () => {
     await act(async () => {
       fireEvent.change(container.querySelector('input[type="file"]')!, {
         target: {
-          files: [new File(["image"], "new-listing.png", { type: "image/png" })],
+          files: [
+            new File(["image"], "new-listing.png", { type: "image/png" }),
+          ],
         },
       });
       fireEvent.change(screen.getByLabelText(/street/i), {
@@ -1927,7 +2346,7 @@ describe("component accessibility", () => {
   });
 
   it("RegisterLayout done and unauthenticated states have no automated accessibility violations", async () => {
-    const done = render(
+    const done = renderWithQuery(
       <RegisterLayout user={user} pathname="/register/done">
         <h2 id="register-step-heading">Done</h2>
       </RegisterLayout>,
@@ -1935,7 +2354,7 @@ describe("component accessibility", () => {
     await expectNoAxeViolations(done.container);
     done.unmount();
 
-    const upcoming = render(
+    const upcoming = renderWithQuery(
       <RegisterLayout user={null} pathname="/register/name">
         <h2 id="register-step-heading">Your name</h2>
       </RegisterLayout>,
@@ -1945,18 +2364,22 @@ describe("component accessibility", () => {
 
   it("Home fallback data and carousel controls have no automated accessibility violations", async () => {
     const scrollBy = vi.fn();
-    Object.defineProperty(HTMLElement.prototype, "scrollBy", {
-      configurable: true,
-      value: scrollBy,
+    mockScrollableCarousels(scrollBy);
+    const { container } = renderHome();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /scroll categories right/i }),
+      ).toBeEnabled();
     });
-    const { container } = render(<Home featuredListings={[]} />);
 
     await act(async () => {
       fireEvent.change(screen.getByLabelText(/search for a service/i), {
         target: { value: "cleaning" },
       });
-      fireEvent.click(screen.getByRole("button", { name: /scroll categories right/i }));
-      fireEvent.click(screen.getByRole("button", { name: /scroll providers left/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /scroll categories right/i }),
+      );
     });
 
     expect(scrollBy).toHaveBeenCalled();
@@ -1975,6 +2398,11 @@ describe("component accessibility", () => {
         screen.getByRole("dialog", { name: /accessibility settings/i }),
       ).toBeInTheDocument();
     });
+    expect(screen.getByLabelText(/easy language/i)).toBeInTheDocument();
+    expect(screen.queryByText(/german/i)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: /accessibility settings/i }),
+    ).toHaveAttribute("aria-modal", "true");
     await expectNoAxeViolations(document.body);
   });
 
@@ -1990,6 +2418,10 @@ describe("component accessibility", () => {
         screen.getByRole("dialog", { name: /user menu/i }),
       ).toBeInTheDocument();
     });
+    expect(screen.getByRole("dialog", { name: /user menu/i })).toHaveAttribute(
+      "aria-modal",
+      "true",
+    );
     await expectNoAxeViolations(document.body);
   });
 
@@ -2163,28 +2595,26 @@ describe("component accessibility", () => {
     },
   );
 
-  it("Navbar login action remains accessible", async () => {
-    const originalLocation = window.location;
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: { ...originalLocation, href: "" },
-    });
-
-    const { container } = render(<Navbar />);
+  it("Navbar login action opens a popup with an accessible link to Google OAuth", async () => {
+    renderWithQuery(<Navbar />);
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /login/i }));
+      fireEvent.click(screen.getByRole("button", { name: /^login$/i }));
     });
 
-    expect(window.location.href).toBe(
+    const dialog = screen.getByRole("dialog", { name: /log in/i });
+    const googleLink = within(dialog).getByRole("link", {
+      name: /continue with google/i,
+    });
+
+    expect(googleLink).toHaveAttribute(
+      "href",
       "http://localhost:8081/auth/login/google",
     );
-    await expectNoAxeViolations(container);
-
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: originalLocation,
-    });
+    expect(
+      within(dialog).getByRole("button", { name: /continue with passkey/i }),
+    ).toBeInTheDocument();
+    await expectNoAxeViolations(document.body);
   });
 
   it("Navbar logged-in state has no automated accessibility violations", async () => {
@@ -2213,8 +2643,59 @@ describe("component accessibility", () => {
       privateAddress: null,
     } satisfies User);
 
-    const { container } = render(<Navbar />);
+    const { container } = renderWithQuery(<Navbar />);
     await expectNoAxeViolations(container);
+  });
+
+  it("Navbar mobile drawer (logged out) has no automated accessibility violations when opened", async () => {
+    renderWithQuery(<Navbar />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(document.body);
+  });
+
+  it("Navbar mobile drawer (logged in) has no automated accessibility violations when opened", async () => {
+    useAuthStore.getState().setUser({
+      userId: "user-1",
+      username: "mira",
+      firstName: "Mira",
+      lastName: "Muster",
+      userType: "PROVIDER",
+      bio: null,
+      simplifiedBio: null,
+      selfSummary: null,
+      accessibilityPreferences: [],
+      profileMedia: {
+        mediaId: "avatar-1",
+        url: "/avatar.jpg",
+        altTextStatus: "COMPLETED",
+        mimeType: "image/jpeg",
+        size: 1024,
+        width: 200,
+        height: 200,
+        createdAt: "2026-06-14T00:00:00.000Z",
+      },
+      registrationComplete: true,
+      isPublic: true,
+      privateAddress: null,
+    } satisfies User);
+
+    renderWithQuery(<Navbar />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(document.body);
   });
 
   it("Popover keyboard and outside-click behavior has no automated accessibility violations", async () => {
@@ -2263,26 +2744,6 @@ describe("component accessibility", () => {
       screen.queryByRole("dialog", { name: /actions/i }),
     ).not.toBeInTheDocument();
     await expectNoAxeViolations(document.body);
-  });
-
-  it("ProviderCard full state has no automated accessibility violations", async () => {
-    const { container } = render(
-      <ProviderCard
-        variant="full"
-        firstName="Mira"
-        lastName="Muster"
-        avatar={<AvatarIcon firstName="Mira" lastName="Muster" />}
-        distanceKm={2}
-        bio="Friendly local support."
-        pricePerHour={20}
-        services={[{ name: "Shopping", price: 20 }]}
-        badges={<Badge text="Verified" />}
-        onMessage={vi.fn()}
-        onViewProfile={vi.fn()}
-      />,
-    );
-
-    await expectNoAxeViolations(container);
   });
 
   it("Slider disabled and controlled states have no automated accessibility violations", async () => {
@@ -2392,7 +2853,11 @@ describe("component accessibility", () => {
               href: "/bookings/booking-1/acknowledge",
               method: "POST",
             },
-            { rel: "cancel", href: "/bookings/booking-1/cancel", method: "POST" },
+            {
+              rel: "cancel",
+              href: "/bookings/booking-1/cancel",
+              method: "POST",
+            },
           ],
         }}
         onActionComplete={onActionComplete}
@@ -2443,9 +2908,17 @@ describe("component accessibility", () => {
   it("MyBookings filters and empty state have no automated accessibility violations", async () => {
     const bookings = [
       bookingSummary,
-      { ...bookingSummary, bookingId: "booking-2", status: "CONFIRMED" as const },
+      {
+        ...bookingSummary,
+        bookingId: "booking-2",
+        status: "CONFIRMED" as const,
+      },
       { ...bookingSummary, bookingId: "booking-3", status: "PAID" as const },
-      { ...bookingSummary, bookingId: "booking-4", status: "COMPLETED" as const },
+      {
+        ...bookingSummary,
+        bookingId: "booking-4",
+        status: "COMPLETED" as const,
+      },
     ];
     const { container } = render(
       <MyBookings
@@ -2482,8 +2955,10 @@ describe("component accessibility", () => {
         onStatusFilterChange={onStatusFilterChange}
         onCreate={vi.fn()}
         onEdit={vi.fn()}
+        onSetAvailability={vi.fn()}
         onNextPage={vi.fn()}
         onPreviousPage={vi.fn()}
+        showMissingAvailabilityWarning={false}
       />,
     );
 
@@ -2496,7 +2971,11 @@ describe("component accessibility", () => {
 
   it("Registration validation edge states have no automated accessibility violations", async () => {
     const name = render(
-      <RegisterName initialValues={null} onBack={vi.fn()} onContinue={vi.fn()} />,
+      <RegisterName
+        initialValues={null}
+        onBack={vi.fn()}
+        onContinue={vi.fn()}
+      />,
     );
     await act(async () => {
       fireEvent.change(screen.getByLabelText(/first name/i), {
@@ -2564,7 +3043,9 @@ describe("component accessibility", () => {
       <RegisterPhoto
         initialValues={null}
         onBack={vi.fn()}
-        onContinue={vi.fn().mockRejectedValue({ field: "file", message: "File failed." })}
+        onContinue={vi
+          .fn()
+          .mockRejectedValue({ field: "file", message: "File failed." })}
       />,
     );
     const photoInput = screen.getByLabelText(/choose photo/i);
@@ -2586,7 +3067,9 @@ describe("component accessibility", () => {
     const role = render(
       <RegisterRole
         currentUserType="CUSTOMER"
-        onContinue={vi.fn().mockRejectedValue({ field: "server", message: "Pick failed." })}
+        onContinue={vi
+          .fn()
+          .mockRejectedValue({ field: "server", message: "Pick failed." })}
       />,
     );
     await act(async () => {
@@ -2600,20 +3083,38 @@ describe("component accessibility", () => {
 
   it("Home remaining controls have no automated accessibility violations", async () => {
     const scrollBy = vi.fn();
-    Object.defineProperty(HTMLElement.prototype, "scrollBy", {
-      configurable: true,
-      value: scrollBy,
+    mockScrollableCarousels(scrollBy);
+    const { container } = renderHome([]);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /scroll listings right/i }),
+      ).toBeEnabled();
     });
-    const { container } = render(<Home featuredListings={[]} />);
 
     await act(async () => {
       fireEvent.submit(screen.getByRole("search"));
-      fireEvent.click(screen.getByRole("button", { name: /scroll categories left/i }));
-      fireEvent.click(screen.getByRole("button", { name: /scroll providers right/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /scroll categories left/i }),
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: /scroll listings right/i }),
+      );
     });
 
     expect(scrollBy).toHaveBeenCalled();
     await expectNoAxeViolations(container);
+  });
+
+  it("Home signed-out provider call-to-action links to Google OAuth", async () => {
+    renderHome([]);
+
+    const getStartedLink = screen.getByRole("link", { name: /get started/i });
+
+    expect(getStartedLink).toHaveAttribute(
+      "href",
+      "http://localhost:8081/auth/login/google",
+    );
   });
 
   it("Small component branch states have no automated accessibility violations", async () => {
@@ -2689,9 +3190,15 @@ describe("component accessibility", () => {
           media: [
             {
               mediaId: "media-1",
+              position: 0,
               url: "/listing.jpg",
               altText: null,
               altTextStatus: "PROCESSING",
+              mimeType: "image/jpeg",
+              size: 1000,
+              width: 800,
+              height: 600,
+              createdAt: "2026-01-01T00:00:00Z",
             },
           ],
         }}
@@ -2707,7 +3214,9 @@ describe("component accessibility", () => {
       />,
     );
 
-    expect(screen.getByLabelText(/generating description/i)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/generating description/i),
+    ).toBeInTheDocument();
     await act(async () => {
       await vi.advanceTimersByTimeAsync(4000);
     });
@@ -2743,7 +3252,9 @@ describe("component accessibility", () => {
 
     vi.useRealTimers();
     await waitFor(() => {
-      expect(screen.getAllByText(/maximum 120 characters/i).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByText(/120 characters or fewer/i).length,
+      ).toBeGreaterThan(0);
     });
     await expectNoAxeViolations(container);
   });
@@ -2755,7 +3266,8 @@ describe("component accessibility", () => {
         availableTags={serviceTags}
         tagsLoading={false}
         onBack={vi.fn()}
-        onSubmit={vi.fn()}
+        onSave={vi.fn()}
+        onPublish={vi.fn()}
       />,
     );
     const fileInput = container.querySelector(
@@ -2815,5 +3327,1061 @@ describe("component accessibility", () => {
     });
 
     await expectNoAxeViolations(document.body);
+  });
+
+  it("Credential surfaces have no automated accessibility violations", async () => {
+    const { container } = render(
+      <>
+        <CredentialCard
+          credential={credential}
+          userId="user-1"
+          onVisibilityChange={vi.fn()}
+          onDelete={vi.fn()}
+        />
+        <CredentialCard
+          credential={deniedCredential}
+          userId="user-1"
+          onVisibilityChange={vi.fn()}
+          onDelete={vi.fn()}
+        />
+      </>,
+    );
+
+    await act(async () => {
+      fireEvent.click(
+        screen.getAllByRole("button", { name: /view document/i })[0],
+      );
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("dialog", { name: /uploaded document/i }),
+      ).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.keyDown(document, { key: "Escape" });
+    });
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("button", { name: /view rejection reason/i }),
+      );
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("dialog", { name: /rejection reason/i }),
+      ).toBeInTheDocument();
+    });
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("CredentialDocumentViewer loaded and error states have no automated accessibility violations", async () => {
+    const { fetchCredentialEvidenceMediaUrl } =
+      await import("../lib/credentialEvidenceMedia");
+    const mockedFetch = vi.mocked(fetchCredentialEvidenceMediaUrl);
+    mockedFetch.mockResolvedValueOnce("blob:loaded-document");
+    render(
+      <CredentialDocumentViewer
+        open
+        onClose={vi.fn()}
+        userId="user-1"
+        credentialId="credential-1"
+        credentialName="Identity check"
+      />,
+    );
+    await waitFor(() => {
+      expect(
+        screen.getByRole("img", {
+          name: /uploaded evidence for identity check/i,
+        }),
+      ).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(document.body);
+
+    cleanup();
+    mockedFetch.mockRejectedValueOnce(new Error("failed"));
+    render(
+      <CredentialDocumentViewer
+        open
+        onClose={vi.fn()}
+        userId="user-1"
+        credentialId="credential-1"
+        credentialName="Identity check"
+      />,
+    );
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /failed to load document/i,
+      );
+    });
+    await expectNoAxeViolations(document.body);
+  });
+
+  it.each([
+    ["loading", { credentials: [], loading: true, error: null }],
+    [
+      "error",
+      { credentials: [], loading: false, error: "Could not load credentials." },
+    ],
+    ["empty", { credentials: [], loading: false, error: null }],
+    ["populated", { credentials: [credential], loading: false, error: null }],
+  ])(
+    "Credentials %s state has no automated accessibility violations",
+    async (_name, state) => {
+      const { container } = render(
+        <Credentials
+          userId="user-1"
+          credentials={state.credentials}
+          loading={state.loading}
+          error={state.error}
+          submissionStatus="Credential submitted."
+          actionError={null}
+          updatingVisibilityId={null}
+          deletingId={null}
+          onAddCredential={vi.fn()}
+          onVisibilityChange={vi.fn()}
+          onDelete={vi.fn()}
+        />,
+      );
+
+      await expectNoAxeViolations(container);
+    },
+  );
+
+  it("InfoPage has no automated accessibility violations", async () => {
+    const { container } = render(
+      <InfoPage
+        page={{
+          title: "Accessibility",
+          intro: "How Mira supports accessible use.",
+          sections: [
+            {
+              title: "Accessibility panel",
+              body: [
+                "Use the panel to tune the interface.",
+                { text: "Contact us at", email: "support@example.com" },
+              ],
+            },
+          ],
+        }}
+      />,
+    );
+
+    await expectNoAxeViolations(container);
+  });
+
+  it.each(["success", "cancelled"] as const)(
+    "PaymentReturnPage %s state has no automated accessibility violations",
+    async (status) => {
+      const { container } = render(
+        <PaymentReturnPage status={status} onBackToBookings={vi.fn()} />,
+      );
+      await expectNoAxeViolations(container);
+    },
+  );
+
+  it("ListingDetailPage loaded state has no automated accessibility violations", async () => {
+    const onBookNow = vi.fn();
+    const { container } = render(
+      <ListingDetailPage
+        listing={listingDetails}
+        loading={false}
+        error={null}
+        description="Weekly pickup and drop-off support."
+        availableToday
+        otherListings={[
+          {
+            ...(publicListing as PublicListingSummary),
+            listingId: "listing-2",
+            title: "Laundry help",
+            primaryMedia: {
+              mediaId: "other-media",
+              url: "/other.jpg",
+              altText: "Laundry basket",
+              altTextStatus: "COMPLETED",
+            },
+          },
+        ]}
+        publicVerifiedCredentials={[{ name: "Identity check" } as never]}
+        onBookNow={onBookNow}
+      />,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /show photo 2/i }));
+      screen.getByText(/verified/i).focus();
+    });
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("ListingProviderCard standalone state has no automated accessibility violations", async () => {
+    const { container } = render(
+      <ListingProviderCard
+        authorId="user-1"
+        authorName="Mira"
+        authorSurname="Muster"
+        price={24}
+        city="Berlin"
+        nextAvailableDate="2026-07-21"
+        tags={serviceTags}
+        publicVerifiedCredentials={[{ name: "Student status" } as never]}
+        onBookNow={vi.fn()}
+      />,
+    );
+
+    await act(async () => {
+      screen.getByText(/verified/i).focus();
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it.each([
+    ["loading", { loading: true, error: null, listing: undefined }],
+    [
+      "error",
+      { loading: false, error: "Could not load listing.", listing: undefined },
+    ],
+  ])(
+    "ListingDetailPage %s state has no automated accessibility violations",
+    async (_name, props) => {
+      const { container } = render(
+        <ListingDetailPage
+          listing={props.listing}
+          loading={props.loading}
+          error={props.error}
+          otherListings={[]}
+          onBookNow={vi.fn()}
+        />,
+      );
+      await expectNoAxeViolations(container);
+    },
+  );
+
+  it("FilterDrawer open state has no automated accessibility violations", async () => {
+    const onApply = vi.fn();
+    render(
+      <FilterDrawer
+        tags={[
+          { tagId: "tag-1", name: "Errands" },
+          { tagId: "tag-2", name: "Tutoring" },
+        ]}
+        selectedTagIds={["tag-1"]}
+        onTagToggle={vi.fn()}
+        distanceKm={20}
+        onDistanceChange={vi.fn()}
+        maxPrice={50}
+        onMaxPriceChange={vi.fn()}
+        onApply={onApply}
+        activeCount={2}
+      />,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /filters/i }));
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("dialog", { name: /filters/i }),
+      ).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /show results/i }));
+    });
+    expect(onApply).toHaveBeenCalled();
+    await expectNoAxeViolations(document.body);
+  });
+
+  it("SubmitCredentialModal filled and validation states have no automated accessibility violations", async () => {
+    const onSubmit = vi.fn();
+    render(
+      <SubmitCredentialModal
+        open
+        onClose={vi.fn()}
+        credentialTypes={[
+          {
+            credentialType: "IDENTITY_VERIFIED",
+            name: "Identity check",
+            description: "Verify your identity.",
+          },
+          {
+            credentialType: "STUDENT_VERIFIED",
+            name: "Student status",
+            description: "Verify current enrollment.",
+          },
+        ]}
+        catalogLoading={false}
+        isSubmitting={false}
+        errorMessage="Upload failed."
+        onSubmit={onSubmit}
+      />,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /credential type/i }));
+    });
+    const fileInput = document.querySelector<HTMLInputElement>("#credential-evidence-input");
+    expect(fileInput).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(screen.getByText(/identity check/i));
+      fireEvent.change(fileInput!, {
+        target: {
+          files: [new File(["bad"], "notes.txt", { type: "text/plain" })],
+        },
+      });
+    });
+    await expectNoAxeViolations(document.body);
+
+    await act(async () => {
+      fireEvent.change(fileInput!, {
+        target: {
+          files: [new File(["ok"], "id.png", { type: "image/png" })],
+        },
+      });
+      fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    });
+    expect(onSubmit).toHaveBeenCalledWith(
+      "IDENTITY_VERIFIED",
+      expect.any(File),
+    );
+  });
+
+  it("SearchRootPage toggle has no automated accessibility violations", async () => {
+    routerMocks.location.pathname = "/browse-users";
+    routerMocks.location.search = {
+      q: "mira",
+      city: "",
+      radiusKm: undefined,
+      tagIds: [],
+      maxPrice: undefined,
+      role: "everyone",
+      from: undefined,
+    };
+
+    const { container } = render(<SearchRootPage />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("switch"));
+    });
+    expect(routerMocks.navigate).toHaveBeenCalled();
+    await expectNoAxeViolations(container);
+  });
+
+  it("SearchServicesPage loaded flow has no automated accessibility violations", async () => {
+    mockGetServiceTags.mockResolvedValue({
+      data: serviceTags,
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: {
+        items: [
+          {
+            ...(publicListing as PublicListingSummary),
+            primaryMedia: {
+              mediaId: "media-1",
+              url: "/service.jpg",
+              altText: "Shopping bags",
+              altTextStatus: "COMPLETED",
+            },
+          },
+        ],
+        cursor: { limit: 10, next: "cursor-2" },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<SearchServicesPage />);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("list", { name: /search results/i }),
+      ).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("button", { name: /remove price filter/i }),
+      );
+      fireEvent.click(screen.getByRole("button", { name: /remove filter/i }));
+      fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    });
+    expect(routerMocks.navigate).toHaveBeenCalled();
+    await expectNoAxeViolations(container);
+  });
+
+  it("SearchServicesPage empty and error flows have no automated accessibility violations", async () => {
+    mockGetServiceTags.mockResolvedValue({
+      data: serviceTags,
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValueOnce({
+      data: { items: [], cursor: { limit: 10, next: null } },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    const empty = renderWithQuery(<SearchServicesPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/no services found/i)).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(empty.container);
+
+    cleanup();
+    mockGetPublicListings.mockResolvedValueOnce({
+      data: null,
+      status: 500,
+      headers: new Headers(),
+    } as never);
+    const error = renderWithQuery(<SearchServicesPage />);
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /listings could not be loaded/i,
+      );
+    });
+    await expectNoAxeViolations(error.container);
+  });
+
+  it("SearchUsersPage loaded flow has no automated accessibility violations", async () => {
+    routerMocks.location.pathname = "/browse-users";
+    routerMocks.location.search = {
+      q: "mira",
+      city: "",
+      radiusKm: undefined,
+      tagIds: [],
+      maxPrice: undefined,
+      role: "everyone",
+      from: undefined,
+    };
+    mockGetPublicProfilesCollection.mockResolvedValue({
+      data: {
+        items: [
+          publicProfile,
+          {
+            ...publicProfile,
+            userId: "customer-1",
+            username: "anna",
+            firstName: "Anna",
+            lastName: "Weber",
+            userType: "CUSTOMER",
+            verified: false,
+          },
+        ],
+        cursor: { limit: 20, next: "profiles-2" },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: {
+        items: [publicListing as PublicListingSummary],
+        cursor: { limit: 500, next: null },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<SearchUsersPage />);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("list", { name: /user results/i }),
+      ).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /providers/i }));
+      fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    });
+    expect(routerMocks.navigate).toHaveBeenCalled();
+    await expectNoAxeViolations(container);
+  });
+
+  it("SearchUsersPage empty, filtered-empty, and error flows have no automated accessibility violations", async () => {
+    routerMocks.location.pathname = "/browse-users";
+    routerMocks.location.search = {
+      q: "mira",
+      city: "",
+      radiusKm: undefined,
+      tagIds: [],
+      maxPrice: undefined,
+      role: "providers",
+      from: undefined,
+    };
+    mockGetPublicProfilesCollection.mockResolvedValueOnce({
+      data: {
+        items: [{ ...publicProfile, userType: "CUSTOMER", verified: false }],
+        cursor: { limit: 20, next: null },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    const filtered = renderWithQuery(<SearchUsersPage />);
+    await waitFor(() => {
+      expect(
+        screen.getByText(/no providers on this page/i),
+      ).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(filtered.container);
+
+    cleanup();
+    routerMocks.location.search = {
+      ...routerMocks.location.search,
+      role: "everyone",
+    };
+    mockGetPublicProfilesCollection.mockResolvedValueOnce({
+      data: { items: [], cursor: { limit: 20, next: null } },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    const empty = renderWithQuery(<SearchUsersPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/no users found/i)).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(empty.container);
+
+    cleanup();
+    mockGetPublicProfilesCollection.mockResolvedValueOnce({
+      data: null,
+      status: 500,
+      headers: new Headers(),
+    } as never);
+    const error = renderWithQuery(<SearchUsersPage />);
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /users could not be loaded/i,
+      );
+    });
+    await expectNoAxeViolations(error.container);
+  });
+
+  it("CredentialCard status and delete confirmation states have no automated accessibility violations", async () => {
+    const onDelete = vi.fn();
+    const onVisibilityChange = vi.fn();
+    const failedCredential: CredentialResponse = {
+      ...credential,
+      credentialId: "credential-3",
+      name: "Failed credential",
+      latestVerification: {
+        verificationId: "verification-3",
+        status: "FAILED",
+        result: null,
+        feedback: null,
+        createdAt: "2026-06-05T00:00:00.000Z",
+        completedAt: null,
+      },
+    };
+    const expiredCredential: CredentialResponse = {
+      ...credential,
+      credentialId: "credential-4",
+      name: "Expired credential",
+      expiresAt: "2020-01-01T00:00:00.000Z",
+    };
+    const pendingCredential: CredentialResponse = {
+      ...credential,
+      credentialId: "credential-5",
+      name: "Pending credential",
+      latestVerification: null,
+    };
+
+    const { container } = render(
+      <>
+        <CredentialCard
+          credential={{ ...credential, isVisible: false }}
+          userId="user-1"
+          onVisibilityChange={onVisibilityChange}
+          onDelete={onDelete}
+        />
+        <CredentialCard
+          credential={failedCredential}
+          userId="user-1"
+          onVisibilityChange={vi.fn()}
+          onDelete={onDelete}
+        />
+        <CredentialCard
+          credential={expiredCredential}
+          userId="user-1"
+          onVisibilityChange={vi.fn()}
+          onDelete={onDelete}
+        />
+        <CredentialCard
+          credential={pendingCredential}
+          userId="user-1"
+          onVisibilityChange={vi.fn()}
+          onDelete={onDelete}
+        />
+      </>,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("switch", { name: /show identity check on public profile/i }));
+    });
+    expect(onVisibilityChange).toHaveBeenCalledWith("credential-1", true);
+
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("button", { name: /delete "failed credential"/i }),
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /delete this credential/i,
+      );
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^cancel$/i }));
+    });
+
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("button", { name: /delete "identity check"/i }),
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /delete this credential/i,
+      );
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
+    });
+    expect(onDelete).toHaveBeenCalledWith("credential-1");
+    await expectNoAxeViolations(container);
+  });
+
+  it("ListingProviderCard tooltip mouse and blur states have no automated accessibility violations", async () => {
+    const { container } = render(
+      <ListingProviderCard
+        authorId="user-1"
+        authorName="Mira"
+        authorSurname="Muster"
+        price={24}
+        city="Berlin"
+        availableToday
+        tags={serviceTags}
+        publicVerifiedCredentials={[{ name: "Identity check" } as never]}
+        onBookNow={vi.fn()}
+      />,
+    );
+    const verified = screen.getByText(/verified/i);
+    await act(async () => {
+      fireEvent.mouseEnter(verified);
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("tooltip")).toHaveTextContent(/identity check/i);
+    });
+    await act(async () => {
+      fireEvent.mouseLeave(verified);
+      verified.focus();
+      verified.blur();
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("SubmitCredentialModal loading and close states have no automated accessibility violations", async () => {
+    const onClose = vi.fn();
+    const loading = render(
+      <SubmitCredentialModal
+        open
+        onClose={onClose}
+        credentialTypes={[]}
+        catalogLoading
+        isSubmitting
+        errorMessage={null}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/loading credential types/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
+    await expectNoAxeViolations(document.body);
+
+    loading.unmount();
+    render(
+      <SubmitCredentialModal
+        open
+        onClose={onClose}
+        credentialTypes={[]}
+        catalogLoading={false}
+        isSubmitting={false}
+        errorMessage={null}
+        onSubmit={vi.fn()}
+      />,
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+    });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("Home loading, category, and provider navigation states have no automated accessibility violations", async () => {
+    const scrollBy = vi.fn();
+    mockScrollableCarousels(scrollBy);
+    useAuthStore.getState().setUser(user);
+    mockGetServiceTags.mockResolvedValue({
+      data: [
+        {
+          tagId: "cleaning",
+          name: "Cleaning",
+          isBarrierefrei: false,
+          isActive: true,
+        },
+        {
+          tagId: "inactive",
+          name: "Tutoring",
+          isBarrierefrei: false,
+          isActive: false,
+        },
+      ],
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: {
+        items: [
+          {
+            ...(publicListing as PublicListingSummary),
+            easyDescription: "Easy grocery help.",
+            primaryMedia: {
+              mediaId: "media-1",
+              url: "/service.jpg",
+              altText: "Shopping bags",
+              altTextStatus: "COMPLETED",
+            },
+          },
+        ],
+        cursor: { limit: 8, next: null },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<Home />);
+    await waitFor(() => {
+      expect(screen.getByText(/cleaning/i)).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /scroll listings right/i }),
+      ).toBeEnabled();
+    });
+
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText(/search for a service/i), {
+        target: { value: "cleaning" },
+      });
+      fireEvent.submit(screen.getByRole("search"));
+      fireEvent.click(screen.getByRole("button", { name: /get started/i }));
+      fireEvent.click(screen.getByRole("button", { name: /cleaning/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /scroll categories right/i }),
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: /scroll listings right/i }),
+      );
+    });
+    expect(routerMocks.navigate).toHaveBeenCalled();
+    expect(scrollBy).toHaveBeenCalled();
+    await expectNoAxeViolations(container);
+  });
+
+  it("Home query error states have no automated accessibility violations", async () => {
+    mockGetServiceTags.mockResolvedValue({
+      data: null,
+      status: 500,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: null,
+      status: 500,
+      headers: new Headers(),
+    } as never);
+    const { container } = renderWithQuery(<Home />);
+    await waitFor(() => {
+      expect(
+        screen.getByText(/categories could not be loaded/i),
+      ).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("Home signed-in customer get-started path has no automated accessibility violations", async () => {
+    useAuthStore.getState().setUser({ ...user, userType: "CUSTOMER" });
+    mockGetServiceTags.mockResolvedValue({
+      data: [],
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: { items: [], cursor: { limit: 8, next: null } },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<Home />);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /get started/i }),
+      ).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /get started/i }));
+    });
+    expect(routerMocks.navigate).toHaveBeenCalledWith({
+      to: "/browse-services",
+      search: { q: "", city: "", tagIds: [], from: undefined },
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("Home signed-out provider call-to-action path has no automated accessibility violations", async () => {
+    mockGetServiceTags.mockResolvedValue({
+      data: [],
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: { items: [], cursor: { limit: 8, next: null } },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<Home />);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", { name: /get started/i }),
+      ).toHaveAttribute("href", "http://localhost:8081/auth/login/google");
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("SearchServicesPage search, filters, and previous pagination flows have no automated accessibility violations", async () => {
+    routerMocks.location.search = {
+      q: "",
+      city: "",
+      radiusKm: undefined,
+      tagIds: [],
+      maxPrice: undefined,
+      role: "everyone",
+      from: undefined,
+    };
+    mockGetServiceTags.mockResolvedValue({
+      data: serviceTags,
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: {
+        items: [publicListing as PublicListingSummary],
+        cursor: { limit: 10, next: "cursor-2" },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<SearchServicesPage />);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("list", { name: /search results/i }),
+      ).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByRole("searchbox", { name: /search/i }), {
+        target: { value: "tutoring" },
+      });
+      fireEvent.keyDown(screen.getByRole("searchbox", { name: /search/i }), {
+        key: "Enter",
+      });
+      fireEvent.click(screen.getByText(/location/i).closest("button")!);
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("dialog", { name: /search location filters/i }),
+      ).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText(/search location/i), {
+        target: { value: "Hamburg" },
+      });
+      fireEvent.click(screen.getByRole("checkbox", { name: /errands/i }));
+      fireEvent.click(
+        within(screen.getByRole("form", { name: /filter services/i }))
+          .getByRole("button", { name: /show results/i }),
+      );
+      fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /previous/i }),
+      ).not.toBeDisabled();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /previous/i }));
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("SearchUsersPage search, consumers tab, and previous pagination flows have no automated accessibility violations", async () => {
+    routerMocks.location.pathname = "/browse-users";
+    routerMocks.location.search = {
+      q: "",
+      city: "",
+      radiusKm: undefined,
+      tagIds: [],
+      maxPrice: undefined,
+      role: "everyone",
+      from: undefined,
+    };
+    mockGetPublicProfilesCollection.mockResolvedValue({
+      data: {
+        items: [
+          publicProfile,
+          {
+            ...publicProfile,
+            userId: "customer-1",
+            username: "anna",
+            firstName: "Anna",
+            lastName: "Weber",
+            userType: "CUSTOMER",
+            verified: false,
+          },
+        ],
+        cursor: { limit: 20, next: "profiles-2" },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+    mockGetPublicListings.mockResolvedValue({
+      data: {
+        items: [publicListing as PublicListingSummary],
+        cursor: { limit: 500, next: null },
+      },
+      status: 200,
+      headers: new Headers(),
+    } as never);
+
+    const { container } = renderWithQuery(<SearchUsersPage />);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("list", { name: /user results/i }),
+      ).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByRole("searchbox", { name: /search/i }), {
+        target: { value: "anna" },
+      });
+      fireEvent.keyDown(screen.getByRole("searchbox", { name: /search/i }), {
+        key: "Enter",
+      });
+      fireEvent.click(screen.getByRole("button", { name: /consumers/i }));
+      fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /previous/i }),
+      ).not.toBeDisabled();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /previous/i }));
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("PrivateProfilePage provider state has no automated accessibility violations", async () => {
+    const providerListing: MyListingSummary = {
+      listingId: "profile-listing-1",
+      title: "Home Cleaning",
+      description: "Thorough cleaning for kitchens and bathrooms.",
+      price: 25,
+      publicationStatus: "ACTIVE",
+      moderationStatus: "VISIBLE",
+      author: { userId: "user-1", name: "Mira", surname: "Hofer" },
+      publishedAt: "2026-01-01T00:00:00Z",
+      location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 10 },
+      tags: [],
+    };
+    const { container } = render(
+      <PrivateProfilePage
+        userFirstName="Mira"
+        userLastName="Hofer"
+        selfSummary="I help people with everyday tasks."
+        bio="Experienced in household support and errands across Berlin."
+        city="Berlin"
+        isProvider={true}
+        ownerListings={[providerListing]}
+        onEditClick={vi.fn()}
+        onEditListing={vi.fn()}
+      />
+    );
+    await expectNoAxeViolations(container);
+  });
+
+  it("PrivateProfilePage consumer state has no automated accessibility violations", async () => {
+    const { container } = render(
+      <PrivateProfilePage
+        userFirstName="Anna"
+        userLastName="Weber"
+        selfSummary=""
+        bio={null}
+        city="Munich"
+        isProvider={false}
+        ownerListings={[]}
+        onEditClick={vi.fn()}
+        onEditListing={vi.fn()}
+      />
+    );
+    await expectNoAxeViolations(container);
+  });
+
+  it("PublicProfilePage provider with verified badge has no automated accessibility violations", async () => {
+    const verifiedCredentials: VerifiedCredentialResponse[] = [
+      {
+        credentialType: "IDENTITY_VERIFIED",
+        name: "Identity verified",
+        description: "Government ID has been checked.",
+        expiresAt: null,
+        verifiedAt: "2026-01-01T00:00:00Z",
+      },
+    ];
+    const { container } = render(
+      <PublicProfilePage
+        userFirstName="Klaus"
+        userLastName="Mueller"
+        username="klausm"
+        selfSummary="Retired IT professional offering PC support."
+        bio="Over 30 years of experience in IT support."
+        simplifiedBio={null}
+        city="Berlin"
+        isProvider={true}
+        verified={true}
+        credentials={verifiedCredentials}
+        publicServiceListings={[
+          {
+            link: "/listings/listing-1",
+            label: "PC Support",
+            hourRate: 20,
+            location: "Berlin",
+            providerFirstName: "Klaus",
+            providerLastName: "Mueller",
+            tags: [],
+          },
+        ]}
+      />
+    );
+    await expectNoAxeViolations(container);
+  });
+
+  it("PublicProfilePage consumer state has no automated accessibility violations", async () => {
+    const { container } = render(
+      <PublicProfilePage
+        userFirstName="Lena"
+        userLastName="Schmidt"
+        username="lenas"
+        selfSummary=""
+        bio={null}
+        simplifiedBio={null}
+        city="Hamburg"
+        isProvider={false}
+        verified={false}
+        credentials={[]}
+        publicServiceListings={[]}
+      />
+    );
+    await expectNoAxeViolations(container);
   });
 });

@@ -3,11 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import type { ComponentProps } from "react";
 
-vi.mock("../components/Navbar", () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}));
-
-vi.mock("../components/MultiSelect", () => ({
+vi.mock("../components/common/ui/MultiSelect", () => ({
   MultiSelect: ({
     onChange,
     id,
@@ -27,8 +23,8 @@ vi.mock("../components/MultiSelect", () => ({
   ),
 }));
 
-import { CreateListing } from "../components/CreateListing";
-import type { MultiSelectProps } from "../components/MultiSelect";
+import { CreateListing } from "../components/features/listings/CreateListing";
+import type { MultiSelectProps } from "../components/common/ui/MultiSelect";
 
 const availableTags = [
   {
@@ -47,7 +43,8 @@ function renderCreateListing(
       availableTags={availableTags}
       tagsLoading={false}
       onBack={vi.fn()}
-      onSubmit={vi.fn().mockResolvedValue(undefined)}
+      onSave={vi.fn().mockResolvedValue(undefined)}
+      onPublish={vi.fn().mockResolvedValue(undefined)}
       {...props}
     />,
   );
@@ -108,16 +105,16 @@ describe("<CreateListing />", () => {
     expect(screen.getByText("Select at least one tag.")).toBeInTheDocument();
   });
 
-  it("does not call onSubmit when the form is invalid", () => {
-    const onSubmit = vi.fn();
-    renderCreateListing({ onSubmit });
+  it("does not call onSave when the form is invalid", () => {
+    const onSave = vi.fn();
+    renderCreateListing({ onSave });
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
-    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onSave).not.toHaveBeenCalled();
   });
 
   it('shows "Service is being saved…" while the request is pending', async () => {
     renderCreateListing({
-      onSubmit: vi.fn().mockReturnValue(new Promise(() => {})),
+      onSave: vi.fn().mockReturnValue(new Promise(() => {})),
     });
     fillForm();
     fireEvent.click(screen.getByTestId("multiselect"));
@@ -127,16 +124,16 @@ describe("<CreateListing />", () => {
     );
   });
 
-  it("calls onSubmit with normalized form values", async () => {
-    const onSubmit = vi.fn().mockResolvedValue(undefined);
-    renderCreateListing({ onSubmit });
+  it("calls onSave with normalized form values", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    renderCreateListing({ onSave });
     fillForm();
     fireEvent.click(screen.getByTestId("multiselect"));
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
 
-    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    await waitFor(() => expect(onSave).toHaveBeenCalledOnce());
 
-    expect(onSubmit).toHaveBeenCalledWith({
+    expect(onSave).toHaveBeenCalledWith({
       title: "Valid Title Here",
       description: "A valid description with enough text.",
       price: 25,
@@ -163,7 +160,7 @@ describe("<CreateListing />", () => {
 
   it("shows an error message when submission fails", async () => {
     renderCreateListing({
-      onSubmit: vi.fn().mockRejectedValue(new Error("Something went wrong.")),
+      onSave: vi.fn().mockRejectedValue(new Error("Something went wrong.")),
     });
     fillForm();
     fireEvent.click(screen.getByTestId("multiselect"));

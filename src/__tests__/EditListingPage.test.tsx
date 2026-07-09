@@ -15,6 +15,9 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
       useParams: () => ({ listingId: "listing-1" }),
     }),
     useNavigate: () => mockNavigate,
+    Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+      <a href={String(to)}>{children}</a>
+    ),
   };
 });
 
@@ -80,13 +83,15 @@ vi.mock("../api/mira", () => ({
         method: "DELETE",
       }),
   ),
+  getAvailability: vi.fn(() =>
+    Promise.resolve({ status: 200, data: { days: [] } }),
+  ),
+  getPublicListings: vi.fn(() =>
+    Promise.resolve({ status: 200, data: { items: [] } }),
+  ),
 }));
 
-vi.mock("../components/Navbar", () => ({
-  Navbar: () => <nav data-testid="navbar" />,
-}));
-
-vi.mock("../components/MultiSelect", () => ({
+vi.mock("../components/common/ui/MultiSelect", () => ({
   MultiSelect: ({
     onChange,
     value,
@@ -107,8 +112,8 @@ vi.mock("../components/MultiSelect", () => ({
   ),
 }));
 
-import { EditListingPage } from "../routes/edit-listing.$listingId";
-import type { MultiSelectProps } from "../components/MultiSelect";
+import { EditListingPage } from "../routes/_app/edit-listing.$listingId";
+import type { MultiSelectProps } from "../components/common/ui/MultiSelect";
 
 type PublicationStatus = "DRAFT" | "ACTIVE" | "PAUSED" | "DELETED";
 
@@ -125,6 +130,7 @@ function makeListing(
       { tagId: "tag-1", name: "IT", isBarrierefrei: false, isActive: true },
     ],
     location: { city: "Berlin", postalCode: "10115", serviceRadiusKm: 10 },
+    author: { userId: "user-1", name: "Provider", surname: "Test" },
     ...overrides,
   };
 }
@@ -162,9 +168,13 @@ function setupMocks(
   });
 }
 
+function renderPage() {
+  return render(<EditListingPage />);
+}
+
 async function waitForLoad() {
   await waitFor(() =>
-    expect(screen.queryByRole("status")).not.toBeInTheDocument(),
+    expect(screen.queryByText("Loading…")).not.toBeInTheDocument(),
   );
   await waitFor(() => expect(screen.getByLabelText(/title/i)).toHaveValue("PC Help"));
 }
@@ -180,14 +190,14 @@ afterEach(() => {
 describe("<EditListingPage />", () => {
   it("shows loading state on mount", () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
-    render(<EditListingPage />);
+    renderPage();
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByText("Loading…")).toBeInTheDocument();
   });
 
   it("shows error when listing fetch fails", async () => {
     mockFetch.mockResolvedValue({ status: 404, data: {} });
-    render(<EditListingPage />);
+    renderPage();
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent(
         "Failed to load listing.",
@@ -197,7 +207,7 @@ describe("<EditListingPage />", () => {
 
   it("renders the Edit Service heading after load", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitFor(() =>
       expect(
         screen.getByRole("heading", { name: "Edit Service" }),
@@ -207,7 +217,7 @@ describe("<EditListingPage />", () => {
 
   it("pre-populates form fields from the fetched listing", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     expect(screen.getByLabelText(/title/i)).toHaveValue("PC Help");
     expect(screen.getByLabelText(/description/i)).toHaveValue(
@@ -220,13 +230,13 @@ describe("<EditListingPage />", () => {
 
   it("shows status badge", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitFor(() => expect(screen.getByText("Active")).toBeInTheDocument());
   });
 
   it("shows Save and Pause buttons for ACTIVE listing", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     expect(screen.getByRole("button", { name: /^save$/i })).toBeInTheDocument();
     expect(
@@ -239,7 +249,7 @@ describe("<EditListingPage />", () => {
 
   it("shows Save and Publish buttons for DRAFT listing", async () => {
     setupMocks(makeListing({ publicationStatus: "DRAFT" }));
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     expect(screen.getByRole("button", { name: /^save$/i })).toBeInTheDocument();
     expect(
@@ -252,7 +262,7 @@ describe("<EditListingPage />", () => {
 
   it("shows Resume button and no Save button for PAUSED listing", async () => {
     setupMocks(makeListing({ publicationStatus: "PAUSED" }));
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     expect(
       screen.getByRole("button", { name: /^resume$/i }),
@@ -264,7 +274,7 @@ describe("<EditListingPage />", () => {
 
   it("disables form fields for PAUSED listing", async () => {
     setupMocks(makeListing({ publicationStatus: "PAUSED" }));
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     expect(screen.getByLabelText(/title/i)).toBeDisabled();
     expect(screen.getByLabelText(/description/i)).toBeDisabled();
@@ -273,7 +283,7 @@ describe("<EditListingPage />", () => {
 
   it("back button navigates to /my-listings", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.click(
       screen.getByRole("button", { name: /back to my services/i }),
@@ -283,20 +293,20 @@ describe("<EditListingPage />", () => {
 
   it("shows title validation error on empty submit", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.change(screen.getByLabelText(/title/i), {
       target: { value: "" },
     });
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
     await waitFor(() =>
-      expect(screen.getByText("Required.")).toBeInTheDocument(),
+      expect(screen.getByText("Title is required.")).toBeInTheDocument(),
     );
   });
 
   it("shows tag error when no tags are selected on submit", async () => {
     setupMocks(makeListing({ tags: [] }));
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
     await waitFor(() =>
@@ -306,7 +316,7 @@ describe("<EditListingPage />", () => {
 
   it("does not call authFetch for PATCH when form is invalid", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.change(screen.getByLabelText(/title/i), {
       target: { value: "" },
@@ -320,7 +330,7 @@ describe("<EditListingPage />", () => {
 
   it("sends PATCH to /v1/listings/:id with updated data on save", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.change(screen.getByLabelText(/title/i), {
       target: { value: "Updated Title" },
@@ -345,7 +355,7 @@ describe("<EditListingPage />", () => {
 
   it("navigates to /my-listings after successful save", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
     await waitFor(() =>
@@ -355,7 +365,7 @@ describe("<EditListingPage />", () => {
 
   it("shows server error when save fails", async () => {
     setupMocks(makeListing(), [], false);
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
     await waitFor(() =>
@@ -365,7 +375,7 @@ describe("<EditListingPage />", () => {
 
   it("calls publish endpoint and navigates on Publish click", async () => {
     setupMocks(makeListing({ publicationStatus: "DRAFT" }));
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.click(screen.getByRole("button", { name: /^publish$/i }));
 
@@ -381,7 +391,7 @@ describe("<EditListingPage />", () => {
 
   it("calls pause endpoint and navigates on Pause click", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.click(screen.getByRole("button", { name: /^pause$/i }));
 
@@ -397,7 +407,7 @@ describe("<EditListingPage />", () => {
 
   it("calls resume endpoint and navigates on Resume click", async () => {
     setupMocks(makeListing({ publicationStatus: "PAUSED" }));
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.click(screen.getByRole("button", { name: /^resume$/i }));
 
@@ -413,7 +423,7 @@ describe("<EditListingPage />", () => {
 
   it("shows delete confirmation dialog when Delete service is clicked", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.click(screen.getByRole("button", { name: /delete service/i }));
     expect(
@@ -429,7 +439,7 @@ describe("<EditListingPage />", () => {
 
   it("hides delete confirmation when Cancel is clicked", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.click(screen.getByRole("button", { name: /delete service/i }));
     fireEvent.click(screen.getByRole("button", { name: /^cancel$/i }));
@@ -443,7 +453,7 @@ describe("<EditListingPage />", () => {
 
   it("sends DELETE to /v1/listings/:id and navigates after confirming deletion", async () => {
     setupMocks();
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     fireEvent.click(screen.getByRole("button", { name: /delete service/i }));
     fireEvent.click(screen.getByRole("button", { name: /yes, delete/i }));
@@ -460,30 +470,80 @@ describe("<EditListingPage />", () => {
 
   it("does not show delete button for DELETED listing", async () => {
     setupMocks(makeListing({ publicationStatus: "DELETED" }));
-    render(<EditListingPage />);
+    renderPage();
     await waitForLoad();
     expect(
       screen.queryByRole("button", { name: /delete service/i }),
     ).not.toBeInTheDocument();
   });
 
+  describe("preview", () => {
+    it("shows Preview instead of Save in the header", async () => {
+      setupMocks();
+      renderPage();
+      await waitForLoad();
+      expect(
+        screen.getByRole("button", { name: /^preview$/i }),
+      ).toBeInTheDocument();
+    });
+
+    it("groups Save next to Delete service instead of in the header", async () => {
+      setupMocks();
+      renderPage();
+      await waitForLoad();
+      const saveButton = screen.getByRole("button", { name: /^save$/i });
+      const deleteButton = screen.getByRole("button", {
+        name: /delete service/i,
+      });
+      expect(saveButton.parentElement).toBe(deleteButton.parentElement);
+    });
+
+    it("opens the public-style preview when Preview is clicked", async () => {
+      setupMocks();
+      renderPage();
+      await waitForLoad();
+      fireEvent.click(screen.getByRole("button", { name: /^preview$/i }));
+      expect(
+        screen.getByText("Previewing — this is what customers will see"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "PC Help" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: "Edit Service" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("returns to the edit form when Back to editing is clicked", async () => {
+      setupMocks();
+      renderPage();
+      await waitForLoad();
+      fireEvent.click(screen.getByRole("button", { name: /^preview$/i }));
+      fireEvent.click(screen.getByRole("button", { name: /back to editing/i }));
+      expect(
+        screen.getByRole("heading", { name: "Edit Service" }),
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText(/title/i)).toHaveValue("PC Help");
+    });
+  });
+
   describe("validation", () => {
     it("shows description error when description is too short", async () => {
       setupMocks();
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       fireEvent.change(screen.getByLabelText(/description/i), {
         target: { value: "short" },
       });
       fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
       await waitFor(() =>
-        expect(screen.getByText("At least 10 characters.")).toBeInTheDocument(),
+        expect(screen.getByText("Description must be at least 10 characters.")).toBeInTheDocument(),
       );
     });
 
     it("shows price error when value is negative", async () => {
       setupMocks();
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       fireEvent.change(screen.getByLabelText(/hourly rate/i), {
         target: { value: "-5" },
@@ -491,14 +551,14 @@ describe("<EditListingPage />", () => {
       fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
       await waitFor(() =>
         expect(
-          screen.getByText("Must be a positive number."),
+          screen.getByText("Hourly rate must be a positive number."),
         ).toBeInTheDocument(),
       );
     });
 
     it("shows postal code error when format is invalid and address is started", async () => {
       setupMocks();
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       fireEvent.change(screen.getByLabelText(/^street$/i), {
         target: { value: "Main St" },
@@ -512,7 +572,7 @@ describe("<EditListingPage />", () => {
       fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
       await waitFor(() =>
         expect(
-          screen.getByText("Must be exactly 5 digits."),
+          screen.getByText("Postal code must be exactly 5 digits."),
         ).toBeInTheDocument(),
       );
     });
@@ -521,7 +581,7 @@ describe("<EditListingPage />", () => {
   describe("location in PATCH body", () => {
     it("excludes location when street and house number are empty", async () => {
       setupMocks();
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
       await waitFor(() =>
@@ -536,7 +596,7 @@ describe("<EditListingPage />", () => {
 
     it("includes location when street and house number are filled", async () => {
       setupMocks();
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       fireEvent.change(screen.getByLabelText(/^street$/i), {
         target: { value: "Main Street" },
@@ -563,7 +623,7 @@ describe("<EditListingPage />", () => {
   describe("DELETED listing", () => {
     it("disables all form fields", async () => {
       setupMocks(makeListing({ publicationStatus: "DELETED" }));
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       expect(screen.getByLabelText(/title/i)).toBeDisabled();
       expect(screen.getByLabelText(/description/i)).toBeDisabled();
@@ -572,7 +632,7 @@ describe("<EditListingPage />", () => {
 
     it("shows no action or delete buttons", async () => {
       setupMocks(makeListing({ publicationStatus: "DELETED" }));
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       expect(
         screen.queryByRole("button", { name: /^save$/i }),
@@ -587,7 +647,7 @@ describe("<EditListingPage />", () => {
 
     it("hides the images section", async () => {
       setupMocks(makeListing({ publicationStatus: "DELETED" }));
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       expect(
         screen.queryByRole("list", { name: /listing images/i }),
@@ -610,7 +670,7 @@ describe("<EditListingPage />", () => {
         },
       ];
       setupMocks(makeListing(), media);
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       expect(
         screen.getByRole("img", { name: "Cat photo" }),
@@ -627,7 +687,7 @@ describe("<EditListingPage />", () => {
         },
       ];
       setupMocks(makeListing(), media);
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       fireEvent.click(
         screen.getByRole("button", { name: /remove image: cat photo/i }),
@@ -647,7 +707,7 @@ describe("<EditListingPage />", () => {
   describe("server errors on status actions", () => {
     it("shows server error when publish fails", async () => {
       setupMocks(makeListing({ publicationStatus: "DRAFT" }), [], false);
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       fireEvent.click(screen.getByRole("button", { name: /^publish$/i }));
       await waitFor(() =>
@@ -657,7 +717,7 @@ describe("<EditListingPage />", () => {
 
     it("shows server error and dismisses confirmation when delete fails", async () => {
       setupMocks(makeListing(), [], false);
-      render(<EditListingPage />);
+      renderPage();
       await waitForLoad();
       fireEvent.click(screen.getByRole("button", { name: /delete service/i }));
       fireEvent.click(screen.getByRole("button", { name: /yes, delete/i }));

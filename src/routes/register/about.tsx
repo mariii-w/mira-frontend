@@ -4,10 +4,18 @@ import type { PatchUserProfileRequest } from "../../api/model";
 import {
   RegisterAbout,
   type RegisterAboutSubmitValues,
-} from "../../components/RegisterAbout";
+} from "../../components/features/register/RegisterAbout";
+import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/about")({
+  head: () =>
+    createPageMeta({
+      title: "About You",
+      description:
+        "Add profile details that help other Mira users understand who you are.",
+      path: "/register/about",
+    }),
   component: RegisterAboutRoute,
 });
 
@@ -30,7 +38,7 @@ function RegisterAboutRoute() {
   const setUser = useAuthStore((s) => s.setUser);
 
   async function handleContinue(values: RegisterAboutSubmitValues) {
-    if (!user) throw new Error("Not logged in.");
+    if (!user?.userId) throw new Error("Not logged in.");
 
     const payload: PatchUserProfileRequest = {
       ...(values.bio ? { bio: values.bio } : {}),

@@ -4,10 +4,17 @@ import type { ProblemDetailsResponse } from "../../api/model";
 import {
   RegisterPhoto,
   type RegisterPhotoSubmitError,
-} from "../../components/RegisterPhoto";
+} from "../../components/features/register/RegisterPhoto";
+import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/photo")({
+  head: () =>
+    createPageMeta({
+      title: "Profile Photo",
+      description: "Upload or skip a profile photo for your Mira account.",
+      path: "/register/photo",
+    }),
   component: RegisterPhotoRoute,
 });
 
@@ -52,7 +59,7 @@ function RegisterPhotoRoute() {
   const setUser = useAuthStore((s) => s.setUser);
 
   async function handleContinue(file: File | null) {
-    if (!user) throw new Error("Not logged in.");
+    if (!user?.userId) throw new Error("Not logged in.");
 
     if (file) {
       const response = await uploadProfilePicture(user.userId, { file });

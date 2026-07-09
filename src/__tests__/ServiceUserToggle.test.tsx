@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import { ServiceUserToggle } from '../components/ServiceUserToggle'
+import { ServiceUserToggle } from '../components/features/search/ServiceUserToggle.tsx'
 
 function renderToggle(checked: boolean) {
   return render(
@@ -38,5 +38,14 @@ describe('<ServiceUserToggle /> entry slide', () => {
     expect(pill).toHaveClass('translate-x-full')
     await waitFor(() => expect(pill).toHaveClass('translate-x-0'))
     expect(pill).toHaveClass('bg-primary')
+  })
+})
+
+describe('<ServiceUserToggle /> focus styling', () => {
+  it('has a visible focus ring on the switch root', () => {
+    renderToggle(false)
+    const switchRoot = screen.getByRole('switch')
+    expect(switchRoot).toHaveClass('focus-visible:ring-2')
+    expect(switchRoot).toHaveClass('focus-visible:ring-primary')
   })
 })

@@ -14,7 +14,8 @@
 
   --color-background: #F9F5F0;
   --color-foreground: #2E2E26;
-  --color-muted: #96928D;
+  --color-muted: #6E6A65;
+  --color-muted-foreground: #6E6A65;
   --color-surface: #FFFFFF;
   --color-border: #96928D;
   --color-primary: #47745B;
@@ -23,6 +24,7 @@
   --color-accent: #7C4E80;
   --color-accent-hover: #653D69;
   --color-accent-foreground: #F9F5F0;
+  --color-destructive: #B91C1C;
 
   --font-heading: 'Atkinson Hyperlegible', system-ui, sans-serif;
   --font-body: 'Lexend', system-ui, sans-serif;
@@ -42,6 +44,10 @@
 }
 
 @layer base {
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     font-family: var(--font-body);
     font-size: var(--text-body);
@@ -49,6 +55,7 @@
     color: var(--color-foreground);
     background: var(--color-background);
     min-height: 100svh;
+    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
   }
 

@@ -8,10 +8,18 @@ import {
   RegisterRole,
   type RegisterRoleSubmitError,
   type RegisterRoleSubmitValues,
-} from "../../components/RegisterRole";
-import { useAuthStore } from "../../stores/auth";
+} from "../../components/features/register/RegisterRole";
+import { createPageMeta } from "../../lib/headers";
+import { exchangeRefreshForAccess, useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/role")({
+  head: () =>
+    createPageMeta({
+      title: "Choose Account Type",
+      description:
+        "Choose whether you want to use Mira as a customer or provider.",
+      path: "/register/role",
+    }),
   component: RegisterRoleRoute,
 });
 
@@ -37,7 +45,7 @@ function RegisterRoleRoute() {
   const setUser = useAuthStore((s) => s.setUser);
 
   async function handleContinue(values: RegisterRoleSubmitValues) {
-    if (!user) {
+    if (!user?.userId) {
       throw {
         field: "server",
         message: "Not logged in.",
@@ -52,6 +60,10 @@ function RegisterRoleRoute() {
     }
 
     setUser(response.data);
+    // userType drives the backend's CAN_CREATE_LISTING permission, which is baked
+    // into the access token at issuance time — force a refresh now so the new
+    // permission is usable immediately, without requiring a full page reload.
+    await exchangeRefreshForAccess();
     await navigate({ to: "/register/name" });
   }
 

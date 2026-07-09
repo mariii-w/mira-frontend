@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { RegisterDone } from "../components/RegisterDone";
+import { RegisterDone } from "../components/features/register/RegisterDone";
 import type { PrivateUserProfileResponse } from "../api/model";
-import source from "../components/RegisterDone.tsx?raw";
+import source from "../components/features/register/RegisterDone.tsx?raw";
 
 const user = {
   firstName: "Mira",
@@ -14,7 +14,7 @@ const user = {
 
 describe("RegisterDone", () => {
   it("renders the completed registration state from props", () => {
-    render(<RegisterDone user={user} onFindServices={vi.fn()} />);
+    render(<RegisterDone user={user} onContinue={vi.fn()} />);
 
     expect(
       screen.getByRole("heading", { name: "You're all set, Mira!" }),
@@ -26,13 +26,13 @@ describe("RegisterDone", () => {
   });
 
   it("calls the injected find services handler", () => {
-    const onFindServices = vi.fn();
+    const onContinue = vi.fn();
 
-    render(<RegisterDone user={user} onFindServices={onFindServices} />);
+    render(<RegisterDone user={user} onContinue={onContinue} />);
 
     fireEvent.click(screen.getByRole("button", { name: /find services/i }));
 
-    expect(onFindServices).toHaveBeenCalledOnce();
+    expect(onContinue).toHaveBeenCalledOnce();
   });
 
   it("keeps fetching and route state out of the component", () => {

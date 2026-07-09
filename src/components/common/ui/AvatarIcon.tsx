@@ -1,0 +1,77 @@
+import { useState } from 'react'
+
+interface AvatarIconProps {
+  firstName?: string
+  lastName?: string
+  picture?: string
+  alt?: string
+  size?: number
+  bgColorClassName?: string
+  className?: string
+  'aria-hidden'?: boolean | 'true' | 'false'
+}
+
+const BG_COLORS = [
+  'bg-forest',
+  'bg-sage',
+  'bg-plum',
+  'bg-lilac',
+] as const
+
+function nameToBgColor(name: string): (typeof BG_COLORS)[number] {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return BG_COLORS[Math.abs(hash) % BG_COLORS.length]
+}
+
+export function AvatarIcon({
+  firstName,
+  lastName,
+  picture,
+  alt,
+  size = 40,
+  bgColorClassName,
+  className,
+  'aria-hidden': ariaHidden,
+}: AvatarIconProps) {
+  const [imgFailed, setImgFailed] = useState(false)
+  const fullName = `${firstName ?? ''} ${lastName ?? ''}`.trim()
+
+  if (picture && !imgFailed) {
+    return (
+      <img
+        src={picture}
+        alt={alt ?? (fullName ? `${fullName} avatar` : 'User avatar')}
+        style={{ width: size, height: size }}
+        className={`rounded-full object-cover block shrink-0 ${className ?? ''}`}
+        onError={() => setImgFailed(true)}
+        aria-hidden={ariaHidden}
+      />
+    )
+  }
+
+  const first = firstName?.[0]?.toUpperCase() ?? ''
+  const last = lastName?.[0]?.toUpperCase() ?? ''
+  const initials = first + last || '?'
+  const bgColor = bgColorClassName ?? nameToBgColor(fullName)
+  const fallbackLabel = alt ?? (fullName ? `${fullName} avatar` : 'User avatar')
+
+  return (
+    <div
+      role="img"
+      aria-label={ariaHidden ? undefined : fallbackLabel}
+      aria-hidden={ariaHidden}
+      style={{
+        width: size,
+        height: size,
+        fontSize: Math.round(size * 0.36),
+        lineHeight: 1,
+      }}
+      className={`${bgColor} text-cream rounded-full flex items-center justify-center font-semibold tracking-wide select-none shrink-0 ${className ?? ''}`}
+    >
+      {initials}
+    </div>
+  )
+}

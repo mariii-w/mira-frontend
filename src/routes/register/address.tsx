@@ -4,10 +4,18 @@ import type { PatchUserProfileRequest } from "../../api/model";
 import {
   RegisterAddress,
   type RegisterAddressSubmitValues,
-} from "../../components/RegisterAddress";
+} from "../../components/features/register/RegisterAddress";
+import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/address")({
+  head: () =>
+    createPageMeta({
+      title: "Add Address",
+      description:
+        "Add your private address so Mira can support local service matching.",
+      path: "/register/address",
+    }),
   component: RegisterAddressRoute,
 });
 
@@ -29,7 +37,7 @@ function RegisterAddressRoute() {
   const setUser = useAuthStore((s) => s.setUser);
 
   async function handleContinue(values: RegisterAddressSubmitValues) {
-    if (!user) throw new Error("Not logged in.");
+    if (!user?.userId) throw new Error("Not logged in.");
 
     const payload: PatchUserProfileRequest = {
       privateAddress: values,

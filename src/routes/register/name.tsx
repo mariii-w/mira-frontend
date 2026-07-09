@@ -5,10 +5,18 @@ import {
   RegisterName,
   type RegisterNameSubmitError,
   type RegisterNameSubmitValues,
-} from "../../components/RegisterName";
+} from "../../components/features/register/RegisterName";
+import { createPageMeta } from "../../lib/headers";
 import { useAuthStore } from "../../stores/auth";
 
 export const Route = createFileRoute("/register/name")({
+  head: () =>
+    createPageMeta({
+      title: "Set Your Name",
+      description:
+        "Add your name and username to continue your Mira profile setup.",
+      path: "/register/name",
+    }),
   component: RegisterNameRoute,
 });
 
@@ -48,7 +56,7 @@ function RegisterNameRoute() {
   const setUser = useAuthStore((s) => s.setUser);
 
   async function handleContinue(values: RegisterNameSubmitValues) {
-    if (!user) throw new Error("Not logged in.");
+    if (!user?.userId) throw new Error("Not logged in.");
 
     const payload: PatchUserProfileRequest = values;
 
