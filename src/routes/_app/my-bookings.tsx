@@ -61,6 +61,11 @@ function MyBookingsRoute() {
       return response.data;
     },
     enabled: !!userId,
+    // No websocket/push backend exists yet, so poll for new requests,
+    // acceptances, etc. Matches the interval used for the Navbar's
+    // notification badge (same query key, so they also stay in sync).
+    refetchInterval: 10_000,
+    refetchOnWindowFocus: true,
   });
 
   async function loadBookingDetails(

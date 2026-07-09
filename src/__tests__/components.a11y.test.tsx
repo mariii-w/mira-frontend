@@ -52,6 +52,7 @@ import { Label } from "../components/common/ui/Label";
 import { ListingDetailPage } from "../components/features/listings/ListingDetailPage";
 import { ListingProviderCard } from "../components/features/listings/ListingProviderCard";
 import { LoginCallback } from "../components/features/auth/LoginCallback";
+import { LoginOptionsDialog } from "../components/common/layout/LoginOptionsDialog";
 import { Logo } from "../components/common/ui/Logo";
 import { Modal } from "../components/common/ui/Modal";
 import { MultiSelect } from "../components/common/ui/MultiSelect";
@@ -141,7 +142,10 @@ vi.mock("../api/mira", () => ({
   getPublicListings: vi.fn(),
   getPublicProfilesCollection: vi.fn(),
   listMyBookings: vi.fn().mockResolvedValue({ status: 200, data: { items: [] } }),
+  getListMyBookingsQueryKey: vi.fn((userId: string) => ["bookings", userId]),
   logout: vi.fn().mockResolvedValue({ status: 204, data: undefined }),
+  getGetAuthLoginGoogleUrl: vi.fn(() => "http://localhost:8081/auth/login/google"),
+  getPrivateUserProfile: vi.fn(),
 }));
 
 vi.mock("../lib/credentialEvidenceMedia", () => ({
@@ -730,7 +734,7 @@ describe("component accessibility", () => {
   it.each(componentCases)(
     "%s has no automated accessibility violations",
     async (_name, ui) => {
-      const { container } = render(ui);
+      const { container } = renderWithQuery(ui);
       await expectNoAxeViolations(container);
     },
   );
@@ -1580,6 +1584,38 @@ describe("component accessibility", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("LoginOptionsDialog closed trigger has no automated accessibility violations", async () => {
+    const { container } = render(
+      <LoginOptionsDialog>
+        <button type="button">Login</button>
+      </LoginOptionsDialog>,
+    );
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("LoginOptionsDialog open state has no automated accessibility violations", async () => {
+    render(
+      <LoginOptionsDialog>
+        <button type="button">Login</button>
+      </LoginOptionsDialog>,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^login$/i }));
+    });
+
+    const dialog = screen.getByRole("dialog", { name: /log in/i });
+    expect(
+      within(dialog).getByRole("link", { name: /continue with google/i }),
+    ).toHaveAttribute("href", "http://localhost:8081/auth/login/google");
+    expect(
+      within(dialog).getByRole("button", { name: /continue with passkey/i }),
+    ).toBeInTheDocument();
+
+    await expectNoAxeViolations(document.body);
+  });
+
   it.each([
     [
       "RegisterLayout",
@@ -1635,7 +1671,7 @@ describe("component accessibility", () => {
   ] satisfies Array<[string, ReactElement]>)(
     "%s has no automated accessibility violations",
     async (_name, ui) => {
-      const { container } = render(ui);
+      const { container } = renderWithQuery(ui);
       await expectNoAxeViolations(container);
     },
   );
@@ -2310,7 +2346,7 @@ describe("component accessibility", () => {
   });
 
   it("RegisterLayout done and unauthenticated states have no automated accessibility violations", async () => {
-    const done = render(
+    const done = renderWithQuery(
       <RegisterLayout user={user} pathname="/register/done">
         <h2 id="register-step-heading">Done</h2>
       </RegisterLayout>,
@@ -2318,7 +2354,7 @@ describe("component accessibility", () => {
     await expectNoAxeViolations(done.container);
     done.unmount();
 
-    const upcoming = render(
+    const upcoming = renderWithQuery(
       <RegisterLayout user={null} pathname="/register/name">
         <h2 id="register-step-heading">Your name</h2>
       </RegisterLayout>,
@@ -2559,16 +2595,26 @@ describe("component accessibility", () => {
     },
   );
 
-  it("Navbar login action is an accessible link to Google OAuth", async () => {
-    const { container } = render(<Navbar />);
+  it("Navbar login action opens a popup with an accessible link to Google OAuth", async () => {
+    renderWithQuery(<Navbar />);
 
-    const loginLink = screen.getByRole("link", { name: /login/i });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^login$/i }));
+    });
 
-    expect(loginLink).toHaveAttribute(
+    const dialog = screen.getByRole("dialog", { name: /log in/i });
+    const googleLink = within(dialog).getByRole("link", {
+      name: /continue with google/i,
+    });
+
+    expect(googleLink).toHaveAttribute(
       "href",
       "http://localhost:8081/auth/login/google",
     );
-    await expectNoAxeViolations(container);
+    expect(
+      within(dialog).getByRole("button", { name: /continue with passkey/i }),
+    ).toBeInTheDocument();
+    await expectNoAxeViolations(document.body);
   });
 
   it("Navbar logged-in state has no automated accessibility violations", async () => {
@@ -2597,12 +2643,12 @@ describe("component accessibility", () => {
       privateAddress: null,
     } satisfies User);
 
-    const { container } = render(<Navbar />);
+    const { container } = renderWithQuery(<Navbar />);
     await expectNoAxeViolations(container);
   });
 
   it("Navbar mobile drawer (logged out) has no automated accessibility violations when opened", async () => {
-    render(<Navbar />);
+    renderWithQuery(<Navbar />);
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
@@ -2640,7 +2686,7 @@ describe("component accessibility", () => {
       privateAddress: null,
     } satisfies User);
 
-    render(<Navbar />);
+    renderWithQuery(<Navbar />);
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /open menu/i }));

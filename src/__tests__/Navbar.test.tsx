@@ -57,6 +57,8 @@ vi.mock("../api/mira", () => ({
   listMyBookings: vi
     .fn()
     .mockResolvedValue({ status: 200, data: { items: [] } }),
+  getGetAuthLoginGoogleUrl: vi.fn(() => "http://localhost:8081/auth/login/google"),
+  getPrivateUserProfile: vi.fn(),
 }));
 
 const providerUser = {
@@ -189,19 +191,39 @@ describe("<Navbar />", () => {
     expect(dialog.getByRole("link", { name: /chat/i })).toBeInTheDocument();
   });
 
-  it("logged out: Login stays in the header (not moved into the drawer) while it is open", () => {
-    renderNavbar();
-    expect(screen.getByRole("button", { name: /^login$/i })).toHaveAttribute(
-      "type",
-      "button",
-    );
-    fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
-    // Still in the DOM behind the modal (correctly aria-hidden, not unmounted) —
-    // confirms Login wasn't duplicated/moved into the drawer's markup.
-    expect(
-      screen.getByRole("button", { name: /^login$/i, hidden: true }),
-    ).toBeInTheDocument();
-  });
+
+it("logged out: Login stays in the header (not moved into the drawer) while it is open", () => {
+  renderNavbar();
+
+  expect(screen.getByRole("button", { name: /^login$/i })).toHaveAttribute(
+    "type",
+    "button",
+  );
+
+  fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+
+  // Still in the DOM behind the modal (correctly aria-hidden, not unmounted) —
+  // confirms Login wasn't duplicated/moved into the drawer's markup.
+  expect(
+    screen.getByRole("button", { name: /^login$/i, hidden: true }),
+  ).toBeInTheDocument();
+});
+
+it("logged out: Login opens a popup with Google and Passkey options", () => {
+  renderNavbar();
+
+  fireEvent.click(screen.getByRole("button", { name: /^login$/i }));
+
+  const dialog = screen.getByRole("dialog", { name: /log in/i });
+
+  expect(
+    within(dialog).getByRole("link", { name: /continue with google/i }),
+  ).toHaveAttribute("href", "http://localhost:8081/auth/login/google");
+
+  expect(
+    within(dialog).getByRole("button", { name: /continue with passkey/i }),
+  ).toBeInTheDocument();
+});
 
   it("logged in (provider): drawer shows account rows and logout, scoped to the dialog", () => {
     useAuthStore.getState().setUser(providerUser);
@@ -305,8 +327,12 @@ describe("<Navbar />", () => {
       status: 200,
       data: {
         items: [
+          // Provider-actionable: a new request to accept/refuse, and a paid
+          // booking to mark delivered. CONFIRMED (awaiting the consumer's
+          // payment) and COMPLETED are not the provider's turn to act.
           makeBooking("pending-1", "PENDING"),
-          makeBooking("pay-1", "CONFIRMED"),
+          makeBooking("delivered-1", "PAID"),
+          makeBooking("awaiting-payment-1", "CONFIRMED"),
           makeBooking("done-1", "COMPLETED"),
         ],
       },
