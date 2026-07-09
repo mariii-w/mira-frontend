@@ -11,8 +11,7 @@ type CachedGetResponse = {
   data: unknown;
 };
 
-// In-memory only, per page load - deliberately not persisted (localStorage/sessionStorage aren't
-// available to artifacts and aren't needed here; a fresh session should just refetch).
+// In-memory only, per page load - not persisted.
 const etagCache = new Map<string, CachedGetResponse>();
 
 function requestUrl(input: RequestInfo | URL): string {
@@ -100,12 +99,13 @@ export async function authFetch<T>(
 
   const res = await fetch(input, requestInit);
 
-  // Server confirmed our cached copy is still current - reuse it instead of an empty 304 body.
+  // Not modified - reuse the cached data instead of an empty body.
   if (res.status === 304 && cached) {
     return { data: cached.data, status: res.status, headers: res.headers } as T;
   }
 
-  const noContent = [204, 205, 304].includes(res.status);
+  // 412 (If-Match conflict, e.g. schedule PUT) is body-less by design, same as 204/304.
+  const noContent = [204, 205, 304, 412].includes(res.status);
   const body = noContent ? null : await res.text();
 
   if (!noContent && !body) {
