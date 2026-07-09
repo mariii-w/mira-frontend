@@ -6,6 +6,31 @@ export type FetchResponse<T> = {
   headers: Headers;
 };
 
+type CachedGetResponse = {
+  etag: string;
+  data: unknown;
+};
+
+// In-memory only, per page load - deliberately not persisted (localStorage/sessionStorage aren't
+// available to artifacts and aren't needed here; a fresh session should just refetch).
+const etagCache = new Map<string, CachedGetResponse>();
+
+function requestUrl(input: RequestInfo | URL): string {
+  if (typeof input === "string") return input;
+  if (input instanceof URL) return input.toString();
+  return input.url;
+}
+
+function isGetRequest(init?: RequestInit): boolean {
+  return (init?.method ?? "GET").toUpperCase() === "GET";
+}
+
+function withIfNoneMatch(init: RequestInit | undefined, etag: string): RequestInit {
+  const headers = new Headers(init?.headers);
+  headers.set("If-None-Match", etag);
+  return { ...init, headers };
+}
+
 function isRefreshRequest(input: RequestInfo | URL): boolean {
   const url =
     typeof input === "string"
@@ -63,19 +88,42 @@ export async function authFetch<T>(
   input: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<T> {
-  const requestInit = await getRequestInit(input, init);
+  let requestInit = await getRequestInit(input, init);
+
+  const url = requestUrl(input);
+  const isGet = isGetRequest(requestInit);
+  const cached = isGet ? etagCache.get(url) : undefined;
+
+  if (cached) {
+    requestInit = withIfNoneMatch(requestInit, cached.etag);
+  }
+
   const res = await fetch(input, requestInit);
+
+  // Server confirmed our cached copy is still current - reuse it instead of an empty 304 body.
+  if (res.status === 304 && cached) {
+    return { data: cached.data, status: res.status, headers: res.headers } as T;
+  }
+
   const noContent = [204, 205, 304].includes(res.status);
   const body = noContent ? null : await res.text();
 
   if (!noContent && !body) {
-    const url = typeof input === "string" ? input : input.toString();
     throw new Error(
       `Request to ${url} returned ${res.status} with an empty body`,
     );
   }
 
   const data = body ? JSON.parse(body) : {};
+
+  if (isGet && res.status === 200) {
+    const etag = res.headers.get("ETag");
+    if (etag) {
+      etagCache.set(url, { etag, data });
+    } else {
+      etagCache.delete(url);
+    }
+  }
 
   return { data, status: res.status, headers: res.headers } as T;
 }
