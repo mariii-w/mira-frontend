@@ -59,7 +59,7 @@ function RegisterPhotoRoute() {
   const setUser = useAuthStore((s) => s.setUser);
 
   async function handleContinue(file: File | null) {
-    if (!user) throw new Error("Not logged in.");
+    if (!user || !user.userId) throw new Error("Not logged in.");
 
     if (file) {
       const response = await uploadProfilePicture(user.userId, { file });

@@ -99,9 +99,11 @@ export async function authFetch<T>(
 
   const res = await fetch(input, requestInit);
 
-  // Not modified - reuse the cached data instead of an empty body.
+  // Not modified - reuse the cached data instead of an empty body. Report it as a
+  // plain 200: callers only care that this is a successful, current read, and
+  // treating it as 304 would make them special-case an internal cache hit.
   if (res.status === 304 && cached) {
-    return { data: cached.data, status: res.status, headers: res.headers } as T;
+    return { data: cached.data, status: 200, headers: res.headers } as T;
   }
 
   // 412 (If-Match conflict, e.g. schedule PUT) is body-less by design, same as 204/304.

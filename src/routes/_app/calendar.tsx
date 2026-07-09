@@ -210,7 +210,7 @@ function CalendarRoute() {
 
   return (
     <CalendarPage
-      userId={userId}
+      userId={userId ?? undefined}
       isProvider={isProvider}
       today={today}
       year={year}

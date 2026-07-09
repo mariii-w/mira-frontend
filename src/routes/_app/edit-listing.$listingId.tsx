@@ -156,7 +156,7 @@ export function EditListingPage() {
     let cancelled = false;
 
     async function loadOtherListings() {
-      const response = await getPublicListings({ userId, limit: 5 });
+      const response = await getPublicListings({ userId: userId ?? undefined, limit: 5 });
 
       if (cancelled) return;
 

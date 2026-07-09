@@ -45,7 +45,9 @@ function RegisterDoneRoute() {
   const setUser = useAuthStore((s) => s.setUser);
   const userId = user?.userId;
 
-  const { data } = useQuery(getAuthedPrivateUserProfileQueryOptions(userId));
+  const { data } = useQuery(
+    getAuthedPrivateUserProfileQueryOptions(userId ?? undefined),
+  );
 
   useEffect(() => {
     if (data) setUser(data);
