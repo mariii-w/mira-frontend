@@ -57,7 +57,7 @@ vi.mock("../api/mira", () => ({
   listMyBookings: vi
     .fn()
     .mockResolvedValue({ status: 200, data: { items: [] } }),
-  getGetAuthLoginGoogleUrl: vi.fn(() => "http://localhost:8081/auth/login/google"),
+  getStartGoogleLoginUrl: vi.fn(() => "http://localhost:8081/auth/login/google"),
   getPrivateUserProfile: vi.fn(),
 }));
 

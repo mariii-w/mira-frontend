@@ -38,6 +38,8 @@ function addDays(date: Date, days: number): Date {
   return d;
 }
 
+// The API only includes the chat HAL link when the request is authenticated,
+// so it doubles as the signal for whether messaging is available at all.
 export function canStartListingChat(listing?: PublicListingDetails): boolean {
   return !!listing?._links?.chat;
 }

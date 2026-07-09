@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { getPrivateUserProfile, getGetAuthLoginGoogleUrl } from "../api/mira";
+import { getPrivateUserProfile, getStartGoogleLoginUrl } from "../api/mira";
 import { LoginCallback } from "../components/features/auth/LoginCallback";
 import { createPageMeta } from "../lib/headers";
 import {
@@ -77,5 +77,5 @@ function LoginRoute() {
     });
   }, [error, navigate]);
 
-  return <LoginCallback error={error} retryHref={getGetAuthLoginGoogleUrl()} />;
+  return <LoginCallback error={error} retryHref={getStartGoogleLoginUrl()} />;
 }

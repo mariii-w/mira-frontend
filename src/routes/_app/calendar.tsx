@@ -53,7 +53,7 @@ function CalendarRoute() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
-  const userId = user?.userId;
+  const userId = user?.userId ?? undefined;
   const queryUserId = userId ?? "";
   const isProvider = user?.userType === "PROVIDER";
 

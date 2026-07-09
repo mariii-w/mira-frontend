@@ -107,7 +107,7 @@ function Profile({ userId }: { userId: string }) {
         queryKey: ["listings", userId, isOwner, isProviderType],
         queryFn: async () => {
             if (!isProviderType) {
-                return { items: [], cursor: { limit: 0, next: null } };
+                return { items: [], cursor: { limit: 0, next: null }, _links: {} };
             }
 
             if (isOwner) {

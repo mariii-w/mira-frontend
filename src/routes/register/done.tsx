@@ -43,7 +43,7 @@ function RegisterDoneRoute() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
-  const userId = user?.userId;
+  const userId = user?.userId ?? undefined;
 
   const { data } = useQuery(
     getAuthedPrivateUserProfileQueryOptions(userId ?? undefined),

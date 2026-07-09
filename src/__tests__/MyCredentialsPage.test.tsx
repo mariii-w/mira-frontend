@@ -3,13 +3,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
-  getV1UsersUserIdCredentials,
-  getV1Credentials,
-  postV1UsersUserIdCredentials,
-  postV1UsersUserIdCredentialsCredentialIdVerifications,
-  getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId,
-  patchV1UsersUserIdCredentialsCredentialId,
-  deleteV1UsersUserIdCredentialsCredentialId,
+  getUserCredentials,
+  getCredentials,
+  submitCredential,
+  createCredentialVerification,
+  getCredentialVerification,
+  updateUserCredential,
+  deleteUserCredential,
 } from '../api/mira'
 import type { CredentialResponse, CredentialTypeResponse } from '../api/model'
 
@@ -36,15 +36,15 @@ vi.mock('../stores/auth', () => ({
 }))
 
 vi.mock('../api/mira', () => ({
-  getGetV1UsersUserIdCredentialsQueryKey: (userId: string) => [`/v1/users/${userId}/credentials`],
-  getGetV1CredentialsQueryKey: () => ['/v1/credentials'],
-  getV1UsersUserIdCredentials: vi.fn(),
-  getV1Credentials: vi.fn(),
-  postV1UsersUserIdCredentials: vi.fn(),
-  postV1UsersUserIdCredentialsCredentialIdVerifications: vi.fn(),
-  getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId: vi.fn(),
-  patchV1UsersUserIdCredentialsCredentialId: vi.fn(),
-  deleteV1UsersUserIdCredentialsCredentialId: vi.fn(),
+  getGetUserCredentialsQueryKey: (userId: string) => [`/v1/users/${userId}/credentials`],
+  getGetCredentialsQueryKey: () => ['/v1/credentials'],
+  getUserCredentials: vi.fn(),
+  getCredentials: vi.fn(),
+  submitCredential: vi.fn(),
+  createCredentialVerification: vi.fn(),
+  getCredentialVerification: vi.fn(),
+  updateUserCredential: vi.fn(),
+  deleteUserCredential: vi.fn(),
 }))
 
 
@@ -52,13 +52,13 @@ vi.mock('../components/features/credentials/CredentialDocumentViewer', () => ({
   CredentialDocumentViewer: () => null,
 }))
 
-const mockGetCredentials = vi.mocked(getV1UsersUserIdCredentials)
-const mockGetCatalog = vi.mocked(getV1Credentials)
-const mockPost = vi.mocked(postV1UsersUserIdCredentials)
-const mockStartVerification = vi.mocked(postV1UsersUserIdCredentialsCredentialIdVerifications)
-const mockGetVerification = vi.mocked(getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId)
-const mockPatch = vi.mocked(patchV1UsersUserIdCredentialsCredentialId)
-const mockDelete = vi.mocked(deleteV1UsersUserIdCredentialsCredentialId)
+const mockGetCredentials = vi.mocked(getUserCredentials)
+const mockGetCatalog = vi.mocked(getCredentials)
+const mockPost = vi.mocked(submitCredential)
+const mockStartVerification = vi.mocked(createCredentialVerification)
+const mockGetVerification = vi.mocked(getCredentialVerification)
+const mockPatch = vi.mocked(updateUserCredential)
+const mockDelete = vi.mocked(deleteUserCredential)
 
 const evidenceMedia = {
   mediaId: 'm-1',
@@ -100,7 +100,7 @@ const catalog: CredentialTypeResponse[] = [
 
 function mockCredentialsSuccess(items: CredentialResponse[]) {
   mockGetCredentials.mockResolvedValue({ status: 200, data: { items }, headers: new Headers() } as Awaited<
-    ReturnType<typeof getV1UsersUserIdCredentials>
+    ReturnType<typeof getUserCredentials>
   >)
 }
 
@@ -133,7 +133,7 @@ import { MyCredentialsRoute } from '../routes/_app/my-credentials'
 beforeEach(() => {
   vi.clearAllMocks()
   mockGetCatalog.mockResolvedValue({ status: 200, data: { items: catalog }, headers: new Headers() } as Awaited<
-    ReturnType<typeof getV1Credentials>
+    ReturnType<typeof getCredentials>
   >)
   mockGetVerification.mockResolvedValue({
     status: 200,
@@ -146,7 +146,7 @@ beforeEach(() => {
       completedAt: null,
     },
     headers: new Headers(),
-  } as Awaited<ReturnType<typeof getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId>>)
+  } as Awaited<ReturnType<typeof getCredentialVerification>>)
 })
 
 afterEach(() => {
@@ -176,7 +176,7 @@ describe('<MyCredentialsPage />', () => {
       status: 400,
       data: { type: 'about:blank', title: 'Error', status: 400, detail: 'Failed to load credentials.', instance: '/v1/users/user-1/credentials' },
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof getV1UsersUserIdCredentials>>)
+    } as Awaited<ReturnType<typeof getUserCredentials>>)
     renderRoute()
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Failed to load credentials.'))
   })
@@ -222,7 +222,7 @@ describe('<MyCredentialsPage />', () => {
       status: 201,
       data: makeCredential({ credentialId: 'cred-new', latestVerification: null }),
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof postV1UsersUserIdCredentials>>)
+    } as Awaited<ReturnType<typeof submitCredential>>)
     mockStartVerification.mockResolvedValue({
       status: 202,
       data: {
@@ -234,7 +234,7 @@ describe('<MyCredentialsPage />', () => {
         completedAt: null,
       },
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof postV1UsersUserIdCredentialsCredentialIdVerifications>>)
+    } as Awaited<ReturnType<typeof createCredentialVerification>>)
 
     renderRoute()
     await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
@@ -261,7 +261,7 @@ describe('<MyCredentialsPage />', () => {
       status: 201,
       data: makeCredential({ credentialId: 'cred-new', latestVerification: null }),
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof postV1UsersUserIdCredentials>>)
+    } as Awaited<ReturnType<typeof submitCredential>>)
     mockStartVerification.mockResolvedValue({
       status: 202,
       data: {
@@ -273,7 +273,7 @@ describe('<MyCredentialsPage />', () => {
         completedAt: null,
       },
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof postV1UsersUserIdCredentialsCredentialIdVerifications>>)
+    } as Awaited<ReturnType<typeof createCredentialVerification>>)
     mockGetVerification.mockResolvedValueOnce({
       status: 200,
       data: {
@@ -285,7 +285,7 @@ describe('<MyCredentialsPage />', () => {
         completedAt: '2026-01-01T00:01:00Z',
       },
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId>>)
+    } as Awaited<ReturnType<typeof getCredentialVerification>>)
 
     renderRoute()
     await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
@@ -310,7 +310,7 @@ describe('<MyCredentialsPage />', () => {
         status: 200,
         data: { items: [makeCredential()] },
         headers: new Headers(),
-      } as Awaited<ReturnType<typeof getV1UsersUserIdCredentials>>)
+      } as Awaited<ReturnType<typeof getUserCredentials>>)
       .mockResolvedValueOnce({
         status: 200,
         data: {
@@ -330,7 +330,7 @@ describe('<MyCredentialsPage />', () => {
           ],
         },
         headers: new Headers(),
-      } as Awaited<ReturnType<typeof getV1UsersUserIdCredentials>>)
+      } as Awaited<ReturnType<typeof getUserCredentials>>)
       .mockResolvedValueOnce({
         status: 200,
         data: {
@@ -350,12 +350,12 @@ describe('<MyCredentialsPage />', () => {
           ],
         },
         headers: new Headers(),
-      } as Awaited<ReturnType<typeof getV1UsersUserIdCredentials>>)
+      } as Awaited<ReturnType<typeof getUserCredentials>>)
     mockPost.mockResolvedValue({
       status: 201,
       data: makeCredential({ credentialId: 'cred-new', latestVerification: null }),
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof postV1UsersUserIdCredentials>>)
+    } as Awaited<ReturnType<typeof submitCredential>>)
     mockStartVerification.mockResolvedValue({
       status: 202,
       data: {
@@ -367,7 +367,7 @@ describe('<MyCredentialsPage />', () => {
         completedAt: null,
       },
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof postV1UsersUserIdCredentialsCredentialIdVerifications>>)
+    } as Awaited<ReturnType<typeof createCredentialVerification>>)
     mockGetVerification.mockResolvedValue({
       status: 200,
       data: {
@@ -379,7 +379,7 @@ describe('<MyCredentialsPage />', () => {
         completedAt: null,
       },
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId>>)
+    } as Awaited<ReturnType<typeof getCredentialVerification>>)
 
     renderRoute()
     await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
@@ -402,7 +402,7 @@ describe('<MyCredentialsPage />', () => {
       status: 200,
       data: makeCredential({ isVisible: false }),
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof patchV1UsersUserIdCredentialsCredentialId>>)
+    } as Awaited<ReturnType<typeof updateUserCredential>>)
 
     renderRoute()
     await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
@@ -426,7 +426,7 @@ describe('<MyCredentialsPage />', () => {
         instance: '/v1/users/user-1/credentials/cred-1',
       },
       headers: new Headers(),
-    } as Awaited<ReturnType<typeof patchV1UsersUserIdCredentialsCredentialId>>)
+    } as Awaited<ReturnType<typeof updateUserCredential>>)
 
     renderRoute()
     await waitFor(() => expect(screen.queryByText('Loading…')).not.toBeInTheDocument())
@@ -441,7 +441,7 @@ describe('<MyCredentialsPage />', () => {
   it('deletes a credential after confirmation', async () => {
     mockCredentialsSuccess([makeCredential()])
     mockDelete.mockResolvedValue({ status: 204, data: undefined, headers: new Headers() } as Awaited<
-      ReturnType<typeof deleteV1UsersUserIdCredentialsCredentialId>
+      ReturnType<typeof deleteUserCredential>
     >)
 
     renderRoute()

@@ -2,15 +2,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-    deleteV1UsersUserIdCredentialsCredentialId,
-    getGetV1CredentialsQueryKey,
-    getGetV1UsersUserIdCredentialsQueryKey,
-    getV1Credentials,
-    getV1UsersUserIdCredentials,
-    getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId,
-    patchV1UsersUserIdCredentialsCredentialId,
-    postV1UsersUserIdCredentials,
-    postV1UsersUserIdCredentialsCredentialIdVerifications,
+    deleteUserCredential,
+    getGetCredentialsQueryKey,
+    getGetUserCredentialsQueryKey,
+    getCredentials,
+    getUserCredentials,
+    getCredentialVerification,
+    updateUserCredential,
+    submitCredential,
+    createCredentialVerification,
 } from "../../api/mira";
 import type {
     CredentialResponse,
@@ -93,7 +93,7 @@ export function MyCredentialsRoute() {
     const credentialsQueryKey = useMemo(
         () =>
             userId
-                ? getGetV1UsersUserIdCredentialsQueryKey(userId)
+                ? getGetUserCredentialsQueryKey(userId)
                 : ["my-credentials"],
         [userId],
     );
@@ -109,7 +109,7 @@ export function MyCredentialsRoute() {
                 throw new Error("You must be signed in to view credentials.");
             }
 
-            const response = await getV1UsersUserIdCredentials(userId);
+            const response = await getUserCredentials(userId);
 
             if (response.status !== 200) {
                 throw new Error(
@@ -125,9 +125,9 @@ export function MyCredentialsRoute() {
     });
 
     const { data: catalogData, isLoading: catalogLoading } = useQuery({
-        queryKey: getGetV1CredentialsQueryKey(),
+        queryKey: getGetCredentialsQueryKey(),
         queryFn: async () => {
-            const response = await getV1Credentials();
+            const response = await getCredentials();
 
             if (response.status !== 200) {
                 throw new Error("Failed to load credential types.");
@@ -147,7 +147,7 @@ export function MyCredentialsRoute() {
         }) => {
             setSubmissionStatus("Submitting credential...");
 
-            const submitResponse = await postV1UsersUserIdCredentials(userId ?? "", {
+            const submitResponse = await submitCredential(userId ?? "", {
                 credentialType,
                 file,
             });
@@ -159,7 +159,7 @@ export function MyCredentialsRoute() {
             setSubmissionStatus("Credential submitted.");
 
             const verificationResponse =
-                await postV1UsersUserIdCredentialsCredentialIdVerifications(
+                await createCredentialVerification(
                     userId ?? "",
                     submitResponse.data.credentialId,
                 );
@@ -196,7 +196,7 @@ export function MyCredentialsRoute() {
             }
 
             const response =
-                await getV1UsersUserIdCredentialsCredentialIdVerificationsVerificationId(
+                await getCredentialVerification(
                     userId,
                     activeVerification.credentialId,
                     activeVerification.verificationId,
@@ -251,7 +251,7 @@ export function MyCredentialsRoute() {
             credentialId: string;
             isVisible: boolean;
         }) =>
-            patchV1UsersUserIdCredentialsCredentialId(userId ?? "", credentialId, {
+            updateUserCredential(userId ?? "", credentialId, {
                 isVisible,
             }),
         onMutate: ({ credentialId }) => {
@@ -274,7 +274,7 @@ export function MyCredentialsRoute() {
 
     const deleteMutation = useMutation({
         mutationFn: (credentialId: string) =>
-            deleteV1UsersUserIdCredentialsCredentialId(userId ?? "", credentialId),
+            deleteUserCredential(userId ?? "", credentialId),
         onMutate: (credentialId: string) => setDeletingId(credentialId),
         onSettled: () => setDeletingId(null),
         onSuccess: (response) => {

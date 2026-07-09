@@ -23,7 +23,7 @@ import { ServiceCard } from "../listings/ServiceCard";
 import { useAccessibilityStore } from "../../../stores/accessibility";
 import { useAuthStore } from "../../../stores/auth";
 import {
-  getGetAuthLoginGoogleUrl,
+  getStartGoogleLoginUrl,
   getServiceTags,
   getPublicListings,
 } from "../../../api/mira";
@@ -371,7 +371,7 @@ export function Home() {
               </p>
               {!user ? (
                 <a
-                  href={getGetAuthLoginGoogleUrl()}
+                  href={getStartGoogleLoginUrl()}
                   className="relative inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-accent px-8 text-body font-medium text-accent-foreground no-underline transition-colors duration-150 hover:bg-accent-hover active:bg-accent-hover [&_svg]:size-5"
                 >
                   Get started

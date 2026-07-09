@@ -1,7 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { useState, type ReactNode } from 'react'
 import { KeyRound, X } from 'lucide-react'
-import { getGetAuthLoginGoogleUrl, getPrivateUserProfile } from '../../../api/mira'
+import { getStartGoogleLoginUrl, getPrivateUserProfile } from '../../../api/mira'
 import { decodeJwtPayload, useAuthStore } from '../../../stores/auth'
 import { startPasskeyLogin } from '../../../lib/passkeyAuth'
 import { Button } from '../ui/Button'
@@ -116,7 +116,7 @@ export function LoginOptionsDialog({ children }: LoginOptionsDialogProps) {
 
           <div className="mt-6 flex flex-col gap-3">
             <a
-              href={getGetAuthLoginGoogleUrl()}
+              href={getStartGoogleLoginUrl()}
               className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-charcoal bg-transparent px-5 text-body font-medium text-foreground no-underline transition-colors duration-150 hover:bg-charcoal/5"
             >
               <GoogleIcon />

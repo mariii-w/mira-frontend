@@ -60,7 +60,7 @@ export function EditListingPage() {
   const { listingId } = Route.useParams();
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const userId = user?.userId;
+  const userId = user?.userId ?? undefined;
 
   const [listing, setListing] = useState<ListingDetails | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);

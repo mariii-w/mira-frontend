@@ -21,8 +21,6 @@ tags:
     description: Public listing discovery resources.
   - name: Listings (Author)
     description: Listing resources managed by listing authors.
-  - name: Listings (Reports)
-    description: Listing reporting and moderation resources.
   - name: Listings (Media)
     description: Listing media resources.
   - name: Bookings
@@ -38,6 +36,7 @@ paths:
     get:
       tags:
         - Auth
+      operationId: startGoogleLogin
       summary: Start OAuth2 login
       description: Starts the OAuth2 authorization code flow with Google.
       responses:
@@ -55,6 +54,7 @@ paths:
     get:
       tags:
         - Auth
+      operationId: handleGoogleCallback
       summary: Handle OAuth2 provider callback
       description: Browser callback endpoint used by Google after the authorization code flow. Google redirects the user agent to this route with either an authorization code and state, or an OAuth error.
       parameters:
@@ -617,6 +617,14 @@ paths:
               schema:
                 type: string
                 format: binary
+        "304":
+          description: Not Modified. The client's cached profile picture content is still current.
+        "400":
+          description: Bad Request. One or more path parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
         "404":
           description: Not Found. The user has no current profile picture or its stored content is unavailable.
           content:
@@ -714,6 +722,7 @@ paths:
     get:
       tags:
         - Credentials
+      operationId: getCredentials
       summary: List credential types
       description: Returns the credential catalog available for provider credential submissions. Clients use this list to populate credential-type selection controls.
       responses:
@@ -727,6 +736,7 @@ paths:
     get:
       tags:
         - Credentials
+      operationId: getUserCredentials
       summary: List credentials
       description: Returns all credential submissions attached to the user profile identified by userId. This includes hidden credentials and their latest verification summary when one exists. Access is allowed when the authenticated account owns the target user profile or is an admin account.
       security:
@@ -767,6 +777,7 @@ paths:
     post:
       tags:
         - Credentials
+      operationId: submitCredential
       summary: Submit credential
       description: Submits one credential claim for the user profile identified by userId. Access is allowed only when the authenticated account owns the target provider profile. The multipart request references a catalog credential type and one uploaded evidence file. If accepted, the backend creates a credential submission with isVisible set to false. Verification is represented by separate verification resources.
       security:
@@ -825,10 +836,29 @@ paths:
             "application/problem+json":
               schema:
                 "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "413":
+          description: Payload Too Large. The uploaded evidence file exceeds the configured size limit.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "415":
+          description: Unsupported Media Type. The uploaded evidence file media type is not supported or the request is not multipart/form-data.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "422":
+          description: Unprocessable Entity. The uploaded evidence image has invalid dimensions.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
   "/v1/users/{userId}/credentials/{credentialId}":
     get:
       tags:
         - Credentials
+      operationId: getUserCredential
       summary: Get credential
       description: Returns one credential submission attached to the user profile identified by userId, including its latest verification summary when one exists. Access is allowed when the authenticated account owns the target user profile or is an admin account.
       security:
@@ -870,6 +900,7 @@ paths:
     patch:
       tags:
         - Credentials
+      operationId: updateUserCredential
       summary: Update credential
       description: Partially updates user-controlled credential submission metadata. Owners may update isVisible. Verification state is not updated through this route.
       security:
@@ -928,6 +959,7 @@ paths:
     delete:
       tags:
         - Credentials
+      operationId: deleteUserCredential
       summary: Delete credential
       description: Deletes a credential submission attached to the user profile identified by userId. Access is allowed only when the authenticated account owns the target user profile. Admin accounts cannot use this route to delete another user's credential. Deleting a credential removes its private evidence and verification resources and removes it from the derived public profile verification projection if it was publicly visible and approved.
       security:
@@ -986,6 +1018,8 @@ paths:
               schema:
                 type: string
                 format: binary
+        "304":
+          description: Not Modified. The client's cached credential evidence media is still current.
         "400":
           description: Bad Request. One or more path parameters are invalid.
           content:
@@ -1014,6 +1048,7 @@ paths:
     get:
       tags:
         - Credential Verifications
+      operationId: getCredentialVerifications
       summary: List credential verifications
       description: Returns verification attempts for the credential submission identified by credentialId. Access is allowed when the authenticated account owns the target user profile or is an admin account.
       security:
@@ -1055,6 +1090,7 @@ paths:
     post:
       tags:
         - Credential Verifications
+      operationId: createCredentialVerification
       summary: Create credential verification
       description: Creates a verification attempt for the credential submission identified by credentialId. The backend accepts the verification resource and processes the Lisa VLM check asynchronously. If a verification for this credential is already queued or processing, the request conflicts with the current resource state.
       security:
@@ -1112,6 +1148,7 @@ paths:
     get:
       tags:
         - Credential Verifications
+      operationId: getCredentialVerification
       summary: Get credential verification
       description: Returns one verification attempt for the credential submission identified by credentialId. Access is allowed when the authenticated account owns the target user profile or is an admin account.
       security:
@@ -1237,6 +1274,11 @@ paths:
                     cursor:
                       limit: 20
                       next: null
+                    _links:
+                      self:
+                        href: "/v1/public-listings?limit=20"
+                      first:
+                        href: "/v1/public-listings?limit=20"
         "400":
           description: Bad Request. One or more query parameters are invalid.
           content:
@@ -1403,19 +1445,55 @@ paths:
     get:
       summary: Get public listing details
       operationId: getPublicListing
-      description: Returns a publicly visible listing by its identifier. A listing is visible in public endpoints only when publicationStatus is ACTIVE and moderationStatus is VISIBLE. Listings in other combinations are returned as not found.
+      description: Returns a publicly visible listing by its identifier. A listing is visible in public endpoints only when publicationStatus is ACTIVE and moderationStatus is VISIBLE. Listings in other combinations are returned as not found. When a valid bearer token is supplied, the response includes a chat link.
       tags:
         - Listings (Public)
+      security:
+        - {}
+        - bearerHttpAuthentication: []
       responses:
         "200":
           description: Listing retrieved successfully.
           content:
             "application/json":
               schema:
-                "$ref": "#/components/schemas/PublicListingDetails"
+                "$ref": "#/components/schemas/PublicListingDetailsEntityModel"
               examples:
-                default:
-                  summary: Example listing details
+                anonymous:
+                  summary: Example listing details without authentication
+                  value:
+                    listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
+                    tags:
+                      - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
+                        name: Laptop support
+                        isBarrierefrei: false
+                        isActive: true
+                    title: Laptop setup and software installation
+                    description: I help with setting up laptops, installing software, and solving basic PC issues.
+                    price: 25.0
+                    publicationStatus: ACTIVE
+                    author:
+                      userId: "22222222-3333-4444-5555-666666666666"
+                      name: Anna
+                      surname: Schmidt
+                    createdAt: "2026-04-20T12:00:00Z"
+                    updatedAt: "2026-04-20T13:00:00Z"
+                    publishedAt: "2026-04-20T13:00:00Z"
+                    location:
+                      city: Berlin
+                      postalCode: "10115"
+                      serviceRadiusKm: 15
+                    media:
+                      - mediaId: "11111111-2222-3333-4444-555555555555"
+                        url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
+                        altText: Open laptop on a wooden desk
+                        mimeType: image/jpeg
+                        size: 248576
+                        width: 1280
+                        height: 720
+                        createdAt: "2026-04-20T16:10:00Z"
+                authenticated:
+                  summary: Example listing details with chat link
                   value:
                     listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
                     tags:
@@ -1551,6 +1629,11 @@ paths:
                     cursor:
                       limit: 20
                       next: null
+                    _links:
+                      self:
+                        href: "/v1/public-profiles/22222222-3333-4444-5555-666666666666/listings?limit=20"
+                      first:
+                        href: "/v1/public-profiles/22222222-3333-4444-5555-666666666666/listings?limit=20"
         "400":
           description: Bad Request. One or more path or query parameters are invalid.
           content:
@@ -1828,186 +1911,6 @@ paths:
                     status: 409
                     detail: Listings with active bookings cannot be deleted
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31
-  "/v1/admin/listings/{listingId}/moderation":
-    parameters:
-      - "$ref": "#/components/parameters/ListingIdParam"
-    patch:
-      summary: Update listing moderation status
-      description: Updates the listing moderationStatus field. Admins can set moderationStatus to BLOCKED to hide a listing from public endpoints, or VISIBLE to make it eligible for public endpoints again when publicationStatus is ACTIVE.
-      tags:
-        - Listings (Reports)
-      security:
-        - bearerHttpAuthentication: []
-      requestBody:
-        required: true
-        content:
-          "application/json":
-            schema:
-              "$ref": "#/components/schemas/UpdateListingModerationRequest"
-            examples:
-              block:
-                summary: Block listing
-                value:
-                  moderationStatus: BLOCKED
-              unblock:
-                summary: Make listing visible
-                value:
-                  moderationStatus: VISIBLE
-      responses:
-        "200":
-          description: Listing moderation status updated successfully.
-          content:
-            "application/json":
-              schema:
-                "$ref": "#/components/schemas/ListingDetails"
-              examples:
-                blocked:
-                  summary: Example moderated listing after approved report
-                  value:
-                    listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
-                    tags:
-                      - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
-                        name: Laptop support
-                        isBarrierefrei: false
-                        isActive: true
-                    title: Laptop setup and software installation
-                    description: I help with setting up laptops, installing software, and solving basic PC issues.
-                    price: 25.0
-                    publicationStatus: ACTIVE
-                    moderationStatus: BLOCKED
-                    author:
-                      userId: "22222222-3333-4444-5555-666666666666"
-                      name: Anna
-                      surname: Schmidt
-                    createdAt: "2026-04-20T12:00:00Z"
-                    updatedAt: "2026-04-21T10:10:00Z"
-                    publishedAt: "2026-04-20T16:00:00Z"
-                    location:
-                      city: Berlin
-                      postalCode: "10115"
-                      serviceRadiusKm: 15
-                    media:
-                      - mediaId: "11111111-2222-3333-4444-555555555555"
-                        url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
-                        altText: Open laptop on a wooden desk
-                        mimeType: image/jpeg
-                        size: 248576
-                        width: 1280
-                        height: 720
-                        createdAt: "2026-04-20T16:10:00Z"
-                visible:
-                  summary: Example listing after rejected report
-                  value:
-                    listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
-                    tags:
-                      - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
-                        name: Laptop support
-                        isBarrierefrei: false
-                        isActive: true
-                    title: Laptop setup and software installation
-                    description: I help with setting up laptops, installing software, and solving basic PC issues.
-                    price: 25.0
-                    publicationStatus: ACTIVE
-                    moderationStatus: VISIBLE
-                    author:
-                      userId: "22222222-3333-4444-5555-666666666666"
-                      name: Anna
-                      surname: Schmidt
-                    createdAt: "2026-04-20T12:00:00Z"
-                    updatedAt: "2026-04-21T10:15:00Z"
-                    publishedAt: "2026-04-20T16:00:00Z"
-                    location:
-                      city: Berlin
-                      postalCode: "10115"
-                      serviceRadiusKm: 15
-                    media:
-                      - mediaId: "11111111-2222-3333-4444-555555555555"
-                        url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
-                        altText: Open laptop on a wooden desk
-                        mimeType: image/jpeg
-                        size: 248576
-                        width: 1280
-                        height: 720
-                        createdAt: "2026-04-20T16:10:00Z"
-        "400":
-          description: Bad Request. The request payload is invalid.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                invalidRequest:
-                  value:
-                    type: "https://api.mira.example/problems/validation-error"
-                    title: Bad Request
-                    status: 400
-                    detail: Request body validation failed
-                    instance: /v1/admin/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/moderation
-                    errors:
-                      - field: moderationStatus
-                        message: must be one of VISIBLE, BLOCKED, or REPORTED
-        "401":
-          "$ref": "#/components/responses/UnauthorizedError"
-          description: Unauthorized. Authentication is required.
-        "403":
-          description: Forbidden. The authenticated account is not allowed to access this resource.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                forbidden:
-                  value:
-                    type: "https://api.mira.example/problems/insufficient-permissions"
-                    title: Forbidden
-                    status: 403
-                    detail: Authenticated user is not allowed to moderate this listing
-                    instance: /v1/admin/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/moderation
-        "404":
-          description: Not Found. No resource exists for the given identifier.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                notFound:
-                  value:
-                    type: "https://api.mira.example/problems/resource-not-found"
-                    title: Not Found
-                    status: 404
-                    detail: Listing with the given identifier was not found
-                    instance: /v1/admin/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/moderation
-        "409":
-          description: Conflict. The request conflicts with the current resource state.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                noActiveReport:
-                  value:
-                    type: "https://api.mira.example/problems/resource-conflict"
-                    title: Conflict
-                    status: 409
-                    detail: Listing moderation status cannot be changed in its current state
-                    instance: /v1/admin/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/moderation
-        "422":
-          description: Unprocessable Entity. The request is formally valid but violates one or more business rules.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                invalidModerationStatus:
-                  value:
-                    type: "https://api.mira.example/problems/business-rule-violation"
-                    title: Unprocessable Entity
-                    status: 422
-                    detail: Business validation failed
-                    instance: /v1/admin/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/moderation
-                    errors:
-                      - field: moderationStatus
-                        message: must be one of VISIBLE, BLOCKED, or REPORTED
   "/v1/service-tags":
     get:
       summary: List service tags
@@ -2104,6 +2007,11 @@ paths:
                     cursor:
                       limit: 20
                       next: null
+                    _links:
+                      self:
+                        href: "/v1/users/22222222-3333-4444-5555-666666666666/listings?limit=20"
+                      first:
+                        href: "/v1/users/22222222-3333-4444-5555-666666666666/listings?limit=20"
         "400":
           description: Bad Request. One or more path or query parameters are invalid.
           content:
@@ -2502,197 +2410,6 @@ paths:
                     status: 409
                     detail: Only paused listings can be resumed
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/resume
-  "/v1/admin/listings/reported":
-    get:
-      summary: List reported listings
-      description: Returns listings that currently have active reports and require admin review. The response may be paginated when pagination query parameters are provided.
-      tags:
-        - Listings (Reports)
-      security:
-        - bearerHttpAuthentication: []
-      parameters:
-        - "$ref": "#/components/parameters/LimitQueryParam"
-        - "$ref": "#/components/parameters/FromQueryParam"
-      responses:
-        "200":
-          description: Reported listings retrieved successfully.
-          content:
-            "application/json":
-              schema:
-                "$ref": "#/components/schemas/AdminReportedListingCollectionResponse"
-              examples:
-                default:
-                  summary: Example reported listings
-                  value:
-                    items:
-                      - listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
-                        tags:
-                          - tagId: dcf4f0b6-a983-4d88-a4d3-d8d4bd6a7b12
-                            name: Laptop support
-                            isBarrierefrei: false
-                            isActive: true
-                        title: Laptop setup and software installation
-                        description: I help with setting up laptops, installing software, and solving basic PC issues.
-                        price: 25.0
-                        publicationStatus: ACTIVE
-                        moderationStatus: VISIBLE
-                        author:
-                          userId: "22222222-3333-4444-5555-666666666666"
-                          name: Anna
-                          surname: Schmidt
-                        publishedAt: "2026-04-20T16:00:00Z"
-                        location:
-                          city: Berlin
-                          postalCode: "10115"
-                          serviceRadiusKm: 15
-                        primaryMedia:
-                          mediaId: "11111111-2222-3333-4444-555555555555"
-                          url: "https://cdn.mira.example/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/hero.jpg"
-                          altText: Open laptop on a wooden desk
-                        activeReportCount: 2
-                    cursor:
-                      limit: 20
-                      next: null
-        "400":
-          description: Bad Request. One or more query parameters are invalid.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                invalidPagination:
-                  value:
-                    type: "https://api.mira.example/problems/invalid-query-parameter"
-                    title: Bad Request
-                    status: 400
-                    detail: Query parameter validation failed
-                    instance: /v1/admin/listings/reported
-                    errors:
-                      - field: limit
-                        message: must be less than or equal to 100
-        "401":
-          "$ref": "#/components/responses/UnauthorizedError"
-          description: Unauthorized. Authentication is required.
-        "403":
-          description: Forbidden. The authenticated account is not allowed to access this resource.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                forbidden:
-                  value:
-                    type: "https://api.mira.example/problems/insufficient-permissions"
-                    title: Forbidden
-                    status: 403
-                    detail: Authenticated user is not allowed to view reported listings
-                    instance: /v1/admin/listings/reported
-  "/v1/listings/{listingId}/report":
-    parameters:
-      - "$ref": "#/components/parameters/ListingIdParam"
-    post:
-      summary: Report listing
-      description: Creates a report for a listing. Reporting a listing does not change its publication status. A user can have at most one active report for the same listing at a time. Authors cannot report their own listings.
-      tags:
-        - Listings (Reports)
-      security:
-        - bearerHttpAuthentication: []
-      requestBody:
-        required: true
-        content:
-          "application/json":
-            schema:
-              "$ref": "#/components/schemas/CreateListingReportRequest"
-            examples:
-              default:
-                summary: Example report request
-                value:
-                  message: This listing contains misleading information and appears to violate platform rules.
-      responses:
-        "201":
-          description: Report created successfully.
-          headers:
-            Location:
-              description: URI of the created report resource.
-              required: true
-              schema:
-                type: string
-                examples:
-                  - /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/report/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
-          content:
-            "application/json":
-              schema:
-                "$ref": "#/components/schemas/ListingReportResponse"
-              examples:
-                default:
-                  summary: Example created report
-                  value:
-                    reportId: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
-                    listingId: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
-                    message: This listing contains misleading information and appears to violate platform rules.
-                    createdAt: "2026-04-21T10:00:00Z"
-        "400":
-          description: Bad Request. The request payload is invalid.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                invalidRequest:
-                  value:
-                    type: "https://api.mira.example/problems/validation-error"
-                    title: Bad Request
-                    status: 400
-                    detail: Request body validation failed
-                    instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/report
-                    errors:
-                      - field: message
-                        message: must contain at least 10 characters
-        "401":
-          "$ref": "#/components/responses/UnauthorizedError"
-          description: Unauthorized. Authentication is required.
-        "403":
-          description: Forbidden. The authenticated account is not allowed to access this resource.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                forbidden:
-                  value:
-                    type: "https://api.mira.example/problems/insufficient-permissions"
-                    title: Forbidden
-                    status: 403
-                    detail: Authenticated user is not allowed to report this listing
-                    instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/report
-        "404":
-          description: Not Found. No resource exists for the given identifier.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                notFound:
-                  value:
-                    type: "https://api.mira.example/problems/resource-not-found"
-                    title: Not Found
-                    status: 404
-                    detail: Listing with the given identifier was not found
-                    instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/report
-        "409":
-          description: Conflict. The request conflicts with the current resource state.
-          content:
-            "application/problem+json":
-              schema:
-                "$ref": "#/components/schemas/ProblemDetailsResponse"
-              examples:
-                duplicateReport:
-                  value:
-                    type: "https://api.mira.example/problems/resource-conflict"
-                    title: Conflict
-                    status: 409
-                    detail: An active report from this user already exists for this listing
-                    instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/report
   "/v1/listings/{listingId}/media":
     parameters:
       - "$ref": "#/components/parameters/ListingIdParam"
@@ -2840,6 +2557,18 @@ paths:
                     status: 409
                     detail: Media cannot be uploaded to deleted listings
                     instance: /v1/listings/9c2de8a5-0e11-4fca-95fc-6852ac6f4b31/media
+        "413":
+          description: Payload Too Large. At least one uploaded listing media file exceeds the configured size limit.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
+        "415":
+          description: Unsupported Media Type. At least one uploaded listing media file media type is not supported or the request is not multipart/form-data.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
         "422":
           description: Unprocessable Entity. The request is formally valid but violates one or more business rules.
           content:
@@ -3138,6 +2867,14 @@ paths:
               schema:
                 type: string
                 format: binary
+        "304":
+          description: Not Modified. The client's cached listing media content is still current.
+        "400":
+          description: Bad Request. One or more path parameters are invalid.
+          content:
+            "application/problem+json":
+              schema:
+                "$ref": "#/components/schemas/ProblemDetailsResponse"
         "404":
           description: Not Found. The media item does not exist or its stored content is unavailable.
           content:
@@ -5420,6 +5157,7 @@ components:
       required:
         - items
         - cursor
+        - _links
       properties:
         items:
           type: array
@@ -5428,6 +5166,8 @@ components:
             "$ref": "#/components/schemas/PublicProfileResponse"
         cursor:
           "$ref": "#/components/schemas/Cursor"
+        _links:
+          "$ref": "#/components/schemas/HalLinks"
     PrivateUserProfileCollectionResponse:
       type: object
       required:
@@ -6034,48 +5774,6 @@ components:
           example: 30.0
         location:
           "$ref": "#/components/schemas/ListingLocationRequest"
-    CreateListingReportRequest:
-      type: object
-      required:
-        - message
-      properties:
-        message:
-          type: string
-          minLength: 10
-          maxLength: 2000
-          example: This listing contains misleading information and appears to violate platform rules.
-    ModerateListingRequest:
-      type: object
-      required:
-        - comment
-      properties:
-        comment:
-          type: string
-          minLength: 5
-          maxLength: 2000
-          example: The report is valid. The listing violates platform rules and has been hidden from public view.
-    ListingReportResponse:
-      type: object
-      required:
-        - reportId
-        - listingId
-        - message
-        - createdAt
-      properties:
-        reportId:
-          type: string
-          format: uuid
-          example: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
-        listingId:
-          type: string
-          format: uuid
-          example: "9c2de8a5-0e11-4fca-95fc-6852ac6f4b31"
-        message:
-          type: string
-          example: This listing contains misleading information and appears to violate platform rules.
-        createdAt:
-          type: string
-          format: date-time
     UploadListingMediaRequest:
       type: object
       required:
@@ -6270,28 +5968,22 @@ components:
         href:
           type: string
           format: uri-reference
-    AdminReportedListingItem:
-      allOf:
-        - "$ref": "#/components/schemas/MyListingSummary"
-        - type: object
-          required:
-            - activeReportCount
-          properties:
-            activeReportCount:
-              type: integer
-              minimum: 1
-              example: 2
-    AdminReportedListingCollectionResponse:
+    HalLinks:
       type: object
-      required:
-        - items
-      properties:
-        items:
-          type: array
-          items:
-            "$ref": "#/components/schemas/AdminReportedListingItem"
-        cursor:
-          "$ref": "#/components/schemas/Cursor"
+      description: HAL navigation links added by CursoredResponseModel.
+      additionalProperties:
+        "$ref": "#/components/schemas/HalLink"
+    PublicListingDetailsEntityModel:
+      allOf:
+        - "$ref": "#/components/schemas/PublicListingDetails"
+        - type: object
+          properties:
+            _links:
+              type: object
+              description: Optional HAL links. The chat link is present only when a valid bearer token is supplied.
+              properties:
+                chat:
+                  "$ref": "#/components/schemas/HalLink"
     ListingMediaUploadResponse:
       type: object
       required:
@@ -6611,6 +6303,8 @@ components:
       type: object
       required:
         - items
+        - cursor
+        - _links
       properties:
         items:
           type: array
@@ -6618,10 +6312,14 @@ components:
             "$ref": "#/components/schemas/PublicListingSummary"
         cursor:
           "$ref": "#/components/schemas/Cursor"
+        _links:
+          "$ref": "#/components/schemas/HalLinks"
     MyListingCollectionResponse:
       type: object
       required:
         - items
+        - cursor
+        - _links
       properties:
         items:
           type: array
@@ -6629,6 +6327,8 @@ components:
             "$ref": "#/components/schemas/MyListingSummary"
         cursor:
           "$ref": "#/components/schemas/Cursor"
+        _links:
+          "$ref": "#/components/schemas/HalLinks"
     PublicationStatus:
       type: string
       enum:
@@ -6684,18 +6384,6 @@ components:
         message:
           type: string
           example: must not be blank
-    UpdateListingModerationRequest:
-      type: object
-      required:
-        - moderationStatus
-      properties:
-        moderationStatus:
-          type: string
-          description: Target moderation status for the listing.
-          enum:
-            - VISIBLE
-            - BLOCKED
-          example: BLOCKED
     CreateBookingRequest:
       type: object
       required:
