@@ -266,7 +266,7 @@ export function BookingCard({
         onClick={handleToggle}
         className="flex cursor-pointer items-start gap-4 p-4 sm:p-5"
       >
-        <div className="flex flex-col items-center justify-center min-w-[3rem] text-center select-none self-center">
+        <div className="flex shrink-0 flex-col items-center justify-center min-w-[3rem] text-center select-none self-center">
           <span className="sr-only">{`${month} ${day} at ${time}`}</span>
           <span
             aria-hidden="true"
@@ -318,7 +318,7 @@ export function BookingCard({
             aria-label={
               expanded ? "Collapse booking details" : "Expand booking details"
             }
-            className={`transition-colors ${expanded ? TOGGLE_COLOR[booking.status] : "text-muted hover:text-foreground"}`}
+            className={`-m-1.5 rounded-lg p-1.5 transition-colors ${expanded ? TOGGLE_COLOR[booking.status] : "text-muted hover:text-foreground"}`}
           >
             {expanded ? (
               <ChevronUp aria-hidden="true" size={18} />
