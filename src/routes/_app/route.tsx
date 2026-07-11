@@ -1,6 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { Footer } from "../../components/common/layout/Footer";
-import { Navbar } from "../../components/common/layout/Navbar";
+import { AppShell } from "../../components/common/layout/AppShell";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
@@ -9,12 +8,8 @@ export const Route = createFileRoute("/_app")({
 // eslint-disable-next-line react-refresh/only-export-components
 function AppLayout() {
   return (
-    <div className="flex min-h-dvh flex-col">
-      <Navbar />
-      <div className="flex-1">
-        <Outlet />
-      </div>
-      <Footer />
-    </div>
+    <AppShell>
+      <Outlet />
+    </AppShell>
   );
 }
