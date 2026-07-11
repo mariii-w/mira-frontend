@@ -405,7 +405,7 @@ export function CalendarPage({
                     aria-pressed={isSelected}
                     tabIndex={isActive ? 0 : -1}
                     className={[
-                      "w-full min-h-20 cursor-pointer p-1.5 flex flex-col items-start text-xs transition-colors rounded-lg border",
+                      "w-full min-h-14 sm:min-h-20 cursor-pointer p-1 sm:p-1.5 flex flex-col items-center sm:items-start text-xs transition-colors rounded-lg border",
                       isSelected
                         ? "border-forest bg-mint"
                         : isBlocked
@@ -415,7 +415,7 @@ export function CalendarPage({
                             : "border-border hover:bg-linen",
                     ].join(" ")}
                   >
-                    <span className="flex items-center justify-between w-full gap-1">
+                    <span className="flex items-center justify-center sm:justify-between w-full gap-1">
                       <span
                         className={[
                           "flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium shrink-0",
@@ -430,7 +430,7 @@ export function CalendarPage({
                       </span>
                       {isProvider &&
                         (isBlocked || hasExtra || isNonWorking) && (
-                          <span className="flex flex-wrap gap-0.5 justify-end">
+                          <span className="hidden sm:flex flex-wrap gap-0.5 justify-end">
                             {isNonWorking && !isBlocked && (
                               <span className="rounded-full bg-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold text-foreground leading-none">
                                 OFF
@@ -450,7 +450,30 @@ export function CalendarPage({
                         )}
                     </span>
 
-                    <span className="mt-1 flex flex-col gap-0.5 w-full overflow-hidden">
+                    {/* Compact status dots for narrow screens — full detail already lives in the button's aria-label */}
+                    {(dayBookings.length > 0 ||
+                      (isProvider &&
+                        (isBlocked || hasExtra || isNonWorking))) && (
+                      <span
+                        aria-hidden="true"
+                        className="mt-1 flex sm:hidden items-center justify-center gap-1"
+                      >
+                        {dayBookings.length > 0 && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-forest" />
+                        )}
+                        {isProvider && isNonWorking && !isBlocked && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-foreground/30" />
+                        )}
+                        {isProvider && isBlocked && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-plum" />
+                        )}
+                        {isProvider && hasExtra && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-forest ring-1 ring-offset-1 ring-forest" />
+                        )}
+                      </span>
+                    )}
+
+                    <span className="mt-1 hidden sm:flex flex-col gap-0.5 w-full overflow-hidden">
                       {dayBookings.slice(0, 1).map((booking) => (
                         <span
                           key={booking.bookingId}
