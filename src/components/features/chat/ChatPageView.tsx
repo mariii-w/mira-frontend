@@ -1,5 +1,5 @@
-import { useId, useState, type KeyboardEvent, type RefObject } from "react";
-import { ArrowRight, Check, Search } from "lucide-react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type RefObject } from "react";
+import { ArrowLeft, ArrowRight, Check, Search } from "lucide-react";
 import { Button } from "../../common/ui/Button";
 import { AvatarIcon } from "../../common/ui/AvatarIcon";
 import { Input } from "../../common/ui/Input.tsx";
@@ -35,7 +35,56 @@ export interface ChatPageViewProps {
     onViewProfile: () => void;
 }
 
-// Presentational view for the chat route 
+// Shared "about this service / contact" content — rendered as a persistent
+// column on large screens and as a collapsible disclosure on mobile.
+function AboutServiceContent({
+    listing,
+    listingIsError,
+    selectedChat,
+    onViewProfile,
+}: {
+    listing: PublicListingDetails | undefined;
+    listingIsError: boolean;
+    selectedChat: ChatPreview | undefined;
+    onViewProfile: () => void;
+}) {
+    return (
+        <>
+            <div className="m-4 border-border">
+                {listing ? (
+                    <ServiceCardChat
+                        pictureLink={listing.media[0] ? mediaUrl(listing.media[0].url) : undefined}
+                        link={`/listings/${listing.listingId}`}
+                        label={listing.title}
+                        tags={listing.tags}
+                        hourRate={listing.price}
+                    />
+                ) : selectedChat?.listingId && !listingIsError ? (
+                    <p role="status" className="text-black/60">Loading service…</p>
+                ) : (
+                    <p className="text-black/60">No service linked to this conversation.</p>
+                )}
+            </div>
+            <div className="m-4">
+                <div className="bg-cream rounded-2xl border border-border w-full p-3 flex flex-col gap-3">
+                    <h3 className="text-primary font-bold">About {selectedChat?.firstName ?? "this contact"}</h3>
+                    <div className="flex justify-center">
+                        <Button
+                            variant="secondary"
+                            trailingIcon={<ArrowRight />}
+                            disabled={!selectedChat}
+                            onClick={onViewProfile}
+                        >
+                            View Full Profile
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
+
+// Presentational view for the chat route
 export function ChatPageView({
     chats,
     visibleChats,
@@ -64,15 +113,53 @@ export function ChatPageView({
     const verifiedDetailsId = useId();
     const hasVerifiedCredentials = contactVerifiedCredentials.length > 0;
 
+    // Below lg:, only one of inbox/conversation is shown at a time — this is
+    // purely a mobile view-switcher, desktop keeps showing both side by side.
+    const [mobileView, setMobileView] = useState<"inbox" | "conversation">("inbox");
+    const inboxHeadingRef = useRef<HTMLHeadingElement>(null);
+    const isFirstMobileViewRender = useRef(true);
+
+    useEffect(() => {
+        if (isFirstMobileViewRender.current) {
+            isFirstMobileViewRender.current = false;
+            return;
+        }
+        if (mobileView === "inbox") {
+            inboxHeadingRef.current?.focus();
+        } else {
+            conversationRef.current?.focus();
+        }
+    }, [mobileView, conversationRef]);
+
+    function handleSelectChat(id: string) {
+        onSelectChat(id);
+        setMobileView("conversation");
+    }
+
     return (
         <>
             <main>
                 <section className=" mt-30">
                     <div className="container mx-auto -mt-20 lg:h-200 bg bg-linen rounded-2xl border-2 border-border flex flex-col lg:flex-row">
                         {/* Inbox */}
-                        <section id="main-content" tabIndex={-1} className="w-full lg:w-1/4 border-b-2 lg:border-b-0 lg:border-r-2 border-border focus-visible:outline-none" aria-labelledby="inbox-heading">
+                        <section
+                            id="main-content"
+                            tabIndex={-1}
+                            className={[
+                                mobileView === "conversation" ? "hidden lg:block" : "block",
+                                "w-full lg:w-1/4 border-b-2 lg:border-b-0 lg:border-r-2 border-border focus-visible:outline-none",
+                            ].join(" ")}
+                            aria-labelledby="inbox-heading"
+                        >
                             <div className="border-b-2 border-border">
-                                <h1 id="inbox-heading" className="mt-10 mx-10">Inbox</h1>
+                                <h1
+                                    id="inbox-heading"
+                                    ref={inboxHeadingRef}
+                                    tabIndex={-1}
+                                    className="mt-10 mx-10 focus-visible:outline-none"
+                                >
+                                    Inbox
+                                </h1>
                                 <div className="mx-9 mb-3 mt-5 relative">
                                     <Search
                                         size={18}
@@ -89,7 +176,7 @@ export function ChatPageView({
                                     />
                                 </div>
                             </div>
-                            <div className="max-h-72 overflow-y-auto lg:max-h-none lg:overflow-visible">
+                            <div>
                                 {chatsLoading && <p role="status" className="m-5 text-black/60">Loading chats…</p>}
                                 {chatsErrored && (
                                     <p role="alert" className="m-5 text-black/60">Couldn't reach the chat server. Make sure the backend is running, then try again.</p>
@@ -104,13 +191,27 @@ export function ChatPageView({
                                     <ChatInbox
                                         chats={visibleChats}
                                         selectedChatId={activeChatId}
-                                        onSelectChat={onSelectChat}
+                                        onSelectChat={handleSelectChat}
                                     />
                                 )}
                             </div>
                         </section>
-                        <section className="w-full lg:w-2/4 bg-cream" aria-label="Conversation">
-                            <div className="border-b-2 border-border flex flex-row bg-linen">
+                        <section
+                            className={[
+                                mobileView === "inbox" ? "hidden lg:block" : "block",
+                                "w-full lg:w-2/4 bg-cream",
+                            ].join(" ")}
+                            aria-label="Conversation"
+                        >
+                            <div className="border-b-2 border-border flex flex-row items-center bg-linen">
+                                <button
+                                    type="button"
+                                    onClick={() => setMobileView("inbox")}
+                                    aria-label="Back to inbox"
+                                    className="lg:hidden shrink-0 m-2 rounded-lg p-2 text-foreground hover:bg-foreground/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                                >
+                                    <ArrowLeft size={20} aria-hidden="true" />
+                                </button>
                                 <div className=" flex flex-row items-center m-2 w-full">
                                     {selectedChat ? (
                                         <>
@@ -184,40 +285,32 @@ export function ChatPageView({
                                         Send Message
                                     </Button>
                                 </div>
-                            </div>
-                        </section>
-                        <section className="w-full lg:w-1/4 border-t-2 lg:border-t-0 lg:border-l-2 border-border" aria-labelledby="about-service-heading">
-                            <h2 id="about-service-heading" className="text-primary text-xl font-semibold-xl m-5">ABOUT THIS SERVICE</h2>
-                            <div className="m-4  border-border">
-                                {listing ? (
-                                    <ServiceCardChat
-                                        pictureLink={listing.media[0] ? mediaUrl(listing.media[0].url) : undefined}
-                                        link={`/listings/${listing.listingId}`}
-                                        label={listing.title}
-                                        tags={listing.tags}
-                                        hourRate={listing.price}
-                                    />
-                                ) : selectedChat?.listingId && !listingIsError ? (
-                                    <p role="status" className="text-black/60">Loading service…</p>
-                                ) : (
-                                    <p className="text-black/60">No service linked to this conversation.</p>
+
+                                {/* Mobile-only: "about this service" folds into a disclosure instead of
+                                    a persistent third column, which there's no room for below lg: */}
+                                {selectedChat && (
+                                    <details className="lg:hidden mt-3 rounded-2xl border border-border">
+                                        <summary className="cursor-pointer select-none rounded-2xl px-4 py-3 font-bold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                                            About this service
+                                        </summary>
+                                        <AboutServiceContent
+                                            listing={listing}
+                                            listingIsError={listingIsError}
+                                            selectedChat={selectedChat}
+                                            onViewProfile={onViewProfile}
+                                        />
+                                    </details>
                                 )}
                             </div>
-                            <div className="m-4">
-                                <div className="bg-cream rounded-2xl border border-border w-full p-3 flex flex-col gap-3">
-                                    <h3 className="text-primary font-bold">About {selectedChat?.firstName ?? "this contact"}</h3>
-                                    <div className="flex justify-center">
-                                        <Button
-                                            variant="secondary"
-                                            trailingIcon={<ArrowRight />}
-                                            disabled={!selectedChat}
-                                            onClick={onViewProfile}
-                                        >
-                                            View Full Profile
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
+                        </section>
+                        <section className="hidden lg:block lg:w-1/4 border-t-2 lg:border-t-0 lg:border-l-2 border-border" aria-labelledby="about-service-heading">
+                            <h2 id="about-service-heading" className="text-primary text-xl font-semibold-xl m-5">ABOUT THIS SERVICE</h2>
+                            <AboutServiceContent
+                                listing={listing}
+                                listingIsError={listingIsError}
+                                selectedChat={selectedChat}
+                                onViewProfile={onViewProfile}
+                            />
                         </section>
                     </div>
                 </section>
