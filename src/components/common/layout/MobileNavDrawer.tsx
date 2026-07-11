@@ -15,6 +15,7 @@ interface MobileNavDrawerProps {
   isProvider?: boolean
   pictureUrl?: string
   notificationCount?: number
+  userId?: string
 }
 
 export function MobileNavDrawer({
@@ -25,12 +26,14 @@ export function MobileNavDrawer({
   isProvider,
   pictureUrl,
   notificationCount = 0,
+  userId,
 }: MobileNavDrawerProps) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const fullName = `${firstName} ${lastName}`.trim()
   const navRoutes = new Set(navLinks.map((link) => link.to))
-  const accountLinks = getAccountLinks(isProvider, '/', notificationCount).filter((link) => !navRoutes.has(link.to))
+  const profilePath = userId ? `/profile/${userId}` : '/'
+  const accountLinks = getAccountLinks(isProvider, profilePath, notificationCount).filter((link) => !navRoutes.has(link.to))
 
   async function handleLogout() {
     await signOut()
@@ -48,7 +51,7 @@ export function MobileNavDrawer({
               ? `Open menu, ${notificationCount} ${notificationCount === 1 ? 'notification' : 'notifications'}`
               : 'Open menu'
           }
-          className="flex lg:hidden border-cream/30 text-cream hover:bg-cream/10"
+          className="flex lg:hidden border-cream/30 text-cream hover:bg-cream/10 active:bg-cream/20"
         >
           <Menu />
           {notificationCount > 0 && (
@@ -101,7 +104,7 @@ export function MobileNavDrawer({
                     to={to}
                     search={{} as never}
                     onClick={() => setOpen(false)}
-                    className="block p-3 rounded-lg text-body font-semibold text-foreground hover:bg-linen transition-colors no-underline"
+                    className="block p-3 rounded-lg text-body font-semibold text-foreground hover:bg-linen active:bg-linen transition-colors no-underline"
                     activeProps={{ className: 'text-primary' }}
                   >
                     {label}
@@ -113,7 +116,7 @@ export function MobileNavDrawer({
                   to="/"
                   hash="how-it-works"
                   onClick={() => setOpen(false)}
-                  className="block p-3 rounded-lg text-body font-semibold text-foreground hover:bg-linen transition-colors no-underline"
+                  className="block p-3 rounded-lg text-body font-semibold text-foreground hover:bg-linen active:bg-linen transition-colors no-underline"
                 >
                   How it works
                 </Link>
@@ -125,7 +128,7 @@ export function MobileNavDrawer({
             <>
               <div className="my-1 h-px bg-border/30" />
               {accountLinks.map((link) => (
-                <Row key={link.to} {...link} />
+                <Row key={link.to} {...link} onClick={() => setOpen(false)} />
               ))}
               <div className="my-1 h-px bg-border/30" />
               <LogoutRow onLogout={handleLogout} />

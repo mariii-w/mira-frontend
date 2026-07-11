@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type RefObject } from "react";
-import { ArrowLeft, ArrowRight, Check, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Search, Send } from "lucide-react";
 import { Button } from "../../common/ui/Button";
 import { AvatarIcon } from "../../common/ui/AvatarIcon";
 import { Input } from "../../common/ui/Input.tsx";
@@ -140,7 +140,7 @@ export function ChatPageView({
         <>
             <main>
                 <section className=" mt-30">
-                    <div className="container mx-auto -mt-20 lg:h-200 bg bg-linen rounded-2xl border-2 border-border flex flex-col lg:flex-row">
+                    <div className="container mx-auto -mt-20 lg:h-200 bg-linen rounded-2xl border-2 border-border overflow-hidden flex flex-col lg:flex-row">
                         {/* Inbox */}
                         <section
                             id="main-content"
@@ -278,11 +278,14 @@ export function ChatPageView({
                                         onKeyDown={onTextareaKeyDown}
                                     />
                                     <Button
-                                        className="my-auto mr-5 ml-2 shrink-0"
+                                        className="my-auto mr-5 ml-2 h-11 w-11 shrink-0 rounded-full !px-0"
                                         onClick={onSend}
                                         disabled={!draft.trim()}
+                                        aria-label="Send Message"
                                     >
-                                        Send Message
+                                        <span aria-hidden="true" className="inline-flex">
+                                            <Send size={18} />
+                                        </span>
                                     </Button>
                                 </div>
 

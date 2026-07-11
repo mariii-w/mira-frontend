@@ -9,10 +9,12 @@ export const Route = createFileRoute("/_app")({
 // eslint-disable-next-line react-refresh/only-export-components
 function AppLayout() {
   return (
-    <>
+    <div className="flex min-h-dvh flex-col">
       <Navbar />
-      <Outlet />
+      <div className="flex-1">
+        <Outlet />
+      </div>
       <Footer />
-    </>
+    </div>
   );
 }

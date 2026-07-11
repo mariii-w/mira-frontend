@@ -161,6 +161,7 @@ export function Navbar() {
             isProvider={isProvider}
             pictureUrl={pictureUrl}
             notificationCount={visibleNotificationCount}
+            userId={userId}
           />
         </div>
       </nav>
