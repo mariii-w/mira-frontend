@@ -83,13 +83,15 @@ interface RowProps {
     title: string
     to: string
     notificationCount?: number
+    onClick?: () => void
 }
 
-export function Row({ icon, title, to, notificationCount = 0 }: RowProps) {
+export function Row({ icon, title, to, notificationCount = 0, onClick }: RowProps) {
     return (
         <Link
             to={to}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-linen transition-colors no-underline"
+            onClick={onClick}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-linen active:bg-linen transition-colors no-underline"
         >
             <span className="relative text-muted shrink-0">
                 {icon}
@@ -122,7 +124,7 @@ export function LogoutRow({ onLogout }: { onLogout: () => void }) {
         <button
             type="button"
             onClick={onLogout}
-            className="w-full flex items-center gap-3 p-3 rounded-lg text-small font-semibold text-foreground hover:bg-linen transition-colors cursor-pointer"
+            className="w-full flex items-center gap-3 p-3 rounded-lg text-small font-semibold text-foreground hover:bg-linen active:bg-linen transition-colors cursor-pointer"
         >
             <LogOut size={15} className="text-muted shrink-0" />
             Logout

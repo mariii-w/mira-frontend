@@ -65,7 +65,7 @@ export function Modal({ open, onClose, title, description, children, className }
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       role="presentation"
     >
       {/* Backdrop */}
@@ -82,7 +82,7 @@ export function Modal({ open, onClose, title, description, children, className }
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
-        className={`relative z-10 w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl ${className ?? ''}`}
+        className={`relative z-10 flex max-h-[85dvh] w-full max-w-lg flex-col overflow-y-auto rounded-2xl bg-surface p-4 shadow-xl sm:p-6 ${className ?? ''}`}
       >
         {/* Header */}
         <div className="mb-1 flex items-start justify-between gap-4">
@@ -100,7 +100,7 @@ export function Modal({ open, onClose, title, description, children, className }
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="shrink-0 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <X size={18} aria-hidden="true" />
           </button>

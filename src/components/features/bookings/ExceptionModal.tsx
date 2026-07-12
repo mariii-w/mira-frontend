@@ -112,7 +112,7 @@ function ExceptionRow({
 
       {/* Delete confirmation */}
       {confirmDelete && (
-        <div role="alert" className="flex items-center justify-between rounded-lg bg-red-50 px-3 py-2">
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-red-50 px-3 py-2">
           <p className="text-xs font-medium text-red-700">Delete this exception?</p>
           <div className="flex items-center gap-2">
             <button
@@ -143,13 +143,13 @@ function ExceptionRow({
 
       {editing && (
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <input
               type="time"
               value={start}
               onChange={(e) => setStart(e.target.value)}
               aria-label="Start time"
-              className="flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-plum [&::-webkit-calendar-picker-indicator]:hidden"
+              className="min-w-[5.5rem] flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-plum [&::-webkit-calendar-picker-indicator]:hidden"
             />
             <span className="text-muted-foreground text-sm" aria-hidden="true">–</span>
             <input
@@ -157,23 +157,25 @@ function ExceptionRow({
               value={end}
               onChange={(e) => setEnd(e.target.value)}
               aria-label="End time"
-              className="flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-plum [&::-webkit-calendar-picker-indicator]:hidden"
+              className="min-w-[5.5rem] flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-plum [&::-webkit-calendar-picker-indicator]:hidden"
             />
-            <button
-              onClick={save}
-              disabled={!!timeError}
-              aria-label="Save"
-              className="p-1.5 rounded-lg bg-forest text-white hover:bg-forest/90 disabled:opacity-40 transition-colors"
-            >
-              <Check size={14} />
-            </button>
-            <button
-              onClick={() => setEditing(false)}
-              aria-label="Cancel"
-              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:bg-foreground/5 transition-colors"
-            >
-              <X size={14} />
-            </button>
+            <div className="ml-auto flex items-center gap-1.5">
+              <button
+                onClick={save}
+                disabled={!!timeError}
+                aria-label="Save"
+                className="p-1.5 rounded-lg bg-forest text-white hover:bg-forest/90 disabled:opacity-40 transition-colors"
+              >
+                <Check size={14} />
+              </button>
+              <button
+                onClick={() => setEditing(false)}
+                aria-label="Cancel"
+                className="p-1.5 rounded-lg border border-border text-muted-foreground hover:bg-foreground/5 transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </div>
           </div>
           {timeError && <p role="alert" className="text-xs text-red-600">{timeError}</p>}
         </div>
@@ -238,7 +240,7 @@ export function ExceptionModal({
       description="Block time off or add extra availability for specific dates."
     >
       {/* Tabs */}
-      <div role="tablist" aria-label="Exception options" className="mt-4 flex border-b border-border">
+      <div role="tablist" aria-label="Exception options" className="mt-4 flex flex-wrap border-b border-border">
         {(['add', 'manage'] as Tab[]).map((t) => (
           <button
             key={t}
@@ -293,7 +295,7 @@ export function ExceptionModal({
               value={date}
               min={tomorrowStr()}
               onChange={(e) => setDate(e.target.value)}
-              className="rounded-xl border border-border bg-background px-3 py-2.5 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-plum [&::-webkit-calendar-picker-indicator]:opacity-60"
+              className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-plum [&::-webkit-calendar-picker-indicator]:opacity-60 sm:w-auto"
             />
           </div>
 
@@ -339,7 +341,7 @@ export function ExceptionModal({
 
           {errorMessage && <p role="alert" className="text-sm text-red-600">{errorMessage}</p>}
 
-          <div className="flex justify-end gap-3 mt-1">
+          <div className="flex flex-wrap justify-end gap-3 mt-1">
             <Button variant="secondary" size="md" onClick={handleClose} disabled={isCreating}>Cancel</Button>
             <Button
               variant="accent"

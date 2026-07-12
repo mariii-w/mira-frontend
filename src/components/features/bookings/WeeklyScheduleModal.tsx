@@ -91,7 +91,7 @@ export function WeeklyScheduleModal({
               <div
                 key={day}
                 className={[
-                  'flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors',
+                  'flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl px-3 py-2.5 transition-colors',
                   enabled ? 'bg-mint/60' : 'bg-foreground/5',
                 ].join(' ')}
               >
@@ -100,17 +100,17 @@ export function WeeklyScheduleModal({
                   id={`day-${day}`}
                   checked={enabled}
                   onChange={() => toggle(day)}
-                  className="h-4 w-4 rounded accent-forest cursor-pointer"
+                  className="h-5 w-5 shrink-0 rounded accent-forest cursor-pointer"
                 />
                 <label
                   htmlFor={`day-${day}`}
-                  className={['w-28 text-base font-medium cursor-pointer select-none', enabled ? 'text-foreground' : 'text-muted-foreground'].join(' ')}
+                  className={['w-24 sm:w-28 text-base font-medium cursor-pointer select-none', enabled ? 'text-foreground' : 'text-muted-foreground'].join(' ')}
                 >
                   {DAY_LABEL[day]}
                 </label>
 
                 {enabled ? (
-                  <div className="flex items-center gap-2 ml-auto">
+                  <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:ml-auto sm:justify-start">
                     <div className="relative flex items-center">
                       <Clock size={14} className="absolute left-2 text-muted-foreground pointer-events-none" aria-hidden="true" />
                       <input
@@ -134,7 +134,9 @@ export function WeeklyScheduleModal({
                     </div>
                   </div>
                 ) : (
-                  <span className="ml-auto text-sm text-muted-foreground italic">Not a working day</span>
+                  <span className="w-full text-right text-sm text-muted-foreground italic sm:w-auto sm:ml-auto sm:text-left">
+                    Not a working day
+                  </span>
                 )}
               </div>
             )
@@ -146,7 +148,7 @@ export function WeeklyScheduleModal({
             </p>
           )}
 
-          <div className="mt-4 flex justify-end gap-3">
+          <div className="mt-4 flex flex-wrap justify-end gap-3">
             <Button variant="secondary" size="md" onClick={onClose} disabled={isSaving}>
               Cancel
             </Button>

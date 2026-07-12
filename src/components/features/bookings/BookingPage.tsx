@@ -266,7 +266,7 @@ export function BookingPage({
   }
 
   return (
-    <div className="min-h-dvh bg-background pb-28">
+    <div className="min-h-dvh bg-background pb-56 sm:pb-28">
       <main className="max-w-4xl mx-auto px-4 py-8">
         <button
           type="button"
@@ -280,26 +280,26 @@ export function BookingPage({
 
         {listing && (
           <div
-            className="rounded-2xl px-6 py-5 mb-4"
+            className="rounded-2xl px-4 py-5 sm:px-6 mb-4"
             style={{
               background: "linear-gradient(135deg, #47745B 0%, #7C4E80 100%)",
             }}
             aria-label="Listing summary"
           >
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+              <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
                 <div
                   className="w-14 h-14 rounded-full ring-2 ring-primary-foreground/40 bg-primary-foreground/20 flex items-center justify-center text-primary-foreground font-bold text-body shrink-0"
                   aria-hidden="true"
                 >
                   {initials(listing.author.name, listing.author.surname)}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs text-primary-foreground uppercase tracking-wide font-semibold mb-1">
                     You're booking
                   </p>
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-body font-bold text-primary-foreground">
+                  <div className="flex min-w-0 items-center gap-2 mb-1">
+                    <p className="min-w-0 truncate text-body font-bold text-primary-foreground">
                       {listing.title}
                     </p>
                     {hasPublicVerifiedCredentials && (
@@ -354,7 +354,7 @@ export function BookingPage({
           id="main-content"
           tabIndex={-1}
           aria-labelledby="pick-datetime-heading"
-          className="bg-linen rounded-2xl border border-border p-6 mb-4 focus-visible:outline-none"
+          className="bg-linen rounded-2xl border border-border p-4 sm:p-6 mb-4 focus-visible:outline-none"
         >
           <div className="flex items-center gap-3 mb-4">
             <StepBadge n={1} />
@@ -534,7 +534,7 @@ export function BookingPage({
 
         <section
           aria-labelledby="details-heading"
-          className="bg-linen rounded-2xl border border-border p-6 mb-4"
+          className="bg-linen rounded-2xl border border-border p-4 sm:p-6 mb-4"
         >
           <div className="flex items-center gap-3 mb-6">
             <StepBadge n={2} />
@@ -661,8 +661,8 @@ export function BookingPage({
             </p>
           </div>
         )}
-        <div className="max-w-4xl mx-auto px-4 py-4 flex flex-wrap items-center gap-x-6 gap-y-3">
-          <div className="flex flex-wrap gap-x-6 gap-y-2 flex-1 min-w-0">
+        <div className="max-w-4xl mx-auto px-4 py-3 sm:py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-x-6 sm:gap-y-3">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:flex sm:min-w-0 sm:flex-1 sm:flex-wrap sm:gap-x-6 sm:gap-y-2">
             <div className="min-w-0">
               <p className="text-xs font-semibold text-muted uppercase tracking-wide">
                 Date & time
@@ -671,7 +671,7 @@ export function BookingPage({
                 {selectedSlot ? formatSlotLabel(selectedSlot) : "—"}
               </p>
             </div>
-            <div className="shrink-0">
+            <div className="min-w-0 sm:shrink-0">
               <p className="text-xs font-semibold text-muted uppercase tracking-wide">
                 Duration
               </p>
@@ -679,11 +679,11 @@ export function BookingPage({
                 {durationHours}h
               </p>
             </div>
-            <div className="shrink-0">
+            <div className="min-w-0 sm:shrink-0">
               <p className="text-xs font-semibold text-muted uppercase tracking-wide">
                 Location
               </p>
-              <p className="text-small font-medium text-foreground">
+              <p className="text-small font-medium text-foreground truncate">
                 {locationType === "AT_CONSUMER"
                   ? "At your place"
                   : locationType === "AT_PROVIDER"
@@ -691,7 +691,7 @@ export function BookingPage({
                     : "—"}
               </p>
             </div>
-            <div className="shrink-0">
+            <div className="min-w-0 sm:shrink-0">
               <p className="text-xs font-semibold text-muted uppercase tracking-wide">
                 Estimated total
               </p>
@@ -724,7 +724,7 @@ export function BookingPage({
               });
             }}
             className={[
-              "flex items-center gap-2 px-6 py-3 rounded-xl text-small font-semibold transition-colors shrink-0",
+              "flex w-full items-center justify-center gap-2 px-6 py-3 rounded-xl text-small font-semibold transition-colors sm:w-auto sm:shrink-0",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
               canSubmit && !bookingPending
                 ? "bg-primary text-primary-foreground hover:bg-primary-hover"
